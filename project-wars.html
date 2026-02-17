@@ -545,6 +545,8 @@
   }
   .chip:hover:not(:disabled) { transform: scale(1.1); }
   .chip:disabled { opacity: 0.3; cursor: not-allowed; }
+  .chip-1   { background: #888; color: #fff; }
+  .chip-5   { background: #aa3399; color: #fff; }
   .chip-10  { background: #2255cc; color: #fff; }
   .chip-25  { background: #229922; color: #fff; }
   .chip-50  { background: #882222; color: #fff; }
@@ -764,6 +766,8 @@
     <div>
       <div class="table-section-label" style="margin-bottom:0.5rem;">Place your bet</div>
       <div class="bet-section">
+        <button class="chip chip-1"   onclick="addBet(1)"   id="chip1">1</button>
+        <button class="chip chip-5"   onclick="addBet(5)"   id="chip5">5</button>
         <button class="chip chip-10"  onclick="addBet(10)"  id="chip10">10</button>
         <button class="chip chip-25"  onclick="addBet(25)"  id="chip25">25</button>
         <button class="chip chip-50"  onclick="addBet(50)"  id="chip50">50</button>
@@ -1628,10 +1632,10 @@
 
     if (delta > 0) setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 300);
 
-    // Reset bet for next round
+    // Reset for next round
     bjBet = 0;
     updateBetDisplay();
-    setTimeout(() => setBJButtons('bet'), 500);
+    setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 500);
   }
 
 </script>
