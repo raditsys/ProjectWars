@@ -1709,16 +1709,16 @@
     </div>
 
     <div class="login-form" id="loginForm">
-      <input class="login-input" type="text" id="loginName" placeholder="Username" maxlength="20" autocomplete="off">
-      <input class="login-input" type="password" id="loginPass" placeholder="Password" autocomplete="off">
+      <input class="login-input" type="text" id="loginName" placeholder="Username" maxlength="20" name="loginName" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+      <input class="login-input" type="password" id="loginPass" placeholder="Password" name="loginPass" autocomplete="current-password">
       <button class="login-btn" id="loginBtn" onclick="doLogin()">Login</button>
       <div class="login-msg" id="loginMsg"></div>
     </div>
 
     <div class="login-form" id="registerForm" style="display:none;">
-      <input class="login-input" type="text" id="regName" placeholder="Choose a username" maxlength="20" autocomplete="off">
-      <input class="login-input" type="password" id="regPass" placeholder="Choose a password" autocomplete="off">
-      <input class="login-input" type="password" id="regPass2" placeholder="Confirm password" autocomplete="off">
+      <input class="login-input" type="text" id="regName" placeholder="Choose a username" maxlength="20" name="regName" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
+      <input class="login-input" type="password" id="regPass" placeholder="Choose a password" name="regPass" autocomplete="new-password">
+      <input class="login-input" type="password" id="regPass2" placeholder="Confirm password" name="regPass2" autocomplete="new-password">
       <button class="login-btn" id="registerBtn" onclick="doRegister()">Create Account</button>
       <div class="login-msg" id="registerMsg"></div>
     </div>
