@@ -1557,45 +1557,59 @@
   #loginScreen { z-index: 1001; }
 
   /* ── GRASS ── */
-  #grassLayer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 80px;
-    pointer-events: none;
-    z-index: 50;
-    overflow: hidden;
-  }
-  .grass-blade {
-    position: absolute;
-    bottom: 0;
-    width: 6px;
-    transform-origin: bottom center;
-    cursor: pointer;
-    pointer-events: all;
-    transition: transform 0.1s;
-  }
-  .grass-blade:hover { transform: scaleY(1.1); }
-  .grass-blade svg { display: block; }
-  .scissors-cursor { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext y='20' font-size='20'%3E✂%3C/text%3E%3C/svg%3E") 12 12, crosshair; }
+#grassLayer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 90px;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
 
-  @keyframes bladeSway {
-    0%,100% { transform: rotate(var(--sway-base)); }
-    50%      { transform: rotate(calc(var(--sway-base) + var(--sway-amt))); }
-  }
-  @keyframes bladeGrow {
-    from { transform: scaleY(0) rotate(var(--sway-base)); opacity: 0; }
-    to   { transform: scaleY(1) rotate(var(--sway-base)); opacity: 1; }
-  }
-  @keyframes bladeCut {
-    0%   { transform: scaleY(1); opacity: 1; }
-    40%  { transform: scaleY(0.2) translateX(20px); opacity: 0.6; }
-    100% { transform: scaleY(0) translateX(40px); opacity: 0; }
-  }
-  .grass-blade.cutting { animation: bladeCut 0.3s ease forwards !important; pointer-events: none; }
+/* A clump is the clickable unit */
+.grass-clump {
+  position: absolute;
+  bottom: 0;
+  height: 90px;
+  pointer-events: all;
+  cursor: pointer;
+  transform-origin: bottom center;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+}
+.grass-clump:hover { transform: scaleY(1.06); }
 
-  /* Coin pop for grass */
+/* Blades live inside the clump */
+.grass-blade {
+  position: absolute;
+  bottom: 0;
+  width: 6px;
+  transform-origin: bottom center;
+  pointer-events: none; /* click the clump, not individual blades */
+}
+.grass-blade svg { display: block; }
+
+.scissors-cursor { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext y='20' font-size='20'%3E✂%3C/text%3E%3C/svg%3E") 12 12, crosshair; }
+
+@keyframes bladeSway {
+  0%,100% { transform: rotate(var(--sway-base)); }
+  50%      { transform: rotate(calc(var(--sway-base) + var(--sway-amt))); }
+}
+@keyframes bladeGrow {
+  from { transform: scaleY(0) rotate(var(--sway-base)); opacity: 0; }
+  to   { transform: scaleY(1) rotate(var(--sway-base)); opacity: 1; }
+}
+
+/* Cutting a clump */
+@keyframes clumpCut {
+  0%   { transform: scaleY(1) translateX(0px); opacity: 1; }
+  40%  { transform: scaleY(0.35) translateX(22px); opacity: 0.7; }
+  100% { transform: scaleY(0) translateX(44px); opacity: 0; }
+}
+.grass-clump.cutting { animation: clumpCut 0.32s ease forwards !important; pointer-events: none; }
+
+/* Coin pop for grass */
   .grass-coin {
     position: fixed;
     font-size: 1rem;
@@ -3209,79 +3223,129 @@
 // ══════════════════ GRASS SYSTEM ══════════════════
 (function() {
   const layer = document.getElementById('grassLayer');
-  const BLADE_COUNT = 60;
-  const REGROW_MS = 4000;
-  const COIN_REWARD_EVERY = 3; // snip 3 blades = 1 coin
 
-  let cutCount = 0;
-  const blades = [];
+  // Instead of single blades, we spawn CLUMPS.
+  // Each clump contains multiple blades. Clicking a clump cuts the whole bunch.
+
+  const CLUMP_COUNT = 18;        // how many clumps across the screen
+  const REGROW_MS = 4500;        // regrow time after cutting
+  const COIN_REWARD_EVERY = 3;   // every N \"blade cuts\" you get a coin
+
+  let cutCount = 0;              // counts blades (not clumps) so the coin rate stays similar
+  const clumps = [];
 
   const greens = ['#3a9e3a','#4ade80','#2d7a2d','#56c456','#38a838','#65d465'];
 
-  function makeBladeEl(x) {
-    const h = 25 + Math.random() * 35;
-    const g = greens[Math.floor(Math.random() * greens.length)];
-    const swayBase = (Math.random() - 0.5) * 8;
-    const swayAmt  = (Math.random() > 0.5 ? 1 : -1) * (4 + Math.random() * 6);
-    const delay    = (Math.random() * 3).toFixed(2);
-    const dur      = (1.8 + Math.random() * 2).toFixed(2);
+  function rand(min, max) { return min + Math.random() * (max - min); }
+  function randi(min, max) { return Math.floor(rand(min, max + 1)); }
 
-    const div = document.createElement('div');
-    div.className = 'grass-blade scissors-cursor';
-    div.style.left = x + 'px';
-    div.style.setProperty('--sway-base', swayBase + 'deg');
-    div.style.setProperty('--sway-amt',  swayAmt  + 'deg');
-    div.style.animation = `bladeSway ${dur}s ${delay}s ease-in-out infinite, bladeGrow 0.5s ease forwards`;
-
-    div.innerHTML = `<svg width="6" height="${h}" viewBox="0 0 6 ${h}" xmlns="http://www.w3.org/2000/svg">
-      <path d="M3 ${h} Q1 ${h*0.5} 2 0 Q4 ${h*0.5} 3 ${h}Z" fill="${g}" opacity="0.9"/>
+  function makeBladeHTML(h, g) {
+    // Slight curve. Height varies.
+    return `<svg width="6" height="${h}" viewBox="0 0 6 ${h}" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 ${h} Q1 ${h*0.5} 2 0 Q4 ${h*0.5} 3 ${h}Z" fill="${g}" opacity="0.92"/>
     </svg>`;
+  }
 
-    div.addEventListener('click', function() {
-      div.classList.add('cutting');
-      cutCount++;
+  function spawnCoinPopAt(x, y) {
+    const coin = document.createElement('div');
+    coin.className = 'grass-coin';
+    coin.textContent = '🪙';
+    coin.style.left = x + 'px';
+    coin.style.top  = y + 'px';
+    document.body.appendChild(coin);
+    setTimeout(() => coin.remove(), 1000);
+  }
 
-      // Coin every N cuts
-      if (cutCount % COIN_REWARD_EVERY === 0) {
-        const rect = div.getBoundingClientRect();
-        const coin = document.createElement('div');
-        coin.className = 'grass-coin';
-        coin.textContent = '🪙';
-        coin.style.left = rect.left + 'px';
-        coin.style.top  = rect.top  + 'px';
-        document.body.appendChild(coin);
-        setTimeout(() => coin.remove(), 1000);
+  function makeClumpEl(x) {
+    // width and blade count define the \"chunky\" look
+    const width = randi(42, 86);
+    const bladeCount = randi(8, 18);
+    const baseHeight = randi(26, 42);
 
-        // Award coin to current user if logged in
-        if (window.__awardGrassCoin) window.__awardGrassCoin();
+    const clump = document.createElement('div');
+    clump.className = 'grass-clump scissors-cursor';
+    clump.style.left = x + 'px';
+    clump.style.width = width + 'px';
+
+    // A little \"lean\" so clumps feel organic
+    const clumpLean = (Math.random() - 0.5) * 6;
+    clump.style.transform = `rotate(${clumpLean}deg)`;
+
+    // Build blades
+    for (let i = 0; i < bladeCount; i++) {
+      const blade = document.createElement('div');
+      blade.className = 'grass-blade';
+
+      // Spread blades across the clump width with some jitter
+      const t = i / Math.max(1, bladeCount - 1);
+      const px = t * (width - 6) + rand(-6, 6);
+      blade.style.left = `${Math.max(0, Math.min(width - 6, px))}px`;
+
+      // Heights cluster around baseHeight with variation (tall in the center)
+      const centerBias = 1 - Math.abs(t - 0.5) * 1.4; // 0..1, taller in middle
+      const h = Math.round(baseHeight + centerBias * rand(10, 26) + rand(-6, 10));
+
+      const g = greens[Math.floor(Math.random() * greens.length)];
+      const swayBase = (Math.random() - 0.5) * 10;
+      const swayAmt  = (Math.random() > 0.5 ? 1 : -1) * (4 + Math.random() * 7);
+      const delay    = (Math.random() * 2.8).toFixed(2);
+      const dur      = (1.6 + Math.random() * 2.3).toFixed(2);
+
+      blade.style.setProperty('--sway-base', swayBase + 'deg');
+      blade.style.setProperty('--sway-amt',  swayAmt  + 'deg');
+      blade.style.animation = `bladeSway ${dur}s ${delay}s ease-in-out infinite, bladeGrow 0.45s ease forwards`;
+
+      blade.innerHTML = makeBladeHTML(h, g);
+      clump.appendChild(blade);
+    }
+
+    // Click handler: cut whole clump
+    clump.addEventListener('click', function() {
+      if (clump.classList.contains('cutting')) return;
+
+      clump.classList.add('cutting');
+
+      // Count this cut as \"bladeCount\" snips to preserve coin pacing
+      cutCount += bladeCount;
+
+      // Coin every N blade snips
+      const earnedCoins = Math.floor(cutCount / COIN_REWARD_EVERY) - Math.floor((cutCount - bladeCount) / COIN_REWARD_EVERY);
+      if (earnedCoins > 0) {
+        const rect = clump.getBoundingClientRect();
+        // Pop one coin per earned coin (usually 1, sometimes more if bladeCount is big)
+        for (let i = 0; i < earnedCoins; i++) {
+          spawnCoinPopAt(rect.left + rect.width * 0.5 + rand(-10, 10), rect.top + rand(-6, 6));
+        }
+        if (window.__awardGrassCoin) {
+          for (let i = 0; i < earnedCoins; i++) window.__awardGrassCoin();
+        }
       }
 
       // Regrow after delay
       setTimeout(() => {
-        div.remove();
-        const newX = Math.random() * (window.innerWidth - 20);
-        const newBlade = makeBladeEl(newX);
-        layer.appendChild(newBlade);
-        blades[blades.indexOf(div)] = newBlade;
+        clump.remove();
+        const newX = Math.random() * (window.innerWidth - 90);
+        const newClump = makeClumpEl(Math.max(0, Math.min(window.innerWidth - 90, newX)));
+        layer.appendChild(newClump);
+        clumps[clumps.indexOf(clump)] = newClump;
       }, REGROW_MS);
     });
 
-    return div;
+    return clump;
   }
 
   function init() {
-    for (let i = 0; i < BLADE_COUNT; i++) {
-      const x = (i / BLADE_COUNT) * window.innerWidth + (Math.random() - 0.5) * (window.innerWidth / BLADE_COUNT);
-      const blade = makeBladeEl(Math.max(0, Math.min(window.innerWidth - 10, x)));
-      blades.push(blade);
-      layer.appendChild(blade);
+    // Place clumps evenly-ish across screen, with jitter.
+    for (let i = 0; i < CLUMP_COUNT; i++) {
+      const slot = window.innerWidth / CLUMP_COUNT;
+      const x = i * slot + rand(-slot * 0.25, slot * 0.25);
+      const clump = makeClumpEl(Math.max(0, Math.min(window.innerWidth - 90, x)));
+      clumps.push(clump);
+      layer.appendChild(clump);
     }
   }
 
   init();
-  window.addEventListener('resize', () => {
-    // reposition blades proportionally on resize - just leave them, looks fine
-  });
 })();
 
 // ══════════════════ FROG PET ══════════════════
