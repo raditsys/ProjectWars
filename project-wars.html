@@ -16,6 +16,7 @@
     --green: #4ade80;
     --text: #f0f0f0;
     --muted: #666;
+    --red: #f87171;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -28,10 +29,7 @@
     padding: 2rem 1rem 4rem;
   }
 
-  header {
-    text-align: center;
-    margin-bottom: 3rem;
-  }
+  header { text-align: center; margin-bottom: 3rem; }
 
   header h1 {
     font-family: 'Bebas Neue', sans-serif;
@@ -44,13 +42,7 @@
     line-height: 1;
   }
 
-  .subtitle {
-    color: var(--muted);
-    font-size: 0.75rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-top: 0.5rem;
-  }
+  .subtitle { color: var(--muted); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-top: 0.5rem; }
 
   .week-display {
     display: inline-block;
@@ -63,20 +55,12 @@
     text-transform: uppercase;
   }
 
-  .sync-status {
-    display: inline-block;
-    font-size: 0.65rem;
-    letter-spacing: 2px;
-    margin-top: 0.5rem;
-    color: var(--muted);
-  }
+  .sync-status { display: inline-block; font-size: 0.65rem; letter-spacing: 2px; margin-top: 0.5rem; color: var(--muted); }
   .sync-status.live { color: var(--green); }
-  .sync-status.err { color: #f87171; }
+  .sync-status.err { color: var(--red); }
 
-  .leaderboard {
-    max-width: 700px;
-    margin: 0 auto 3rem;
-  }
+  /* ── Leaderboard ── */
+  .leaderboard { max-width: 700px; margin: 0 auto 3rem; }
 
   .leaderboard-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -89,11 +73,6 @@
   }
 
   .player-card {
-    display: grid;
-    grid-template-columns: 2rem 1fr auto auto;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
     background: var(--surface);
     border: 1px solid var(--border);
     margin-bottom: 0.5rem;
@@ -114,40 +93,24 @@
     background: var(--gold);
   }
 
-  .rank-badge {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
-    text-align: center;
+  .card-top {
+    display: grid;
+    grid-template-columns: 2rem 1fr auto auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem 0.75rem;
   }
+
+  .rank-badge { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; text-align: center; }
   .rank-1 .rank-badge { color: var(--gold); }
   .rank-2 .rank-badge { color: var(--silver); }
   .rank-3 .rank-badge { color: var(--bronze); }
 
-  .player-name {
-    font-size: 0.95rem;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .player-name { font-size: 0.95rem; font-weight: 500; }
+  .streak { font-size: 0.65rem; color: var(--gold); letter-spacing: 1px; }
 
-  .player-hours {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.8rem;
-    color: var(--green);
-    text-align: right;
-    white-space: nowrap;
-  }
-
-  .player-hours span {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    display: block;
-    text-align: right;
-    margin-top: -4px;
-    letter-spacing: 1px;
-  }
+  .player-hours { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--green); text-align: right; white-space: nowrap; }
+  .player-hours span { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); display: block; text-align: right; margin-top: -4px; letter-spacing: 1px; }
 
   .log-btn {
     background: none;
@@ -161,44 +124,70 @@
     transition: all 0.15s;
     white-space: nowrap;
   }
-
   .log-btn:hover { border-color: var(--green); color: var(--green); }
 
-  .empty-state {
-    text-align: center;
+  /* Project pills inside card */
+  .card-projects {
+    padding: 0 1.25rem 0.85rem 3.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .proj-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.25rem 0.6rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
     color: var(--muted);
-    font-size: 0.8rem;
-    padding: 3rem;
-    border: 1px dashed var(--border);
-    letter-spacing: 1px;
+    border-radius: 2px;
   }
 
-  .bar-wrap {
-    grid-column: 1 / -1;
-    margin-top: 0.25rem;
+  .proj-pill .proj-hrs {
+    color: var(--text);
+    font-weight: 500;
   }
 
+  .proj-pill .remove-proj {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    line-height: 1;
+    padding: 0 0 0 2px;
+    transition: color 0.15s;
+  }
+  .proj-pill .remove-proj:hover { color: var(--red); }
+
+  .bar-wrap { padding: 0 1.25rem 1rem; }
   .bar-track { height: 3px; background: var(--border); width: 100%; }
   .bar-fill { height: 3px; background: var(--green); transition: width 0.5s ease; }
   .rank-1 .bar-fill { background: var(--gold); }
   .rank-2 .bar-fill { background: var(--silver); }
   .rank-3 .bar-fill { background: var(--bronze); }
 
+  .empty-state {
+    text-align: center; color: var(--muted); font-size: 0.8rem;
+    padding: 3rem; border: 1px dashed var(--border); letter-spacing: 1px;
+  }
+
+  /* ── Panels ── */
   .panels {
     max-width: 700px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 1rem;
   }
 
-  @media (max-width: 500px) { .panels { grid-template-columns: 1fr; } }
+  @media (max-width: 650px) { .panels { grid-template-columns: 1fr; } }
 
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1.5rem;
-  }
+  .panel { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; }
 
   .panel h2 {
     font-family: 'Bebas Neue', sans-serif;
@@ -231,7 +220,6 @@
     transition: border-color 0.15s;
     -webkit-appearance: none;
   }
-
   .field input:focus, .field select:focus { border-color: var(--gold); }
 
   .btn {
@@ -246,25 +234,16 @@
     cursor: pointer;
     transition: opacity 0.15s;
   }
-
   .btn:hover { opacity: 0.85; }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.secondary { background: none; color: var(--green); border: 1px solid var(--green); }
+  .btn.tertiary { background: none; color: var(--silver); border: 1px solid var(--border); }
 
-  .btn.secondary {
-    background: none;
-    color: var(--green);
-    border: 1px solid var(--green);
-  }
-
-  .msg {
-    font-size: 0.7rem;
-    letter-spacing: 1px;
-    margin-top: 0.75rem;
-    min-height: 1rem;
-  }
+  .msg { font-size: 0.7rem; letter-spacing: 1px; margin-top: 0.75rem; min-height: 1rem; }
   .msg.ok { color: var(--green); }
-  .msg.err { color: #f87171; }
+  .msg.err { color: var(--red); }
 
+  /* ── History ── */
   .history-section { max-width: 700px; margin: 2rem auto 0; }
 
   .history-title {
@@ -291,8 +270,7 @@
     letter-spacing: 1px;
     transition: all 0.15s;
   }
-
-  .clear-btn:hover { border-color: #f87171; color: #f87171; }
+  .clear-btn:hover { border-color: var(--red); color: var(--red); }
 
   .log-item {
     display: flex;
@@ -302,33 +280,23 @@
     border-bottom: 1px solid var(--border);
     font-size: 0.75rem;
   }
-
   .log-item:last-child { border-bottom: none; }
   .log-who { color: var(--text); }
   .log-detail { color: var(--muted); font-size: 0.65rem; }
   .log-amount { color: var(--green); font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
 
+  /* ── Reset ── */
   .reset-section { max-width: 700px; margin: 2rem auto 0; text-align: center; }
-
   .reset-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 2px;
-    padding: 0.5rem 1.5rem;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 2px;
+    padding: 0.5rem 1.5rem; cursor: pointer; transition: all 0.15s; text-transform: uppercase;
   }
-
-  .reset-btn:hover { border-color: #f87171; color: #f87171; }
-  .streak { font-size: 0.65rem; color: var(--gold); letter-spacing: 1px; }
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
 
   @keyframes pop {
     0% { transform: scale(1); }
-    50% { transform: scale(1.04); }
+    50% { transform: scale(1.02); }
     100% { transform: scale(1); }
   }
   .popped { animation: pop 0.3s ease; }
@@ -339,8 +307,7 @@
 <header>
   <h1>Project Wars</h1>
   <div class="subtitle">Who ships the most this week?</div>
-  <div class="week-display" id="weekDisplay"></div>
-  <br>
+  <div class="week-display" id="weekDisplay"></div><br>
   <div class="sync-status" id="syncStatus">⬤ connecting...</div>
 </header>
 
@@ -350,26 +317,48 @@
 </div>
 
 <div class="panels">
+
+  <!-- Add Player -->
   <div class="panel">
     <h2>Add Player</h2>
     <div class="field">
       <label>Name</label>
       <input type="text" id="newName" placeholder="e.g. Alex" maxlength="20">
     </div>
-    <div class="field">
-      <label>Project</label>
-      <input type="text" id="newProject" placeholder="e.g. iOS app" maxlength="30">
-    </div>
-    <button class="btn" id="addBtn" onclick="addPlayer()">Add to Competition</button>
+    <button class="btn" id="addBtn" onclick="addPlayer()">Add Player</button>
     <div class="msg" id="addMsg"></div>
   </div>
 
+  <!-- Add Project to Player -->
+  <div class="panel">
+    <h2>Add Project</h2>
+    <div class="field">
+      <label>Player</label>
+      <select id="projPlayer">
+        <option value="">— select —</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Project name</label>
+      <input type="text" id="projName" placeholder="e.g. iOS app" maxlength="30">
+    </div>
+    <button class="btn tertiary" id="addProjBtn" onclick="addProject()">Add Project</button>
+    <div class="msg" id="projMsg"></div>
+  </div>
+
+  <!-- Log Hours -->
   <div class="panel">
     <h2>Log Hours</h2>
     <div class="field">
       <label>Player</label>
-      <select id="logPlayer">
+      <select id="logPlayer" onchange="updateProjectSelect()">
         <option value="">— select —</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Project</label>
+      <select id="logProject">
+        <option value="">— select player first —</option>
       </select>
     </div>
     <div class="field">
@@ -383,6 +372,7 @@
     <button class="btn secondary" id="logBtn" onclick="logHours()">+ Log Hours</button>
     <div class="msg" id="logMsg"></div>
   </div>
+
 </div>
 
 <div class="history-section">
@@ -396,13 +386,13 @@
 <div class="reset-section" style="margin-top:3rem;">
   <button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
   <div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
-    Resets hours but keeps players
+    Resets all hours but keeps players and projects
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, remove, update, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAtMH_AvVGskpK2TxMlXjf0IXRb9HT-q_Y",
@@ -417,6 +407,9 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  // ── State ──
+  // players[id] = { name, projects: { projId: { name, hours } } }
+  // logs[id]    = { player, project, hours, note, ts }
   let players = {};
   let logs = {};
 
@@ -437,176 +430,11 @@
     render();
   });
 
-  function render() {
-    renderWeek();
-    renderLeaderboard();
-    renderPlayerSelect();
-    renderHistory();
+  // ── Helpers ──
+  function totalHours(player) {
+    if (!player.projects) return 0;
+    return Object.values(player.projects).reduce((s, p) => s + (p.hours || 0), 0);
   }
-
-  function renderWeek() {
-    const d = new Date();
-    const start = new Date(d);
-    start.setDate(d.getDate() - d.getDay());
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-    const fmt = x => x.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    document.getElementById('weekDisplay').textContent = `Week of ${fmt(start)} – ${fmt(end)}`;
-  }
-
-  function renderLeaderboard() {
-    const lb = document.getElementById('leaderboard');
-    const arr = Object.entries(players).map(([id, p]) => ({ id, ...p }));
-    if (!arr.length) {
-      lb.innerHTML = '<div class="empty-state">No players yet — add some below!</div>';
-      return;
-    }
-    arr.sort((a, b) => (b.hours || 0) - (a.hours || 0));
-    const max = arr[0].hours || 1;
-
-    lb.innerHTML = arr.map((p, i) => {
-      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
-      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
-      const pct = Math.round(((p.hours || 0) / max) * 100);
-      const streak = getStreak(p.name);
-      return `
-        <div class="player-card ${rankClass}" id="card-${p.id}">
-          <div class="rank-badge">${medal}</div>
-          <div>
-            <div class="player-name">${escHtml(p.name)}</div>
-            <div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-top:2px;">
-              ${escHtml(p.project)}${streak > 1 ? ` · <span class="streak">🔥 ${streak} day streak</span>` : ''}
-            </div>
-          </div>
-          <div class="player-hours">${(p.hours || 0).toFixed(1)}<span>hrs this week</span></div>
-          <button class="log-btn" onclick="window._quickLog('${escHtml(p.name)}')">+ Log</button>
-          <div class="bar-wrap">
-            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-          </div>
-        </div>`;
-    }).join('');
-  }
-
-  function getStreak(name) {
-    const days = new Set(
-      Object.values(logs).filter(l => l.player === name).map(l => new Date(l.ts).toDateString())
-    );
-    let streak = 0;
-    for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      if (days.has(d.toDateString())) streak++;
-      else break;
-    }
-    return streak;
-  }
-
-  function renderPlayerSelect() {
-    const sel = document.getElementById('logPlayer');
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">— select —</option>';
-    Object.values(players).forEach(p => {
-      const o = document.createElement('option');
-      o.value = p.name;
-      o.textContent = `${p.name} (${p.project})`;
-      if (p.name === cur) o.selected = true;
-      sel.appendChild(o);
-    });
-  }
-
-  function renderHistory() {
-    const el = document.getElementById('history');
-    const arr = Object.values(logs).sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 20);
-    if (!arr.length) {
-      el.innerHTML = '<div style="color:var(--muted);font-size:0.75rem;padding:1rem 0;">No activity logged yet.</div>';
-      return;
-    }
-    el.innerHTML = arr.map(l => `
-      <div class="log-item">
-        <div>
-          <div class="log-who">${escHtml(l.player)}</div>
-          <div class="log-detail">${l.note ? escHtml(l.note) : 'no note'} · ${timeAgo(new Date(l.ts))}</div>
-        </div>
-        <div class="log-amount">+${l.hours}h</div>
-      </div>`).join('');
-  }
-
-  window.addPlayer = async function() {
-    const name = document.getElementById('newName').value.trim();
-    const project = document.getElementById('newProject').value.trim();
-    const msg = document.getElementById('addMsg');
-    if (!name) { msg.textContent = 'Enter a name.'; msg.className = 'msg err'; return; }
-    if (!project) { msg.textContent = 'Enter a project name.'; msg.className = 'msg err'; return; }
-    if (Object.values(players).find(p => p.name.toLowerCase() === name.toLowerCase())) {
-      msg.textContent = 'Name already taken.'; msg.className = 'msg err'; return;
-    }
-    const btn = document.getElementById('addBtn');
-    btn.disabled = true;
-    try {
-      await push(ref(db, 'players'), { name, project, hours: 0 });
-      document.getElementById('newName').value = '';
-      document.getElementById('newProject').value = '';
-      msg.textContent = `${name} joined the competition!`;
-      msg.className = 'msg ok';
-      setTimeout(() => msg.textContent = '', 3000);
-    } catch(e) {
-      msg.textContent = 'Error saving. Check your connection.';
-      msg.className = 'msg err';
-    }
-    btn.disabled = false;
-  };
-
-  window.logHours = async function() {
-    const playerName = document.getElementById('logPlayer').value;
-    const hours = parseFloat(document.getElementById('logHours').value);
-    const note = document.getElementById('logNote').value.trim();
-    const msg = document.getElementById('logMsg');
-    if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; return; }
-    if (!hours || hours <= 0) { msg.textContent = 'Enter valid hours.'; msg.className = 'msg err'; return; }
-    if (hours > 24) { msg.textContent = 'Max 24 hours per entry.'; msg.className = 'msg err'; return; }
-
-    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
-    if (!entry) return;
-    const [id, p] = entry;
-
-    const btn = document.getElementById('logBtn');
-    btn.disabled = true;
-    try {
-      const newHours = Math.round(((p.hours || 0) + hours) * 100) / 100;
-      await update(ref(db, `players/${id}`), { hours: newHours });
-      await push(ref(db, 'logs'), { player: playerName, hours, note, ts: new Date().toISOString() });
-      document.getElementById('logHours').value = '';
-      document.getElementById('logNote').value = '';
-      msg.textContent = `+${hours}h logged for ${playerName} 🎉`;
-      msg.className = 'msg ok';
-      setTimeout(() => msg.textContent = '', 3000);
-      const card = document.getElementById(`card-${id}`);
-      if (card) { card.classList.remove('popped'); void card.offsetWidth; card.classList.add('popped'); }
-    } catch(e) {
-      msg.textContent = 'Error saving. Check your connection.';
-      msg.className = 'msg err';
-    }
-    btn.disabled = false;
-  };
-
-  window._quickLog = function(name) {
-    document.getElementById('logPlayer').value = name;
-    document.getElementById('logHours').focus();
-    document.querySelector('.panels').scrollIntoView({ behavior: 'smooth' });
-  };
-
-  window.clearHistory = async function() {
-    if (!confirm('Clear all activity logs? (Hours are kept.)')) return;
-    await remove(ref(db, 'logs'));
-  };
-
-  window.resetWeek = async function() {
-    if (!confirm('Reset all hours for a new week? Player names and projects are kept.')) return;
-    const updates = {};
-    Object.keys(players).forEach(id => { updates[`players/${id}/hours`] = 0; });
-    await update(ref(db), updates);
-    await remove(ref(db, 'logs'));
-  };
 
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -620,9 +448,269 @@
     return `${Math.floor(secs/86400)}d ago`;
   }
 
-  ['newName','newProject'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') window.addPlayer(); });
-  });
+  function getStreak(name) {
+    const days = new Set(
+      Object.values(logs).filter(l => l.player === name).map(l => new Date(l.ts).toDateString())
+    );
+    let streak = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      if (days.has(d.toDateString())) streak++; else break;
+    }
+    return streak;
+  }
+
+  // ── Render ──
+  function render() {
+    renderWeek();
+    renderLeaderboard();
+    renderPlayerSelects();
+    renderHistory();
+  }
+
+  function renderWeek() {
+    const d = new Date();
+    const start = new Date(d); start.setDate(d.getDate() - d.getDay());
+    const end = new Date(start); end.setDate(start.getDate() + 6);
+    const fmt = x => x.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    document.getElementById('weekDisplay').textContent = `Week of ${fmt(start)} – ${fmt(end)}`;
+  }
+
+  function renderLeaderboard() {
+    const lb = document.getElementById('leaderboard');
+    const arr = Object.entries(players).map(([id, p]) => ({ id, ...p, total: totalHours(p) }));
+    if (!arr.length) {
+      lb.innerHTML = '<div class="empty-state">No players yet — add some below!</div>';
+      return;
+    }
+    arr.sort((a, b) => b.total - a.total);
+    const max = arr[0].total || 1;
+
+    lb.innerHTML = arr.map((p, i) => {
+      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      const pct = Math.round((p.total / max) * 100);
+      const streak = getStreak(p.name);
+
+      // Project pills
+      const projEntries = Object.entries(p.projects || {});
+      const pillsHtml = projEntries.length
+        ? projEntries.map(([pid, proj]) => `
+            <span class="proj-pill">
+              <span>${escHtml(proj.name)}</span>
+              <span class="proj-hrs">${(proj.hours || 0).toFixed(1)}h</span>
+              <button class="remove-proj" title="Remove project" onclick="window._removeProject('${escHtml(p.id)}','${escHtml(pid)}','${escHtml(proj.name)}','${escHtml(p.name)}')">×</button>
+            </span>`).join('')
+        : `<span style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;">no projects yet — add one below</span>`;
+
+      return `
+        <div class="player-card ${rankClass}" id="card-${p.id}">
+          <div class="card-top">
+            <div class="rank-badge">${medal}</div>
+            <div>
+              <div class="player-name">${escHtml(p.name)}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}</div>
+            </div>
+            <div class="player-hours">${p.total.toFixed(1)}<span>total hrs</span></div>
+            <button class="log-btn" onclick="window._quickLog('${escHtml(p.name)}')">+ Log</button>
+          </div>
+          <div class="card-projects">${pillsHtml}</div>
+          <div class="bar-wrap">
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderPlayerSelects() {
+    // Shared helper: populate a <select> with player names
+    function fill(selId, curVal, placeholder) {
+      const sel = document.getElementById(selId);
+      sel.innerHTML = `<option value="">${placeholder}</option>`;
+      Object.values(players).forEach(p => {
+        const o = document.createElement('option');
+        o.value = p.name;
+        o.textContent = p.name;
+        if (p.name === curVal) o.selected = true;
+        sel.appendChild(o);
+      });
+    }
+    fill('projPlayer', document.getElementById('projPlayer').value, '— select —');
+    fill('logPlayer', document.getElementById('logPlayer').value, '— select —');
+    updateProjectSelect();
+  }
+
+  window.updateProjectSelect = function() {
+    const playerName = document.getElementById('logPlayer').value;
+    const sel = document.getElementById('logProject');
+    const curProj = sel.value;
+    sel.innerHTML = '';
+
+    if (!playerName) {
+      sel.innerHTML = '<option value="">— select player first —</option>';
+      return;
+    }
+
+    const player = Object.values(players).find(p => p.name === playerName);
+    const projs = player?.projects ? Object.entries(player.projects) : [];
+
+    if (!projs.length) {
+      sel.innerHTML = '<option value="">— no projects yet —</option>';
+      return;
+    }
+
+    projs.forEach(([pid, proj]) => {
+      const o = document.createElement('option');
+      o.value = pid;
+      o.textContent = `${proj.name} (${(proj.hours||0).toFixed(1)}h)`;
+      if (pid === curProj) o.selected = true;
+      sel.appendChild(o);
+    });
+  };
+
+  function renderHistory() {
+    const el = document.getElementById('history');
+    const arr = Object.values(logs).sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 20);
+    if (!arr.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:0.75rem;padding:1rem 0;">No activity logged yet.</div>';
+      return;
+    }
+    el.innerHTML = arr.map(l => `
+      <div class="log-item">
+        <div>
+          <div class="log-who">${escHtml(l.player)} · <span style="color:var(--muted)">${escHtml(l.project || '')}</span></div>
+          <div class="log-detail">${l.note ? escHtml(l.note) : 'no note'} · ${timeAgo(new Date(l.ts))}</div>
+        </div>
+        <div class="log-amount">+${l.hours}h</div>
+      </div>`).join('');
+  }
+
+  // ── Actions ──
+
+  window.addPlayer = async function() {
+    const name = document.getElementById('newName').value.trim();
+    const msg = document.getElementById('addMsg');
+    if (!name) { msg.textContent = 'Enter a name.'; msg.className = 'msg err'; return; }
+    if (Object.values(players).find(p => p.name.toLowerCase() === name.toLowerCase())) {
+      msg.textContent = 'Name already taken.'; msg.className = 'msg err'; return;
+    }
+    const btn = document.getElementById('addBtn');
+    btn.disabled = true;
+    try {
+      await push(ref(db, 'players'), { name, projects: {} });
+      document.getElementById('newName').value = '';
+      msg.textContent = `${name} joined the competition!`;
+      msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+    } catch(e) {
+      msg.textContent = 'Error saving.'; msg.className = 'msg err';
+    }
+    btn.disabled = false;
+  };
+
+  window.addProject = async function() {
+    const playerName = document.getElementById('projPlayer').value;
+    const projName = document.getElementById('projName').value.trim();
+    const msg = document.getElementById('projMsg');
+    if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; return; }
+    if (!projName) { msg.textContent = 'Enter a project name.'; msg.className = 'msg err'; return; }
+
+    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
+    if (!entry) return;
+    const [playerId, player] = entry;
+
+    // Duplicate check
+    const existing = Object.values(player.projects || {}).find(p => p.name.toLowerCase() === projName.toLowerCase());
+    if (existing) { msg.textContent = 'Project already exists for this player.'; msg.className = 'msg err'; return; }
+
+    const btn = document.getElementById('addProjBtn');
+    btn.disabled = true;
+    try {
+      await push(ref(db, `players/${playerId}/projects`), { name: projName, hours: 0 });
+      document.getElementById('projName').value = '';
+      msg.textContent = `"${projName}" added to ${playerName}!`;
+      msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+    } catch(e) {
+      msg.textContent = 'Error saving.'; msg.className = 'msg err';
+    }
+    btn.disabled = false;
+  };
+
+  window.logHours = async function() {
+    const playerName = document.getElementById('logPlayer').value;
+    const projectId = document.getElementById('logProject').value;
+    const hours = parseFloat(document.getElementById('logHours').value);
+    const note = document.getElementById('logNote').value.trim();
+    const msg = document.getElementById('logMsg');
+
+    if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; return; }
+    if (!projectId) { msg.textContent = 'Select a project.'; msg.className = 'msg err'; return; }
+    if (!hours || hours <= 0) { msg.textContent = 'Enter valid hours.'; msg.className = 'msg err'; return; }
+    if (hours > 24) { msg.textContent = 'Max 24 hours per entry.'; msg.className = 'msg err'; return; }
+
+    const playerEntry = Object.entries(players).find(([, p]) => p.name === playerName);
+    if (!playerEntry) return;
+    const [playerId, player] = playerEntry;
+    const proj = player.projects?.[projectId];
+    if (!proj) return;
+
+    const btn = document.getElementById('logBtn');
+    btn.disabled = true;
+    try {
+      const newHours = Math.round(((proj.hours || 0) + hours) * 100) / 100;
+      await update(ref(db, `players/${playerId}/projects/${projectId}`), { hours: newHours });
+      await push(ref(db, 'logs'), { player: playerName, project: proj.name, hours, note, ts: new Date().toISOString() });
+
+      document.getElementById('logHours').value = '';
+      document.getElementById('logNote').value = '';
+      msg.textContent = `+${hours}h on "${proj.name}" for ${playerName} 🎉`;
+      msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+
+      const card = document.getElementById(`card-${playerId}`);
+      if (card) { card.classList.remove('popped'); void card.offsetWidth; card.classList.add('popped'); }
+    } catch(e) {
+      msg.textContent = 'Error saving.'; msg.className = 'msg err';
+    }
+    btn.disabled = false;
+  };
+
+  window._quickLog = function(name) {
+    document.getElementById('logPlayer').value = name;
+    window.updateProjectSelect();
+    document.getElementById('logHours').focus();
+    document.querySelector('.panels').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window._removeProject = async function(playerId, projId, projName, playerName) {
+    if (!confirm(`Remove project "${projName}" from ${playerName}?\n\nThis will delete its hours permanently.`)) return;
+    try {
+      await remove(ref(db, `players/${playerId}/projects/${projId}`));
+    } catch(e) {
+      alert('Error removing project. Check your connection.');
+    }
+  };
+
+  window.clearHistory = async function() {
+    if (!confirm('Clear all activity logs? (Hours are kept.)')) return;
+    await remove(ref(db, 'logs'));
+  };
+
+  window.resetWeek = async function() {
+    if (!confirm('Reset ALL hours for a new week?\n\nPlayers and projects are kept, but hours go back to zero.')) return;
+    const updates = {};
+    Object.entries(players).forEach(([pid, player]) => {
+      Object.keys(player.projects || {}).forEach(projId => {
+        updates[`players/${pid}/projects/${projId}/hours`] = 0;
+      });
+    });
+    await update(ref(db), updates);
+    await remove(ref(db, 'logs'));
+  };
+
+  // Enter key shortcuts
+  document.getElementById('newName').addEventListener('keydown', e => { if (e.key === 'Enter') window.addPlayer(); });
+  document.getElementById('projName').addEventListener('keydown', e => { if (e.key === 'Enter') window.addProject(); });
   ['logHours','logNote'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') window.logHours(); });
   });
