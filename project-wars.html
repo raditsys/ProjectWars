@@ -32,7 +32,7 @@
     overflow-x: hidden;
   }
 
-  header { text-align: center; margin-bottom: 3rem; }
+  header { text-align: center; margin-bottom: 3rem; display: flex; flex-direction: column; align-items: center; }
 
   header h1 {
     font-family: 'Bebas Neue', sans-serif;
@@ -1488,11 +1488,202 @@
   .shop-equip-btn:hover { opacity: 0.8; }
   .btn-equip   { background: var(--gold); color: #000; }
   .btn-unequip { background: transparent; color: var(--muted); border: 1px solid #3d00b3 !important; }
+
+  /* ── AMBIENT BACKGROUND ── */
+  .bg-blobs {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+    overflow: hidden;
+  }
+  .bg-blobs::before, .bg-blobs::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.12;
+    animation: blobDrift 18s ease-in-out infinite alternate;
+  }
+  .bg-blobs::before {
+    width: 60vw; height: 60vw;
+    background: radial-gradient(circle, #f5c842 0%, transparent 70%);
+    top: -15vw; left: -10vw;
+    animation-delay: 0s;
+  }
+  .bg-blobs::after {
+    width: 50vw; height: 50vw;
+    background: radial-gradient(circle, #4ade80 0%, transparent 70%);
+    bottom: -10vw; right: -5vw;
+    animation-delay: -9s;
+  }
+  .bg-blobs-mid {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+    overflow: hidden;
+  }
+  .bg-blobs-mid::before {
+    content: '';
+    position: absolute;
+    width: 45vw; height: 45vw;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.07;
+    background: radial-gradient(circle, #a78bfa 0%, transparent 70%);
+    top: 40%; left: 30%;
+    animation: blobDrift 22s ease-in-out infinite alternate;
+    animation-delay: -5s;
+  }
+  @keyframes blobDrift {
+    0%   { transform: translate(0, 0) scale(1); }
+    33%  { transform: translate(4vw, -3vw) scale(1.05); }
+    66%  { transform: translate(-2vw, 4vw) scale(0.97); }
+    100% { transform: translate(3vw, 2vw) scale(1.03); }
+  }
+
+  /* Login bg sits at 999, blobs at 1000, login box at 1001 */
+  .login-screen { background: transparent !important; }
+  .login-screen-bg {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 999;
+  }
+  /* When logged in, blobs drop below normal content (which has no z-index) */
+  body.logged-in .bg-blobs,
+  body.logged-in .bg-blobs-mid { z-index: -1; }
+  #loginScreen { z-index: 1001; }
+
+  /* ── GRASS ── */
+  #grassLayer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    pointer-events: none;
+    z-index: 50;
+    overflow: hidden;
+  }
+  .grass-blade {
+    position: absolute;
+    bottom: 0;
+    width: 6px;
+    transform-origin: bottom center;
+    cursor: pointer;
+    pointer-events: all;
+    transition: transform 0.1s;
+  }
+  .grass-blade:hover { transform: scaleY(1.1); }
+  .grass-blade svg { display: block; }
+  .scissors-cursor { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext y='20' font-size='20'%3E✂%3C/text%3E%3C/svg%3E") 12 12, crosshair; }
+
+  @keyframes bladeSway {
+    0%,100% { transform: rotate(var(--sway-base)); }
+    50%      { transform: rotate(calc(var(--sway-base) + var(--sway-amt))); }
+  }
+  @keyframes bladeGrow {
+    from { transform: scaleY(0) rotate(var(--sway-base)); opacity: 0; }
+    to   { transform: scaleY(1) rotate(var(--sway-base)); opacity: 1; }
+  }
+  @keyframes bladeCut {
+    0%   { transform: scaleY(1); opacity: 1; }
+    40%  { transform: scaleY(0.2) translateX(20px); opacity: 0.6; }
+    100% { transform: scaleY(0) translateX(40px); opacity: 0; }
+  }
+  .grass-blade.cutting { animation: bladeCut 0.3s ease forwards !important; pointer-events: none; }
+
+  /* Coin pop for grass */
+  .grass-coin {
+    position: fixed;
+    font-size: 1rem;
+    pointer-events: none;
+    z-index: 200;
+    animation: grassCoinPop 0.9s ease forwards;
+  }
+  @keyframes grassCoinPop {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
+  }
+
+  /* ── FROG ── */
+  #frogPet {
+    position: fixed;
+    bottom: 20px;
+    left: 100px;
+    width: 52px;
+    height: 52px;
+    z-index: 60;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.05s;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+  }
+  #frogPet:active { transform: scale(0.88); }
+  #frogPet .frog-hat {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.4rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+  @keyframes frogHop {
+    0%   { transform: translateY(0); }
+    30%  { transform: translateY(-22px); }
+    55%  { transform: translateY(-8px); }
+    75%  { transform: translateY(-16px); }
+    100% { transform: translateY(0); }
+  }
+  #frogPet.hopping { animation: frogHop 0.45s ease forwards; }
+  @keyframes frogBlink {
+    0%,95%,100% { transform: scaleY(1); }
+    97%          { transform: scaleY(0.1); }
+  }
+  .frog-svg { animation: frogBlink 4s ease-in-out infinite; }
 </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- AMBIENT BACKGROUND BLOBS -->
+<div class="login-screen-bg" id="loginBg"></div>
+<div class="bg-blobs"></div>
+<div class="bg-blobs-mid"></div>
+
+<!-- GRASS LAYER -->
+<div id="grassLayer"></div>
+
+<!-- FROG PET -->
+<div id="frogPet" onclick="frogClick()" title="Click me!">
+  <svg class="frog-svg" width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Body -->
+    <ellipse cx="26" cy="34" rx="18" ry="14" fill="#3a9e3a"/>
+    <ellipse cx="26" cy="32" rx="15" ry="12" fill="#4ade80"/>
+    <!-- Belly -->
+    <ellipse cx="26" cy="36" rx="9" ry="7" fill="#86efac" opacity="0.6"/>
+    <!-- Eyes -->
+    <circle cx="17" cy="22" r="7" fill="#3a9e3a"/>
+    <circle cx="35" cy="22" r="7" fill="#3a9e3a"/>
+    <circle cx="17" cy="22" r="5" fill="#f0f0f0"/>
+    <circle cx="35" cy="22" r="5" fill="#f0f0f0"/>
+    <circle cx="18" cy="22" r="2.5" fill="#111"/>
+    <circle cx="36" cy="22" r="2.5" fill="#111"/>
+    <!-- Nostrils -->
+    <circle cx="23" cy="28" r="1" fill="#2d7a2d"/>
+    <circle cx="29" cy="28" r="1" fill="#2d7a2d"/>
+    <!-- Mouth -->
+    <path d="M20 33 Q26 37 32 33" stroke="#2d7a2d" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- Legs -->
+    <ellipse cx="10" cy="44" rx="7" ry="4" fill="#3a9e3a" transform="rotate(-15 10 44)"/>
+    <ellipse cx="42" cy="44" rx="7" ry="4" fill="#3a9e3a" transform="rotate(15 42 44)"/>
+  </svg>
+  <div class="frog-hat" id="frogHatEl"></div>
+</div>
+
+
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
     <div class="login-title" id="wavyLoginTitle" aria-label="Project Wars"></div>
@@ -1907,6 +2098,8 @@
     if (player.password !== pass) { msg.textContent = 'Wrong password.'; msg.className = 'login-msg err'; return; }
 
     currentUser = { id, ...player };
+    window.__currentUser = currentUser;
+    window.__currentUserId = currentUser.id;
     onLoggedIn();
   };
 
@@ -1930,6 +2123,8 @@
     try {
       const newRef = await push(ref(db, 'players'), { name, password: pass, projects: {}, coins: 0 });
       currentUser = { id: newRef.key, name, password: pass, projects: {}, coins: 0 };
+      window.__currentUser = currentUser;
+      window.__currentUserId = currentUser.id;
       onLoggedIn();
     } catch(e) {
       msg.textContent = 'Error creating account.'; msg.className = 'login-msg err';
@@ -1939,6 +2134,8 @@
 
   function onLoggedIn() {
     document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('loginBg').style.display = 'none';
+    document.body.classList.add('logged-in');
     document.getElementById('userBadge').style.display = 'flex';
     document.getElementById('userBadgeName').textContent = currentUser.name;
     document.getElementById('loginName').value = '';
@@ -1948,7 +2145,11 @@
 
   window.doLogout = function() {
     currentUser = null;
+    window.__currentUser = null;
+    window.__currentUserId = null;
+    document.body.classList.remove('logged-in');
     document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('loginBg').style.display = '';
     document.getElementById('userBadge').style.display = 'none';
     closeCasino(); closeShop();
   };
@@ -3002,6 +3203,317 @@
     setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
   }
 
+</script>
+
+<script>
+// ══════════════════ GRASS SYSTEM ══════════════════
+(function() {
+  const layer = document.getElementById('grassLayer');
+  const BLADE_COUNT = 60;
+  const REGROW_MS = 4000;
+  const COIN_REWARD_EVERY = 3; // snip 3 blades = 1 coin
+
+  let cutCount = 0;
+  const blades = [];
+
+  const greens = ['#3a9e3a','#4ade80','#2d7a2d','#56c456','#38a838','#65d465'];
+
+  function makeBladeEl(x) {
+    const h = 25 + Math.random() * 35;
+    const g = greens[Math.floor(Math.random() * greens.length)];
+    const swayBase = (Math.random() - 0.5) * 8;
+    const swayAmt  = (Math.random() > 0.5 ? 1 : -1) * (4 + Math.random() * 6);
+    const delay    = (Math.random() * 3).toFixed(2);
+    const dur      = (1.8 + Math.random() * 2).toFixed(2);
+
+    const div = document.createElement('div');
+    div.className = 'grass-blade scissors-cursor';
+    div.style.left = x + 'px';
+    div.style.setProperty('--sway-base', swayBase + 'deg');
+    div.style.setProperty('--sway-amt',  swayAmt  + 'deg');
+    div.style.animation = `bladeSway ${dur}s ${delay}s ease-in-out infinite, bladeGrow 0.5s ease forwards`;
+
+    div.innerHTML = `<svg width="6" height="${h}" viewBox="0 0 6 ${h}" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 ${h} Q1 ${h*0.5} 2 0 Q4 ${h*0.5} 3 ${h}Z" fill="${g}" opacity="0.9"/>
+    </svg>`;
+
+    div.addEventListener('click', function() {
+      div.classList.add('cutting');
+      cutCount++;
+
+      // Coin every N cuts
+      if (cutCount % COIN_REWARD_EVERY === 0) {
+        const rect = div.getBoundingClientRect();
+        const coin = document.createElement('div');
+        coin.className = 'grass-coin';
+        coin.textContent = '🪙';
+        coin.style.left = rect.left + 'px';
+        coin.style.top  = rect.top  + 'px';
+        document.body.appendChild(coin);
+        setTimeout(() => coin.remove(), 1000);
+
+        // Award coin to current user if logged in
+        if (window.__awardGrassCoin) window.__awardGrassCoin();
+      }
+
+      // Regrow after delay
+      setTimeout(() => {
+        div.remove();
+        const newX = Math.random() * (window.innerWidth - 20);
+        const newBlade = makeBladeEl(newX);
+        layer.appendChild(newBlade);
+        blades[blades.indexOf(div)] = newBlade;
+      }, REGROW_MS);
+    });
+
+    return div;
+  }
+
+  function init() {
+    for (let i = 0; i < BLADE_COUNT; i++) {
+      const x = (i / BLADE_COUNT) * window.innerWidth + (Math.random() - 0.5) * (window.innerWidth / BLADE_COUNT);
+      const blade = makeBladeEl(Math.max(0, Math.min(window.innerWidth - 10, x)));
+      blades.push(blade);
+      layer.appendChild(blade);
+    }
+  }
+
+  init();
+  window.addEventListener('resize', () => {
+    // reposition blades proportionally on resize - just leave them, looks fine
+  });
+})();
+
+// ══════════════════ FROG PET ══════════════════
+(function() {
+  const frog = document.getElementById('frogPet');
+  let posX = 120, posY = 20; // from bottom
+  let velX = 1.2;
+  let isHopping = false;
+  let hopInterval, moveInterval;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function ribbit() {
+    try {
+      const g = audioCtx.createGain();
+      g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+
+      const o1 = audioCtx.createOscillator();
+      o1.type = 'sine';
+      o1.frequency.setValueAtTime(260, audioCtx.currentTime);
+      o1.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.15);
+      o1.connect(g);
+      o1.start(audioCtx.currentTime);
+      o1.stop(audioCtx.currentTime + 0.15);
+
+      setTimeout(() => {
+        const g2 = audioCtx.createGain();
+        g2.connect(audioCtx.destination);
+        g2.gain.setValueAtTime(0.14, audioCtx.currentTime);
+        g2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        const o2 = audioCtx.createOscillator();
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(240, audioCtx.currentTime);
+        o2.frequency.exponentialRampToValueAtTime(160, audioCtx.currentTime + 0.2);
+        o2.connect(g2);
+        o2.start(audioCtx.currentTime);
+        o2.stop(audioCtx.currentTime + 0.2);
+      }, 180);
+    } catch(e) {}
+  }
+
+  function hop() {
+    if (isHopping) return;
+    isHopping = true;
+    frog.classList.add('hopping');
+    // reverse direction sometimes
+    if (Math.random() < 0.3) velX = -velX;
+    frog.addEventListener('animationend', () => {
+      frog.classList.remove('hopping');
+      isHopping = false;
+    }, { once: true });
+  }
+
+  // Move frog continuously
+  moveInterval = setInterval(() => {
+    posX += velX;
+    if (posX < 10) { posX = 10; velX = Math.abs(velX); }
+    if (posX > window.innerWidth - 60) { posX = window.innerWidth - 60; velX = -Math.abs(velX); }
+    frog.style.left = posX + 'px';
+    frog.style.bottom = posY + 'px';
+    // Flip sprite based on direction
+    frog.style.transform = velX < 0 ? 'scaleX(-1)' : '';
+  }, 30);
+
+  // Hop periodically
+  hopInterval = setInterval(() => {
+    if (Math.random() < 0.6) hop();
+  }, 1400);
+
+  window.frogClick = function() {
+    ribbit();
+    hop();
+  };
+})();
+
+// ══════════════════ FROG HAT SHOP ══════════════════
+// Hat items are injected into the shop — we hook into renderShopItems
+const FROG_HATS = [
+  { id: 'hat_tophat', name: 'Top Hat',    emoji: '🎩', price: 80,  desc: 'Dapper frog' },
+  { id: 'hat_party',  name: 'Party Hat',  emoji: '🎉', price: 50,  desc: 'Frog party!' },
+];
+
+// Persist frog hat selection in localStorage (per-user)
+function getFrogHat() { return localStorage.getItem('frogHat_' + (window.__currentUserId || 'guest')); }
+function setFrogHatLocal(id) {
+  localStorage.setItem('frogHat_' + (window.__currentUserId || 'guest'), id || '');
+  document.getElementById('frogHatEl').textContent = id
+    ? (FROG_HATS.find(h => h.id === id)?.emoji || '')
+    : '';
+}
+
+// Owned hats in localStorage too (simple)
+function getOwnedHats() {
+  try { return JSON.parse(localStorage.getItem('ownedHats_' + (window.__currentUserId || 'guest')) || '[]'); }
+  catch { return []; }
+}
+function addOwnedHat(id) {
+  const owned = getOwnedHats();
+  if (!owned.includes(id)) { owned.push(id); localStorage.setItem('ownedHats_' + (window.__currentUserId || 'guest'), JSON.stringify(owned)); }
+}
+
+// Restore hat on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const h = getFrogHat();
+  if (h) setFrogHatLocal(h);
+});
+
+// Hook __awardGrassCoin into the Firebase update system
+// We'll define it here; the module script will override with a DB-aware version
+window.__awardGrassCoin = function() {
+  // fallback: no-op if not logged in
+};
+</script>
+
+<script type="module">
+// Extend the Firebase module with grass coin award + hat shop
+import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+const db = getDatabase(getApp());
+
+// Override grass coin award
+window.__awardGrassCoin = async function() {
+  if (!window.__currentUser) return;
+  const uid = window.__currentUser.id;
+  const snap = await new Promise(res => onValue(ref(db, `players/${uid}/coins`), res, { onlyOnce: true }));
+  const coins = snap.val() || 0;
+  await update(ref(db, `players/${uid}`), { coins: coins + 1 });
+  // spawn float
+  const el = document.createElement('div');
+  el.className = 'coin-float';
+  el.textContent = '+1 🪙';
+  el.style.left = (Math.random() * window.innerWidth * 0.6 + window.innerWidth * 0.2) + 'px';
+  el.style.top  = (window.innerHeight - 80) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+};
+
+// Hook into existing shop to inject hat items
+const _origRenderShopItems = window.renderShopItems;
+
+function renderHatSection() {
+  const body = document.getElementById('shopBody') || document.querySelector('.shop-body');
+  if (!body) return;
+  let hatSection = document.getElementById('hatShopSection');
+  if (!hatSection) {
+    hatSection = document.createElement('div');
+    hatSection.id = 'hatShopSection';
+    body.appendChild(hatSection);
+  }
+  const uid = window.__currentUser?.id;
+  const owned = getOwnedHats();
+  const equipped = getFrogHat();
+
+  hatSection.innerHTML = `
+    <div class="shop-section-title" style="margin-bottom:0.75rem;">🐸 Frog Hats</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+    ${FROG_HATS.map(hat => {
+      const isOwned = owned.includes(hat.id);
+      const isOn    = equipped === hat.id;
+      return `<div style="background:#0a0118;border:1px solid ${isOn ? '#f5c842' : '#3d00b3'};padding:0.85rem;display:flex;flex-direction:column;gap:0.4rem;">
+        <div style="font-size:2rem;text-align:center;">${hat.emoji}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:2px;color:#f0f0f0;">${hat.name}</div>
+        <div style="font-size:0.6rem;color:#666;letter-spacing:1px;">${hat.desc}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.25rem;">
+          <span class="shop-price">🪙 ${hat.price}</span>
+          <span class="shop-tag ${isOn ? 'tag-on' : isOwned ? 'tag-owned' : 'tag-buy'}">${isOn ? 'ON' : isOwned ? 'OWNED' : 'BUY'}</span>
+        </div>
+        ${isOwned
+          ? `<button class="shop-equip-btn ${isOn ? 'btn-unequip' : 'btn-equip'}" onclick="window.toggleFrogHat('${hat.id}')">${isOn ? 'Remove' : 'Wear'}</button>`
+          : `<button class="shop-equip-btn btn-equip" onclick="window.buyFrogHat('${hat.id}',${hat.price})">Buy</button>`
+        }
+      </div>`;
+    }).join('')}
+    </div>`;
+}
+
+window.toggleFrogHat = function(id) {
+  const equipped = getFrogHat();
+  if (equipped === id) {
+    setFrogHatLocal('');
+    localStorage.setItem('frogHat_' + (window.__currentUser?.id || 'guest'), '');
+  } else {
+    setFrogHatLocal(id);
+  }
+  renderHatSection();
+};
+
+window.buyFrogHat = async function(id, price) {
+  if (!window.__currentUser) return;
+  const uid = window.__currentUser.id;
+  const snap = await new Promise(res => onValue(ref(db, `players/${uid}/coins`), res, { onlyOnce: true }));
+  const coins = snap.val() || 0;
+  if (coins < price) {
+    const el = document.createElement('div');
+    el.className = 'coin-float';
+    el.textContent = '❌ Not enough coins';
+    el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:100px;font-size:0.8rem;color:#f87171;z-index:999;animation:coinPop 1s ease forwards;pointer-events:none;';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+    return;
+  }
+  await update(ref(db, `players/${uid}`), { coins: coins - price });
+  addOwnedHat(id);
+  setFrogHatLocal(id);
+  renderHatSection();
+};
+
+// Hook into shop open to render hats
+const origOpenShop = window.openShop;
+window.openShop = function() {
+  if (origOpenShop) origOpenShop();
+  setTimeout(renderHatSection, 50);
+};
+
+// Also expose current user ID to grass coin system
+const origOnLoggedIn = window.__onLoggedInHook;
+// Poll for currentUser (since it's in a module scope we can't directly patch)
+setInterval(() => {
+  const badge = document.getElementById('userBadgeName');
+  if (badge && badge.textContent && badge.closest('#userBadge')?.style.display !== 'none') {
+    // user is logged in — restore hat
+    if (!window.__hatRestored) {
+      window.__hatRestored = true;
+      const h = getFrogHat();
+      if (h) setFrogHatLocal(h);
+    }
+  } else {
+    window.__hatRestored = false;
+  }
+}, 500);
 </script>
 </body>
 </html>
