@@ -36,7 +36,7 @@
 
   header h1 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3rem, 10vw, 7rem);
+    font-size: clamp(5rem, 16vw, 11rem);
     letter-spacing: 4px;
     background: linear-gradient(135deg, var(--gold), #ff8c42);
     -webkit-background-clip: text;
@@ -46,36 +46,31 @@
     white-space: nowrap;
   }
 
-  .subtitle { color: var(--muted); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-top: 0.5rem; }
+  .subtitle { color: var(--muted); font-size: 1.1rem; letter-spacing: 3px; text-transform: uppercase; margin-top: 0.5rem; }
 
   /* ── Wavy text ── */
   .wavy-letter {
     display: inline-block;
-    animation: wavyFloat 2.2s ease-in-out infinite;
+    animation: wavyFloat 3s ease-in-out infinite;
+    filter: url(#ooze);
+    will-change: transform;
   }
-  .wavy-letter.space { display: inline; }
+
+  .subtitle .wavy-letter,
+  .login-subtitle .wavy-letter {
+    animation-name: wavyFloatSubtle;
+    filter: url(#oozeSubtle);
+  }
 
   @keyframes wavyFloat {
-    0%   { transform: translateY(0px) rotate(0deg) scaleX(1); }
-    15%  { transform: translateY(-8px) rotate(-3deg) scaleX(0.95); }
-    30%  { transform: translateY(-14px) rotate(2deg) scaleX(1.05); }
-    45%  { transform: translateY(-8px) rotate(-1deg) scaleX(0.98); }
-    60%  { transform: translateY(4px) rotate(2deg) scaleX(1.03); }
-    75%  { transform: translateY(8px) rotate(-2deg) scaleX(0.97); }
-    90%  { transform: translateY(3px) rotate(1deg) scaleX(1.01); }
-    100% { transform: translateY(0px) rotate(0deg) scaleX(1); }
-  }
-
-  .subtitle .wavy-letter {
-    animation-name: wavyFloatSubtle;
-    color: var(--muted);
+    0%   { transform: translateY(0px) rotate(0deg); }
+    50%  { transform: translateY(-10px) rotate(-2deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
   }
   @keyframes wavyFloatSubtle {
-    0%   { transform: translateY(0px) rotate(0deg); }
-    25%  { transform: translateY(-4px) rotate(-2deg); }
-    50%  { transform: translateY(5px) rotate(1.5deg); }
-    75%  { transform: translateY(-3px) rotate(-1deg); }
-    100% { transform: translateY(0px) rotate(0deg); }
+    0%   { transform: translateY(0px); }
+    50%  { transform: translateY(-5px); }
+    100% { transform: translateY(0px); }
   }
 
   .week-display {
@@ -881,31 +876,29 @@
 
   .login-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3rem, 12vw, 5rem);
+    font-size: clamp(5rem, 16vw, 9rem);
     letter-spacing: 4px;
     text-align: center;
-    line-height: 1;
+    line-height: 1.1;
     margin-bottom: 0.25rem;
-    white-space: nowrap;
+    width: 100%;
   }
+  .login-subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    width: 100%;
+  }
+
   .login-title .wavy-letter {
     background: linear-gradient(135deg, var(--gold), #ff8c42);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-
-  .login-subtitle {
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.65rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 2.5rem;
-    white-space: nowrap;
-  }
-
-  .login-tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
     border: 1px solid var(--border);
@@ -1494,9 +1487,9 @@
 
 <!-- LOGIN SCREEN -->
 <div class="login-screen" id="loginScreen">
+  <div class="login-title" id="wavyLoginTitle" aria-label="Project Wars"></div>
+  <div class="login-subtitle" id="wavyLoginSubtitle" aria-label="Who ships the most this week?"></div>
   <div class="login-box">
-    <div class="login-title" id="wavyLoginTitle" aria-label="Project Wars"></div>
-    <div class="login-subtitle" id="wavyLoginSubtitle" aria-label="Who ships the most this week?"></div>
 
     <div class="login-tabs">
       <button class="login-tab active" id="tabLogin" onclick="switchLoginTab('login')">Login</button>
@@ -1759,6 +1752,21 @@
 </div>
 
 <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+<!-- Ooze Filters -->
+<svg width="0" height="0" style="position:absolute;pointer-events:none">
+  <defs>
+    <filter id="ooze" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feTurbulence id="oozeTurb" type="turbulence" baseFrequency="0.035 0.025" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G" result="warped"/>
+      <feComposite in="warped" in2="warped" operator="over"/>
+    </filter>
+    <filter id="oozeSubtle" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feTurbulence id="oozeTurbS" type="turbulence" baseFrequency="0.035 0.025" numOctaves="2" seed="3" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
 <!-- Music Player -->
 <div class="music-player" id="musicPlayer">
   <button class="music-icon-btn" id="musicBtn" onclick="toggleMusic()" title="Toggle music">🎵</button>
@@ -1818,22 +1826,47 @@
   // ── Wavy Text ──
   function makeWavy(el, text, baseDelay, stagger) {
     el.innerHTML = '';
-    [...text].forEach((ch, i) => {
-      if (ch === ' ') {
-        el.appendChild(document.createTextNode(' '));
-      } else {
+    const words = text.split(' ');
+    let i = 0;
+    words.forEach((word, wi) => {
+      const wordSpan = document.createElement('span');
+      wordSpan.style.display = 'inline-block';
+      wordSpan.style.whiteSpace = 'nowrap';
+      [...word].forEach(ch => {
         const span = document.createElement('span');
         span.className = 'wavy-letter';
         span.textContent = ch;
         span.style.animationDelay = (baseDelay + i * stagger) + 's';
-        el.appendChild(span);
+        wordSpan.appendChild(span);
+        i++;
+      });
+      el.appendChild(wordSpan);
+      if (wi < words.length - 1) {
+        el.appendChild(document.createTextNode(' '));
+        i++;
       }
     });
   }
-  makeWavy(document.getElementById('wavyTitle'),        'Project Wars',                 0,    0.08);
-  makeWavy(document.getElementById('wavySubtitle'),     'Who ships the most this week?', 0.3, 0.04);
-  makeWavy(document.getElementById('wavyLoginTitle'),   'Project Wars',                 0,    0.08);
-  makeWavy(document.getElementById('wavyLoginSubtitle'),'Who ships the most this week?', 0.3, 0.04);
+  makeWavy(document.getElementById('wavyTitle'),        'Project Wars',                 0,     0.12);
+  makeWavy(document.getElementById('wavySubtitle'),     'Who ships the most this week?', 0,    0.06);
+  makeWavy(document.getElementById('wavyLoginTitle'),   'Project Wars',                 0,     0.12);
+  makeWavy(document.getElementById('wavyLoginSubtitle'),'Who ships the most this week?', 0,    0.06);
+
+  // Slowly morph turbulence so letter edges ooze and flow
+  (function oozeAnimate() {
+    const turb  = document.getElementById('oozeTurb');
+    const turbS = document.getElementById('oozeTurbS');
+    function tick(ts) {
+      const t = ts * 0.0003;
+      const fx = (0.032 + Math.sin(t * 0.7)  * 0.012).toFixed(4);
+      const fy = (0.022 + Math.cos(t * 0.5)  * 0.010).toFixed(4);
+      const bf = `${fx} ${fy}`;
+      if (turb)  turb.setAttribute('baseFrequency', bf);
+      if (turbS) turbS.setAttribute('baseFrequency', bf);
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
 </script>
 
 <script type="module">
