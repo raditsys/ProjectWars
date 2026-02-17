@@ -17,6 +17,8 @@
     --text: #f0f0f0;
     --muted: #666;
     --red: #f87171;
+    --casino: #0d2b0d;
+    --casino-felt: #1a4a1a;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,6 +29,7 @@
     font-family: 'DM Mono', monospace;
     min-height: 100vh;
     padding: 2rem 1rem 4rem;
+    overflow-x: hidden;
   }
 
   header { text-align: center; margin-bottom: 3rem; }
@@ -70,6 +73,19 @@
     margin-bottom: 1rem;
     border-bottom: 1px solid var(--border);
     padding-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .multiplier-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--gold);
+    letter-spacing: 1px;
+    border: 1px solid var(--gold);
+    padding: 0.2rem 0.6rem;
+    opacity: 0.7;
   }
 
   .player-card {
@@ -95,9 +111,9 @@
 
   .card-top {
     display: grid;
-    grid-template-columns: 2rem 1fr auto auto;
+    grid-template-columns: 2rem 1fr auto auto auto;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
     padding: 1rem 1.25rem 0.75rem;
   }
 
@@ -109,16 +125,19 @@
   .player-name { font-size: 0.95rem; font-weight: 500; }
   .streak { font-size: 0.65rem; color: var(--gold); letter-spacing: 1px; }
 
-  .player-hours { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--green); text-align: right; white-space: nowrap; }
-  .player-hours span { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); display: block; text-align: right; margin-top: -4px; letter-spacing: 1px; }
+  .player-stats { display: flex; flex-direction: column; align-items: flex-end; gap: 0.1rem; }
+  .player-hours { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--green); white-space: nowrap; }
+  .player-hours small { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); display: block; text-align: right; margin-top: -4px; letter-spacing: 1px; }
+  .player-coins { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--gold); white-space: nowrap; }
+  .player-coins small { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: var(--muted); letter-spacing: 1px; }
 
   .log-btn {
     background: none;
     border: 1px solid var(--border);
     color: var(--muted);
-    padding: 0.4rem 0.75rem;
+    padding: 0.4rem 0.6rem;
     font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     cursor: pointer;
     letter-spacing: 1px;
     transition: all 0.15s;
@@ -126,7 +145,6 @@
   }
   .log-btn:hover { border-color: var(--green); color: var(--green); }
 
-  /* Project pills inside card */
   .card-projects {
     padding: 0 1.25rem 0.85rem 3.5rem;
     display: flex;
@@ -147,10 +165,7 @@
     border-radius: 2px;
   }
 
-  .proj-pill .proj-hrs {
-    color: var(--text);
-    font-weight: 500;
-  }
+  .proj-pill .proj-hrs { color: var(--text); font-weight: 500; }
 
   .proj-pill .remove-proj {
     background: none;
@@ -284,7 +299,9 @@
   .log-item:last-child { border-bottom: none; }
   .log-who { color: var(--text); }
   .log-detail { color: var(--muted); font-size: 0.65rem; }
-  .log-amount { color: var(--green); font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
+  .log-amount { text-align: right; }
+  .log-amount .hrs { color: var(--green); font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
+  .log-amount .coins { color: var(--gold); font-size: 0.65rem; display: block; text-align: right; }
 
   /* ── Reset ── */
   .reset-section { max-width: 900px; margin: 2rem auto 0; text-align: center; }
@@ -295,12 +312,304 @@
   }
   .reset-btn:hover { border-color: var(--red); color: var(--red); }
 
-  @keyframes pop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.02); }
-    100% { transform: scale(1); }
+  /* ── GAMBLE BUTTON (fixed tab) ── */
+  .gamble-tab {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 200;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    background: var(--gold);
+    color: #000;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+    padding: 1.5rem 0.6rem;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s, padding 0.2s;
+    box-shadow: -4px 0 20px rgba(245,200,66,0.3);
   }
-  .popped { animation: pop 0.3s ease; }
+  .gamble-tab:hover { background: #ffd000; }
+  .gamble-tab .tab-arrow { font-size: 0.9rem; }
+
+  /* ── CASINO DRAWER ── */
+  .casino-drawer {
+    position: fixed;
+    top: 0;
+    right: -520px;
+    width: 500px;
+    max-width: 95vw;
+    height: 100vh;
+    background: var(--casino);
+    border-left: 2px solid #2a5a2a;
+    z-index: 300;
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .casino-drawer.open { right: 0; }
+
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 299;
+    display: none;
+    backdrop-filter: blur(2px);
+  }
+  .drawer-overlay.open { display: block; }
+
+  .drawer-header {
+    background: #0a1f0a;
+    border-bottom: 1px solid #2a5a2a;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .drawer-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--gold), #ff8c42);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .drawer-close {
+    background: none;
+    border: 1px solid #2a5a2a;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .drawer-close:hover { border-color: var(--red); color: var(--red); }
+
+  .drawer-body { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  /* Player picker inside drawer */
+  .casino-player-pick {
+    background: #0a1f0a;
+    border: 1px solid #2a5a2a;
+    padding: 1rem;
+  }
+
+  .casino-player-pick label {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: #4a8a4a;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .casino-player-pick select {
+    width: 100%;
+    background: var(--casino);
+    border: 1px solid #2a5a2a;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .casino-wallet {
+    text-align: center;
+    padding: 0.75rem;
+    background: #0a1f0a;
+    border: 1px solid #2a5a2a;
+  }
+
+  .wallet-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .wallet-label {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: #4a8a4a;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+  }
+
+  /* ── FELT TABLE ── */
+  .felt-table {
+    background: var(--casino-felt);
+    border: 2px solid #2a5a2a;
+    border-radius: 4px;
+    padding: 1.25rem;
+    position: relative;
+  }
+
+  .table-section-label {
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: #4a8a4a;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .cards-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-height: 90px;
+    align-items: center;
+  }
+
+  /* Playing card */
+  .card {
+    width: 58px;
+    height: 84px;
+    background: #fff;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #111;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    position: relative;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+
+  .card.red { color: #c00; }
+  .card.face-down {
+    background: linear-gradient(135deg, #1a3a8a 25%, #0a2060 25%, #0a2060 50%, #1a3a8a 50%, #1a3a8a 75%, #0a2060 75%);
+    background-size: 10px 10px;
+    color: transparent;
+  }
+
+  .card .rank { font-size: 1rem; line-height: 1; }
+  .card .suit { font-size: 1.1rem; line-height: 1; }
+
+  @keyframes dealCard {
+    from { opacity: 0; transform: translateY(-20px) scale(0.8); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .card.deal-anim { animation: dealCard 0.25s ease forwards; }
+
+  .score-badge {
+    display: inline-block;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #2a5a2a;
+    padding: 0.2rem 0.6rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+  .score-badge.bust { color: var(--red); border-color: var(--red); }
+  .score-badge.bj { color: var(--gold); border-color: var(--gold); }
+
+  /* Bet section */
+  .bet-section { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+  .chip {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px dashed rgba(255,255,255,0.4);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s, opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .chip:hover:not(:disabled) { transform: scale(1.1); }
+  .chip:disabled { opacity: 0.3; cursor: not-allowed; }
+  .chip-10  { background: #2255cc; color: #fff; }
+  .chip-25  { background: #229922; color: #fff; }
+  .chip-50  { background: #882222; color: #fff; }
+  .chip-100 { background: #333; color: var(--gold); border-color: var(--gold); }
+
+  .bet-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    min-width: 80px;
+    text-align: center;
+  }
+  .bet-display small { display: block; font-family: 'DM Mono', monospace; font-size: 0.55rem; color: #4a8a4a; letter-spacing: 1px; text-transform: uppercase; }
+
+  .clear-bet-btn {
+    background: none;
+    border: 1px solid #2a5a2a;
+    color: #4a8a4a;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .clear-bet-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Action buttons */
+  .bj-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+
+  .bj-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 0.6rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .bj-btn:hover:not(:disabled) { opacity: 0.85; transform: scale(1.02); }
+  .bj-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .bj-btn.deal  { background: var(--gold); color: #000; }
+  .bj-btn.hit   { background: var(--green); color: #000; }
+  .bj-btn.stand { background: var(--red); color: #000; }
+  .bj-btn.dbl   { background: var(--bronze); color: #000; }
+
+  /* Result banner */
+  .result-banner {
+    text-align: center;
+    padding: 1rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 4px;
+    border: 2px solid;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .result-banner.show { opacity: 1; }
+  .result-banner.win  { color: var(--gold); border-color: var(--gold); background: rgba(245,200,66,0.08); }
+  .result-banner.lose { color: var(--red);  border-color: var(--red);  background: rgba(248,113,113,0.08); }
+  .result-banner.push { color: var(--silver); border-color: var(--silver); background: rgba(168,178,189,0.08); }
+  .result-banner.bj   { color: var(--gold); border-color: var(--gold); background: rgba(245,200,66,0.15); }
 
   /* ── Delete Modal ── */
   .modal-backdrop {
@@ -308,7 +617,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.75);
-    z-index: 100;
+    z-index: 400;
     align-items: center;
     justify-content: center;
   }
@@ -338,11 +647,8 @@
     margin-bottom: 1.25rem;
     line-height: 1.6;
   }
-
   .modal p strong { color: var(--text); }
-
   .modal .field { margin-bottom: 1rem; }
-
   .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 1rem; }
 
   .btn-danger {
@@ -375,9 +681,110 @@
   .btn-cancel:hover { border-color: var(--muted); color: var(--text); }
 
   .modal-err { font-size: 0.7rem; color: var(--red); letter-spacing: 1px; margin-top: 0.5rem; min-height: 1rem; }
+
+  /* ── Misc ── */
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  .popped { animation: pop 0.3s ease; }
+
+  @keyframes coinPop {
+    0%   { opacity:1; transform: translateY(0) scale(1); }
+    100% { opacity:0; transform: translateY(-40px) scale(1.4); }
+  }
+  .coin-float {
+    position: fixed;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    pointer-events: none;
+    z-index: 999;
+    animation: coinPop 1s ease forwards;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-6px); }
+    40%,80% { transform: translateX(6px); }
+  }
+  .shake { animation: shake 0.4s ease; }
 </style>
 </head>
 <body>
+
+<!-- GAMBLE TAB -->
+<button class="gamble-tab" id="gambleTab" onclick="openCasino()">
+  <span class="tab-arrow">◀</span>
+  GAMBLE
+</button>
+
+<!-- CASINO DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino()"></div>
+
+<!-- CASINO DRAWER -->
+<div class="casino-drawer" id="casinoDrawer">
+  <div class="drawer-header">
+    <h2>🃏 Casino</h2>
+    <button class="drawer-close" onclick="closeCasino()">✕ Close</button>
+  </div>
+  <div class="drawer-body">
+
+    <!-- Pick who's playing -->
+    <div class="casino-player-pick">
+      <label>Playing as</label>
+      <select id="casinoPlayer" onchange="onCasinoPlayerChange()">
+        <option value="">— select your name —</option>
+      </select>
+    </div>
+
+    <!-- Wallet -->
+    <div class="casino-wallet">
+      <div class="wallet-amount" id="walletDisplay">—</div>
+      <div class="wallet-label">🪙 coins</div>
+    </div>
+
+    <!-- Felt Table -->
+    <div class="felt-table">
+      <div class="table-section-label">Dealer <span id="dealerScoreEl"></span></div>
+      <div class="cards-row" id="dealerCards"></div>
+
+      <div style="margin: 1rem 0; border-top: 1px solid #2a5a2a;"></div>
+
+      <div class="table-section-label">You <span id="playerScoreEl"></span></div>
+      <div class="cards-row" id="playerCards"></div>
+
+      <div style="margin-top:1rem;">
+        <div class="result-banner" id="resultBanner"></div>
+      </div>
+    </div>
+
+    <!-- Bet chips -->
+    <div>
+      <div class="table-section-label" style="margin-bottom:0.5rem;">Place your bet</div>
+      <div class="bet-section">
+        <button class="chip chip-10"  onclick="addBet(10)"  id="chip10">10</button>
+        <button class="chip chip-25"  onclick="addBet(25)"  id="chip25">25</button>
+        <button class="chip chip-50"  onclick="addBet(50)"  id="chip50">50</button>
+        <button class="chip chip-100" onclick="addBet(100)" id="chip100">100</button>
+        <div class="bet-display" id="betDisplay">0<small>bet</small></div>
+        <button class="clear-bet-btn" onclick="clearBet()">Clear</button>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="bj-actions">
+      <button class="bj-btn deal"  id="btnDeal"  onclick="bjDeal()">Deal</button>
+      <button class="bj-btn hit"   id="btnHit"   onclick="bjHit()"  disabled>Hit</button>
+      <button class="bj-btn stand" id="btnStand" onclick="bjStand()" disabled>Stand</button>
+      <button class="bj-btn dbl"   id="btnDouble" onclick="bjDouble()" disabled>Double</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════ MAIN PAGE ═══════════════════ -->
 
 <header>
   <h1>Project Wars</h1>
@@ -387,7 +794,10 @@
 </header>
 
 <div class="leaderboard">
-  <div class="leaderboard-title">🏆 Leaderboard</div>
+  <div class="leaderboard-title">
+    <span>🏆 Leaderboard</span>
+    <span class="multiplier-note" id="multiplierNote"></span>
+  </div>
   <div id="leaderboard"><div class="empty-state">Connecting to database...</div></div>
 </div>
 
@@ -404,7 +814,7 @@
     <div class="msg" id="addMsg"></div>
   </div>
 
-  <!-- Add Project to Player -->
+  <!-- Add Project -->
   <div class="panel">
     <h2>Add Project</h2>
     <div class="field">
@@ -419,19 +829,6 @@
     </div>
     <button class="btn tertiary" id="addProjBtn" onclick="addProject()">Add Project</button>
     <div class="msg" id="projMsg"></div>
-  </div>
-
-  <!-- Delete Player -->
-  <div class="panel">
-    <h2>Delete Player</h2>
-    <div class="field">
-      <label>Player to delete</label>
-      <select id="deletePlayer">
-        <option value="">— select —</option>
-      </select>
-    </div>
-    <button class="btn" style="background:none;color:var(--red);border:1px solid var(--red);" onclick="openDeletePlayer()">Delete Player</button>
-    <div class="msg" id="deleteMsg"></div>
   </div>
 
   <!-- Log Hours -->
@@ -461,6 +858,19 @@
     <div class="msg" id="logMsg"></div>
   </div>
 
+  <!-- Delete -->
+  <div class="panel">
+    <h2>Delete</h2>
+    <div class="field">
+      <label>Delete Player</label>
+      <select id="deletePlayer">
+        <option value="">— select —</option>
+      </select>
+    </div>
+    <button class="btn" style="background:none;color:var(--red);border:1px solid var(--red);margin-bottom:0.5rem;" onclick="openDeletePlayer()">Delete Player</button>
+    <div class="msg" id="deleteMsg"></div>
+  </div>
+
 </div>
 
 <div class="history-section">
@@ -474,11 +884,11 @@
 <div class="reset-section" style="margin-top:3rem;">
   <button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
   <div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
-    Resets all hours but keeps players and projects
+    Applies Sunday multipliers, resets hours, keeps players, projects & coins
   </div>
 </div>
 
-<!-- Password Modal -->
+<!-- Delete Modal -->
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal">
     <h3 id="modalTitle">Confirm Delete</h3>
@@ -495,9 +905,10 @@
   </div>
 </div>
 
+<!-- ═══════════════════ SCRIPTS ═══════════════════ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, remove, update, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAtMH_AvVGskpK2TxMlXjf0IXRb9HT-q_Y",
@@ -512,9 +923,10 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  // ── Constants ──
+  const COINS_PER_HOUR = 10; // 1 hour = 10 coins
+
   // ── State ──
-  // players[id] = { name, projects: { projId: { name, hours } } }
-  // logs[id]    = { player, project, hours, note, ts }
   let players = {};
   let logs = {};
 
@@ -525,6 +937,7 @@
     syncEl.textContent = '⬤ live — updates instantly for everyone';
     syncEl.className = 'sync-status live';
     render();
+    refreshCasinoWallet();
   }, () => {
     syncEl.textContent = '⬤ connection error';
     syncEl.className = 'sync-status err';
@@ -565,6 +978,26 @@
     return streak;
   }
 
+  function isSunday() {
+    // Sunday EST check
+    const now = new Date();
+    const est = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    return est.getDay() === 0;
+  }
+
+  function getTimeUntilSundayEST() {
+    const now = new Date();
+    const estNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const estSunday = new Date(estNow);
+    const daysUntilSun = (7 - estNow.getDay()) % 7 || 7;
+    estSunday.setDate(estNow.getDate() + daysUntilSun);
+    estSunday.setHours(23, 59, 0, 0);
+    const diffMs = estSunday - estNow;
+    const h = Math.floor(diffMs / 3600000);
+    const m = Math.floor((diffMs % 3600000) / 60000);
+    return `${h}h ${m}m`;
+  }
+
   // ── Render ──
   function render() {
     renderWeek();
@@ -579,6 +1012,9 @@
     const end = new Date(start); end.setDate(start.getDate() + 6);
     const fmt = x => x.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     document.getElementById('weekDisplay').textContent = `Week of ${fmt(start)} – ${fmt(end)}`;
+
+    const note = document.getElementById('multiplierNote');
+    note.textContent = `🏅 Multipliers in ${getTimeUntilSundayEST()}`;
   }
 
   function renderLeaderboard() {
@@ -594,17 +1030,18 @@
     lb.innerHTML = arr.map((p, i) => {
       const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
       const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      const mult = i === 0 ? '×1.25' : i === 1 ? '×1.15' : i === 2 ? '×1.10' : '';
       const pct = Math.round((p.total / max) * 100);
       const streak = getStreak(p.name);
+      const coins = p.coins || 0;
 
-      // Project pills
       const projEntries = Object.entries(p.projects || {});
       const pillsHtml = projEntries.length
         ? projEntries.map(([pid, proj]) => `
             <span class="proj-pill">
               <span>${escHtml(proj.name)}</span>
               <span class="proj-hrs">${(proj.hours || 0).toFixed(1)}h</span>
-              <button class="remove-proj" title="Remove project" onclick="window._removeProject('${escHtml(p.id)}','${escHtml(pid)}','${escHtml(proj.name)}','${escHtml(p.name)}')">×</button>
+              <button class="remove-proj" title="Remove project" onclick="window._removeProject('${p.id}','${pid}','${escHtml(proj.name)}','${escHtml(p.name)}')">×</button>
             </span>`).join('')
         : `<span style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;">no projects yet — add one below</span>`;
 
@@ -613,9 +1050,14 @@
           <div class="card-top">
             <div class="rank-badge">${medal}</div>
             <div>
-              <div class="player-name">${escHtml(p.name)}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}</div>
+              <div class="player-name">${escHtml(p.name)}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}${mult ? ` <span style="font-size:0.6rem;color:var(--gold);letter-spacing:1px;">${mult}</span>` : ''}</div>
             </div>
-            <div class="player-hours">${p.total.toFixed(1)}<span>total hrs</span></div>
+            <div class="player-stats">
+              <div class="player-hours">${p.total.toFixed(1)}<small>hrs this week</small></div>
+            </div>
+            <div class="player-stats">
+              <div class="player-coins">🪙 ${coins.toLocaleString()}<small>coins</small></div>
+            </div>
             <button class="log-btn" onclick="window._quickLog('${escHtml(p.name)}')">+ Log</button>
           </div>
           <div class="card-projects">${pillsHtml}</div>
@@ -627,7 +1069,6 @@
   }
 
   function renderPlayerSelects() {
-    // Shared helper: populate a <select> with player names
     function fill(selId, curVal, placeholder) {
       const sel = document.getElementById(selId);
       sel.innerHTML = `<option value="">${placeholder}</option>`;
@@ -639,9 +1080,10 @@
         sel.appendChild(o);
       });
     }
-    fill('projPlayer', document.getElementById('projPlayer').value, '— select —');
-    fill('logPlayer', document.getElementById('logPlayer').value, '— select —');
+    fill('projPlayer',   document.getElementById('projPlayer').value,   '— select —');
+    fill('logPlayer',    document.getElementById('logPlayer').value,    '— select —');
     fill('deletePlayer', document.getElementById('deletePlayer').value, '— select —');
+    fill('casinoPlayer', document.getElementById('casinoPlayer').value, '— select your name —');
     updateProjectSelect();
   }
 
@@ -650,20 +1092,10 @@
     const sel = document.getElementById('logProject');
     const curProj = sel.value;
     sel.innerHTML = '';
-
-    if (!playerName) {
-      sel.innerHTML = '<option value="">— select player first —</option>';
-      return;
-    }
-
+    if (!playerName) { sel.innerHTML = '<option value="">— select player first —</option>'; return; }
     const player = Object.values(players).find(p => p.name === playerName);
     const projs = player?.projects ? Object.entries(player.projects) : [];
-
-    if (!projs.length) {
-      sel.innerHTML = '<option value="">— no projects yet —</option>';
-      return;
-    }
-
+    if (!projs.length) { sel.innerHTML = '<option value="">— no projects yet —</option>'; return; }
     projs.forEach(([pid, proj]) => {
       const o = document.createElement('option');
       o.value = pid;
@@ -686,11 +1118,14 @@
           <div class="log-who">${escHtml(l.player)} · <span style="color:var(--muted)">${escHtml(l.project || '')}</span></div>
           <div class="log-detail">${l.note ? escHtml(l.note) : 'no note'} · ${timeAgo(new Date(l.ts))}</div>
         </div>
-        <div class="log-amount">+${l.hours}h</div>
+        <div class="log-amount">
+          <span class="hrs">+${l.hours}h</span>
+          <span class="coins">+${Math.floor(l.hours * COINS_PER_HOUR)} 🪙</span>
+        </div>
       </div>`).join('');
   }
 
-  // ── Actions ──
+  // ── Main Actions ──
 
   window.addPlayer = async function() {
     const name = document.getElementById('newName').value.trim();
@@ -702,14 +1137,12 @@
     const btn = document.getElementById('addBtn');
     btn.disabled = true;
     try {
-      await push(ref(db, 'players'), { name, projects: {} });
+      await push(ref(db, 'players'), { name, projects: {}, coins: 0 });
       document.getElementById('newName').value = '';
       msg.textContent = `${name} joined the competition!`;
       msg.className = 'msg ok';
       setTimeout(() => msg.textContent = '', 3000);
-    } catch(e) {
-      msg.textContent = 'Error saving.'; msg.className = 'msg err';
-    }
+    } catch(e) { msg.textContent = 'Error saving.'; msg.className = 'msg err'; }
     btn.disabled = false;
   };
 
@@ -719,15 +1152,11 @@
     const msg = document.getElementById('projMsg');
     if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; return; }
     if (!projName) { msg.textContent = 'Enter a project name.'; msg.className = 'msg err'; return; }
-
     const entry = Object.entries(players).find(([, p]) => p.name === playerName);
     if (!entry) return;
     const [playerId, player] = entry;
-
-    // Duplicate check
     const existing = Object.values(player.projects || {}).find(p => p.name.toLowerCase() === projName.toLowerCase());
-    if (existing) { msg.textContent = 'Project already exists for this player.'; msg.className = 'msg err'; return; }
-
+    if (existing) { msg.textContent = 'Project already exists.'; msg.className = 'msg err'; return; }
     const btn = document.getElementById('addProjBtn');
     btn.disabled = true;
     try {
@@ -736,23 +1165,21 @@
       msg.textContent = `"${projName}" added to ${playerName}!`;
       msg.className = 'msg ok';
       setTimeout(() => msg.textContent = '', 3000);
-    } catch(e) {
-      msg.textContent = 'Error saving.'; msg.className = 'msg err';
-    }
+    } catch(e) { msg.textContent = 'Error saving.'; msg.className = 'msg err'; }
     btn.disabled = false;
   };
 
   window.logHours = async function() {
     const playerName = document.getElementById('logPlayer').value;
-    const projectId = document.getElementById('logProject').value;
-    const hours = parseFloat(document.getElementById('logHours').value);
-    const note = document.getElementById('logNote').value.trim();
-    const msg = document.getElementById('logMsg');
+    const projectId  = document.getElementById('logProject').value;
+    const hours      = parseFloat(document.getElementById('logHours').value);
+    const note       = document.getElementById('logNote').value.trim();
+    const msg        = document.getElementById('logMsg');
 
     if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; return; }
-    if (!projectId) { msg.textContent = 'Select a project.'; msg.className = 'msg err'; return; }
+    if (!projectId)  { msg.textContent = 'Select a project.'; msg.className = 'msg err'; return; }
     if (!hours || hours <= 0) { msg.textContent = 'Enter valid hours.'; msg.className = 'msg err'; return; }
-    if (hours > 24) { msg.textContent = 'Max 24 hours per entry.'; msg.className = 'msg err'; return; }
+    if (hours > 24)  { msg.textContent = 'Max 24 hours.'; msg.className = 'msg err'; return; }
 
     const playerEntry = Object.entries(players).find(([, p]) => p.name === playerName);
     if (!playerEntry) return;
@@ -763,23 +1190,39 @@
     const btn = document.getElementById('logBtn');
     btn.disabled = true;
     try {
-      const newHours = Math.round(((proj.hours || 0) + hours) * 100) / 100;
+      const newHours  = Math.round(((proj.hours || 0) + hours) * 100) / 100;
+      const earnedCoins = Math.floor(hours * COINS_PER_HOUR);
+      const newCoins  = (player.coins || 0) + earnedCoins;
+
       await update(ref(db, `players/${playerId}/projects/${projectId}`), { hours: newHours });
+      await update(ref(db, `players/${playerId}`), { coins: newCoins });
       await push(ref(db, 'logs'), { player: playerName, project: proj.name, hours, note, ts: new Date().toISOString() });
 
       document.getElementById('logHours').value = '';
       document.getElementById('logNote').value = '';
-      msg.textContent = `+${hours}h on "${proj.name}" for ${playerName} 🎉`;
+      msg.textContent = `+${hours}h & +${earnedCoins} coins for ${playerName} 🎉`;
       msg.className = 'msg ok';
       setTimeout(() => msg.textContent = '', 3000);
 
+      // Coin float animation
+      spawnCoinFloat(`+${earnedCoins} 🪙`);
+
       const card = document.getElementById(`card-${playerId}`);
       if (card) { card.classList.remove('popped'); void card.offsetWidth; card.classList.add('popped'); }
-    } catch(e) {
-      msg.textContent = 'Error saving.'; msg.className = 'msg err';
-    }
+    } catch(e) { msg.textContent = 'Error saving.'; msg.className = 'msg err'; }
     btn.disabled = false;
   };
+
+  function spawnCoinFloat(text) {
+    const el = document.createElement('div');
+    el.className = 'coin-float';
+    el.textContent = text;
+    el.style.left = (Math.random() * 60 + 20) + 'vw';
+    el.style.top = '60vh';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1100);
+  }
+  window.spawnCoinFloat = spawnCoinFloat;
 
   window._quickLog = function(name) {
     document.getElementById('logPlayer').value = name;
@@ -789,7 +1232,7 @@
   };
 
   // ── Delete Modal ──
-  let pendingDelete = null; // { type: 'player'|'project', ... }
+  let pendingDelete = null;
 
   window.openDeletePlayer = function() {
     const playerName = document.getElementById('deletePlayer').value;
@@ -799,14 +1242,14 @@
     if (!entry) return;
     pendingDelete = { type: 'player', playerId: entry[0], playerName };
     document.getElementById('modalTitle').textContent = 'Delete Player';
-    document.getElementById('modalDesc').innerHTML = `This will permanently delete <strong>${escHtml(playerName)}</strong> and all their projects and hours.`;
+    document.getElementById('modalDesc').innerHTML = `Permanently delete <strong>${escHtml(playerName)}</strong> and all their data?`;
     openModal();
   };
 
   window._removeProject = function(playerId, projId, projName, playerName) {
     pendingDelete = { type: 'project', playerId, projId, projName, playerName };
     document.getElementById('modalTitle').textContent = 'Delete Project';
-    document.getElementById('modalDesc').innerHTML = `This will permanently delete <strong>${escHtml(projName)}</strong> from ${escHtml(playerName)} and all its hours.`;
+    document.getElementById('modalDesc').innerHTML = `Permanently delete <strong>${escHtml(projName)}</strong> from ${escHtml(playerName)}?`;
     openModal();
   };
 
@@ -840,41 +1283,47 @@
         await remove(ref(db, `players/${pendingDelete.playerId}/projects/${pendingDelete.projId}`));
       }
       window.closeModal();
-    } catch(e) {
-      errEl.textContent = 'Error deleting. Check your connection.';
-    }
+    } catch(e) { errEl.textContent = 'Error deleting.'; }
     btn.disabled = false;
   };
 
-  // Close modal on backdrop click
   document.getElementById('modalBackdrop').addEventListener('click', e => {
     if (e.target === document.getElementById('modalBackdrop')) window.closeModal();
   });
-
-  // Enter key in password field
   document.getElementById('modalPassword').addEventListener('keydown', e => {
     if (e.key === 'Enter') window.confirmDelete();
     if (e.key === 'Escape') window.closeModal();
   });
 
   window.clearHistory = async function() {
-    if (!confirm('Clear all activity logs? (Hours are kept.)')) return;
+    if (!confirm('Clear all activity logs? (Hours and coins are kept.)')) return;
     await remove(ref(db, 'logs'));
   };
 
   window.resetWeek = async function() {
-    if (!confirm('Reset ALL hours for a new week?\n\nPlayers and projects are kept, but hours go back to zero.')) return;
+    if (!confirm('Apply Sunday multipliers and reset the week?\n\n🥇 1st place: ×1.25 coins\n🥈 2nd place: ×1.15 coins\n🥉 3rd place: ×1.10 coins\n\nHours reset to 0. Players, projects & coins kept.')) return;
+
+    const arr = Object.entries(players)
+      .map(([id, p]) => ({ id, ...p, total: totalHours(p) }))
+      .sort((a, b) => b.total - a.total);
+
+    const multipliers = [1.25, 1.15, 1.10];
     const updates = {};
-    Object.entries(players).forEach(([pid, player]) => {
-      Object.keys(player.projects || {}).forEach(projId => {
-        updates[`players/${pid}/projects/${projId}/hours`] = 0;
+
+    arr.forEach((p, i) => {
+      const mult = multipliers[i] || 1;
+      const newCoins = Math.floor((p.coins || 0) * mult);
+      updates[`players/${p.id}/coins`] = newCoins;
+      Object.keys(p.projects || {}).forEach(projId => {
+        updates[`players/${p.id}/projects/${projId}/hours`] = 0;
       });
     });
+
     await update(ref(db), updates);
     await remove(ref(db, 'logs'));
   };
 
-  // Enter key shortcuts
+  // Enter shortcuts
   document.getElementById('newName').addEventListener('keydown', e => { if (e.key === 'Enter') window.addPlayer(); });
   document.getElementById('projName').addEventListener('keydown', e => { if (e.key === 'Enter') window.addProject(); });
   ['logHours','logNote'].forEach(id => {
@@ -882,6 +1331,309 @@
   });
 
   renderWeek();
+  setInterval(renderWeek, 60000); // refresh countdown every minute
+
+  // ══════════════════════════════════════════
+  // ── CASINO / BLACKJACK ──
+  // ══════════════════════════════════════════
+
+  // Web Audio for sounds
+  let audioCtx = null;
+  function getAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function playTone(freq, type, duration, vol = 0.15) {
+    try {
+      const ctx = getAudio();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = type; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      o.start(); o.stop(ctx.currentTime + duration);
+    } catch(e) {}
+  }
+
+  function soundDeal()  { playTone(440, 'sine', 0.08, 0.12); setTimeout(() => playTone(550, 'sine', 0.08, 0.1), 80); }
+  function soundHit()   { playTone(380, 'sine', 0.07, 0.1); }
+  function soundWin()   {
+    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.2, 0.18), i * 80));
+  }
+  function soundLose()  { playTone(200, 'sawtooth', 0.4, 0.15); setTimeout(() => playTone(150, 'sawtooth', 0.4, 0.15), 150); }
+  function soundBJ()    {
+    [523,659,784,1047,1319].forEach((f,i) => setTimeout(() => playTone(f,'sine',0.25,0.2), i*60));
+  }
+  function soundChip()  { playTone(800, 'sine', 0.05, 0.1); }
+
+  // Deck
+  const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  const SUITS = ['♠','♥','♦','♣'];
+
+  function buildDeck() {
+    const d = [];
+    for (const s of SUITS) for (const r of RANKS) d.push({ r, s });
+    return d;
+  }
+
+  function shuffle(d) {
+    for (let i = d.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [d[i], d[j]] = [d[j], d[i]];
+    }
+    return d;
+  }
+
+  function cardValue(r) {
+    if (r === 'A') return 11;
+    if (['J','Q','K'].includes(r)) return 10;
+    return parseInt(r);
+  }
+
+  function handTotal(hand) {
+    let total = 0, aces = 0;
+    for (const c of hand) {
+      total += cardValue(c.r);
+      if (c.r === 'A') aces++;
+    }
+    while (total > 21 && aces > 0) { total -= 10; aces--; }
+    return total;
+  }
+
+  function isRed(s) { return s === '♥' || s === '♦'; }
+
+  // BJ state
+  let bjDeck = [], bjPlayer = [], bjDealer = [], bjBet = 0, bjPhase = 'bet'; // phases: bet, play, done
+
+  function renderCard(c, faceDown = false) {
+    const div = document.createElement('div');
+    div.className = 'card deal-anim' + (faceDown ? ' face-down' : (isRed(c.s) ? ' red' : ''));
+    if (!faceDown) {
+      const rank = document.createElement('div'); rank.className = 'rank'; rank.textContent = c.r;
+      const suit = document.createElement('div'); suit.className = 'suit'; suit.textContent = c.s;
+      div.appendChild(rank); div.appendChild(suit);
+    }
+    return div;
+  }
+
+  function renderBJTable() {
+    const dc = document.getElementById('dealerCards');
+    const pc = document.getElementById('playerCards');
+    dc.innerHTML = ''; pc.innerHTML = '';
+
+    bjDealer.forEach((c, i) => {
+      dc.appendChild(renderCard(c, bjPhase === 'play' && i === 1));
+    });
+    bjPlayer.forEach(c => pc.appendChild(renderCard(c)));
+
+    // Scores
+    const dScore = bjPhase === 'play'
+      ? handTotal([bjDealer[0]]).toString()
+      : handTotal(bjDealer).toString();
+    const pTotal = handTotal(bjPlayer);
+
+    document.getElementById('dealerScoreEl').innerHTML =
+      `<span class="score-badge${bjPhase !== 'play' && handTotal(bjDealer) > 21 ? ' bust' : ''}">${dScore}</span>`;
+    document.getElementById('playerScoreEl').innerHTML =
+      `<span class="score-badge${pTotal > 21 ? ' bust' : pTotal === 21 && bjPlayer.length === 2 ? ' bj' : ''}">${pTotal}</span>`;
+  }
+
+  function setBJButtons(phase) {
+    document.getElementById('btnDeal').disabled   = phase !== 'bet';
+    document.getElementById('btnHit').disabled    = phase !== 'play';
+    document.getElementById('btnStand').disabled  = phase !== 'play';
+    document.getElementById('btnDouble').disabled = phase !== 'play' || bjPlayer.length !== 2;
+  }
+
+  function showResult(text, type) {
+    const b = document.getElementById('resultBanner');
+    b.textContent = text;
+    b.className = `result-banner show ${type}`;
+    setTimeout(() => { b.classList.remove('show'); }, 2500);
+  }
+
+  // Casino drawer open/close
+  window.openCasino = function() {
+    document.getElementById('casinoDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '▶';
+    refreshCasinoWallet();
+  };
+
+  window.closeCasino = function() {
+    document.getElementById('casinoDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '◀';
+  };
+
+  window.onCasinoPlayerChange = function() {
+    refreshCasinoWallet();
+    // Reset table on player switch
+    bjDeck = []; bjPlayer = []; bjDealer = []; bjBet = 0; bjPhase = 'bet';
+    renderBJTable();
+    setBJButtons('bet');
+    updateBetDisplay();
+    document.getElementById('resultBanner').className = 'result-banner';
+  };
+
+  function refreshCasinoWallet() {
+    const name = document.getElementById('casinoPlayer').value;
+    const p = Object.values(players).find(p => p.name === name);
+    document.getElementById('walletDisplay').textContent =
+      p ? (p.coins || 0).toLocaleString() : '—';
+  }
+
+  function getCurrentCasinoPlayer() {
+    const name = document.getElementById('casinoPlayer').value;
+    const entry = Object.entries(players).find(([, p]) => p.name === name);
+    return entry ? { id: entry[0], ...entry[1] } : null;
+  }
+
+  // Bet
+  window.addBet = function(amount) {
+    if (bjPhase !== 'bet') return;
+    const p = getCurrentCasinoPlayer();
+    if (!p) { shakeWallet(); return; }
+    if (bjBet + amount > (p.coins || 0)) { shakeWallet(); return; }
+    bjBet += amount;
+    soundChip();
+    updateBetDisplay();
+  };
+
+  window.clearBet = function() {
+    if (bjPhase !== 'bet') return;
+    bjBet = 0;
+    updateBetDisplay();
+  };
+
+  function updateBetDisplay() {
+    document.getElementById('betDisplay').innerHTML = `${bjBet}<small>bet</small>`;
+  }
+
+  function shakeWallet() {
+    const w = document.getElementById('walletDisplay');
+    w.classList.remove('shake'); void w.offsetWidth; w.classList.add('shake');
+    playTone(150, 'sawtooth', 0.15, 0.1);
+  }
+
+  // Deal
+  window.bjDeal = async function() {
+    const p = getCurrentCasinoPlayer();
+    if (!p) { document.getElementById('resultBanner').textContent = 'Select a player first!'; document.getElementById('resultBanner').className = 'result-banner show lose'; return; }
+    if (bjBet < 1) { shakeWallet(); return; }
+    if (bjBet > (p.coins || 0)) { shakeWallet(); return; }
+
+    bjDeck = shuffle(buildDeck());
+    bjPlayer = [bjDeck.pop(), bjDeck.pop()];
+    bjDealer = [bjDeck.pop(), bjDeck.pop()];
+    bjPhase = 'play';
+
+    soundDeal();
+    renderBJTable();
+    setBJButtons('play');
+    document.getElementById('resultBanner').className = 'result-banner';
+
+    // Blackjack check
+    if (handTotal(bjPlayer) === 21) {
+      await bjResolve();
+    }
+  };
+
+  // Hit
+  window.bjHit = async function() {
+    bjPlayer.push(bjDeck.pop());
+    soundHit();
+    renderBJTable();
+    if (handTotal(bjPlayer) >= 21) await bjResolve();
+  };
+
+  // Stand
+  window.bjStand = async function() {
+    setBJButtons('done');
+    // Dealer draws to 17
+    while (handTotal(bjDealer) < 17) {
+      bjDealer.push(bjDeck.pop());
+      soundHit();
+    }
+    await bjResolve();
+  };
+
+  // Double down
+  window.bjDouble = async function() {
+    const p = getCurrentCasinoPlayer();
+    if (!p || bjBet * 2 > (p.coins || 0)) { shakeWallet(); return; }
+    bjBet *= 2;
+    updateBetDisplay();
+    bjPlayer.push(bjDeck.pop());
+    soundHit();
+    renderBJTable();
+    // Auto-stand after double
+    while (handTotal(bjDealer) < 17) bjDealer.push(bjDeck.pop());
+    await bjResolve();
+  };
+
+  async function bjResolve() {
+    bjPhase = 'done';
+    setBJButtons('done');
+    renderBJTable();
+
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+
+    const pt = handTotal(bjPlayer);
+    const dt = handTotal(bjDealer);
+    const isBJ = pt === 21 && bjPlayer.length === 2;
+    let delta = 0;
+    let resultText = '';
+    let resultType = '';
+
+    if (pt > 21) {
+      delta = -bjBet;
+      resultText = '💀 Bust — You Lose';
+      resultType = 'lose';
+      soundLose();
+    } else if (isBJ && handTotal(bjDealer) !== 21) {
+      delta = Math.floor(bjBet * 1.5);
+      resultText = '🃏 Blackjack! +' + delta + ' 🪙';
+      resultType = 'bj';
+      soundBJ();
+    } else if (dt > 21) {
+      delta = bjBet;
+      resultText = '🎉 Dealer Busts! +' + delta + ' 🪙';
+      resultType = 'win';
+      soundWin();
+    } else if (pt > dt) {
+      delta = bjBet;
+      resultText = '✅ You Win! +' + delta + ' 🪙';
+      resultType = 'win';
+      soundWin();
+    } else if (pt < dt) {
+      delta = -bjBet;
+      resultText = '❌ Dealer Wins';
+      resultType = 'lose';
+      soundLose();
+    } else {
+      delta = 0;
+      resultText = '🤝 Push — Bet Returned';
+      resultType = 'push';
+      playTone(440, 'sine', 0.2);
+    }
+
+    showResult(resultText, resultType);
+
+    const newCoins = Math.max(0, (p.coins || 0) + delta);
+    await update(ref(db, `players/${p.id}`), { coins: newCoins });
+
+    if (delta > 0) setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 300);
+
+    // Reset bet for next round
+    bjBet = 0;
+    updateBetDisplay();
+    setTimeout(() => setBJButtons('bet'), 500);
+  }
+
 </script>
 </body>
 </html>
