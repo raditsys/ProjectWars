@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Project Wars 🏆</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
 <style>
   :root {
     --bg: #0a0a0a;
@@ -1661,318 +1662,277 @@
 </style>
 </head>
 <body>
-
 <!-- AMBIENT BACKGROUND BLOBS -->
 <div class="login-screen-bg" id="loginBg"></div>
 <div class="bg-blobs"></div>
 <div class="bg-blobs-mid"></div>
-
 <!-- GRASS LAYER -->
 <div id="grassLayer"></div>
-
 <!-- FROG PET -->
 <div id="frogPet" onclick="frogClick()" title="Click me!">
-  <svg class="frog-svg" width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Body -->
-    <ellipse cx="26" cy="34" rx="18" ry="14" fill="#3a9e3a"/>
-    <ellipse cx="26" cy="32" rx="15" ry="12" fill="#4ade80"/>
-    <!-- Belly -->
-    <ellipse cx="26" cy="36" rx="9" ry="7" fill="#86efac" opacity="0.6"/>
-    <!-- Eyes -->
-    <circle cx="17" cy="22" r="7" fill="#3a9e3a"/>
-    <circle cx="35" cy="22" r="7" fill="#3a9e3a"/>
-    <circle cx="17" cy="22" r="5" fill="#f0f0f0"/>
-    <circle cx="35" cy="22" r="5" fill="#f0f0f0"/>
-    <circle cx="18" cy="22" r="2.5" fill="#111"/>
-    <circle cx="36" cy="22" r="2.5" fill="#111"/>
-    <!-- Nostrils -->
-    <circle cx="23" cy="28" r="1" fill="#2d7a2d"/>
-    <circle cx="29" cy="28" r="1" fill="#2d7a2d"/>
-    <!-- Mouth -->
-    <path d="M20 33 Q26 37 32 33" stroke="#2d7a2d" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    <!-- Legs -->
-    <ellipse cx="10" cy="44" rx="7" ry="4" fill="#3a9e3a" transform="rotate(-15 10 44)"/>
-    <ellipse cx="42" cy="44" rx="7" ry="4" fill="#3a9e3a" transform="rotate(15 42 44)"/>
-  </svg>
-  <div class="frog-hat" id="frogHatEl"></div>
+<svg class="frog-svg" fill="none" height="52" viewbox="0 0 52 52" width="52" xmlns="http://www.w3.org/2000/svg">
+<!-- Body -->
+<ellipse cx="26" cy="34" fill="#3a9e3a" rx="18" ry="14"></ellipse>
+<ellipse cx="26" cy="32" fill="#4ade80" rx="15" ry="12"></ellipse>
+<!-- Belly -->
+<ellipse cx="26" cy="36" fill="#86efac" opacity="0.6" rx="9" ry="7"></ellipse>
+<!-- Eyes -->
+<circle cx="17" cy="22" fill="#3a9e3a" r="7"></circle>
+<circle cx="35" cy="22" fill="#3a9e3a" r="7"></circle>
+<circle cx="17" cy="22" fill="#f0f0f0" r="5"></circle>
+<circle cx="35" cy="22" fill="#f0f0f0" r="5"></circle>
+<circle cx="18" cy="22" fill="#111" r="2.5"></circle>
+<circle cx="36" cy="22" fill="#111" r="2.5"></circle>
+<!-- Nostrils -->
+<circle cx="23" cy="28" fill="#2d7a2d" r="1"></circle>
+<circle cx="29" cy="28" fill="#2d7a2d" r="1"></circle>
+<!-- Mouth -->
+<path d="M20 33 Q26 37 32 33" fill="none" stroke="#2d7a2d" stroke-linecap="round" stroke-width="1.5"></path>
+<!-- Legs -->
+<ellipse cx="10" cy="44" fill="#3a9e3a" rx="7" ry="4" transform="rotate(-15 10 44)"></ellipse>
+<ellipse cx="42" cy="44" fill="#3a9e3a" rx="7" ry="4" transform="rotate(15 42 44)"></ellipse>
+</svg>
+<div class="frog-hat" id="frogHatEl"></div>
 </div>
-
-
 <div class="login-screen" id="loginScreen">
-  <div class="login-box">
-    <div class="login-title" id="wavyLoginTitle" aria-label="Project Wars"></div>
-    <div class="login-subtitle" id="wavyLoginSubtitle" aria-label="Who ships the most this week?"></div>
-
-    <div class="login-tabs">
-      <button class="login-tab active" id="tabLogin" onclick="switchLoginTab('login')">Login</button>
-      <button class="login-tab" id="tabRegister" onclick="switchLoginTab('register')">Register</button>
-    </div>
-
-    <div class="login-form" id="loginForm">
-      <input class="login-input" type="text" id="loginName" placeholder="Username" maxlength="20" name="loginName" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
-      <input class="login-input" type="password" id="loginPass" placeholder="Password" name="loginPass" autocomplete="current-password">
-      <button class="login-btn" id="loginBtn" onclick="doLogin()">Login</button>
-      <div class="login-msg" id="loginMsg"></div>
-    </div>
-
-    <div class="login-form" id="registerForm" style="display:none;">
-      <input class="login-input" type="text" id="regName" placeholder="Choose a username" maxlength="20" name="regName" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
-      <input class="login-input" type="password" id="regPass" placeholder="Choose a password" name="regPass" autocomplete="new-password">
-      <input class="login-input" type="password" id="regPass2" placeholder="Confirm password" name="regPass2" autocomplete="new-password">
-      <button class="login-btn" id="registerBtn" onclick="doRegister()">Create Account</button>
-      <div class="login-msg" id="registerMsg"></div>
-    </div>
-  </div>
+<div class="login-box">
+<div aria-label="Project Wars" class="login-title" id="wavyLoginTitle"></div>
+<div aria-label="Who ships the most this week?" class="login-subtitle" id="wavyLoginSubtitle"></div>
+<div class="login-tabs">
+<button class="login-tab active" id="tabLogin" onclick="switchLoginTab('login')">Login</button>
+<button class="login-tab" id="tabRegister" onclick="switchLoginTab('register')">Register</button>
 </div>
-
+<form action="#" autocomplete="on" class="login-form" id="loginForm" method="post" onsubmit="event.preventDefault(); doLogin();">
+<input autocapitalize="none" autocomplete="username" autocorrect="off" class="login-input" id="loginName" maxlength="20" name="username" placeholder="Username" spellcheck="false" type="text"/>
+<input autocomplete="current-password" class="login-input" id="loginPass" name="password" placeholder="Password" type="password"/>
+<button class="login-btn" id="loginBtn" type="submit">Login</button>
+<div class="login-msg" id="loginMsg"></div>
+</form>
+<form action="#" autocomplete="on" class="login-form" id="registerForm" method="post" onsubmit="event.preventDefault(); doRegister();" style="display:none;">
+<input autocapitalize="none" autocomplete="username" autocorrect="off" class="login-input" id="regName" maxlength="20" name="new_username" placeholder="Choose a username" spellcheck="false" type="text"/>
+<input autocomplete="new-password" class="login-input" id="regPass" name="new_password" placeholder="Choose a password" type="password"/>
+<input autocomplete="new-password" class="login-input" id="regPass2" name="new_password_confirm" placeholder="Confirm password" type="password"/>
+<button class="login-btn" id="registerBtn" type="submit">Create Account</button>
+<div class="login-msg" id="registerMsg"></div>
+</form>
+</div>
+</div>
 <!-- USER BADGE -->
 <div class="user-badge" id="userBadge" style="display:none;">
-  <span>👤</span>
-  <span class="user-badge-name" id="userBadgeName"></span>
-  <button class="user-badge-logout" onclick="doLogout()">logout</button>
+<span>👤</span>
+<span class="user-badge-name" id="userBadgeName"></span>
+<button class="user-badge-logout" onclick="doLogout()">logout</button>
 </div>
-
 <!-- GAMBLE TAB -->
 <button class="gamble-tab" id="gambleTab" onclick="openCasino()">
-  <span class="tab-arrow">◀</span>
+<span class="tab-arrow">◀</span>
   GAMBLE
 </button>
-
 <!-- CASINO DRAWER OVERLAY -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop();"></div>
-
 <!-- CASINO DRAWER -->
 <div class="casino-drawer" id="casinoDrawer">
-  <div class="drawer-header">
-    <h2>🃏 Casino</h2>
-    <button class="drawer-close" onclick="closeCasino()">✕ Close</button>
-  </div>
-  <div class="drawer-body">
-
-    <!-- Who's playing -->
-    <div class="casino-player-pick">
-      <label>Playing as</label>
-      <div id="casinoPlayerDisplay" style="color:var(--text);font-size:0.85rem;padding:0.4rem 0;">— log in first —</div>
-    </div>
-
-    <!-- Wallet -->
-    <div class="casino-wallet">
-      <div class="wallet-amount" id="walletDisplay">—</div>
-      <div class="wallet-label">🪙 coins</div>
-    </div>
-
-    <!-- Felt Table -->
-    <div class="felt-table">
-      <div class="table-section-label">Dealer <span id="dealerScoreEl"></span></div>
-      <div class="cards-row" id="dealerCards"></div>
-
-      <div style="margin: 1rem 0; border-top: 1px solid #2a5a2a;"></div>
-
-      <div class="table-section-label">You <span id="playerScoreEl"></span></div>
-      <div class="cards-row" id="playerCards"></div>
-
-      <div style="margin-top:1rem;">
-        <div class="result-banner" id="resultBanner"></div>
-      </div>
-    </div>
-
-    <!-- Bet chips -->
-    <div>
-      <div class="table-section-label" style="margin-bottom:0.5rem;">Place your bet</div>
-      <div class="bet-section">
-        <button class="chip chip-1"   onclick="addBet(1)"   id="chip1">1</button>
-        <button class="chip chip-5"   onclick="addBet(5)"   id="chip5">5</button>
-        <button class="chip chip-10"  onclick="addBet(10)"  id="chip10">10</button>
-        <button class="chip chip-25"  onclick="addBet(25)"  id="chip25">25</button>
-        <button class="chip chip-50"  onclick="addBet(50)"  id="chip50">50</button>
-        <button class="chip chip-100" onclick="addBet(100)" id="chip100">100</button>
-        <div class="bet-display" id="betDisplay">0<small>bet</small></div>
-        <button class="clear-bet-btn" onclick="clearBet()">Clear</button>
-      </div>
-    </div>
-
-    <!-- Action buttons -->
-    <div class="bj-actions">
-      <button class="bj-btn deal"  id="btnDeal"  onclick="bjDeal()">Deal</button>
-      <button class="bj-btn hit"   id="btnHit"   onclick="bjHit()"  disabled>Hit</button>
-      <button class="bj-btn stand" id="btnStand" onclick="bjStand()" disabled>Stand</button>
-      <button class="bj-btn dbl"   id="btnDouble" onclick="bjDouble()" disabled>Double</button>
-    </div>
-
-  </div>
+<div class="drawer-header">
+<h2>🃏 Casino</h2>
+<button class="drawer-close" onclick="closeCasino()">✕ Close</button>
 </div>
-
+<div class="drawer-body">
+<!-- Who's playing -->
+<div class="casino-player-pick">
+<label>Playing as</label>
+<div id="casinoPlayerDisplay" style="color:var(--text);font-size:0.85rem;padding:0.4rem 0;">— log in first —</div>
+</div>
+<!-- Wallet -->
+<div class="casino-wallet">
+<div class="wallet-amount" id="walletDisplay">—</div>
+<div class="wallet-label">🪙 coins</div>
+</div>
+<!-- Felt Table -->
+<div class="felt-table">
+<div class="table-section-label">Dealer <span id="dealerScoreEl"></span></div>
+<div class="cards-row" id="dealerCards"></div>
+<div style="margin: 1rem 0; border-top: 1px solid #2a5a2a;"></div>
+<div class="table-section-label">You <span id="playerScoreEl"></span></div>
+<div class="cards-row" id="playerCards"></div>
+<div style="margin-top:1rem;">
+<div class="result-banner" id="resultBanner"></div>
+</div>
+</div>
+<!-- Bet chips -->
+<div>
+<div class="table-section-label" style="margin-bottom:0.5rem;">Place your bet</div>
+<div class="bet-section">
+<button class="chip chip-1" id="chip1" onclick="addBet(1)">1</button>
+<button class="chip chip-5" id="chip5" onclick="addBet(5)">5</button>
+<button class="chip chip-10" id="chip10" onclick="addBet(10)">10</button>
+<button class="chip chip-25" id="chip25" onclick="addBet(25)">25</button>
+<button class="chip chip-50" id="chip50" onclick="addBet(50)">50</button>
+<button class="chip chip-100" id="chip100" onclick="addBet(100)">100</button>
+<div class="bet-display" id="betDisplay">0<small>bet</small></div>
+<button class="clear-bet-btn" onclick="clearBet()">Clear</button>
+</div>
+</div>
+<!-- Action buttons -->
+<div class="bj-actions">
+<button class="bj-btn deal" id="btnDeal" onclick="bjDeal()">Deal</button>
+<button class="bj-btn hit" disabled="" id="btnHit" onclick="bjHit()">Hit</button>
+<button class="bj-btn stand" disabled="" id="btnStand" onclick="bjStand()">Stand</button>
+<button class="bj-btn dbl" disabled="" id="btnDouble" onclick="bjDouble()">Double</button>
+</div>
+</div>
+</div>
 <!-- SHOP TAB -->
 <button class="shop-tab" id="shopTab" onclick="openShop()">
-  <span id="shopTabArrow">◀</span>
+<span id="shopTabArrow">◀</span>
   SHOP
 </button>
-
 <!-- SHOP DRAWER -->
 <div class="shop-drawer" id="shopDrawer">
-  <div class="shop-header">
-    <h2>✨ Effect Shop</h2>
-    <button class="shop-close" onclick="closeShop()">✕ Close</button>
-  </div>
-  <div class="shop-body">
-
-    <div class="shop-wallet-box" style="text-align:center;padding:0.85rem;background:#0a0118;border:1px solid #3d00b3;">
-      <div class="shop-wallet-coins" id="shopWalletDisplay">—</div>
-      <div class="shop-wallet-lbl">🪙 coins</div>
-    </div>
-
-    <div>
-      <div class="shop-section-title">Bar Effects</div>
-      <div class="shop-grid" id="shopGrid">
-        <div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Log in to shop</div>
-      </div>
-    </div>
-
-  </div>
+<div class="shop-header">
+<h2>✨ Effect Shop</h2>
+<button class="shop-close" onclick="closeShop()">✕ Close</button>
 </div>
-
+<div class="shop-body">
+<div class="shop-wallet-box" style="text-align:center;padding:0.85rem;background:#0a0118;border:1px solid #3d00b3;">
+<div class="shop-wallet-coins" id="shopWalletDisplay">—</div>
+<div class="shop-wallet-lbl">🪙 coins</div>
+</div>
+<div>
+<div class="shop-section-title">Bar Effects</div>
+<div class="shop-grid" id="shopGrid">
+<div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Log in to shop</div>
+</div>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ MAIN PAGE ═══════════════════ -->
-
 <header>
-  <h1 id="wavyTitle" aria-label="Project Wars"></h1>
-  <div class="subtitle" id="wavySubtitle" aria-label="Who ships the most this week?"></div>
-  <div class="week-display" id="weekDisplay"></div><br>
-  <div class="sync-status" id="syncStatus">⬤ connecting...</div>
+<h1 aria-label="Project Wars" id="wavyTitle"></h1>
+<div aria-label="Who ships the most this week?" class="subtitle" id="wavySubtitle"></div>
+<div class="week-display" id="weekDisplay"></div><br/>
+<div class="sync-status" id="syncStatus">⬤ connecting...</div>
 </header>
-
 <div class="leaderboard">
-  <div class="leaderboard-title">
-    <span>🏆 Leaderboard</span>
-    <span class="multiplier-note" id="multiplierNote"></span>
-  </div>
-  <div id="leaderboard"><div class="empty-state">Connecting to database...</div></div>
+<div class="leaderboard-title">
+<span>🏆 Leaderboard</span>
+<span class="multiplier-note" id="multiplierNote"></span>
 </div>
-
+<div id="leaderboard"><div class="empty-state">Connecting to database...</div></div>
+</div>
 <div class="panels">
-
-  <!-- Add Project (for self) -->
-  <div class="panel">
-    <h2>Add Project</h2>
-    <div class="field">
-      <label>Project name</label>
-      <input type="text" id="projName" placeholder="e.g. iOS app" maxlength="30">
-    </div>
-    <button class="btn tertiary" id="addProjBtn" onclick="addProject()">Add Project</button>
-    <div class="msg" id="projMsg"></div>
-  </div>
-
-  <!-- Log Hours -->
-  <div class="panel">
-    <h2>Log Hours</h2>
-    <div class="field">
-      <label>Project</label>
-      <select id="logProject">
-        <option value="">— select project —</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Hours worked</label>
-      <input type="number" id="logHours" placeholder="e.g. 2.5" min="0.25" max="24" step="0.25">
-    </div>
-    <div class="field">
-      <label>Note (optional)</label>
-      <input type="text" id="logNote" placeholder="what did you work on?" maxlength="60">
-    </div>
-    <button class="btn secondary" id="logBtn" onclick="logHours()">+ Log Hours</button>
-    <div class="msg" id="logMsg"></div>
-  </div>
-
-  <!-- Delete Project -->
-  <div class="panel">
-    <h2>Delete</h2>
-    <div class="field">
-      <label>Delete one of your projects</label>
-      <select id="deleteProjectSel">
-        <option value="">— select —</option>
-      </select>
-    </div>
-    <button class="btn" style="background:none;color:var(--red);border:1px solid var(--red);margin-bottom:0.5rem;" onclick="openDeleteProjectSelf()">Delete Project</button>
-    <div style="margin-top:1rem; border-top: 1px solid var(--border); padding-top:1rem;">
-      <div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-bottom:0.5rem;">ADMIN — Delete any player</div>
-      <select id="deletePlayer" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:0.8rem;padding:0.5rem;margin-bottom:0.5rem;-webkit-appearance:none;">
-        <option value="">— select —</option>
-      </select>
-      <button class="btn" style="background:none;color:var(--red);border:1px solid var(--red);" onclick="openDeletePlayer()">Delete Player</button>
-    </div>
-    <div class="msg" id="deleteMsg"></div>
-  </div>
-
-  <!-- Quick stats panel -->
-  <div class="panel">
-    <h2>This Week</h2>
-    <div id="selfStats" style="color:var(--muted);font-size:0.75rem;line-height:2;">Log in to see your stats</div>
-  </div>
-
+<!-- Add Project (for self) -->
+<div class="panel">
+<h2>Add Project</h2>
+<div class="field">
+<label>Project name</label>
+<input id="projName" maxlength="30" placeholder="e.g. iOS app" type="text"/>
 </div>
-
+<button class="btn tertiary" id="addProjBtn" onclick="addProject()">Add Project</button>
+<div class="msg" id="projMsg"></div>
+</div>
+<!-- Log Hours -->
+<div class="panel">
+<h2>Log Hours</h2>
+<div class="field">
+<label>Project</label>
+<select id="logProject">
+<option value="">— select project —</option>
+</select>
+</div>
+<div class="field">
+<label>Hours worked</label>
+<input id="logHours" max="24" min="0.25" placeholder="e.g. 2.5" step="0.25" type="number"/>
+</div>
+<div class="field">
+<label>Note (optional)</label>
+<input id="logNote" maxlength="60" placeholder="what did you work on?" type="text"/>
+</div>
+<button class="btn secondary" id="logBtn" onclick="logHours()">+ Log Hours</button>
+<div class="msg" id="logMsg"></div>
+</div>
+<!-- Delete Project -->
+<div class="panel">
+<h2>Delete</h2>
+<div class="field">
+<label>Delete one of your projects</label>
+<select id="deleteProjectSel">
+<option value="">— select —</option>
+</select>
+</div>
+<button class="btn" onclick="openDeleteProjectSelf()" style="background:none;color:var(--red);border:1px solid var(--red);margin-bottom:0.5rem;">Delete Project</button>
+<div style="margin-top:1rem; border-top: 1px solid var(--border); padding-top:1rem;">
+<div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-bottom:0.5rem;">ADMIN — Delete any player</div>
+<select id="deletePlayer" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:0.8rem;padding:0.5rem;margin-bottom:0.5rem;-webkit-appearance:none;">
+<option value="">— select —</option>
+</select>
+<button class="btn" onclick="openDeletePlayer()" style="background:none;color:var(--red);border:1px solid var(--red);">Delete Player</button>
+</div>
+<div class="msg" id="deleteMsg"></div>
+</div>
+<!-- Quick stats panel -->
+<div class="panel">
+<h2>This Week</h2>
+<div id="selfStats" style="color:var(--muted);font-size:0.75rem;line-height:2;">Log in to see your stats</div>
+</div>
+</div>
 <div class="history-section">
-  <div class="history-title">
-    <span>Recent Activity</span>
-    <button class="clear-btn" onclick="clearHistory()">Clear log</button>
-  </div>
-  <div id="history"></div>
+<div class="history-title">
+<span>Recent Activity</span>
+<button class="clear-btn" onclick="clearHistory()">Clear log</button>
 </div>
-
+<div id="history"></div>
+</div>
 <div class="reset-section" style="margin-top:3rem;">
-  <button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
-  <div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
+<button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
+<div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
     Resets hours &amp; logs. Multipliers only apply if run on Sunday EST.
   </div>
-  <div style="margin-top:1.5rem;">
-    <button class="reset-btn" style="border-color:#f87171;color:#f87171;" onclick="openNukeModal()">☢ Clear All Data</button>
-    <div style="color:var(--muted);font-size:0.65rem;margin-top:0.5rem;letter-spacing:1px;">Wipes everything — players, hours, coins, effects, logs</div>
-  </div>
+<div style="margin-top:1.5rem;">
+<button class="reset-btn" onclick="openNukeModal()" style="border-color:#f87171;color:#f87171;">☢ Clear All Data</button>
+<div style="color:var(--muted);font-size:0.65rem;margin-top:0.5rem;letter-spacing:1px;">Wipes everything — players, hours, coins, effects, logs</div>
 </div>
-
+</div>
 <!-- Delete Modal -->
 <div class="modal-backdrop" id="modalBackdrop">
-  <div class="modal">
-    <h3 id="modalTitle">Confirm Delete</h3>
-    <p id="modalDesc">Enter the admin password to continue.</p>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="modalPassword" placeholder="••••••" autocomplete="off">
-    </div>
-    <div class="modal-err" id="modalErr"></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-danger" id="modalConfirmBtn" onclick="confirmDelete()">Delete</button>
-    </div>
-  </div>
+<div class="modal">
+<h3 id="modalTitle">Confirm Delete</h3>
+<p id="modalDesc">Enter the admin password to continue.</p>
+<div class="field">
+<label>Password</label>
+<input autocomplete="off" id="modalPassword" placeholder="••••••" type="password"/>
 </div>
-
+<div class="modal-err" id="modalErr"></div>
+<div class="modal-btns">
+<button class="btn-cancel" onclick="closeModal()">Cancel</button>
+<button class="btn-danger" id="modalConfirmBtn" onclick="confirmDelete()">Delete</button>
+</div>
+</div>
+</div>
 <!-- Nuke Modal -->
 <div class="modal-backdrop" id="nukeBackdrop">
-  <div class="modal">
-    <h3 style="color:var(--red);">☢ Clear All Data</h3>
-    <p>This will <strong>permanently delete everything</strong> — all players, hours, coins, shop effects, and logs. There is no undo.</p>
-    <div class="field">
-      <label>Admin password</label>
-      <input type="password" id="nukePassword" placeholder="••••••" autocomplete="off">
-    </div>
-    <div class="modal-err" id="nukeErr"></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeNukeModal()">Cancel</button>
-      <button class="btn-danger" id="nukeConfirmBtn" onclick="confirmNuke()">Nuke It</button>
-    </div>
-  </div>
+<div class="modal">
+<h3 style="color:var(--red);">☢ Clear All Data</h3>
+<p>This will <strong>permanently delete everything</strong> — all players, hours, coins, shop effects, and logs. There is no undo.</p>
+<div class="field">
+<label>Admin password</label>
+<input autocomplete="off" id="nukePassword" placeholder="••••••" type="password"/>
 </div>
-
+<div class="modal-err" id="nukeErr"></div>
+<div class="modal-btns">
+<button class="btn-cancel" onclick="closeNukeModal()">Cancel</button>
+<button class="btn-danger" id="nukeConfirmBtn" onclick="confirmNuke()">Nuke It</button>
+</div>
+</div>
+</div>
 <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
 <!-- Music Player -->
 <div class="music-player" id="musicPlayer">
-  <button class="music-icon-btn" id="musicBtn" onclick="toggleMusic()" title="Toggle music">🎵</button>
-  <div class="music-slider-wrap">
-    <span class="music-label">vol</span>
-    <input type="range" class="music-vol-slider" id="volSlider" min="0" max="1" step="0.01" value="0.18" oninput="setVolume(this.value)">
-  </div>
+<button class="music-icon-btn" id="musicBtn" onclick="toggleMusic()" title="Toggle music">🎵</button>
+<div class="music-slider-wrap">
+<span class="music-label">vol</span>
+<input class="music-vol-slider" id="volSlider" max="1" min="0" oninput="setVolume(this.value)" step="0.01" type="range" value="0.18"/>
 </div>
-
+</div>
 <script>
   (function() {
     const audio = new Audio("ShopMusic.mp3");
@@ -2018,7 +1978,6 @@
     };
   })();
 </script>
-
 <script>
   // ── Wavy Text ──
   function makeWavy(el, text, baseDelay, stagger) {
@@ -2040,7 +1999,6 @@
   makeWavy(document.getElementById('wavyLoginTitle'),   'Project Wars',                 0,    0.08);
   makeWavy(document.getElementById('wavyLoginSubtitle'),'Who ships the most this week?', 0.3, 0.04);
 </script>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -3218,7 +3176,6 @@
   }
 
 </script>
-
 <script>
 // ══════════════════ GRASS SYSTEM ══════════════════
 (function() {
@@ -3469,7 +3426,6 @@ window.__awardGrassCoin = function() {
   // fallback: no-op if not logged in
 };
 </script>
-
 <script type="module">
 // Extend the Firebase module with grass coin award + hat shop
 import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
