@@ -1989,7 +1989,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAtMH_AvVGskpK2TxMlXjf0IXRb9HT-q_Y",
@@ -2010,7 +2010,10 @@
   // ── State ──
   let players = {};
   let logs = {};
-  let currentUser = null; // { id, name, ...playerData }
+  let currentUser = null;
+  let adminPassword = null;
+
+  get(ref(db, 'config/adminPassword')).then(snap => { adminPassword = snap.val(); });
 
   const syncEl = document.getElementById('syncStatus');
 
@@ -2446,7 +2449,7 @@
   window.confirmDelete = async function() {
     const pw = document.getElementById('modalPassword').value;
     const errEl = document.getElementById('modalErr');
-    if (pw !== 'ass') {
+    if (!adminPassword || pw !== adminPassword) {
       errEl.textContent = 'Wrong password.';
       document.getElementById('modalPassword').value = '';
       document.getElementById('modalPassword').focus();
@@ -2648,7 +2651,7 @@
   window.confirmNuke = async function() {
     const pw = document.getElementById('nukePassword').value;
     const errEl = document.getElementById('nukeErr');
-    if (pw !== 'qwertys1') {
+    if (!adminPassword || pw !== adminPassword) {
       errEl.textContent = 'Wrong password.';
       document.getElementById('nukePassword').value = '';
       document.getElementById('nukePassword').focus();
