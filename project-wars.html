@@ -713,6 +713,139 @@
   }
   .shake { animation: shake 0.4s ease; }
 
+  /* ── LOGIN SCREEN ── */
+  .login-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0;
+  }
+  .login-screen.hidden { display: none; }
+
+  .login-box {
+    width: 100%;
+    max-width: 380px;
+    padding: 0 1.5rem;
+  }
+
+  .login-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 12vw, 5rem);
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--gold), #ff8c42);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .login-subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+  }
+
+  .login-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .login-tab {
+    padding: 0.6rem;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .login-tab.active { background: var(--surface); color: var(--text); }
+
+  .login-form { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .login-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .login-input:focus { border-color: var(--gold); }
+  .login-input::placeholder { color: var(--muted); }
+
+  .login-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    margin-top: 0.25rem;
+  }
+  .login-btn:hover { opacity: 0.85; }
+  .login-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .login-msg {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-align: center;
+    min-height: 1rem;
+    margin-top: 0.25rem;
+  }
+  .login-msg.err { color: var(--red); }
+  .login-msg.ok  { color: var(--green); }
+
+  /* ── User badge (top right when logged in) ── */
+  .user-badge {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.75rem;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+  }
+  .user-badge-name { color: var(--gold); font-weight: 500; }
+  .user-badge-logout {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    padding: 0;
+    transition: color 0.15s;
+  }
+  .user-badge-logout:hover { color: var(--red); }
+
   /* ══ SHOP EFFECT KEYFRAMES ══ */
 
   @keyframes lava {
@@ -1209,6 +1342,41 @@
 </head>
 <body>
 
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-title">Project Wars</div>
+    <div class="login-subtitle">Who ships the most this week?</div>
+
+    <div class="login-tabs">
+      <button class="login-tab active" id="tabLogin" onclick="switchLoginTab('login')">Login</button>
+      <button class="login-tab" id="tabRegister" onclick="switchLoginTab('register')">Register</button>
+    </div>
+
+    <div class="login-form" id="loginForm">
+      <input class="login-input" type="text" id="loginName" placeholder="Username" maxlength="20" autocomplete="off">
+      <input class="login-input" type="password" id="loginPass" placeholder="Password" autocomplete="off">
+      <button class="login-btn" id="loginBtn" onclick="doLogin()">Login</button>
+      <div class="login-msg" id="loginMsg"></div>
+    </div>
+
+    <div class="login-form" id="registerForm" style="display:none;">
+      <input class="login-input" type="text" id="regName" placeholder="Choose a username" maxlength="20" autocomplete="off">
+      <input class="login-input" type="password" id="regPass" placeholder="Choose a password" autocomplete="off">
+      <input class="login-input" type="password" id="regPass2" placeholder="Confirm password" autocomplete="off">
+      <button class="login-btn" id="registerBtn" onclick="doRegister()">Create Account</button>
+      <div class="login-msg" id="registerMsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- USER BADGE -->
+<div class="user-badge" id="userBadge" style="display:none;">
+  <span>👤</span>
+  <span class="user-badge-name" id="userBadgeName"></span>
+  <button class="user-badge-logout" onclick="doLogout()">logout</button>
+</div>
+
 <!-- GAMBLE TAB -->
 <button class="gamble-tab" id="gambleTab" onclick="openCasino()">
   <span class="tab-arrow">◀</span>
@@ -1226,12 +1394,10 @@
   </div>
   <div class="drawer-body">
 
-    <!-- Pick who's playing -->
+    <!-- Who's playing -->
     <div class="casino-player-pick">
       <label>Playing as</label>
-      <select id="casinoPlayer" onchange="onCasinoPlayerChange()">
-        <option value="">— select your name —</option>
-      </select>
+      <div id="casinoPlayerDisplay" style="color:var(--text);font-size:0.85rem;padding:0.4rem 0;">— log in first —</div>
     </div>
 
     <!-- Wallet -->
@@ -1295,23 +1461,15 @@
   </div>
   <div class="shop-body">
 
-    <div class="shop-player-row">
-      <div class="shop-field">
-        <label>Shopping as</label>
-        <select id="shopPlayer" onchange="renderShopItems()">
-          <option value="">— select —</option>
-        </select>
-      </div>
-      <div class="shop-wallet-box">
-        <div class="shop-wallet-coins" id="shopWalletDisplay">—</div>
-        <div class="shop-wallet-lbl">🪙 coins</div>
-      </div>
+    <div class="shop-wallet-box" style="text-align:center;padding:0.85rem;background:#0a0118;border:1px solid #3d00b3;">
+      <div class="shop-wallet-coins" id="shopWalletDisplay">—</div>
+      <div class="shop-wallet-lbl">🪙 coins</div>
     </div>
 
     <div>
       <div class="shop-section-title">Bar Effects</div>
       <div class="shop-grid" id="shopGrid">
-        <div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Select your name above to shop</div>
+        <div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Log in to shop</div>
       </div>
     </div>
 
@@ -1337,26 +1495,9 @@
 
 <div class="panels">
 
-  <!-- Add Player -->
-  <div class="panel">
-    <h2>Add Player</h2>
-    <div class="field">
-      <label>Name</label>
-      <input type="text" id="newName" placeholder="e.g. Alex" maxlength="20">
-    </div>
-    <button class="btn" id="addBtn" onclick="addPlayer()">Add Player</button>
-    <div class="msg" id="addMsg"></div>
-  </div>
-
-  <!-- Add Project -->
+  <!-- Add Project (for self) -->
   <div class="panel">
     <h2>Add Project</h2>
-    <div class="field">
-      <label>Player</label>
-      <select id="projPlayer">
-        <option value="">— select —</option>
-      </select>
-    </div>
     <div class="field">
       <label>Project name</label>
       <input type="text" id="projName" placeholder="e.g. iOS app" maxlength="30">
@@ -1369,15 +1510,9 @@
   <div class="panel">
     <h2>Log Hours</h2>
     <div class="field">
-      <label>Player</label>
-      <select id="logPlayer" onchange="updateProjectSelect()">
-        <option value="">— select —</option>
-      </select>
-    </div>
-    <div class="field">
       <label>Project</label>
       <select id="logProject">
-        <option value="">— select player first —</option>
+        <option value="">— select project —</option>
       </select>
     </div>
     <div class="field">
@@ -1392,17 +1527,30 @@
     <div class="msg" id="logMsg"></div>
   </div>
 
-  <!-- Delete -->
+  <!-- Delete Project -->
   <div class="panel">
     <h2>Delete</h2>
     <div class="field">
-      <label>Delete Player</label>
-      <select id="deletePlayer">
+      <label>Delete one of your projects</label>
+      <select id="deleteProjectSel">
         <option value="">— select —</option>
       </select>
     </div>
-    <button class="btn" style="background:none;color:var(--red);border:1px solid var(--red);margin-bottom:0.5rem;" onclick="openDeletePlayer()">Delete Player</button>
+    <button class="btn" style="background:none;color:var(--red);border:1px solid var(--red);margin-bottom:0.5rem;" onclick="openDeleteProjectSelf()">Delete Project</button>
+    <div style="margin-top:1rem; border-top: 1px solid var(--border); padding-top:1rem;">
+      <div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-bottom:0.5rem;">ADMIN — Delete any player</div>
+      <select id="deletePlayer" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:0.8rem;padding:0.5rem;margin-bottom:0.5rem;-webkit-appearance:none;">
+        <option value="">— select —</option>
+      </select>
+      <button class="btn" style="background:none;color:var(--red);border:1px solid var(--red);" onclick="openDeletePlayer()">Delete Player</button>
+    </div>
     <div class="msg" id="deleteMsg"></div>
+  </div>
+
+  <!-- Quick stats panel -->
+  <div class="panel">
+    <h2>This Week</h2>
+    <div id="selfStats" style="color:var(--muted);font-size:0.75rem;line-height:2;">Log in to see your stats</div>
   </div>
 
 </div>
@@ -1418,7 +1566,7 @@
 <div class="reset-section" style="margin-top:3rem;">
   <button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
   <div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
-    Applies Sunday multipliers, resets hours, keeps players, projects & coins
+    Resets hours &amp; logs. Multipliers only apply if run on Sunday EST.
   </div>
   <div style="margin-top:1.5rem;">
     <button class="reset-btn" style="border-color:#f87171;color:#f87171;" onclick="openNukeModal()">☢ Clear All Data</button>
@@ -1479,24 +1627,26 @@
   const db = getDatabase(app);
 
   // ── Constants ──
-  const COINS_PER_HOUR = 10; // 1 hour = 10 coins
+  const COINS_PER_HOUR = 10;
 
   // ── State ──
   let players = {};
   let logs = {};
+  let currentUser = null; // { id, name, ...playerData }
 
   const syncEl = document.getElementById('syncStatus');
 
   onValue(ref(db, 'players'), snap => {
     players = snap.val() || {};
-    syncEl.textContent = '⬤ live — updates instantly for everyone';
+    syncEl.textContent = '⬤ live';
     syncEl.className = 'sync-status live';
-    render();
-    refreshCasinoWallet();
-    // Refresh shop if open
-    if (document.getElementById('shopDrawer')?.classList.contains('open')) {
-      renderShopItems();
+    // Refresh currentUser data from latest snapshot
+    if (currentUser) {
+      const fresh = players[currentUser.id];
+      if (fresh) currentUser = { id: currentUser.id, ...fresh };
     }
+    render();
+    if (document.getElementById('shopDrawer')?.classList.contains('open')) renderShopItems();
   }, () => {
     syncEl.textContent = '⬤ connection error';
     syncEl.className = 'sync-status err';
@@ -1506,6 +1656,80 @@
     logs = snap.val() || {};
     render();
   });
+
+  // ── Login System ──
+
+  window.switchLoginTab = function(tab) {
+    document.getElementById('loginForm').style.display    = tab === 'login'    ? 'flex' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'flex' : 'none';
+    document.getElementById('tabLogin').classList.toggle('active',    tab === 'login');
+    document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+    document.getElementById('loginMsg').textContent = '';
+    document.getElementById('registerMsg').textContent = '';
+  };
+
+  window.doLogin = async function() {
+    const name = document.getElementById('loginName').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const msg  = document.getElementById('loginMsg');
+    if (!name || !pass) { msg.textContent = 'Fill in both fields.'; msg.className = 'login-msg err'; return; }
+
+    const entry = Object.entries(players).find(([, p]) => p.name.toLowerCase() === name.toLowerCase());
+    if (!entry) { msg.textContent = 'No account found.'; msg.className = 'login-msg err'; return; }
+    const [id, player] = entry;
+    if (player.password !== pass) { msg.textContent = 'Wrong password.'; msg.className = 'login-msg err'; return; }
+
+    currentUser = { id, ...player };
+    onLoggedIn();
+  };
+
+  window.doRegister = async function() {
+    const name  = document.getElementById('regName').value.trim();
+    const pass  = document.getElementById('regPass').value;
+    const pass2 = document.getElementById('regPass2').value;
+    const msg   = document.getElementById('registerMsg');
+
+    if (!name) { msg.textContent = 'Enter a username.'; msg.className = 'login-msg err'; return; }
+    if (!pass)  { msg.textContent = 'Enter a password.'; msg.className = 'login-msg err'; return; }
+    if (pass !== pass2) { msg.textContent = 'Passwords do not match.'; msg.className = 'login-msg err'; return; }
+    if (pass.length < 3) { msg.textContent = 'Password too short (min 3 chars).'; msg.className = 'login-msg err'; return; }
+    if (Object.values(players).find(p => p.name.toLowerCase() === name.toLowerCase())) {
+      msg.textContent = 'Username already taken.'; msg.className = 'login-msg err'; return;
+    }
+
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true;
+    msg.textContent = 'Creating account...'; msg.className = 'login-msg';
+    try {
+      const newRef = await push(ref(db, 'players'), { name, password: pass, projects: {}, coins: 0 });
+      currentUser = { id: newRef.key, name, password: pass, projects: {}, coins: 0 };
+      onLoggedIn();
+    } catch(e) {
+      msg.textContent = 'Error creating account.'; msg.className = 'login-msg err';
+    }
+    btn.disabled = false;
+  };
+
+  function onLoggedIn() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('userBadge').style.display = 'flex';
+    document.getElementById('userBadgeName').textContent = currentUser.name;
+    document.getElementById('loginName').value = '';
+    document.getElementById('loginPass').value = '';
+    render();
+  }
+
+  window.doLogout = function() {
+    currentUser = null;
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('userBadge').style.display = 'none';
+    closeCasino(); closeShop();
+  };
+
+  // Enter key shortcuts for login
+  document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); });
+  document.getElementById('loginName').addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); });
+  document.getElementById('regPass2').addEventListener('keydown', e => { if (e.key === 'Enter') window.doRegister(); });
 
   // ── Helpers ──
   function totalHours(player) {
@@ -1537,8 +1761,7 @@
     return streak;
   }
 
-  function isSunday() {
-    // Sunday EST check
+  function isSundayEST() {
     const now = new Date();
     const est = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
     return est.getDay() === 0;
@@ -1547,8 +1770,8 @@
   function getTimeUntilSundayEST() {
     const now = new Date();
     const estNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-    const estSunday = new Date(estNow);
     const daysUntilSun = (7 - estNow.getDay()) % 7 || 7;
+    const estSunday = new Date(estNow);
     estSunday.setDate(estNow.getDate() + daysUntilSun);
     estSunday.setHours(23, 59, 0, 0);
     const diffMs = estSunday - estNow;
@@ -1561,7 +1784,8 @@
   function render() {
     renderWeek();
     renderLeaderboard();
-    renderPlayerSelects();
+    renderSelfPanels();
+    renderAdminSelects();
     renderHistory();
   }
 
@@ -1571,16 +1795,15 @@
     const end = new Date(start); end.setDate(start.getDate() + 6);
     const fmt = x => x.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     document.getElementById('weekDisplay').textContent = `Week of ${fmt(start)} – ${fmt(end)}`;
-
     const note = document.getElementById('multiplierNote');
-    note.textContent = `🏅 Multipliers in ${getTimeUntilSundayEST()}`;
+    note.textContent = isSundayEST() ? '🏅 Multiplier day!' : `🏅 Multipliers in ${getTimeUntilSundayEST()}`;
   }
 
   function renderLeaderboard() {
     const lb = document.getElementById('leaderboard');
     const arr = Object.entries(players).map(([id, p]) => ({ id, ...p, total: totalHours(p) }));
     if (!arr.length) {
-      lb.innerHTML = '<div class="empty-state">No players yet — add some below!</div>';
+      lb.innerHTML = '<div class="empty-state">No players yet — register to join!</div>';
       return;
     }
     arr.sort((a, b) => b.total - a.total);
@@ -1593,6 +1816,7 @@
       const pct = Math.round((p.total / max) * 100);
       const streak = getStreak(p.name);
       const coins = p.coins || 0;
+      const isMe = currentUser && currentUser.id === p.id;
 
       const projEntries = Object.entries(p.projects || {});
       const pillsHtml = projEntries.length
@@ -1600,16 +1824,16 @@
             <span class="proj-pill">
               <span>${escHtml(proj.name)}</span>
               <span class="proj-hrs">${(proj.hours || 0).toFixed(1)}h</span>
-              <button class="remove-proj" title="Remove project" onclick="window._removeProject('${p.id}','${pid}','${escHtml(proj.name)}','${escHtml(p.name)}')">×</button>
+              ${isMe ? `<button class="remove-proj" title="Remove project" onclick="window._removeProject('${p.id}','${pid}','${escHtml(proj.name)}','${escHtml(p.name)}')">×</button>` : ''}
             </span>`).join('')
-        : `<span style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;">no projects yet — add one below</span>`;
+        : `<span style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;">no projects yet</span>`;
 
       return `
-        <div class="player-card ${rankClass}${p.equippedFx ? ' fx-' + p.equippedFx : ''}" id="card-${p.id}">
+        <div class="player-card ${rankClass}${p.equippedFx ? ' fx-' + p.equippedFx : ''}${isMe ? ' is-me' : ''}" id="card-${p.id}">
           <div class="card-top">
             <div class="rank-badge">${medal}</div>
             <div>
-              <div class="player-name">${escHtml(p.name)}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}${mult ? ` <span style="font-size:0.6rem;color:var(--gold);letter-spacing:1px;">${mult}</span>` : ''}</div>
+              <div class="player-name">${escHtml(p.name)}${isMe ? ' <span style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;">(you)</span>' : ''}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}${isSundayEST() && mult ? ` <span style="font-size:0.6rem;color:var(--gold);letter-spacing:1px;">${mult}</span>` : ''}</div>
             </div>
             <div class="player-stats">
               <div class="player-hours">${p.total.toFixed(1)}<small>hrs this week</small></div>
@@ -1617,7 +1841,7 @@
             <div class="player-stats">
               <div class="player-coins">🪙 ${coins.toLocaleString()}<small>coins</small></div>
             </div>
-            <button class="log-btn" onclick="window._quickLog('${escHtml(p.name)}')">+ Log</button>
+            ${isMe ? `<button class="log-btn" onclick="document.querySelector('.panels').scrollIntoView({behavior:'smooth'})">+ Log</button>` : ''}
           </div>
           <div class="card-projects">${pillsHtml}</div>
           <div class="bar-wrap">
@@ -1627,43 +1851,79 @@
     }).join('');
   }
 
-  function renderPlayerSelects() {
-    function fill(selId, curVal, placeholder) {
-      const sel = document.getElementById(selId);
-      sel.innerHTML = `<option value="">${placeholder}</option>`;
-      Object.values(players).forEach(p => {
+  // Populate the "your projects" dropdown and self stats panel
+  function renderSelfPanels() {
+    if (!currentUser) return;
+    const player = players[currentUser.id];
+    if (!player) return;
+
+    // Log project select
+    const sel = document.getElementById('logProject');
+    const cur = sel.value;
+    sel.innerHTML = '';
+    const projs = Object.entries(player.projects || {});
+    if (!projs.length) {
+      sel.innerHTML = '<option value="">— no projects yet —</option>';
+    } else {
+      projs.forEach(([pid, proj]) => {
         const o = document.createElement('option');
-        o.value = p.name;
-        o.textContent = p.name;
-        if (p.name === curVal) o.selected = true;
+        o.value = pid;
+        o.textContent = `${proj.name} (${(proj.hours||0).toFixed(1)}h)`;
+        if (pid === cur) o.selected = true;
         sel.appendChild(o);
       });
     }
-    fill('projPlayer',   document.getElementById('projPlayer').value,   '— select —');
-    fill('logPlayer',    document.getElementById('logPlayer').value,    '— select —');
-    fill('deletePlayer', document.getElementById('deletePlayer').value, '— select —');
-    fill('casinoPlayer', document.getElementById('casinoPlayer').value, '— select your name —');
-    fill('shopPlayer',   document.getElementById('shopPlayer').value,   '— select —');
-    updateProjectSelect();
-  }
 
-  window.updateProjectSelect = function() {
-    const playerName = document.getElementById('logPlayer').value;
-    const sel = document.getElementById('logProject');
-    const curProj = sel.value;
-    sel.innerHTML = '';
-    if (!playerName) { sel.innerHTML = '<option value="">— select player first —</option>'; return; }
-    const player = Object.values(players).find(p => p.name === playerName);
-    const projs = player?.projects ? Object.entries(player.projects) : [];
-    if (!projs.length) { sel.innerHTML = '<option value="">— no projects yet —</option>'; return; }
+    // Delete project select
+    const dsel = document.getElementById('deleteProjectSel');
+    const dcur = dsel.value;
+    dsel.innerHTML = '<option value="">— select —</option>';
     projs.forEach(([pid, proj]) => {
       const o = document.createElement('option');
       o.value = pid;
-      o.textContent = `${proj.name} (${(proj.hours||0).toFixed(1)}h)`;
-      if (pid === curProj) o.selected = true;
+      o.textContent = proj.name;
+      if (pid === dcur) o.selected = true;
+      dsel.appendChild(o);
+    });
+
+    // Self stats
+    const total = totalHours(player);
+    const coins = player.coins || 0;
+    const streak = getStreak(currentUser.name);
+    const projCount = projs.length;
+    const statsEl = document.getElementById('selfStats');
+    statsEl.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <div style="border:1px solid var(--border);padding:0.75rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--green);">${total.toFixed(1)}</div>
+          <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">hours</div>
+        </div>
+        <div style="border:1px solid var(--border);padding:0.75rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);">${coins.toLocaleString()}</div>
+          <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">coins</div>
+        </div>
+        <div style="border:1px solid var(--border);padding:0.75rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--text);">${streak}</div>
+          <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">day streak</div>
+        </div>
+        <div style="border:1px solid var(--border);padding:0.75rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--text);">${projCount}</div>
+          <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">projects</div>
+        </div>
+      </div>`;
+  }
+
+  function renderAdminSelects() {
+    const sel = document.getElementById('deletePlayer');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— select —</option>';
+    Object.values(players).forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.name; o.textContent = p.name;
+      if (p.name === cur) o.selected = true;
       sel.appendChild(o);
     });
-  };
+  }
 
   function renderHistory() {
     const el = document.getElementById('history');
@@ -1687,42 +1947,20 @@
 
   // ── Main Actions ──
 
-  window.addPlayer = async function() {
-    const name = document.getElementById('newName').value.trim();
-    const msg = document.getElementById('addMsg');
-    if (!name) { msg.textContent = 'Enter a name.'; msg.className = 'msg err'; return; }
-    if (Object.values(players).find(p => p.name.toLowerCase() === name.toLowerCase())) {
-      msg.textContent = 'Name already taken.'; msg.className = 'msg err'; return;
-    }
-    const btn = document.getElementById('addBtn');
-    btn.disabled = true;
-    try {
-      await push(ref(db, 'players'), { name, projects: {}, coins: 0 });
-      document.getElementById('newName').value = '';
-      msg.textContent = `${name} joined the competition!`;
-      msg.className = 'msg ok';
-      setTimeout(() => msg.textContent = '', 3000);
-    } catch(e) { msg.textContent = 'Error saving.'; msg.className = 'msg err'; }
-    btn.disabled = false;
-  };
-
   window.addProject = async function() {
-    const playerName = document.getElementById('projPlayer').value;
+    if (!currentUser) return;
     const projName = document.getElementById('projName').value.trim();
     const msg = document.getElementById('projMsg');
-    if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; return; }
     if (!projName) { msg.textContent = 'Enter a project name.'; msg.className = 'msg err'; return; }
-    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
-    if (!entry) return;
-    const [playerId, player] = entry;
-    const existing = Object.values(player.projects || {}).find(p => p.name.toLowerCase() === projName.toLowerCase());
+    const player = players[currentUser.id];
+    const existing = Object.values(player?.projects || {}).find(p => p.name.toLowerCase() === projName.toLowerCase());
     if (existing) { msg.textContent = 'Project already exists.'; msg.className = 'msg err'; return; }
     const btn = document.getElementById('addProjBtn');
     btn.disabled = true;
     try {
-      await push(ref(db, `players/${playerId}/projects`), { name: projName, hours: 0 });
+      await push(ref(db, `players/${currentUser.id}/projects`), { name: projName, hours: 0 });
       document.getElementById('projName').value = '';
-      msg.textContent = `"${projName}" added to ${playerName}!`;
+      msg.textContent = `"${projName}" added!`;
       msg.className = 'msg ok';
       setTimeout(() => msg.textContent = '', 3000);
     } catch(e) { msg.textContent = 'Error saving.'; msg.className = 'msg err'; }
@@ -1730,44 +1968,39 @@
   };
 
   window.logHours = async function() {
-    const playerName = document.getElementById('logPlayer').value;
-    const projectId  = document.getElementById('logProject').value;
-    const hours      = parseFloat(document.getElementById('logHours').value);
-    const note       = document.getElementById('logNote').value.trim();
-    const msg        = document.getElementById('logMsg');
+    if (!currentUser) return;
+    const projectId = document.getElementById('logProject').value;
+    const hours     = parseFloat(document.getElementById('logHours').value);
+    const note      = document.getElementById('logNote').value.trim();
+    const msg       = document.getElementById('logMsg');
 
-    if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; return; }
-    if (!projectId)  { msg.textContent = 'Select a project.'; msg.className = 'msg err'; return; }
+    if (!projectId) { msg.textContent = 'Select a project.'; msg.className = 'msg err'; return; }
     if (!hours || hours <= 0) { msg.textContent = 'Enter valid hours.'; msg.className = 'msg err'; return; }
-    if (hours > 24)  { msg.textContent = 'Max 24 hours.'; msg.className = 'msg err'; return; }
+    if (hours > 24) { msg.textContent = 'Max 24 hours.'; msg.className = 'msg err'; return; }
 
-    const playerEntry = Object.entries(players).find(([, p]) => p.name === playerName);
-    if (!playerEntry) return;
-    const [playerId, player] = playerEntry;
-    const proj = player.projects?.[projectId];
+    const player = players[currentUser.id];
+    const proj = player?.projects?.[projectId];
     if (!proj) return;
 
     const btn = document.getElementById('logBtn');
     btn.disabled = true;
     try {
-      const newHours  = Math.round(((proj.hours || 0) + hours) * 100) / 100;
+      const newHours    = Math.round(((proj.hours || 0) + hours) * 100) / 100;
       const earnedCoins = Math.floor(hours * COINS_PER_HOUR);
-      const newCoins  = (player.coins || 0) + earnedCoins;
+      const newCoins    = (player.coins || 0) + earnedCoins;
 
-      await update(ref(db, `players/${playerId}/projects/${projectId}`), { hours: newHours });
-      await update(ref(db, `players/${playerId}`), { coins: newCoins });
-      await push(ref(db, 'logs'), { player: playerName, project: proj.name, hours, note, ts: new Date().toISOString() });
+      await update(ref(db, `players/${currentUser.id}/projects/${projectId}`), { hours: newHours });
+      await update(ref(db, `players/${currentUser.id}`), { coins: newCoins });
+      await push(ref(db, 'logs'), { player: currentUser.name, project: proj.name, hours, note, ts: new Date().toISOString() });
 
       document.getElementById('logHours').value = '';
       document.getElementById('logNote').value = '';
-      msg.textContent = `+${hours}h & +${earnedCoins} coins for ${playerName} 🎉`;
+      msg.textContent = `+${hours}h & +${earnedCoins} coins! 🎉`;
       msg.className = 'msg ok';
       setTimeout(() => msg.textContent = '', 3000);
 
-      // Coin float animation
       spawnCoinFloat(`+${earnedCoins} 🪙`);
-
-      const card = document.getElementById(`card-${playerId}`);
+      const card = document.getElementById(`card-${currentUser.id}`);
       if (card) { card.classList.remove('popped'); void card.offsetWidth; card.classList.add('popped'); }
     } catch(e) { msg.textContent = 'Error saving.'; msg.className = 'msg err'; }
     btn.disabled = false;
@@ -1784,20 +2017,27 @@
   }
   window.spawnCoinFloat = spawnCoinFloat;
 
-  window._quickLog = function(name) {
-    document.getElementById('logPlayer').value = name;
-    window.updateProjectSelect();
-    document.getElementById('logHours').focus();
-    document.querySelector('.panels').scrollIntoView({ behavior: 'smooth' });
-  };
-
   // ── Delete Modal ──
   let pendingDelete = null;
+
+  window.openDeleteProjectSelf = function() {
+    if (!currentUser) return;
+    const sel = document.getElementById('deleteProjectSel');
+    const projId = sel.value;
+    const msg = document.getElementById('deleteMsg');
+    if (!projId) { msg.textContent = 'Select a project.'; msg.className = 'msg err'; setTimeout(() => msg.textContent='',3000); return; }
+    const proj = players[currentUser.id]?.projects?.[projId];
+    if (!proj) return;
+    pendingDelete = { type: 'project', playerId: currentUser.id, projId, projName: proj.name, playerName: currentUser.name };
+    document.getElementById('modalTitle').textContent = 'Delete Project';
+    document.getElementById('modalDesc').innerHTML = `Permanently delete <strong>${escHtml(proj.name)}</strong>?`;
+    openModal();
+  };
 
   window.openDeletePlayer = function() {
     const playerName = document.getElementById('deletePlayer').value;
     const msg = document.getElementById('deleteMsg');
-    if (!playerName) { msg.textContent = 'Select a player first.'; msg.className = 'msg err'; setTimeout(() => msg.textContent = '', 3000); return; }
+    if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; setTimeout(() => msg.textContent='',3000); return; }
     const entry = Object.entries(players).find(([, p]) => p.name === playerName);
     if (!entry) return;
     pendingDelete = { type: 'player', playerId: entry[0], playerName };
@@ -1809,7 +2049,7 @@
   window._removeProject = function(playerId, projId, projName, playerName) {
     pendingDelete = { type: 'project', playerId, projId, projName, playerName };
     document.getElementById('modalTitle').textContent = 'Delete Project';
-    document.getElementById('modalDesc').innerHTML = `Permanently delete <strong>${escHtml(projName)}</strong> from ${escHtml(playerName)}?`;
+    document.getElementById('modalDesc').innerHTML = `Permanently delete <strong>${escHtml(projName)}</strong>?`;
     openModal();
   };
 
@@ -1839,6 +2079,8 @@
     try {
       if (pendingDelete.type === 'player') {
         await remove(ref(db, `players/${pendingDelete.playerId}`));
+        // If deleting self, log out
+        if (currentUser && currentUser.id === pendingDelete.playerId) window.doLogout();
       } else {
         await remove(ref(db, `players/${pendingDelete.playerId}/projects/${pendingDelete.projId}`));
       }
@@ -1861,19 +2103,24 @@
   };
 
   window.resetWeek = async function() {
-    if (!confirm('Apply Sunday multipliers and reset the week?\n\n🥇 1st place: ×1.25 coins\n🥈 2nd place: ×1.15 coins\n🥉 3rd place: ×1.10 coins\n\nHours reset to 0. Players, projects & coins kept.')) return;
+    const sunday = isSundayEST();
+    const multMsg = sunday
+      ? '\n\n🥇 1st: ×1.25  🥈 2nd: ×1.15  🥉 3rd: ×1.10'
+      : '\n\nToday is NOT Sunday — hours will reset but NO coin multipliers will be applied.';
+    if (!confirm(`Reset the week?${multMsg}\n\nHours reset to 0. Players, projects & coins kept.`)) return;
 
     const arr = Object.entries(players)
       .map(([id, p]) => ({ id, ...p, total: totalHours(p) }))
       .sort((a, b) => b.total - a.total);
 
-    const multipliers = [1.25, 1.15, 1.10];
     const updates = {};
-
     arr.forEach((p, i) => {
-      const mult = multipliers[i] || 1;
-      const newCoins = Math.floor((p.coins || 0) * mult);
-      updates[`players/${p.id}/coins`] = newCoins;
+      // Only apply multiplier on Sunday
+      if (sunday) {
+        const multipliers = [1.25, 1.15, 1.10];
+        const mult = multipliers[i] || 1;
+        updates[`players/${p.id}/coins`] = Math.floor((p.coins || 0) * mult);
+      }
       Object.keys(p.projects || {}).forEach(projId => {
         updates[`players/${p.id}/projects/${projId}/hours`] = 0;
       });
@@ -1884,14 +2131,13 @@
   };
 
   // Enter shortcuts
-  document.getElementById('newName').addEventListener('keydown', e => { if (e.key === 'Enter') window.addPlayer(); });
   document.getElementById('projName').addEventListener('keydown', e => { if (e.key === 'Enter') window.addProject(); });
   ['logHours','logNote'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') window.logHours(); });
   });
 
   renderWeek();
-  setInterval(renderWeek, 60000); // refresh countdown every minute
+  setInterval(renderWeek, 60000);
 
   // ══════════════════════════════════════════
   // ── SHOP ──
@@ -1918,6 +2164,7 @@
   ];
 
   window.openShop = function() {
+    if (!currentUser) { doLogout(); return; }
     closeCasino();
     document.getElementById('shopDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
@@ -1931,40 +2178,24 @@
     document.getElementById('shopTabArrow').textContent = '◀';
   };
 
-  // Overlay closes whichever drawer is open
-  document.getElementById('drawerOverlay').addEventListener('click', () => {
-    closeCasino();
-    closeShop();
-  });
-
-  function getShopPlayer() {
-    const name = document.getElementById('shopPlayer').value;
-    const entry = Object.entries(players).find(([, p]) => p.name === name);
-    return entry ? { id: entry[0], ...entry[1] } : null;
-  }
-
   window.renderShopItems = function() {
-    const p = getShopPlayer();
-
-    // Wallet display
-    document.getElementById('shopWalletDisplay').textContent =
-      p ? (p.coins || 0).toLocaleString() : '—';
-
-    const grid = document.getElementById('shopGrid');
-    if (!p) {
-      grid.innerHTML = '<div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Select your name above to shop</div>';
+    if (!currentUser) {
+      document.getElementById('shopGrid').innerHTML = '<div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Log in to shop</div>';
+      document.getElementById('shopWalletDisplay').textContent = '—';
       return;
     }
+    const p = players[currentUser.id] || currentUser;
+    document.getElementById('shopWalletDisplay').textContent = (p.coins || 0).toLocaleString();
 
     const owned    = p.ownedFx    ? Object.keys(p.ownedFx)    : [];
     const equipped = p.equippedFx || null;
 
+    const grid = document.getElementById('shopGrid');
     grid.innerHTML = SHOP_ITEMS.map(item => {
       const isOwned    = owned.includes(item.id);
       const isEquipped = equipped === item.id;
       const canAfford  = (p.coins || 0) >= item.price;
 
-      // Preview bar style
       let previewInner = '';
       if (item.previewClass) {
         previewInner = `<div class="shop-preview-fill ${item.previewClass}" style="width:70%;"></div>`;
@@ -1977,16 +2208,12 @@
       const itemClasses = ['shop-item', isOwned ? 'owned' : '', isEquipped ? 'equipped' : ''].filter(Boolean).join(' ');
       const tag = isEquipped ? '<span class="shop-tag tag-on">ON</span>'
                 : isOwned   ? '<span class="shop-tag tag-owned">Owned</span>'
-                            : `<span class="shop-tag tag-buy">${canAfford ? 'Buy' : 'Too Poor'}</span>`;
-
-      const buyAction = !isOwned && canAfford
-        ? `onclick="buyEffect('${item.id}','${p.name}')"`
-        : '';
-
+                            : `<span class="shop-tag tag-buy">${canAfford ? 'Buy' : '🪙 Need more'}</span>`;
+      const buyAction = !isOwned && canAfford ? `onclick="buyEffect('${item.id}')"` : '';
       const equipBtn = isOwned
         ? isEquipped
-          ? `<div class="shop-equip-row"><button class="shop-equip-btn btn-unequip" onclick="unequipEffect('${p.name}')">Unequip</button></div>`
-          : `<div class="shop-equip-row"><button class="shop-equip-btn btn-equip" onclick="equipEffect('${item.id}','${p.name}')">Equip</button></div>`
+          ? `<div class="shop-equip-row"><button class="shop-equip-btn btn-unequip" onclick="unequipEffect()">Unequip</button></div>`
+          : `<div class="shop-equip-row"><button class="shop-equip-btn btn-equip" onclick="equipEffect('${item.id}')">Equip</button></div>`
         : '';
 
       return `
@@ -2002,39 +2229,31 @@
     }).join('');
   };
 
-  window.buyEffect = async function(fxId, playerName) {
-    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
-    if (!entry) return;
-    const [pid, p] = entry;
+  window.buyEffect = async function(fxId) {
+    if (!currentUser) return;
+    const p = players[currentUser.id];
     const item = SHOP_ITEMS.find(i => i.id === fxId);
-    if (!item) return;
-    if ((p.coins || 0) < item.price) return;
-
-    const newCoins = (p.coins || 0) - item.price;
+    if (!item || !p || (p.coins || 0) < item.price) return;
     const updates = {};
-    updates[`players/${pid}/coins`] = newCoins;
-    updates[`players/${pid}/ownedFx/${fxId}`] = true;
+    updates[`players/${currentUser.id}/coins`] = (p.coins || 0) - item.price;
+    updates[`players/${currentUser.id}/ownedFx/${fxId}`] = true;
     await update(ref(db, '/'), updates);
     soundShopBuy();
     spawnCoinFloat(`-${item.price} 🪙`);
   };
 
-  window.equipEffect = async function(fxId, playerName) {
-    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
-    if (!entry) return;
-    const [pid] = entry;
-    await update(ref(db, `players/${pid}`), { equippedFx: fxId });
+  window.equipEffect = async function(fxId) {
+    if (!currentUser) return;
+    await update(ref(db, `players/${currentUser.id}`), { equippedFx: fxId });
   };
 
-  window.unequipEffect = async function(playerName) {
-    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
-    if (!entry) return;
-    const [pid] = entry;
-    await update(ref(db, `players/${pid}`), { equippedFx: null });
+  window.unequipEffect = async function() {
+    if (!currentUser) return;
+    await update(ref(db, `players/${currentUser.id}`), { equippedFx: null });
   };
 
-  // Re-render shop items when firebase data updates (so wallet refreshes instantly)
-  // (handled via patched onValue above)
+  // Re-render shop wallet when firebase updates
+  // (handled via patched onValue above — renders shop if open)
 
   // ── Nuke Modal ──
   window.openNukeModal = function() {
@@ -2337,12 +2556,13 @@
     setTimeout(() => { b.classList.remove('show'); }, 2500);
   }
 
-  // Casino drawer open/close
   window.openCasino = function() {
+    if (!currentUser) { doLogout(); return; }
     closeShop();
     document.getElementById('casinoDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '▶';
+    document.getElementById('casinoPlayerDisplay').textContent = currentUser.name;
     refreshCasinoWallet();
   };
 
@@ -2352,27 +2572,16 @@
     document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '◀';
   };
 
-  window.onCasinoPlayerChange = function() {
-    refreshCasinoWallet();
-    // Reset table on player switch
-    bjDeck = []; bjPlayer = []; bjDealer = []; bjBet = 0; bjPhase = 'bet';
-    renderBJTable();
-    setBJButtons('bet');
-    updateBetDisplay();
-    document.getElementById('resultBanner').className = 'result-banner';
-  };
-
   function refreshCasinoWallet() {
-    const name = document.getElementById('casinoPlayer').value;
-    const p = Object.values(players).find(p => p.name === name);
-    document.getElementById('walletDisplay').textContent =
-      p ? (p.coins || 0).toLocaleString() : '—';
+    if (!currentUser) { document.getElementById('walletDisplay').textContent = '—'; return; }
+    const p = players[currentUser.id];
+    document.getElementById('walletDisplay').textContent = p ? (p.coins || 0).toLocaleString() : '—';
   }
 
   function getCurrentCasinoPlayer() {
-    const name = document.getElementById('casinoPlayer').value;
-    const entry = Object.entries(players).find(([, p]) => p.name === name);
-    return entry ? { id: entry[0], ...entry[1] } : null;
+    if (!currentUser) return null;
+    const p = players[currentUser.id];
+    return p ? { id: currentUser.id, ...p } : null;
   }
 
   // Bet
