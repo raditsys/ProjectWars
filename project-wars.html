@@ -3224,23 +3224,26 @@
 (function() {
   const layer = document.getElementById('grassLayer');
 
-  // Instead of single blades, we spawn CLUMPS.
-  // Each clump contains multiple blades. Clicking a clump cuts the whole bunch.
+  // Slow + random growth tuning
+  const INITIAL_CLUMPS = 6;           // start sparse
+  const MAX_CLUMPS = 10;              // never exceed this many on screen
 
-  const CLUMP_COUNT = 18;        // how many clumps across the screen
-  const REGROW_MS = 4500;        // regrow time after cutting
-  const COIN_REWARD_EVERY = 3;   // every N \"blade cuts\" you get a coin
+  const MIN_REGROW_MS = 30_000;       // 30s
+  const MAX_REGROW_MS = 120_000;      // 120s (2 min)
 
-  let cutCount = 0;              // counts blades (not clumps) so the coin rate stays similar
+  const SPAWN_TICK_MS = 8_000;        // every 8s, maybe spawn one
+  const SPAWN_CHANCE_PER_TICK = 0.18; // 18% chance each tick (~one spawn every ~45s average)
+
+  // Coin tuning: only sometimes
+  const COIN_CHANCE_ON_CUT = 0.15;    // 15% chance to get a coin when cutting a clump
+
   const clumps = [];
-
   const greens = ['#3a9e3a','#4ade80','#2d7a2d','#56c456','#38a838','#65d465'];
 
   function rand(min, max) { return min + Math.random() * (max - min); }
   function randi(min, max) { return Math.floor(rand(min, max + 1)); }
 
   function makeBladeHTML(h, g) {
-    // Slight curve. Height varies.
     return `<svg width="6" height="${h}" viewBox="0 0 6 ${h}" xmlns="http://www.w3.org/2000/svg">
       <path d="M3 ${h} Q1 ${h*0.5} 2 0 Q4 ${h*0.5} 3 ${h}Z" fill="${g}" opacity="0.92"/>
     </svg>`;
@@ -3256,8 +3259,25 @@
     setTimeout(() => coin.remove(), 1000);
   }
 
+  function spawnClumpAtRandomX() {
+    if (clumps.length >= MAX_CLUMPS) return;
+
+    const newX = Math.random() * (window.innerWidth - 90);
+    const clump = makeClumpEl(Math.max(0, Math.min(window.innerWidth - 90, newX)));
+    clumps.push(clump);
+    layer.appendChild(clump);
+  }
+
+  function scheduleRegrow() {
+    // random, slow regrow
+    const delay = Math.floor(rand(MIN_REGROW_MS, MAX_REGROW_MS));
+    setTimeout(() => {
+      spawnClumpAtRandomX();
+      scheduleRegrow();
+    }, delay);
+  }
+
   function makeClumpEl(x) {
-    // width and blade count define the \"chunky\" look
     const width = randi(42, 86);
     const bladeCount = randi(8, 18);
     const baseHeight = randi(26, 42);
@@ -3267,22 +3287,18 @@
     clump.style.left = x + 'px';
     clump.style.width = width + 'px';
 
-    // A little \"lean\" so clumps feel organic
     const clumpLean = (Math.random() - 0.5) * 6;
     clump.style.transform = `rotate(${clumpLean}deg)`;
 
-    // Build blades
     for (let i = 0; i < bladeCount; i++) {
       const blade = document.createElement('div');
       blade.className = 'grass-blade';
 
-      // Spread blades across the clump width with some jitter
       const t = i / Math.max(1, bladeCount - 1);
       const px = t * (width - 6) + rand(-6, 6);
       blade.style.left = `${Math.max(0, Math.min(width - 6, px))}px`;
 
-      // Heights cluster around baseHeight with variation (tall in the center)
-      const centerBias = 1 - Math.abs(t - 0.5) * 1.4; // 0..1, taller in middle
+      const centerBias = 1 - Math.abs(t - 0.5) * 1.4;
       const h = Math.round(baseHeight + centerBias * rand(10, 26) + rand(-6, 10));
 
       const g = greens[Math.floor(Math.random() * greens.length)];
@@ -3299,50 +3315,43 @@
       clump.appendChild(blade);
     }
 
-    // Click handler: cut whole clump
     clump.addEventListener('click', function() {
       if (clump.classList.contains('cutting')) return;
-
       clump.classList.add('cutting');
 
-      // Count this cut as \"bladeCount\" snips to preserve coin pacing
-      cutCount += bladeCount;
-
-      // Coin every N blade snips
-      const earnedCoins = Math.floor(cutCount / COIN_REWARD_EVERY) - Math.floor((cutCount - bladeCount) / COIN_REWARD_EVERY);
-      if (earnedCoins > 0) {
+      // Random coin drop (instead of deterministic payouts)
+      if (Math.random() < COIN_CHANCE_ON_CUT) {
         const rect = clump.getBoundingClientRect();
-        // Pop one coin per earned coin (usually 1, sometimes more if bladeCount is big)
-        for (let i = 0; i < earnedCoins; i++) {
-          spawnCoinPopAt(rect.left + rect.width * 0.5 + rand(-10, 10), rect.top + rand(-6, 6));
-        }
-        if (window.__awardGrassCoin) {
-          for (let i = 0; i < earnedCoins; i++) window.__awardGrassCoin();
-        }
+        spawnCoinPopAt(rect.left + rect.width * 0.5 + rand(-10, 10), rect.top + rand(-6, 6));
+        if (window.__awardGrassCoin) window.__awardGrassCoin();
       }
 
-      // Regrow after delay
+      // Remove this clump after the cut animation
       setTimeout(() => {
         clump.remove();
-        const newX = Math.random() * (window.innerWidth - 90);
-        const newClump = makeClumpEl(Math.max(0, Math.min(window.innerWidth - 90, newX)));
-        layer.appendChild(newClump);
-        clumps[clumps.indexOf(clump)] = newClump;
-      }, REGROW_MS);
+        const idx = clumps.indexOf(clump);
+        if (idx !== -1) clumps.splice(idx, 1);
+      }, 350);
     });
 
     return clump;
   }
 
   function init() {
-    // Place clumps evenly-ish across screen, with jitter.
-    for (let i = 0; i < CLUMP_COUNT; i++) {
-      const slot = window.innerWidth / CLUMP_COUNT;
-      const x = i * slot + rand(-slot * 0.25, slot * 0.25);
-      const clump = makeClumpEl(Math.max(0, Math.min(window.innerWidth - 90, x)));
-      clumps.push(clump);
-      layer.appendChild(clump);
+    // Start with fewer clumps
+    for (let i = 0; i < INITIAL_CLUMPS; i++) {
+      spawnClumpAtRandomX();
     }
+
+    // Very slow background growth: occasional new clump
+    setInterval(() => {
+      if (clumps.length < MAX_CLUMPS && Math.random() < SPAWN_CHANCE_PER_TICK) {
+        spawnClumpAtRandomX();
+      }
+    }, SPAWN_TICK_MS);
+
+    // Long random regrow pulses
+    scheduleRegrow();
   }
 
   init();
