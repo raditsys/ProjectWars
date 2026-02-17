@@ -63,7 +63,16 @@
     text-transform: uppercase;
   }
 
-  /* Leaderboard */
+  .sync-status {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    margin-top: 0.5rem;
+    color: var(--muted);
+  }
+  .sync-status.live { color: var(--green); }
+  .sync-status.err { color: #f87171; }
+
   .leaderboard {
     max-width: 700px;
     margin: 0 auto 3rem;
@@ -153,10 +162,7 @@
     white-space: nowrap;
   }
 
-  .log-btn:hover {
-    border-color: var(--green);
-    color: var(--green);
-  }
+  .log-btn:hover { border-color: var(--green); color: var(--green); }
 
   .empty-state {
     text-align: center;
@@ -167,29 +173,17 @@
     letter-spacing: 1px;
   }
 
-  /* Progress bar */
   .bar-wrap {
     grid-column: 1 / -1;
     margin-top: 0.25rem;
   }
 
-  .bar-track {
-    height: 3px;
-    background: var(--border);
-    width: 100%;
-  }
-
-  .bar-fill {
-    height: 3px;
-    background: var(--green);
-    transition: width 0.5s ease;
-  }
-
+  .bar-track { height: 3px; background: var(--border); width: 100%; }
+  .bar-fill { height: 3px; background: var(--green); transition: width 0.5s ease; }
   .rank-1 .bar-fill { background: var(--gold); }
   .rank-2 .bar-fill { background: var(--silver); }
   .rank-3 .bar-fill { background: var(--bronze); }
 
-  /* Add player / log section */
   .panels {
     max-width: 700px;
     margin: 0 auto;
@@ -198,9 +192,7 @@
     gap: 1rem;
   }
 
-  @media (max-width: 500px) {
-    .panels { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 500px) { .panels { grid-template-columns: 1fr; } }
 
   .panel {
     background: var(--surface);
@@ -216,9 +208,7 @@
     margin-bottom: 1rem;
   }
 
-  .field {
-    margin-bottom: 0.75rem;
-  }
+  .field { margin-bottom: 0.75rem; }
 
   .field label {
     display: block;
@@ -242,9 +232,7 @@
     -webkit-appearance: none;
   }
 
-  .field input:focus, .field select:focus {
-    border-color: var(--gold);
-  }
+  .field input:focus, .field select:focus { border-color: var(--gold); }
 
   .btn {
     width: 100%;
@@ -260,6 +248,8 @@
   }
 
   .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
   .btn.secondary {
     background: none;
     color: var(--green);
@@ -275,11 +265,7 @@
   .msg.ok { color: var(--green); }
   .msg.err { color: #f87171; }
 
-  /* Log history */
-  .history-section {
-    max-width: 700px;
-    margin: 2rem auto 0;
-  }
+  .history-section { max-width: 700px; margin: 2rem auto 0; }
 
   .history-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -318,17 +304,11 @@
   }
 
   .log-item:last-child { border-bottom: none; }
-
   .log-who { color: var(--text); }
   .log-detail { color: var(--muted); font-size: 0.65rem; }
   .log-amount { color: var(--green); font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
 
-  /* Reset week */
-  .reset-section {
-    max-width: 700px;
-    margin: 2rem auto 0;
-    text-align: center;
-  }
+  .reset-section { max-width: 700px; margin: 2rem auto 0; text-align: center; }
 
   .reset-btn {
     background: none;
@@ -344,19 +324,13 @@
   }
 
   .reset-btn:hover { border-color: #f87171; color: #f87171; }
-
-  .streak {
-    font-size: 0.65rem;
-    color: var(--gold);
-    letter-spacing: 1px;
-  }
+  .streak { font-size: 0.65rem; color: var(--gold); letter-spacing: 1px; }
 
   @keyframes pop {
     0% { transform: scale(1); }
     50% { transform: scale(1.04); }
     100% { transform: scale(1); }
   }
-
   .popped { animation: pop 0.3s ease; }
 </style>
 </head>
@@ -366,15 +340,16 @@
   <h1>Project Wars</h1>
   <div class="subtitle">Who ships the most this week?</div>
   <div class="week-display" id="weekDisplay"></div>
+  <br>
+  <div class="sync-status" id="syncStatus">⬤ connecting...</div>
 </header>
 
 <div class="leaderboard">
   <div class="leaderboard-title">🏆 Leaderboard</div>
-  <div id="leaderboard"></div>
+  <div id="leaderboard"><div class="empty-state">Connecting to database...</div></div>
 </div>
 
 <div class="panels">
-  <!-- Add player -->
   <div class="panel">
     <h2>Add Player</h2>
     <div class="field">
@@ -385,11 +360,10 @@
       <label>Project</label>
       <input type="text" id="newProject" placeholder="e.g. iOS app" maxlength="30">
     </div>
-    <button class="btn" onclick="addPlayer()">Add to Competition</button>
+    <button class="btn" id="addBtn" onclick="addPlayer()">Add to Competition</button>
     <div class="msg" id="addMsg"></div>
   </div>
 
-  <!-- Log hours -->
   <div class="panel">
     <h2>Log Hours</h2>
     <div class="field">
@@ -406,12 +380,11 @@
       <label>Note (optional)</label>
       <input type="text" id="logNote" placeholder="what did you work on?" maxlength="60">
     </div>
-    <button class="btn secondary" onclick="logHours()">+ Log Hours</button>
+    <button class="btn secondary" id="logBtn" onclick="logHours()">+ Log Hours</button>
     <div class="msg" id="logMsg"></div>
   </div>
 </div>
 
-<!-- Log history -->
 <div class="history-section">
   <div class="history-title">
     <span>Recent Activity</span>
@@ -420,7 +393,6 @@
   <div id="history"></div>
 </div>
 
-<!-- Reset week -->
 <div class="reset-section" style="margin-top:3rem;">
   <button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
   <div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
@@ -428,30 +400,43 @@
   </div>
 </div>
 
-<script>
-  // ---- State ----
-  let state = loadState();
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  function loadState() {
-    try {
-      const s = JSON.parse(localStorage.getItem('projectwars'));
-      if (s && s.players) return s;
-    } catch(e) {}
-    return { players: [], logs: [], weekStart: getWeekStart() };
-  }
+  const firebaseConfig = {
+    apiKey: "AIzaSyAtMH_AvVGskpK2TxMlXjf0IXRb9HT-q_Y",
+    authDomain: "projectwars-60a92.firebaseapp.com",
+    databaseURL: "https://projectwars-60a92-default-rtdb.firebaseio.com",
+    projectId: "projectwars-60a92",
+    storageBucket: "projectwars-60a92.firebasestorage.app",
+    messagingSenderId: "308228931446",
+    appId: "1:308228931446:web:39c1921f7e9be891980457"
+  };
 
-  function saveState() {
-    localStorage.setItem('projectwars', JSON.stringify(state));
-  }
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-  function getWeekStart() {
-    const d = new Date();
-    d.setDate(d.getDate() - d.getDay());
-    d.setHours(0,0,0,0);
-    return d.toISOString();
-  }
+  let players = {};
+  let logs = {};
 
-  // ---- Render ----
+  const syncEl = document.getElementById('syncStatus');
+
+  onValue(ref(db, 'players'), snap => {
+    players = snap.val() || {};
+    syncEl.textContent = '⬤ live — updates instantly for everyone';
+    syncEl.className = 'sync-status live';
+    render();
+  }, () => {
+    syncEl.textContent = '⬤ connection error';
+    syncEl.className = 'sync-status err';
+  });
+
+  onValue(ref(db, 'logs'), snap => {
+    logs = snap.val() || {};
+    render();
+  });
+
   function render() {
     renderWeek();
     renderLeaderboard();
@@ -460,37 +445,41 @@
   }
 
   function renderWeek() {
-    const start = new Date(state.weekStart);
+    const d = new Date();
+    const start = new Date(d);
+    start.setDate(d.getDate() - d.getDay());
     const end = new Date(start);
-    end.setDate(end.getDate() + 6);
-    const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    end.setDate(start.getDate() + 6);
+    const fmt = x => x.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     document.getElementById('weekDisplay').textContent = `Week of ${fmt(start)} – ${fmt(end)}`;
   }
 
   function renderLeaderboard() {
     const lb = document.getElementById('leaderboard');
-    if (!state.players.length) {
-      lb.innerHTML = '<div class="empty-state">No players yet — add some above!</div>';
+    const arr = Object.entries(players).map(([id, p]) => ({ id, ...p }));
+    if (!arr.length) {
+      lb.innerHTML = '<div class="empty-state">No players yet — add some below!</div>';
       return;
     }
+    arr.sort((a, b) => (b.hours || 0) - (a.hours || 0));
+    const max = arr[0].hours || 1;
 
-    const sorted = [...state.players].sort((a, b) => b.hours - a.hours);
-    const max = sorted[0].hours || 1;
-
-    lb.innerHTML = sorted.map((p, i) => {
+    lb.innerHTML = arr.map((p, i) => {
       const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
       const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
-      const pct = Math.round((p.hours / max) * 100);
+      const pct = Math.round(((p.hours || 0) / max) * 100);
       const streak = getStreak(p.name);
       return `
-        <div class="player-card ${rankClass}" id="card-${p.name}">
+        <div class="player-card ${rankClass}" id="card-${p.id}">
           <div class="rank-badge">${medal}</div>
           <div>
             <div class="player-name">${escHtml(p.name)}</div>
-            <div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-top:2px;">${escHtml(p.project)}${streak > 1 ? ` · <span class="streak">🔥 ${streak} day streak</span>` : ''}</div>
+            <div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-top:2px;">
+              ${escHtml(p.project)}${streak > 1 ? ` · <span class="streak">🔥 ${streak} day streak</span>` : ''}
+            </div>
           </div>
-          <div class="player-hours">${p.hours.toFixed(1)}<span>hrs this week</span></div>
-          <button class="log-btn" onclick="quickLog('${p.name}')">+ Log</button>
+          <div class="player-hours">${(p.hours || 0).toFixed(1)}<span>hrs this week</span></div>
+          <button class="log-btn" onclick="window._quickLog('${escHtml(p.name)}')">+ Log</button>
           <div class="bar-wrap">
             <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
           </div>
@@ -499,10 +488,8 @@
   }
 
   function getStreak(name) {
-    // Count consecutive days with logs
     const days = new Set(
-      state.logs.filter(l => l.player === name)
-        .map(l => new Date(l.ts).toDateString())
+      Object.values(logs).filter(l => l.player === name).map(l => new Date(l.ts).toDateString())
     );
     let streak = 0;
     for (let i = 0; i < 7; i++) {
@@ -518,7 +505,7 @@
     const sel = document.getElementById('logPlayer');
     const cur = sel.value;
     sel.innerHTML = '<option value="">— select —</option>';
-    state.players.forEach(p => {
+    Object.values(players).forEach(p => {
       const o = document.createElement('option');
       o.value = p.name;
       o.textContent = `${p.name} (${p.project})`;
@@ -529,95 +516,98 @@
 
   function renderHistory() {
     const el = document.getElementById('history');
-    if (!state.logs.length) {
+    const arr = Object.values(logs).sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 20);
+    if (!arr.length) {
       el.innerHTML = '<div style="color:var(--muted);font-size:0.75rem;padding:1rem 0;">No activity logged yet.</div>';
       return;
     }
-    const recent = [...state.logs].reverse().slice(0, 20);
-    el.innerHTML = recent.map(l => {
-      const ago = timeAgo(new Date(l.ts));
-      return `<div class="log-item">
+    el.innerHTML = arr.map(l => `
+      <div class="log-item">
         <div>
           <div class="log-who">${escHtml(l.player)}</div>
-          <div class="log-detail">${l.note ? escHtml(l.note) : 'no note'} · ${ago}</div>
+          <div class="log-detail">${l.note ? escHtml(l.note) : 'no note'} · ${timeAgo(new Date(l.ts))}</div>
         </div>
         <div class="log-amount">+${l.hours}h</div>
-      </div>`;
-    }).join('');
+      </div>`).join('');
   }
 
-  // ---- Actions ----
-  function addPlayer() {
+  window.addPlayer = async function() {
     const name = document.getElementById('newName').value.trim();
     const project = document.getElementById('newProject').value.trim();
     const msg = document.getElementById('addMsg');
-
     if (!name) { msg.textContent = 'Enter a name.'; msg.className = 'msg err'; return; }
     if (!project) { msg.textContent = 'Enter a project name.'; msg.className = 'msg err'; return; }
-    if (state.players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+    if (Object.values(players).find(p => p.name.toLowerCase() === name.toLowerCase())) {
       msg.textContent = 'Name already taken.'; msg.className = 'msg err'; return;
     }
+    const btn = document.getElementById('addBtn');
+    btn.disabled = true;
+    try {
+      await push(ref(db, 'players'), { name, project, hours: 0 });
+      document.getElementById('newName').value = '';
+      document.getElementById('newProject').value = '';
+      msg.textContent = `${name} joined the competition!`;
+      msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+    } catch(e) {
+      msg.textContent = 'Error saving. Check your connection.';
+      msg.className = 'msg err';
+    }
+    btn.disabled = false;
+  };
 
-    state.players.push({ name, project, hours: 0 });
-    saveState();
-    render();
-    document.getElementById('newName').value = '';
-    document.getElementById('newProject').value = '';
-    msg.textContent = `${name} joined the competition!`;
-    msg.className = 'msg ok';
-    setTimeout(() => msg.textContent = '', 3000);
-  }
-
-  function logHours() {
-    const player = document.getElementById('logPlayer').value;
+  window.logHours = async function() {
+    const playerName = document.getElementById('logPlayer').value;
     const hours = parseFloat(document.getElementById('logHours').value);
     const note = document.getElementById('logNote').value.trim();
     const msg = document.getElementById('logMsg');
-
-    if (!player) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; return; }
+    if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; return; }
     if (!hours || hours <= 0) { msg.textContent = 'Enter valid hours.'; msg.className = 'msg err'; return; }
     if (hours > 24) { msg.textContent = 'Max 24 hours per entry.'; msg.className = 'msg err'; return; }
 
-    const p = state.players.find(p => p.name === player);
-    p.hours = Math.round((p.hours + hours) * 100) / 100;
-    state.logs.push({ player, hours, note, ts: new Date().toISOString() });
-    saveState();
-    render();
+    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
+    if (!entry) return;
+    const [id, p] = entry;
 
-    // Animate card
-    const card = document.getElementById(`card-${player}`);
-    if (card) { card.classList.remove('popped'); void card.offsetWidth; card.classList.add('popped'); }
+    const btn = document.getElementById('logBtn');
+    btn.disabled = true;
+    try {
+      const newHours = Math.round(((p.hours || 0) + hours) * 100) / 100;
+      await update(ref(db, `players/${id}`), { hours: newHours });
+      await push(ref(db, 'logs'), { player: playerName, hours, note, ts: new Date().toISOString() });
+      document.getElementById('logHours').value = '';
+      document.getElementById('logNote').value = '';
+      msg.textContent = `+${hours}h logged for ${playerName} 🎉`;
+      msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+      const card = document.getElementById(`card-${id}`);
+      if (card) { card.classList.remove('popped'); void card.offsetWidth; card.classList.add('popped'); }
+    } catch(e) {
+      msg.textContent = 'Error saving. Check your connection.';
+      msg.className = 'msg err';
+    }
+    btn.disabled = false;
+  };
 
-    document.getElementById('logHours').value = '';
-    document.getElementById('logNote').value = '';
-    msg.textContent = `+${hours}h logged for ${player} 🎉`;
-    msg.className = 'msg ok';
-    setTimeout(() => msg.textContent = '', 3000);
-  }
-
-  function quickLog(name) {
+  window._quickLog = function(name) {
     document.getElementById('logPlayer').value = name;
     document.getElementById('logHours').focus();
     document.querySelector('.panels').scrollIntoView({ behavior: 'smooth' });
-  }
+  };
 
-  function clearHistory() {
+  window.clearHistory = async function() {
     if (!confirm('Clear all activity logs? (Hours are kept.)')) return;
-    state.logs = [];
-    saveState();
-    render();
-  }
+    await remove(ref(db, 'logs'));
+  };
 
-  function resetWeek() {
+  window.resetWeek = async function() {
     if (!confirm('Reset all hours for a new week? Player names and projects are kept.')) return;
-    state.players.forEach(p => p.hours = 0);
-    state.logs = [];
-    state.weekStart = getWeekStart();
-    saveState();
-    render();
-  }
+    const updates = {};
+    Object.keys(players).forEach(id => { updates[`players/${id}/hours`] = 0; });
+    await update(ref(db), updates);
+    await remove(ref(db, 'logs'));
+  };
 
-  // ---- Helpers ----
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -630,16 +620,14 @@
     return `${Math.floor(secs/86400)}d ago`;
   }
 
-  // Allow Enter key on add form
   ['newName','newProject'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') window.addPlayer(); });
   });
   ['logHours','logNote'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') logHours(); });
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') window.logHours(); });
   });
 
-  // Init
-  render();
+  renderWeek();
 </script>
 </body>
 </html>
