@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Wars 🏆</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --border: #2a2a2a;
+    --gold: #f5c842;
+    --silver: #a8b2bd;
+    --bronze: #cd7f42;
+    --green: #4ade80;
+    --text: #f0f0f0;
+    --muted: #666;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 7rem);
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--gold), #ff8c42);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+  }
+
+  .week-display {
+    display: inline-block;
+    border: 1px solid var(--border);
+    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-top: 1rem;
+    text-transform: uppercase;
+  }
+
+  /* Leaderboard */
+  .leaderboard {
+    max-width: 700px;
+    margin: 0 auto 3rem;
+  }
+
+  .leaderboard-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+  }
+
+  .player-card {
+    display: grid;
+    grid-template-columns: 2rem 1fr auto auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .player-card.rank-1 { border-color: var(--gold); }
+  .player-card.rank-2 { border-color: var(--silver); }
+  .player-card.rank-3 { border-color: var(--bronze); }
+
+  .player-card.rank-1::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gold);
+  }
+
+  .rank-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    text-align: center;
+  }
+  .rank-1 .rank-badge { color: var(--gold); }
+  .rank-2 .rank-badge { color: var(--silver); }
+  .rank-3 .rank-badge { color: var(--bronze); }
+
+  .player-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-hours {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--green);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .player-hours span {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    display: block;
+    text-align: right;
+    margin-top: -4px;
+    letter-spacing: 1px;
+  }
+
+  .log-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.4rem 0.75rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .log-btn:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    padding: 3rem;
+    border: 1px dashed var(--border);
+    letter-spacing: 1px;
+  }
+
+  /* Progress bar */
+  .bar-wrap {
+    grid-column: 1 / -1;
+    margin-top: 0.25rem;
+  }
+
+  .bar-track {
+    height: 3px;
+    background: var(--border);
+    width: 100%;
+  }
+
+  .bar-fill {
+    height: 3px;
+    background: var(--green);
+    transition: width 0.5s ease;
+  }
+
+  .rank-1 .bar-fill { background: var(--gold); }
+  .rank-2 .bar-fill { background: var(--silver); }
+  .rank-3 .bar-fill { background: var(--bronze); }
+
+  /* Add player / log section */
+  .panels {
+    max-width: 700px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 500px) {
+    .panels { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+  }
+
+  .panel h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .field {
+    margin-bottom: 0.75rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+
+  .field input:focus, .field select:focus {
+    border-color: var(--gold);
+  }
+
+  .btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .btn:hover { opacity: 0.85; }
+  .btn.secondary {
+    background: none;
+    color: var(--green);
+    border: 1px solid var(--green);
+  }
+
+  .msg {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    margin-top: 0.75rem;
+    min-height: 1rem;
+  }
+  .msg.ok { color: var(--green); }
+  .msg.err { color: #f87171; }
+
+  /* Log history */
+  .history-section {
+    max-width: 700px;
+    margin: 2rem auto 0;
+  }
+
+  .history-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .clear-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+
+  .clear-btn:hover { border-color: #f87171; color: #f87171; }
+
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+  }
+
+  .log-item:last-child { border-bottom: none; }
+
+  .log-who { color: var(--text); }
+  .log-detail { color: var(--muted); font-size: 0.65rem; }
+  .log-amount { color: var(--green); font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
+
+  /* Reset week */
+  .reset-section {
+    max-width: 700px;
+    margin: 2rem auto 0;
+    text-align: center;
+  }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    padding: 0.5rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .reset-btn:hover { border-color: #f87171; color: #f87171; }
+
+  .streak {
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+    100% { transform: scale(1); }
+  }
+
+  .popped { animation: pop 0.3s ease; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Project Wars</h1>
+  <div class="subtitle">Who ships the most this week?</div>
+  <div class="week-display" id="weekDisplay"></div>
+</header>
+
+<div class="leaderboard">
+  <div class="leaderboard-title">🏆 Leaderboard</div>
+  <div id="leaderboard"></div>
+</div>
+
+<div class="panels">
+  <!-- Add player -->
+  <div class="panel">
+    <h2>Add Player</h2>
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="newName" placeholder="e.g. Alex" maxlength="20">
+    </div>
+    <div class="field">
+      <label>Project</label>
+      <input type="text" id="newProject" placeholder="e.g. iOS app" maxlength="30">
+    </div>
+    <button class="btn" onclick="addPlayer()">Add to Competition</button>
+    <div class="msg" id="addMsg"></div>
+  </div>
+
+  <!-- Log hours -->
+  <div class="panel">
+    <h2>Log Hours</h2>
+    <div class="field">
+      <label>Player</label>
+      <select id="logPlayer">
+        <option value="">— select —</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Hours worked</label>
+      <input type="number" id="logHours" placeholder="e.g. 2.5" min="0.25" max="24" step="0.25">
+    </div>
+    <div class="field">
+      <label>Note (optional)</label>
+      <input type="text" id="logNote" placeholder="what did you work on?" maxlength="60">
+    </div>
+    <button class="btn secondary" onclick="logHours()">+ Log Hours</button>
+    <div class="msg" id="logMsg"></div>
+  </div>
+</div>
+
+<!-- Log history -->
+<div class="history-section">
+  <div class="history-title">
+    <span>Recent Activity</span>
+    <button class="clear-btn" onclick="clearHistory()">Clear log</button>
+  </div>
+  <div id="history"></div>
+</div>
+
+<!-- Reset week -->
+<div class="reset-section" style="margin-top:3rem;">
+  <button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
+  <div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
+    Resets hours but keeps players
+  </div>
+</div>
+
+<script>
+  // ---- State ----
+  let state = loadState();
+
+  function loadState() {
+    try {
+      const s = JSON.parse(localStorage.getItem('projectwars'));
+      if (s && s.players) return s;
+    } catch(e) {}
+    return { players: [], logs: [], weekStart: getWeekStart() };
+  }
+
+  function saveState() {
+    localStorage.setItem('projectwars', JSON.stringify(state));
+  }
+
+  function getWeekStart() {
+    const d = new Date();
+    d.setDate(d.getDate() - d.getDay());
+    d.setHours(0,0,0,0);
+    return d.toISOString();
+  }
+
+  // ---- Render ----
+  function render() {
+    renderWeek();
+    renderLeaderboard();
+    renderPlayerSelect();
+    renderHistory();
+  }
+
+  function renderWeek() {
+    const start = new Date(state.weekStart);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    document.getElementById('weekDisplay').textContent = `Week of ${fmt(start)} – ${fmt(end)}`;
+  }
+
+  function renderLeaderboard() {
+    const lb = document.getElementById('leaderboard');
+    if (!state.players.length) {
+      lb.innerHTML = '<div class="empty-state">No players yet — add some above!</div>';
+      return;
+    }
+
+    const sorted = [...state.players].sort((a, b) => b.hours - a.hours);
+    const max = sorted[0].hours || 1;
+
+    lb.innerHTML = sorted.map((p, i) => {
+      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      const pct = Math.round((p.hours / max) * 100);
+      const streak = getStreak(p.name);
+      return `
+        <div class="player-card ${rankClass}" id="card-${p.name}">
+          <div class="rank-badge">${medal}</div>
+          <div>
+            <div class="player-name">${escHtml(p.name)}</div>
+            <div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-top:2px;">${escHtml(p.project)}${streak > 1 ? ` · <span class="streak">🔥 ${streak} day streak</span>` : ''}</div>
+          </div>
+          <div class="player-hours">${p.hours.toFixed(1)}<span>hrs this week</span></div>
+          <button class="log-btn" onclick="quickLog('${p.name}')">+ Log</button>
+          <div class="bar-wrap">
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function getStreak(name) {
+    // Count consecutive days with logs
+    const days = new Set(
+      state.logs.filter(l => l.player === name)
+        .map(l => new Date(l.ts).toDateString())
+    );
+    let streak = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      if (days.has(d.toDateString())) streak++;
+      else break;
+    }
+    return streak;
+  }
+
+  function renderPlayerSelect() {
+    const sel = document.getElementById('logPlayer');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— select —</option>';
+    state.players.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.name;
+      o.textContent = `${p.name} (${p.project})`;
+      if (p.name === cur) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+
+  function renderHistory() {
+    const el = document.getElementById('history');
+    if (!state.logs.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:0.75rem;padding:1rem 0;">No activity logged yet.</div>';
+      return;
+    }
+    const recent = [...state.logs].reverse().slice(0, 20);
+    el.innerHTML = recent.map(l => {
+      const ago = timeAgo(new Date(l.ts));
+      return `<div class="log-item">
+        <div>
+          <div class="log-who">${escHtml(l.player)}</div>
+          <div class="log-detail">${l.note ? escHtml(l.note) : 'no note'} · ${ago}</div>
+        </div>
+        <div class="log-amount">+${l.hours}h</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ---- Actions ----
+  function addPlayer() {
+    const name = document.getElementById('newName').value.trim();
+    const project = document.getElementById('newProject').value.trim();
+    const msg = document.getElementById('addMsg');
+
+    if (!name) { msg.textContent = 'Enter a name.'; msg.className = 'msg err'; return; }
+    if (!project) { msg.textContent = 'Enter a project name.'; msg.className = 'msg err'; return; }
+    if (state.players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+      msg.textContent = 'Name already taken.'; msg.className = 'msg err'; return;
+    }
+
+    state.players.push({ name, project, hours: 0 });
+    saveState();
+    render();
+    document.getElementById('newName').value = '';
+    document.getElementById('newProject').value = '';
+    msg.textContent = `${name} joined the competition!`;
+    msg.className = 'msg ok';
+    setTimeout(() => msg.textContent = '', 3000);
+  }
+
+  function logHours() {
+    const player = document.getElementById('logPlayer').value;
+    const hours = parseFloat(document.getElementById('logHours').value);
+    const note = document.getElementById('logNote').value.trim();
+    const msg = document.getElementById('logMsg');
+
+    if (!player) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; return; }
+    if (!hours || hours <= 0) { msg.textContent = 'Enter valid hours.'; msg.className = 'msg err'; return; }
+    if (hours > 24) { msg.textContent = 'Max 24 hours per entry.'; msg.className = 'msg err'; return; }
+
+    const p = state.players.find(p => p.name === player);
+    p.hours = Math.round((p.hours + hours) * 100) / 100;
+    state.logs.push({ player, hours, note, ts: new Date().toISOString() });
+    saveState();
+    render();
+
+    // Animate card
+    const card = document.getElementById(`card-${player}`);
+    if (card) { card.classList.remove('popped'); void card.offsetWidth; card.classList.add('popped'); }
+
+    document.getElementById('logHours').value = '';
+    document.getElementById('logNote').value = '';
+    msg.textContent = `+${hours}h logged for ${player} 🎉`;
+    msg.className = 'msg ok';
+    setTimeout(() => msg.textContent = '', 3000);
+  }
+
+  function quickLog(name) {
+    document.getElementById('logPlayer').value = name;
+    document.getElementById('logHours').focus();
+    document.querySelector('.panels').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function clearHistory() {
+    if (!confirm('Clear all activity logs? (Hours are kept.)')) return;
+    state.logs = [];
+    saveState();
+    render();
+  }
+
+  function resetWeek() {
+    if (!confirm('Reset all hours for a new week? Player names and projects are kept.')) return;
+    state.players.forEach(p => p.hours = 0);
+    state.logs = [];
+    state.weekStart = getWeekStart();
+    saveState();
+    render();
+  }
+
+  // ---- Helpers ----
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function timeAgo(date) {
+    const secs = Math.floor((Date.now() - date) / 1000);
+    if (secs < 60) return 'just now';
+    if (secs < 3600) return `${Math.floor(secs/60)}m ago`;
+    if (secs < 86400) return `${Math.floor(secs/3600)}h ago`;
+    return `${Math.floor(secs/86400)}d ago`;
+  }
+
+  // Allow Enter key on add form
+  ['newName','newProject'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
+  });
+  ['logHours','logNote'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') logHours(); });
+  });
+
+  // Init
+  render();
+</script>
+</body>
+</html>
