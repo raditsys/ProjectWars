@@ -60,7 +60,7 @@
   .sync-status.err { color: var(--red); }
 
   /* ── Leaderboard ── */
-  .leaderboard { max-width: 700px; margin: 0 auto 3rem; }
+  .leaderboard { max-width: 900px; margin: 0 auto 3rem; }
 
   .leaderboard-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -178,14 +178,15 @@
 
   /* ── Panels ── */
   .panels {
-    max-width: 700px;
+    max-width: 900px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 1rem;
   }
 
-  @media (max-width: 650px) { .panels { grid-template-columns: 1fr; } }
+  @media (max-width: 800px) { .panels { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .panels { grid-template-columns: 1fr; } }
 
   .panel { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; }
 
@@ -244,7 +245,7 @@
   .msg.err { color: var(--red); }
 
   /* ── History ── */
-  .history-section { max-width: 700px; margin: 2rem auto 0; }
+  .history-section { max-width: 900px; margin: 2rem auto 0; }
 
   .history-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -286,7 +287,7 @@
   .log-amount { color: var(--green); font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
 
   /* ── Reset ── */
-  .reset-section { max-width: 700px; margin: 2rem auto 0; text-align: center; }
+  .reset-section { max-width: 900px; margin: 2rem auto 0; text-align: center; }
   .reset-btn {
     background: none; border: 1px solid var(--border); color: var(--muted);
     font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 2px;
@@ -300,6 +301,80 @@
     100% { transform: scale(1); }
   }
   .popped { animation: pop 0.3s ease; }
+
+  /* ── Delete Modal ── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--red);
+    padding: 2rem;
+    width: 100%;
+    max-width: 360px;
+    margin: 1rem;
+  }
+
+  .modal h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    color: var(--red);
+    margin-bottom: 0.5rem;
+  }
+
+  .modal p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+  }
+
+  .modal p strong { color: var(--text); }
+
+  .modal .field { margin-bottom: 1rem; }
+
+  .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 1rem; }
+
+  .btn-danger {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--red);
+    color: #000;
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-danger:hover { opacity: 0.85; }
+  .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-cancel {
+    width: 100%;
+    padding: 0.75rem;
+    background: none;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-cancel:hover { border-color: var(--muted); color: var(--text); }
+
+  .modal-err { font-size: 0.7rem; color: var(--red); letter-spacing: 1px; margin-top: 0.5rem; min-height: 1rem; }
 </style>
 </head>
 <body>
@@ -346,6 +421,19 @@
     <div class="msg" id="projMsg"></div>
   </div>
 
+  <!-- Delete Player -->
+  <div class="panel">
+    <h2>Delete Player</h2>
+    <div class="field">
+      <label>Player to delete</label>
+      <select id="deletePlayer">
+        <option value="">— select —</option>
+      </select>
+    </div>
+    <button class="btn" style="background:none;color:var(--red);border:1px solid var(--red);" onclick="openDeletePlayer()">Delete Player</button>
+    <div class="msg" id="deleteMsg"></div>
+  </div>
+
   <!-- Log Hours -->
   <div class="panel">
     <h2>Log Hours</h2>
@@ -387,6 +475,23 @@
   <button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
   <div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
     Resets all hours but keeps players and projects
+  </div>
+</div>
+
+<!-- Password Modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal">
+    <h3 id="modalTitle">Confirm Delete</h3>
+    <p id="modalDesc">Enter the admin password to continue.</p>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="modalPassword" placeholder="••••••" autocomplete="off">
+    </div>
+    <div class="modal-err" id="modalErr"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-danger" id="modalConfirmBtn" onclick="confirmDelete()">Delete</button>
+    </div>
   </div>
 </div>
 
@@ -536,6 +641,7 @@
     }
     fill('projPlayer', document.getElementById('projPlayer').value, '— select —');
     fill('logPlayer', document.getElementById('logPlayer').value, '— select —');
+    fill('deletePlayer', document.getElementById('deletePlayer').value, '— select —');
     updateProjectSelect();
   }
 
@@ -682,14 +788,74 @@
     document.querySelector('.panels').scrollIntoView({ behavior: 'smooth' });
   };
 
-  window._removeProject = async function(playerId, projId, projName, playerName) {
-    if (!confirm(`Remove project "${projName}" from ${playerName}?\n\nThis will delete its hours permanently.`)) return;
-    try {
-      await remove(ref(db, `players/${playerId}/projects/${projId}`));
-    } catch(e) {
-      alert('Error removing project. Check your connection.');
-    }
+  // ── Delete Modal ──
+  let pendingDelete = null; // { type: 'player'|'project', ... }
+
+  window.openDeletePlayer = function() {
+    const playerName = document.getElementById('deletePlayer').value;
+    const msg = document.getElementById('deleteMsg');
+    if (!playerName) { msg.textContent = 'Select a player first.'; msg.className = 'msg err'; setTimeout(() => msg.textContent = '', 3000); return; }
+    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
+    if (!entry) return;
+    pendingDelete = { type: 'player', playerId: entry[0], playerName };
+    document.getElementById('modalTitle').textContent = 'Delete Player';
+    document.getElementById('modalDesc').innerHTML = `This will permanently delete <strong>${escHtml(playerName)}</strong> and all their projects and hours.`;
+    openModal();
   };
+
+  window._removeProject = function(playerId, projId, projName, playerName) {
+    pendingDelete = { type: 'project', playerId, projId, projName, playerName };
+    document.getElementById('modalTitle').textContent = 'Delete Project';
+    document.getElementById('modalDesc').innerHTML = `This will permanently delete <strong>${escHtml(projName)}</strong> from ${escHtml(playerName)} and all its hours.`;
+    openModal();
+  };
+
+  function openModal() {
+    document.getElementById('modalPassword').value = '';
+    document.getElementById('modalErr').textContent = '';
+    document.getElementById('modalBackdrop').classList.add('open');
+    setTimeout(() => document.getElementById('modalPassword').focus(), 50);
+  }
+
+  window.closeModal = function() {
+    document.getElementById('modalBackdrop').classList.remove('open');
+    pendingDelete = null;
+  };
+
+  window.confirmDelete = async function() {
+    const pw = document.getElementById('modalPassword').value;
+    const errEl = document.getElementById('modalErr');
+    if (pw !== 'ass') {
+      errEl.textContent = 'Wrong password.';
+      document.getElementById('modalPassword').value = '';
+      document.getElementById('modalPassword').focus();
+      return;
+    }
+    const btn = document.getElementById('modalConfirmBtn');
+    btn.disabled = true;
+    try {
+      if (pendingDelete.type === 'player') {
+        await remove(ref(db, `players/${pendingDelete.playerId}`));
+      } else {
+        await remove(ref(db, `players/${pendingDelete.playerId}/projects/${pendingDelete.projId}`));
+      }
+      window.closeModal();
+    } catch(e) {
+      errEl.textContent = 'Error deleting. Check your connection.';
+    }
+    btn.disabled = false;
+  };
+
+  // Close modal on backdrop click
+  document.getElementById('modalBackdrop').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalBackdrop')) window.closeModal();
+  });
+
+  // Enter key in password field
+  document.getElementById('modalPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.confirmDelete();
+    if (e.key === 'Escape') window.closeModal();
+  });
 
   window.clearHistory = async function() {
     if (!confirm('Clear all activity logs? (Hours are kept.)')) return;
