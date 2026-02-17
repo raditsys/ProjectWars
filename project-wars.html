@@ -882,13 +882,15 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(3rem, 12vw, 5rem);
     letter-spacing: 4px;
+    text-align: center;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+  .login-title .wavy-letter {
     background: linear-gradient(135deg, var(--gold), #ff8c42);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-align: center;
-    line-height: 1;
-    margin-bottom: 0.25rem;
   }
 
   .login-subtitle {
@@ -1490,8 +1492,8 @@
 <!-- LOGIN SCREEN -->
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
-    <div class="login-title">Project Wars</div>
-    <div class="login-subtitle">Who ships the most this week?</div>
+    <div class="login-title" id="wavyLoginTitle" aria-label="Project Wars"></div>
+    <div class="login-subtitle" id="wavyLoginSubtitle" aria-label="Who ships the most this week?"></div>
 
     <div class="login-tabs">
       <button class="login-tab active" id="tabLogin" onclick="switchLoginTab('login')">Login</button>
@@ -1825,8 +1827,10 @@
       }
     });
   }
-  makeWavy(document.getElementById('wavyTitle'),    'Project Wars',                 0,    0.08);
-  makeWavy(document.getElementById('wavySubtitle'), 'Who ships the most this week?', 0.3, 0.04);
+  makeWavy(document.getElementById('wavyTitle'),        'Project Wars',                 0,    0.08);
+  makeWavy(document.getElementById('wavySubtitle'),     'Who ships the most this week?', 0.3, 0.04);
+  makeWavy(document.getElementById('wavyLoginTitle'),   'Project Wars',                 0,    0.08);
+  makeWavy(document.getElementById('wavyLoginSubtitle'),'Who ships the most this week?', 0.3, 0.04);
 </script>
 
 <script type="module">
