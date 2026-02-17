@@ -857,6 +857,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(5rem, 16vw, 9rem);
     letter-spacing: 4px;
+<<<<<<< HEAD
     text-align: center;
     line-height: 1.1;
     margin-bottom: 0.25rem;
@@ -873,10 +874,15 @@
   }
 
   .login-title .wavy-letter {
+=======
+>>>>>>> parent of 005198c (Wobbly landing page)
     background: linear-gradient(135deg, var(--gold), #ff8c42);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-align: center;
+    line-height: 1;
+    margin-bottom: 0.25rem;
   }
 
   .login-tabs {
@@ -1471,6 +1477,11 @@
   <div class="login-title" id="wavyLoginTitle" aria-label="Project Wars"></div>
   <div class="login-subtitle" id="wavyLoginSubtitle" aria-label="Who ships the most this week?"></div>
   <div class="login-box">
+<<<<<<< HEAD
+=======
+    <div class="login-title">Project Wars</div>
+    <div class="login-subtitle">Who ships the most this week?</div>
+>>>>>>> parent of 005198c (Wobbly landing page)
 
     <div class="login-tabs">
       <button class="login-tab active" id="tabLogin" onclick="switchLoginTab('login')">Login</button>
@@ -1803,6 +1814,7 @@
       el.appendChild(s);
     });
   }
+<<<<<<< HEAD
 
   makeWavy(document.getElementById('wavyTitle'),         'Project Wars');
   makeWavy(document.getElementById('wavySubtitle'),      'Who ships the most this week?');
@@ -1969,6 +1981,10 @@
   });
 
 })();
+=======
+  makeWavy(document.getElementById('wavyTitle'),    'Project Wars',                 0,    0.08);
+  makeWavy(document.getElementById('wavySubtitle'), 'Who ships the most this week?', 0.3, 0.04);
+>>>>>>> parent of 005198c (Wobbly landing page)
 </script>
 
 <script type="module">
