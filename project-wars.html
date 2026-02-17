@@ -712,6 +712,371 @@
     40%,80% { transform: translateX(6px); }
   }
   .shake { animation: shake 0.4s ease; }
+
+  /* ══ SHOP EFFECT KEYFRAMES ══ */
+
+  @keyframes lava {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .bar-fill.fx-lava {
+    background: linear-gradient(90deg,#ff4400,#ff9900,#ffcc00,#ff4400,#cc0000) !important;
+    background-size: 300% 100% !important;
+    animation: lava 2s ease infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes rainbow-scroll {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .bar-fill.fx-rainbow {
+    background: linear-gradient(90deg,#ff0000,#ff8800,#ffff00,#00ff00,#0088ff,#8800ff,#ff0000) !important;
+    background-size: 200% 100% !important;
+    animation: rainbow-scroll 2s linear infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes plasma-shift {
+    0%   { background-position: 0% 50%;   filter: hue-rotate(0deg); }
+    50%  { background-position: 100% 50%; filter: hue-rotate(180deg); }
+    100% { background-position: 0% 50%;   filter: hue-rotate(360deg); }
+  }
+  .bar-fill.fx-plasma {
+    background: linear-gradient(90deg,#a200ff,#00cfff,#ff00aa,#a200ff) !important;
+    background-size: 300% 100% !important;
+    animation: plasma-shift 1.5s ease infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes glitch-bar {
+    0%,94%,100% { clip-path: none; transform: skewX(0deg); filter: none; }
+    95%  { clip-path: inset(20% 0 30% 0); transform: skewX(-4deg); filter: hue-rotate(90deg); }
+    96%  { clip-path: inset(60% 0 5% 0);  transform: skewX(4deg);  filter: hue-rotate(200deg); }
+    97%  { clip-path: inset(10% 0 60% 0); transform: skewX(-2deg); filter: hue-rotate(270deg); }
+    98%  { clip-path: none; transform: skewX(0deg); filter: none; }
+  }
+  .bar-fill.fx-glitch {
+    background: linear-gradient(90deg,#00ffcc,#0044ff) !important;
+    animation: glitch-bar 3s steps(1) infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes fire-bar {
+    0%,100% { filter: brightness(1) saturate(1); }
+    25%     { filter: brightness(1.4) saturate(1.3); }
+    50%     { filter: brightness(0.9) saturate(0.9); }
+    75%     { filter: brightness(1.3) saturate(1.2); }
+  }
+  .bar-fill.fx-fire {
+    background: linear-gradient(90deg,#330000,#cc0000,#ff6600,#ffcc00) !important;
+    animation: fire-bar 0.8s ease infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes aurora-flow {
+    0%   { background-position: 0% 50%;   filter: hue-rotate(0deg) brightness(1.1); }
+    50%  { background-position: 100% 50%; filter: hue-rotate(120deg) brightness(1.3); }
+    100% { background-position: 0% 50%;   filter: hue-rotate(0deg) brightness(1.1); }
+  }
+  .bar-fill.fx-aurora {
+    background: linear-gradient(90deg,#00ff88,#00ccff,#aa00ff,#00ff88) !important;
+    background-size: 300% 100% !important;
+    animation: aurora-flow 3s ease infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes galaxy-drift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .bar-fill.fx-galaxy {
+    background: linear-gradient(90deg,#0d0221,#6a0dad,#1b0057,#3d00b3,#0d0221) !important;
+    background-size: 400% 100% !important;
+    animation: galaxy-drift 4s ease infinite !important;
+    box-shadow: 0 0 8px #6a0dad, 0 0 16px #3d00b3 !important;
+    height: 100% !important;
+  }
+
+  @keyframes neon-pulse {
+    0%,100% { box-shadow: 0 0 4px #00ffcc, 0 0 8px #00ffcc;  opacity: 1; }
+    50%     { box-shadow: 0 0 14px #00ffcc, 0 0 28px #00ffcc; opacity: 0.8; }
+  }
+  .bar-fill.fx-neon {
+    background: #00ffcc !important;
+    animation: neon-pulse 1s ease-in-out infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes holo-shift {
+    0%   { background-position: 0% 50%;   filter: hue-rotate(0deg) saturate(2); }
+    100% { background-position: 100% 50%; filter: hue-rotate(360deg) saturate(2); }
+  }
+  .bar-fill.fx-holo {
+    background: linear-gradient(90deg,#ff0080,#ff8c00,#ffe100,#00ff80,#00cfff,#cc00ff,#ff0080) !important;
+    background-size: 200% 100% !important;
+    animation: holo-shift 1.2s linear infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes gold-shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+  .bar-fill.fx-shimmer {
+    background: linear-gradient(90deg,#b8860b 0%,#ffd700 25%,#fffacd 50%,#ffd700 75%,#b8860b 100%) !important;
+    background-size: 200% 100% !important;
+    animation: gold-shimmer 1.5s linear infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes ice-flow {
+    0%   { background-position: 0% 50%;   filter: brightness(1); }
+    50%  { background-position: 100% 50%; filter: brightness(1.4); }
+    100% { background-position: 0% 50%;   filter: brightness(1); }
+  }
+  .bar-fill.fx-ice {
+    background: linear-gradient(90deg,#a8edea,#00bfff,#ffffff,#80d0ff,#a8edea) !important;
+    background-size: 300% 100% !important;
+    animation: ice-flow 2s ease infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes toxic-pulse {
+    0%,100% { filter: brightness(1) drop-shadow(0 0 3px #39ff14); }
+    50%     { filter: brightness(1.5) drop-shadow(0 0 10px #39ff14); }
+  }
+  .bar-fill.fx-toxic {
+    background: linear-gradient(90deg,#003300,#39ff14,#00cc00,#003300) !important;
+    background-size: 200% 100% !important;
+    animation: toxic-pulse 0.9s ease-in-out infinite, rainbow-scroll 3s linear infinite !important;
+    height: 100% !important;
+  }
+
+  @keyframes vaporwave-flow {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .bar-fill.fx-vaporwave {
+    background: linear-gradient(90deg,#ff71ce,#b967ff,#05ffa1,#01cdfe,#ff71ce) !important;
+    background-size: 200% 100% !important;
+    animation: vaporwave-flow 2.5s linear infinite !important;
+    height: 100% !important;
+  }
+
+  /* Glow border effect — on .bar-track */
+  @keyframes glow-cycle {
+    0%   { box-shadow: 0 0 6px 2px rgba(255,0,255,0.7); }
+    33%  { box-shadow: 0 0 10px 3px rgba(0,255,255,0.7); }
+    66%  { box-shadow: 0 0 10px 3px rgba(255,255,0,0.7); }
+    100% { box-shadow: 0 0 6px 2px rgba(255,0,255,0.7); }
+  }
+  .bar-track.fx-glow { animation: glow-cycle 2s ease-in-out infinite; border-radius: 2px; }
+
+  /* Stars — on .bar-wrap */
+  @keyframes star-float {
+    0%   { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-14px); }
+  }
+  .bar-wrap.fx-stars::after {
+    content: '✦ ✧ ✦ ✧ ✦ ✧';
+    position: absolute;
+    font-size: 0.5rem;
+    color: var(--gold);
+    letter-spacing: 3px;
+    top: -12px;
+    left: 1.25rem;
+    animation: star-float 1.4s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  .bar-wrap { position: relative; padding: 0 1.25rem 1rem; }
+
+  /* ── SHOP DRAWER ── */
+  .shop-tab {
+    position: fixed;
+    right: 0;
+    top: calc(50% + 90px);
+    transform: translateY(-50%);
+    z-index: 200;
+    writing-mode: vertical-rl;
+    background: #6a0dad;
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+    padding: 1.5rem 0.6rem;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s;
+    box-shadow: -4px 0 20px rgba(106,13,173,0.4);
+  }
+  .shop-tab:hover { background: #8b00ff; }
+
+  .shop-drawer {
+    position: fixed;
+    top: 0;
+    right: -520px;
+    width: 500px;
+    max-width: 95vw;
+    height: 100vh;
+    background: #0d0221;
+    border-left: 2px solid #3d00b3;
+    z-index: 300;
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .shop-drawer.open { right: 0; }
+
+  .shop-header {
+    background: #0a0118;
+    border-bottom: 1px solid #3d00b3;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .shop-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #cc00ff, #00cfff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .shop-close {
+    background: none;
+    border: 1px solid #3d00b3;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .shop-close:hover { border-color: var(--red); color: var(--red); }
+
+  .shop-body { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .shop-player-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .shop-field {
+    background: #0a0118;
+    border: 1px solid #3d00b3;
+    padding: 0.85rem;
+  }
+  .shop-field label {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: #8844cc;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .shop-field select {
+    width: 100%;
+    background: #0d0221;
+    border: 1px solid #3d00b3;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.5rem;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .shop-wallet-box {
+    background: #0a0118;
+    border: 1px solid #3d00b3;
+    padding: 0.85rem;
+    text-align: center;
+  }
+  .shop-wallet-coins {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .shop-wallet-lbl { font-size: 0.55rem; letter-spacing: 2px; color: #8844cc; text-transform: uppercase; }
+
+  .shop-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    color: #8844cc;
+    border-bottom: 1px solid #3d00b3;
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+
+  .shop-item {
+    background: #0a0118;
+    border: 2px solid #1a0057;
+    padding: 0.85rem 0.75rem;
+    transition: border-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    cursor: pointer;
+    user-select: none;
+  }
+  .shop-item:hover:not(.owned) { border-color: #aa00ff; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(106,13,173,0.4); }
+  .shop-item.owned { cursor: default; border-color: #1a3a1a; }
+  .shop-item.equipped { border-color: var(--gold) !important; box-shadow: 0 0 12px rgba(245,200,66,0.25) !important; }
+
+  .shop-item-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .shop-preview-wrap { height: 8px; background: #1a0057; border-radius: 1px; overflow: visible; margin-bottom: 0.5rem; }
+  .shop-preview-fill { height: 100%; border-radius: 1px; }
+
+  .shop-item-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .shop-price { font-size: 0.65rem; color: var(--gold); letter-spacing: 1px; }
+  .shop-tag {
+    font-size: 0.5rem;
+    letter-spacing: 1px;
+    padding: 0.15rem 0.4rem;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  .tag-buy    { background: #6a0dad; color: #fff; }
+  .tag-owned  { background: #1a3a1a; color: var(--green); }
+  .tag-on     { background: #3a2a00; color: var(--gold); }
+
+  .shop-equip-row { margin-top: 0.5rem; }
+  .shop-equip-btn {
+    width: 100%;
+    padding: 0.35rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .shop-equip-btn:hover { opacity: 0.8; }
+  .btn-equip   { background: var(--gold); color: #000; }
+  .btn-unequip { background: transparent; color: var(--muted); border: 1px solid #3d00b3 !important; }
 </style>
 </head>
 <body>
@@ -723,7 +1088,7 @@
 </button>
 
 <!-- CASINO DRAWER OVERLAY -->
-<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino()"></div>
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop();"></div>
 
 <!-- CASINO DRAWER -->
 <div class="casino-drawer" id="casinoDrawer">
@@ -783,6 +1148,43 @@
       <button class="bj-btn hit"   id="btnHit"   onclick="bjHit()"  disabled>Hit</button>
       <button class="bj-btn stand" id="btnStand" onclick="bjStand()" disabled>Stand</button>
       <button class="bj-btn dbl"   id="btnDouble" onclick="bjDouble()" disabled>Double</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- SHOP TAB -->
+<button class="shop-tab" id="shopTab" onclick="openShop()">
+  <span id="shopTabArrow">◀</span>
+  SHOP
+</button>
+
+<!-- SHOP DRAWER -->
+<div class="shop-drawer" id="shopDrawer">
+  <div class="shop-header">
+    <h2>✨ Effect Shop</h2>
+    <button class="shop-close" onclick="closeShop()">✕ Close</button>
+  </div>
+  <div class="shop-body">
+
+    <div class="shop-player-row">
+      <div class="shop-field">
+        <label>Shopping as</label>
+        <select id="shopPlayer" onchange="renderShopItems()">
+          <option value="">— select —</option>
+        </select>
+      </div>
+      <div class="shop-wallet-box">
+        <div class="shop-wallet-coins" id="shopWalletDisplay">—</div>
+        <div class="shop-wallet-lbl">🪙 coins</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="shop-section-title">Bar Effects</div>
+      <div class="shop-grid" id="shopGrid">
+        <div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Select your name above to shop</div>
+      </div>
     </div>
 
   </div>
@@ -942,6 +1344,10 @@
     syncEl.className = 'sync-status live';
     render();
     refreshCasinoWallet();
+    // Refresh shop if open
+    if (document.getElementById('shopDrawer')?.classList.contains('open')) {
+      renderShopItems();
+    }
   }, () => {
     syncEl.textContent = '⬤ connection error';
     syncEl.className = 'sync-status err';
@@ -1065,8 +1471,8 @@
             <button class="log-btn" onclick="window._quickLog('${escHtml(p.name)}')">+ Log</button>
           </div>
           <div class="card-projects">${pillsHtml}</div>
-          <div class="bar-wrap">
-            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          <div class="bar-wrap${p.equippedFx === 'stars' ? ' fx-stars' : ''}">
+            <div class="bar-track${p.equippedFx === 'glow' ? ' fx-glow' : ''}"><div class="bar-fill${p.equippedFx && p.equippedFx !== 'glow' && p.equippedFx !== 'stars' ? ' fx-' + p.equippedFx : ''}" style="width:${pct}%"></div></div>
           </div>
         </div>`;
     }).join('');
@@ -1088,6 +1494,7 @@
     fill('logPlayer',    document.getElementById('logPlayer').value,    '— select —');
     fill('deletePlayer', document.getElementById('deletePlayer').value, '— select —');
     fill('casinoPlayer', document.getElementById('casinoPlayer').value, '— select your name —');
+    fill('shopPlayer',   document.getElementById('shopPlayer').value,   '— select —');
     updateProjectSelect();
   }
 
@@ -1338,8 +1745,145 @@
   setInterval(renderWeek, 60000); // refresh countdown every minute
 
   // ══════════════════════════════════════════
-  // ── CASINO / BLACKJACK ──
+  // ── SHOP ──
   // ══════════════════════════════════════════
+
+  const SHOP_ITEMS = [
+    { id: 'lava',      name: '🌋 Lava',       price: 150,  desc: 'Molten fire gradient',     previewClass: 'fx-lava' },
+    { id: 'rainbow',   name: '🌈 Rainbow',     price: 100,  desc: 'Scrolling rainbow',        previewClass: 'fx-rainbow' },
+    { id: 'plasma',    name: '⚡ Plasma',      price: 200,  desc: 'Electric hue-shifting',    previewClass: 'fx-plasma' },
+    { id: 'glitch',    name: '📺 Glitch',      price: 250,  desc: 'Corrupted signal',         previewClass: 'fx-glitch' },
+    { id: 'fire',      name: '🔥 Fire',        price: 175,  desc: 'Flickering flames',        previewClass: 'fx-fire' },
+    { id: 'aurora',    name: '🌌 Aurora',      price: 200,  desc: 'Northern lights',          previewClass: 'fx-aurora' },
+    { id: 'galaxy',    name: '🪐 Galaxy',      price: 300,  desc: 'Deep space glow',          previewClass: 'fx-galaxy' },
+    { id: 'neon',      name: '💡 Neon',        price: 125,  desc: 'Pulsing cyan glow',        previewClass: 'fx-neon' },
+    { id: 'holo',      name: '💿 Holographic', price: 350,  desc: 'Full-spectrum holo',       previewClass: 'fx-holo' },
+    { id: 'shimmer',   name: '✨ Gold Shimmer', price: 225,  desc: 'Gleaming gold sweep',     previewClass: 'fx-shimmer' },
+    { id: 'ice',       name: '🧊 Ice',         price: 150,  desc: 'Frozen crystal flow',      previewClass: 'fx-ice' },
+    { id: 'toxic',     name: '☢️ Toxic',       price: 275,  desc: 'Radioactive green pulse',  previewClass: 'fx-toxic' },
+    { id: 'vaporwave', name: '🌸 Vaporwave',   price: 200,  desc: 'Pastel synthwave dream',   previewClass: 'fx-vaporwave' },
+    { id: 'glow',      name: '🔮 Glow Border', price: 175,  desc: 'Cycling neon border',      previewClass: null, trackFx: true },
+    { id: 'stars',     name: '⭐ Stars',       price: 125,  desc: 'Floating star particles',  previewClass: null, wrapFx: true },
+  ];
+
+  window.openShop = function() {
+    closeCasino();
+    document.getElementById('shopDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('shopTabArrow').textContent = '▶';
+    renderShopItems();
+  };
+
+  window.closeShop = function() {
+    document.getElementById('shopDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('shopTabArrow').textContent = '◀';
+  };
+
+  // Overlay closes whichever drawer is open
+  document.getElementById('drawerOverlay').addEventListener('click', () => {
+    closeCasino();
+    closeShop();
+  });
+
+  function getShopPlayer() {
+    const name = document.getElementById('shopPlayer').value;
+    const entry = Object.entries(players).find(([, p]) => p.name === name);
+    return entry ? { id: entry[0], ...entry[1] } : null;
+  }
+
+  window.renderShopItems = function() {
+    const p = getShopPlayer();
+
+    // Wallet display
+    document.getElementById('shopWalletDisplay').textContent =
+      p ? (p.coins || 0).toLocaleString() : '—';
+
+    const grid = document.getElementById('shopGrid');
+    if (!p) {
+      grid.innerHTML = '<div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Select your name above to shop</div>';
+      return;
+    }
+
+    const owned    = p.ownedFx    ? Object.keys(p.ownedFx)    : [];
+    const equipped = p.equippedFx || null;
+
+    grid.innerHTML = SHOP_ITEMS.map(item => {
+      const isOwned    = owned.includes(item.id);
+      const isEquipped = equipped === item.id;
+      const canAfford  = (p.coins || 0) >= item.price;
+
+      // Preview bar style
+      let previewInner = '';
+      if (item.previewClass) {
+        previewInner = `<div class="shop-preview-fill ${item.previewClass}" style="width:70%;"></div>`;
+      } else if (item.trackFx) {
+        previewInner = `<div class="shop-preview-fill" style="width:70%;background:#00ff88;"></div>`;
+      } else if (item.wrapFx) {
+        previewInner = `<div class="shop-preview-fill" style="width:70%;background:linear-gradient(90deg,var(--gold),#fff,var(--gold));background-size:200%;animation:gold-shimmer 1.5s linear infinite;"></div>`;
+      }
+
+      const itemClasses = ['shop-item', isOwned ? 'owned' : '', isEquipped ? 'equipped' : ''].filter(Boolean).join(' ');
+      const tag = isEquipped ? '<span class="shop-tag tag-on">ON</span>'
+                : isOwned   ? '<span class="shop-tag tag-owned">Owned</span>'
+                            : `<span class="shop-tag tag-buy">${canAfford ? 'Buy' : 'Too Poor'}</span>`;
+
+      const buyAction = !isOwned && canAfford
+        ? `onclick="buyEffect('${item.id}','${p.name}')"`
+        : '';
+
+      const equipBtn = isOwned
+        ? isEquipped
+          ? `<div class="shop-equip-row"><button class="shop-equip-btn btn-unequip" onclick="unequipEffect('${p.name}')">Unequip</button></div>`
+          : `<div class="shop-equip-row"><button class="shop-equip-btn btn-equip" onclick="equipEffect('${item.id}','${p.name}')">Equip</button></div>`
+        : '';
+
+      return `
+        <div class="${itemClasses}" ${buyAction}>
+          <div class="shop-item-name">${item.name}</div>
+          <div class="shop-preview-wrap">${previewInner}</div>
+          <div class="shop-item-bottom">
+            <span class="shop-price">${isOwned ? '✓ owned' : '🪙 ' + item.price}</span>
+            ${tag}
+          </div>
+          ${equipBtn}
+        </div>`;
+    }).join('');
+  };
+
+  window.buyEffect = async function(fxId, playerName) {
+    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
+    if (!entry) return;
+    const [pid, p] = entry;
+    const item = SHOP_ITEMS.find(i => i.id === fxId);
+    if (!item) return;
+    if ((p.coins || 0) < item.price) return;
+
+    const newCoins = (p.coins || 0) - item.price;
+    const updates = {};
+    updates[`players/${pid}/coins`] = newCoins;
+    updates[`players/${pid}/ownedFx/${fxId}`] = true;
+    await update(ref(db, '/'), updates);
+    spawnCoinFloat(`-${item.price} 🪙`);
+  };
+
+  window.equipEffect = async function(fxId, playerName) {
+    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
+    if (!entry) return;
+    const [pid] = entry;
+    await update(ref(db, `players/${pid}`), { equippedFx: fxId });
+  };
+
+  window.unequipEffect = async function(playerName) {
+    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
+    if (!entry) return;
+    const [pid] = entry;
+    await update(ref(db, `players/${pid}`), { equippedFx: null });
+  };
+
+  // Re-render shop items when firebase data updates (so wallet refreshes instantly)
+  // (handled via patched onValue above)
+
 
   // Web Audio for sounds
   let audioCtx = null;
@@ -1460,6 +2004,7 @@
 
   // Casino drawer open/close
   window.openCasino = function() {
+    closeShop();
     document.getElementById('casinoDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '▶';
