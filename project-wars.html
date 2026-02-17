@@ -316,7 +316,7 @@
   .gamble-tab {
     position: fixed;
     right: 0;
-    top: 50%;
+    top: calc(50% - 80px);
     transform: translateY(-50%);
     z-index: 200;
     writing-mode: vertical-rl;
@@ -923,13 +923,109 @@
   }
   .player-card.fx-stars { padding-bottom: 4px; }
 
+  /* ── MATRIX — scrolling green code rain ── */
+  @keyframes matrix-drop {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 0% 100%; }
+  }
+  @keyframes matrix-flicker {
+    0%,100% { opacity: 1; }
+    92%     { opacity: 1; }
+    93%     { opacity: 0.5; }
+    94%     { opacity: 1; }
+    97%     { opacity: 0.7; }
+    98%     { opacity: 1; }
+  }
+  .player-card.fx-matrix {
+    background-color: #000 !important;
+    background-image:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0px,
+        transparent 18px,
+        rgba(0,255,65,0.07) 18px,
+        rgba(0,255,65,0.07) 19px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 10px,
+        rgba(0,255,65,0.04) 10px,
+        rgba(0,255,65,0.04) 11px
+      ) !important;
+    border-color: #00ff41 !important;
+    box-shadow: 0 0 12px rgba(0,255,65,0.4), inset 0 0 30px rgba(0,255,65,0.06) !important;
+    animation: matrix-flicker 4s steps(1) infinite !important;
+    color: #00ff41 !important;
+  }
+  .player-card.fx-matrix .player-name,
+  .player-card.fx-matrix .player-hours,
+  .player-card.fx-matrix .streak { color: #00ff41 !important; -webkit-text-fill-color: #00ff41 !important; }
+  .player-card.fx-matrix .rank-badge { color: #00ff41 !important; }
+  .player-card.fx-matrix .player-coins { color: #80ffb0 !important; }
+  .player-card.fx-matrix::after {
+    content: '01 10 11 00 10 01 11 00 01 10';
+    position: absolute;
+    bottom: 4px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 0.4rem;
+    letter-spacing: 4px;
+    color: rgba(0,255,65,0.35);
+    pointer-events: none;
+    font-family: 'DM Mono', monospace;
+    z-index: 2;
+  }
+
+  /* ── INFERNO — multi-layer animated fire with sparks ── */
+  @keyframes inferno-base {
+    0%,100% { background-position: 50% 100%; filter: brightness(1) saturate(1.2); }
+    25%     { background-position: 45% 80%;  filter: brightness(1.3) saturate(1.5); }
+    50%     { background-position: 55% 90%;  filter: brightness(0.95) saturate(1); }
+    75%     { background-position: 50% 85%;  filter: brightness(1.2) saturate(1.3); }
+  }
+  @keyframes inferno-glow {
+    0%,100% { box-shadow: 0 4px 20px rgba(255,60,0,0.6), 0 -2px 14px rgba(255,180,0,0.3), inset 0 0 20px rgba(255,40,0,0.1); }
+    50%     { box-shadow: 0 8px 35px rgba(255,80,0,0.8), 0 -4px 20px rgba(255,220,0,0.5), inset 0 0 30px rgba(255,60,0,0.15); }
+  }
+  @keyframes inferno-border {
+    0%,100% { border-color: #ff4400; }
+    33%     { border-color: #ff9900; }
+    66%     { border-color: #ffcc00; }
+  }
+  .player-card.fx-inferno {
+    background:
+      radial-gradient(ellipse at 30% 100%, #ff6600 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 100%, #ff3300 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%,  #ff9900 0%, transparent 60%),
+      linear-gradient(180deg, #0a0000 0%, #220000 30%, #550000 60%, #cc2200 85%, #ff6600 100%) !important;
+    background-size: 200% 200% !important;
+    animation: inferno-base 1.1s ease infinite, inferno-glow 1.1s ease infinite, inferno-border 1.1s ease infinite !important;
+  }
+  .player-card.fx-inferno::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      180deg,
+      transparent 0%, transparent 85%,
+      rgba(255,120,0,0.08) 90%,
+      transparent 100%
+    );
+    background-size: 100% 8px;
+    animation: matrix-drop 0.4s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+  }
+
   .bar-wrap { position: relative; padding: 0 1.25rem 1rem; }
 
   /* ── SHOP DRAWER ── */
   .shop-tab {
     position: fixed;
     right: 0;
-    top: calc(50% + 90px);
+    top: calc(50% + 140px);
     transform: translateY(-50%);
     z-index: 200;
     writing-mode: vertical-rl;
@@ -1817,6 +1913,8 @@
     { id: 'vaporwave', name: '🌸 Vaporwave',   price: 200,  desc: 'Pastel synthwave dream',   previewClass: 'fx-vaporwave' },
     { id: 'glow',      name: '🔮 Glow Border', price: 175,  desc: 'Cycling neon border',      previewClass: null, trackFx: true },
     { id: 'stars',     name: '⭐ Stars',       price: 125,  desc: 'Floating star particles',  previewClass: null, wrapFx: true },
+    { id: 'matrix',    name: '🟩 Matrix',      price: 600,  desc: 'Green code rain & flicker', previewClass: 'fx-matrix' },
+    { id: 'inferno',   name: '🔥 Inferno',     price: 750,  desc: 'Multi-layer raging fire',  previewClass: 'fx-inferno' },
   ];
 
   window.openShop = function() {
@@ -1917,6 +2015,7 @@
     updates[`players/${pid}/coins`] = newCoins;
     updates[`players/${pid}/ownedFx/${fxId}`] = true;
     await update(ref(db, '/'), updates);
+    soundShopBuy();
     spawnCoinFloat(`-${item.price} 🪙`);
   };
 
@@ -1999,16 +2098,158 @@
     } catch(e) {}
   }
 
-  function soundDeal()  { playTone(440, 'sine', 0.08, 0.12); setTimeout(() => playTone(550, 'sine', 0.08, 0.1), 80); }
-  function soundHit()   { playTone(380, 'sine', 0.07, 0.1); }
-  function soundWin()   {
-    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.2, 0.18), i * 80));
+  function soundDeal()  {
+    playTone(300, 'sine', 0.06, 0.1);
+    setTimeout(() => playTone(420, 'sine', 0.06, 0.08), 70);
   }
-  function soundLose()  { playTone(200, 'sawtooth', 0.4, 0.15); setTimeout(() => playTone(150, 'sawtooth', 0.4, 0.15), 150); }
-  function soundBJ()    {
-    [523,659,784,1047,1319].forEach((f,i) => setTimeout(() => playTone(f,'sine',0.25,0.2), i*60));
+  function soundHit()   { playTone(360, 'sine', 0.06, 0.08); setTimeout(() => playTone(440, 'sine', 0.04, 0.06), 50); }
+  function soundChip()  { playTone(900, 'triangle', 0.04, 0.08); setTimeout(() => playTone(700, 'triangle', 0.02, 0.06), 40); }
+
+  function soundWin() {
+    const melody = [523, 659, 784, 1047, 1319];
+    melody.forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.25, 0.2), i * 90));
   }
-  function soundChip()  { playTone(800, 'sine', 0.05, 0.1); }
+
+  function soundBJ() {
+    // Big ascending fanfare
+    const melody = [392, 523, 659, 784, 1047, 1319, 1568];
+    melody.forEach((f, i) => setTimeout(() => {
+      playTone(f, 'sine', 0.3, 0.22);
+      if (i > 3) playTone(f * 0.5, 'sine', 0.3, 0.15); // bass harmony
+    }, i * 70));
+  }
+
+  function soundLose()  {
+    playTone(300, 'sawtooth', 0.3, 0.12);
+    setTimeout(() => playTone(220, 'sawtooth', 0.3, 0.15), 140);
+    setTimeout(() => playTone(160, 'sawtooth', 0.3, 0.25), 300);
+  }
+
+  function soundPush() {
+    playTone(440, 'sine', 0.12, 0.1);
+    setTimeout(() => playTone(440, 'sine', 0.12, 0.1), 200);
+  }
+
+  function soundShopBuy() {
+    // Ascending chime: C E G C
+    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => {
+      playTone(f, 'sine', 0.2, 0.15);
+    }, i * 80));
+    setTimeout(() => playTone(1047, 'sine', 0.35, 0.12), 400);
+  }
+
+  // ── Particle Fanfare ──
+  function launchParticles(type) {
+    const drawer = document.getElementById('casinoDrawer');
+    const rect = drawer.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height * 0.45;
+
+    const configs = {
+      win:  { count: 40, colors: ['#f5c842','#4ade80','#fff','#ff8c42'], emojis: ['🪙','✨','💰'], spread: 260 },
+      bj:   { count: 80, colors: ['#f5c842','#fff','#ff8c42','#ffdd00','#fffacd'], emojis: ['🃏','🪙','⭐','💎','🎰'], spread: 360 },
+      bust: { count: 20, colors: ['#f87171','#ff4400','#880000'], emojis: ['💀','❌'], spread: 180 },
+    };
+    const cfg = configs[type] || configs.win;
+
+    // Emoji bursts
+    cfg.emojis.forEach((em, ei) => {
+      setTimeout(() => {
+        for (let j = 0; j < (type === 'bj' ? 3 : 1); j++) {
+          const el = document.createElement('div');
+          el.style.cssText = `
+            position:fixed; left:${cx + (Math.random()-0.5)*80}px; top:${cy}px;
+            font-size:${1.2 + Math.random()}rem; pointer-events:none; z-index:9999;
+            transform:translate(-50%,-50%); transition:none;
+          `;
+          el.textContent = em;
+          document.body.appendChild(el);
+          const angle = (Math.random() * cfg.spread) - cfg.spread/2;
+          const dist  = 80 + Math.random() * 160;
+          const dur   = 700 + Math.random() * 600;
+          el.animate([
+            { transform: 'translate(-50%,-50%) scale(0.5)', opacity: 1 },
+            { transform: `translate(calc(-50% + ${Math.cos(angle*Math.PI/180)*dist}px), calc(-50% + ${Math.sin(angle*Math.PI/180)*dist - 60}px)) scale(${0.8+Math.random()*0.8})`, opacity: 0 }
+          ], { duration: dur, easing: 'cubic-bezier(0,0.9,0.57,1)', fill: 'forwards' })
+            .onfinish = () => el.remove();
+        }
+      }, ei * 80);
+    });
+
+    // Dot particles
+    for (let i = 0; i < cfg.count; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        const color = cfg.colors[Math.floor(Math.random() * cfg.colors.length)];
+        const size  = 4 + Math.random() * 7;
+        el.style.cssText = `
+          position:fixed; left:${cx + (Math.random()-0.5)*40}px; top:${cy + (Math.random()-0.5)*20}px;
+          width:${size}px; height:${size}px; border-radius:50%;
+          background:${color}; pointer-events:none; z-index:9998;
+        `;
+        document.body.appendChild(el);
+        const angle = Math.random() * 360;
+        const dist  = 60 + Math.random() * 200;
+        const dur   = 500 + Math.random() * 800;
+        el.animate([
+          { transform: 'scale(1)', opacity: 1 },
+          { transform: `translate(${Math.cos(angle*Math.PI/180)*dist}px, ${Math.sin(angle*Math.PI/180)*dist - 100}px) scale(0)`, opacity: 0 }
+        ], { duration: dur, easing: 'cubic-bezier(0,0.9,0.57,1)', fill: 'forwards' })
+          .onfinish = () => el.remove();
+      }, Math.random() * 200);
+    }
+
+    // Screen flash for BJ
+    if (type === 'bj') {
+      const flash = document.createElement('div');
+      flash.style.cssText = `
+        position:fixed; inset:0; background:rgba(245,200,66,0.18);
+        pointer-events:none; z-index:9997;
+      `;
+      document.body.appendChild(flash);
+      flash.animate([{opacity:1},{opacity:0}], {duration:500, fill:'forwards'}).onfinish = () => flash.remove();
+    }
+  }
+
+  // ── Animated card dealing (one at a time) ──
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function dealCardsAnimated() {
+    const dc = document.getElementById('dealerCards');
+    const pc = document.getElementById('playerCards');
+    dc.innerHTML = ''; pc.innerHTML = '';
+    updateScoreDisplay();
+
+    // Deal order: player1, dealer1, player2, dealer2 (face down)
+    const order = [
+      { hand: 'player', idx: 0 },
+      { hand: 'dealer', idx: 0 },
+      { hand: 'player', idx: 1 },
+      { hand: 'dealer', idx: 1, faceDown: true },
+    ];
+
+    for (const step of order) {
+      await sleep(160);
+      soundDeal();
+      if (step.hand === 'player') {
+        pc.appendChild(renderCard(bjPlayer[step.idx], false));
+      } else {
+        dc.appendChild(renderCard(bjDealer[step.idx], !!step.faceDown));
+      }
+      updateScoreDisplay();
+    }
+  }
+
+  function updateScoreDisplay() {
+    const dScore = bjPhase === 'play'
+      ? handTotal([bjDealer[0]]).toString()
+      : handTotal(bjDealer).toString();
+    const pTotal = handTotal(bjPlayer);
+    document.getElementById('dealerScoreEl').innerHTML =
+      bjDealer.length ? `<span class="score-badge${bjPhase !== 'play' && handTotal(bjDealer) > 21 ? ' bust' : ''}">${dScore}</span>` : '';
+    document.getElementById('playerScoreEl').innerHTML =
+      bjPlayer.length ? `<span class="score-badge${pTotal > 21 ? ' bust' : pTotal === 21 && bjPlayer.length === 2 ? ' bj' : ''}">${pTotal}</span>` : '';
+  }
 
   // Deck
   const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
@@ -2173,10 +2414,10 @@
     bjDealer = [bjDeck.pop(), bjDeck.pop()];
     bjPhase = 'play';
 
-    soundDeal();
-    renderBJTable();
-    setBJButtons('play');
+    setBJButtons('done'); // lock during deal animation
     document.getElementById('resultBanner').className = 'result-banner';
+    await dealCardsAnimated();
+    setBJButtons('play');
 
     // Blackjack check
     if (handTotal(bjPlayer) === 21) {
@@ -2184,22 +2425,46 @@
     }
   };
 
-  // Hit
+  // Hit — append one card with animation
   window.bjHit = async function() {
-    bjPlayer.push(bjDeck.pop());
+    setBJButtons('done');
+    const card = bjDeck.pop();
+    bjPlayer.push(card);
     soundHit();
-    renderBJTable();
-    if (handTotal(bjPlayer) >= 21) await bjResolve();
+    document.getElementById('playerCards').appendChild(renderCard(card, false));
+    updateScoreDisplay();
+    await sleep(120);
+    if (handTotal(bjPlayer) >= 21) {
+      await bjResolve();
+    } else {
+      setBJButtons('play');
+      document.getElementById('btnDouble').disabled = true; // can only double on first 2 cards
+    }
   };
 
-  // Stand
+  // Stand — flip dealer hole card, then draw one at a time
   window.bjStand = async function() {
     setBJButtons('done');
-    // Dealer draws to 17
+    bjPhase = 'done';
+
+    // Flip dealer hole card
+    const dc = document.getElementById('dealerCards');
+    dc.innerHTML = '';
+    bjDealer.forEach(c => dc.appendChild(renderCard(c, false)));
+    updateScoreDisplay();
+    await sleep(300);
+
+    // Dealer draws to 17 one at a time
     while (handTotal(bjDealer) < 17) {
-      bjDealer.push(bjDeck.pop());
+      await sleep(400);
+      const card = bjDeck.pop();
+      bjDealer.push(card);
       soundHit();
+      dc.appendChild(renderCard(card, false));
+      updateScoreDisplay();
     }
+
+    await sleep(200);
     await bjResolve();
   };
 
@@ -2209,18 +2474,40 @@
     if (!p || bjBet * 2 > (p.coins || 0)) { shakeWallet(); return; }
     bjBet *= 2;
     updateBetDisplay();
-    bjPlayer.push(bjDeck.pop());
+    setBJButtons('done');
+
+    const card = bjDeck.pop();
+    bjPlayer.push(card);
     soundHit();
-    renderBJTable();
-    // Auto-stand after double
-    while (handTotal(bjDealer) < 17) bjDealer.push(bjDeck.pop());
+    document.getElementById('playerCards').appendChild(renderCard(card, false));
+    updateScoreDisplay();
+    await sleep(300);
+
+    // Auto-stand: flip dealer, draw to 17
+    bjPhase = 'done';
+    const dc = document.getElementById('dealerCards');
+    dc.innerHTML = '';
+    bjDealer.forEach(c => dc.appendChild(renderCard(c, false)));
+    updateScoreDisplay();
+    await sleep(300);
+
+    while (handTotal(bjDealer) < 17) {
+      await sleep(400);
+      const dc2 = bjDeck.pop();
+      bjDealer.push(dc2);
+      soundHit();
+      document.getElementById('dealerCards').appendChild(renderCard(dc2, false));
+      updateScoreDisplay();
+    }
+
+    await sleep(200);
     await bjResolve();
   };
 
   async function bjResolve() {
     bjPhase = 'done';
     setBJButtons('done');
-    renderBJTable();
+    updateScoreDisplay();
 
     const p = getCurrentCasinoPlayer();
     if (!p) return;
@@ -2228,40 +2515,43 @@
     const pt = handTotal(bjPlayer);
     const dt = handTotal(bjDealer);
     const isBJ = pt === 21 && bjPlayer.length === 2;
-    let delta = 0;
-    let resultText = '';
-    let resultType = '';
+    let delta = 0, resultText = '', resultType = '';
 
     if (pt > 21) {
       delta = -bjBet;
-      resultText = '💀 Bust — You Lose';
+      resultText = '💀 BUST — YOU LOSE';
       resultType = 'lose';
       soundLose();
-    } else if (isBJ && handTotal(bjDealer) !== 21) {
+      setTimeout(() => launchParticles('bust'), 100);
+    } else if (isBJ && dt !== 21) {
       delta = Math.floor(bjBet * 1.5);
-      resultText = '🃏 Blackjack! +' + delta + ' 🪙';
+      resultText = '🃏 BLACKJACK!  +' + delta + ' 🪙';
       resultType = 'bj';
       soundBJ();
+      setTimeout(() => launchParticles('bj'), 80);
     } else if (dt > 21) {
       delta = bjBet;
-      resultText = '🎉 Dealer Busts! +' + delta + ' 🪙';
+      resultText = '🎉 DEALER BUSTS!  +' + delta + ' 🪙';
       resultType = 'win';
       soundWin();
+      setTimeout(() => launchParticles('win'), 80);
     } else if (pt > dt) {
       delta = bjBet;
-      resultText = '✅ You Win! +' + delta + ' 🪙';
+      resultText = '✅ YOU WIN!  +' + delta + ' 🪙';
       resultType = 'win';
       soundWin();
+      setTimeout(() => launchParticles('win'), 80);
     } else if (pt < dt) {
       delta = -bjBet;
-      resultText = '❌ Dealer Wins';
+      resultText = '❌ DEALER WINS';
       resultType = 'lose';
       soundLose();
+      setTimeout(() => launchParticles('bust'), 100);
     } else {
       delta = 0;
-      resultText = '🤝 Push — Bet Returned';
+      resultText = '🤝 PUSH — BET RETURNED';
       resultType = 'push';
-      playTone(440, 'sine', 0.2);
+      soundPush();
     }
 
     showResult(resultText, resultType);
@@ -2269,12 +2559,11 @@
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await update(ref(db, `players/${p.id}`), { coins: newCoins });
 
-    if (delta > 0) setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 300);
+    if (delta > 0) setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 400);
 
-    // Reset for next round
     bjBet = 0;
     updateBetDisplay();
-    setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 500);
+    setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
   }
 
 </script>
