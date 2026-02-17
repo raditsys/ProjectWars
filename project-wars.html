@@ -47,6 +47,36 @@
 
   .subtitle { color: var(--muted); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-top: 0.5rem; }
 
+  /* ── Wavy text ── */
+  .wavy-letter {
+    display: inline-block;
+    animation: wavyFloat 2.2s ease-in-out infinite;
+  }
+  .wavy-letter.space { display: inline; }
+
+  @keyframes wavyFloat {
+    0%   { transform: translateY(0px) rotate(0deg) scaleX(1); }
+    15%  { transform: translateY(-8px) rotate(-3deg) scaleX(0.95); }
+    30%  { transform: translateY(-14px) rotate(2deg) scaleX(1.05); }
+    45%  { transform: translateY(-8px) rotate(-1deg) scaleX(0.98); }
+    60%  { transform: translateY(4px) rotate(2deg) scaleX(1.03); }
+    75%  { transform: translateY(8px) rotate(-2deg) scaleX(0.97); }
+    90%  { transform: translateY(3px) rotate(1deg) scaleX(1.01); }
+    100% { transform: translateY(0px) rotate(0deg) scaleX(1); }
+  }
+
+  .subtitle .wavy-letter {
+    animation-name: wavyFloatSubtle;
+    color: var(--muted);
+  }
+  @keyframes wavyFloatSubtle {
+    0%   { transform: translateY(0px) rotate(0deg); }
+    25%  { transform: translateY(-4px) rotate(-2deg); }
+    50%  { transform: translateY(5px) rotate(1.5deg); }
+    75%  { transform: translateY(-3px) rotate(-1deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+  }
+
   .week-display {
     display: inline-block;
     border: 1px solid var(--border);
@@ -1594,8 +1624,8 @@
 <!-- ═══════════════════ MAIN PAGE ═══════════════════ -->
 
 <header>
-  <h1>Project Wars</h1>
-  <div class="subtitle">Who ships the most this week?</div>
+  <h1 id="wavyTitle" aria-label="Project Wars"></h1>
+  <div class="subtitle" id="wavySubtitle" aria-label="Who ships the most this week?"></div>
   <div class="week-display" id="weekDisplay"></div><br>
   <div class="sync-status" id="syncStatus">⬤ connecting...</div>
 </header>
@@ -1777,6 +1807,26 @@
       audio.volume = parseFloat(val);
     };
   })();
+</script>
+
+<script>
+  // ── Wavy Text ──
+  function makeWavy(el, text, baseDelay, stagger) {
+    el.innerHTML = '';
+    [...text].forEach((ch, i) => {
+      if (ch === ' ') {
+        el.appendChild(document.createTextNode(' '));
+      } else {
+        const span = document.createElement('span');
+        span.className = 'wavy-letter';
+        span.textContent = ch;
+        span.style.animationDelay = (baseDelay + i * stagger) + 's';
+        el.appendChild(span);
+      }
+    });
+  }
+  makeWavy(document.getElementById('wavyTitle'),    'Project Wars',                 0,    0.08);
+  makeWavy(document.getElementById('wavySubtitle'), 'Who ships the most this week?', 0.3, 0.04);
 </script>
 
 <script type="module">
