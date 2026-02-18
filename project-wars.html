@@ -114,7 +114,21 @@
     border: 1px solid var(--border);
     padding: 0.75rem 1rem;
   }
-  .win-lb-title {
+  
+  /* Biggest Win — detached right sidebar (does not affect leaderboard centering) */
+  .biggest-win-sidebar {
+    position: fixed;
+    top: 220px;
+    right: 32px;
+    width: 240px;
+    z-index: 150;
+  }
+
+  /* Keep it usable on small screens */
+  @media (max-width: 1100px) {
+    .biggest-win-sidebar { position: static; width: auto; max-width: 900px; margin: 0 auto 2rem; }
+  }
+.win-lb-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1rem;
     letter-spacing: 2px;
@@ -2168,7 +2182,6 @@
 <div class="week-display" id="weekDisplay"></div><br/>
 <div class="sync-status" id="syncStatus">⬤ connecting...</div>
 </header>
-<div class="win-leaderboard">
 <div class="leaderboard">
 <div class="leaderboard-title">
 <span>🏆 Leaderboard</span>
@@ -2176,9 +2189,9 @@
 </div>
 <div id="leaderboard"><div class="empty-state">Connecting to database...</div></div>
 </div>
-<div class="win-lb-panel">
+<div class="biggest-win-sidebar">
+  <div class="win-lb-panel">
   <div class="win-lb-title">🎰 Biggest Win</div>
-  <div id="biggestWinList"><div class="win-lb-empty">No wins yet</div></div>
 </div>
 </div>
 <div class="panels">
