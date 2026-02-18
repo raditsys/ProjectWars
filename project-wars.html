@@ -1623,6 +1623,47 @@
     100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
   }
 
+  /* ── FLOWER ── */
+  .flower-clump {
+    position: absolute;
+    bottom: 0;
+    pointer-events: all;
+    cursor: pointer;
+    transform-origin: bottom center;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+  .flower-clump:hover { transform: scale(1.08); }
+  .flower-clump.cutting { animation: clumpCut 0.32s ease forwards !important; pointer-events: none; }
+
+  .flower-stem {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    border-radius: 2px;
+    transform-origin: bottom center;
+  }
+  .flower-head {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.4rem;
+    line-height: 1;
+    animation: flowerSway 3s ease-in-out infinite;
+    transform-origin: bottom center;
+    user-select: none;
+  }
+  @keyframes flowerSway {
+    0%,100% { transform: translateX(-50%) rotate(-4deg); }
+    50%      { transform: translateX(-50%) rotate(4deg); }
+  }
+  @keyframes flowerGrow {
+    from { transform: translateX(-50%) scaleY(0); opacity: 0; }
+    to   { transform: translateX(-50%) scaleY(1); opacity: 1; }
+  }
+  .flower-stem { animation: flowerGrow 0.5s ease forwards; }
+
   /* ── FROG ── */
   #frogPet {
     position: fixed;
@@ -3133,16 +3174,16 @@
 
   // Slow + random growth tuning
   const INITIAL_CLUMPS = 6;           // start sparse
-  const MAX_CLUMPS = 20;              // never exceed this many on screen
+  const MAX_CLUMPS = 10;              // never exceed this many on screen
 
-  const MIN_REGROW_MS = 20_000;       // 20s
-  const MAX_REGROW_MS = 110_000;      // 110s (2ish min)
+  const MIN_REGROW_MS = 30_000;       // 30s
+  const MAX_REGROW_MS = 120_000;      // 120s (2 min)
 
-  const SPAWN_TICK_MS = 6_000;        // every 6s, maybe spawn one
-  const SPAWN_CHANCE_PER_TICK = 0.25; // 25% chance each tick (~one spawn every ~45s average)
+  const SPAWN_TICK_MS = 8_000;        // every 8s, maybe spawn one
+  const SPAWN_CHANCE_PER_TICK = 0.18; // 18% chance each tick (~one spawn every ~45s average)
 
   // Coin tuning: only sometimes
-  const COIN_CHANCE_ON_CUT = 0.2;    // 20% chance to get a coin when cutting a clump
+  const COIN_CHANCE_ON_CUT = 0.15;    // 15% chance to get a coin when cutting a clump
 
   const clumps = [];
   const greens = ['#3a9e3a','#4ade80','#2d7a2d','#56c456','#38a838','#65d465'];
@@ -3156,21 +3197,73 @@
     </svg>`;
   }
 
-  function spawnCoinPopAt(x, y) {
+  const FLOWER_CHANCE = 0.20; // 20% chance to spawn a flower instead of grass
+  const FLOWER_EMOJIS = ['🌸','🌼','🌺','💐','🌻'];
+
+  function spawnCoinPopAt(x, y, amount = 1) {
     const coin = document.createElement('div');
     coin.className = 'grass-coin';
-    coin.textContent = '🪙';
+    coin.textContent = amount === 1 ? '🪙' : `+${amount} 🪙`;
     coin.style.left = x + 'px';
     coin.style.top  = y + 'px';
+    if (amount > 1) coin.style.fontSize = '1.15rem';
     document.body.appendChild(coin);
     setTimeout(() => coin.remove(), 1000);
+  }
+
+  function makeFlowerEl(x) {
+    const stemH = randi(55, 80);
+    const emoji = FLOWER_EMOJIS[Math.floor(Math.random() * FLOWER_EMOJIS.length)];
+    const stemColor = ['#3a9e3a','#2d7a2d','#4ade80'][Math.floor(Math.random() * 3)];
+    const lean = (Math.random() - 0.5) * 10;
+    const swayDelay = (Math.random() * 2).toFixed(2);
+
+    const clump = document.createElement('div');
+    clump.className = 'flower-clump scissors-cursor';
+    clump.style.left = x + 'px';
+    clump.style.width = '36px';
+    clump.style.height = (stemH + 28) + 'px';
+    clump.style.transform = `rotate(${lean}deg)`;
+
+    const stem = document.createElement('div');
+    stem.className = 'flower-stem';
+    stem.style.height = stemH + 'px';
+    stem.style.background = stemColor;
+
+    const head = document.createElement('div');
+    head.className = 'flower-head';
+    head.textContent = emoji;
+    head.style.bottom = (stemH - 4) + 'px';
+    head.style.animationDelay = swayDelay + 's';
+
+    clump.appendChild(stem);
+    clump.appendChild(head);
+
+    clump.addEventListener('click', function() {
+      if (clump.classList.contains('cutting')) return;
+      clump.classList.add('cutting');
+
+      // Flowers always give 2 coins
+      const rect = clump.getBoundingClientRect();
+      spawnCoinPopAt(rect.left + rect.width * 0.5, rect.top + rand(-6, 6), 2);
+      if (window.__awardGrassCoin) window.__awardGrassCoin(2);
+
+      setTimeout(() => {
+        clump.remove();
+        const idx = clumps.indexOf(clump);
+        if (idx !== -1) clumps.splice(idx, 1);
+      }, 350);
+    });
+
+    return clump;
   }
 
   function spawnClumpAtRandomX() {
     if (clumps.length >= MAX_CLUMPS) return;
 
     const newX = Math.random() * (window.innerWidth - 90);
-    const clump = makeClumpEl(Math.max(0, Math.min(window.innerWidth - 90, newX)));
+    const x = Math.max(0, Math.min(window.innerWidth - 90, newX));
+    const clump = Math.random() < FLOWER_CHANCE ? makeFlowerEl(x) : makeClumpEl(x);
     clumps.push(clump);
     layer.appendChild(clump);
   }
@@ -3229,8 +3322,8 @@
       // Random coin drop (instead of deterministic payouts)
       if (Math.random() < COIN_CHANCE_ON_CUT) {
         const rect = clump.getBoundingClientRect();
-        spawnCoinPopAt(rect.left + rect.width * 0.5 + rand(-10, 10), rect.top + rand(-6, 6));
-        if (window.__awardGrassCoin) window.__awardGrassCoin();
+        spawnCoinPopAt(rect.left + rect.width * 0.5 + rand(-10, 10), rect.top + rand(-6, 6), 1);
+        if (window.__awardGrassCoin) window.__awardGrassCoin(1);
       }
 
       // Remove this clump after the cut animation
@@ -3384,16 +3477,16 @@ import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.
 const db = getDatabase(getApp());
 
 // Override grass coin award
-window.__awardGrassCoin = async function() {
+window.__awardGrassCoin = async function(amount = 1) {
   if (!window.__currentUser) return;
   const uid = window.__currentUser.id;
   const snap = await new Promise(res => onValue(ref(db, `players/${uid}/coins`), res, { onlyOnce: true }));
   const coins = snap.val() || 0;
-  await update(ref(db, `players/${uid}`), { coins: coins + 1 });
+  await update(ref(db, `players/${uid}`), { coins: coins + amount });
   // spawn float
   const el = document.createElement('div');
   el.className = 'coin-float';
-  el.textContent = '+1 🪙';
+  el.textContent = `+${amount} 🪙`;
   el.style.left = (Math.random() * window.innerWidth * 0.6 + window.innerWidth * 0.2) + 'px';
   el.style.top  = (window.innerHeight - 80) + 'px';
   document.body.appendChild(el);
