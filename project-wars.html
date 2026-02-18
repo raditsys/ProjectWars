@@ -878,7 +878,22 @@
     width: 100%;
     max-width: 380px;
     padding: 0 1.5rem;
+
+    /* Ensure the landing text is truly centered and not affected by form widths */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
+
+  .login-title,
+  .login-subtitle {
+    width: 100%;
+    text-align: center;
+  }
+
+  .login-form { width: 100%; }
+
 
   .login-title {
     font-family: 'Bebas Neue', sans-serif;
@@ -1636,7 +1651,6 @@
     transition: transform 0.05s;
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
   }
-  body:not(.logged-in) #frogPet { z-index: 1000; }
   #frogPet:active { transform: scale(0.88); }
   #frogPet .frog-hat {
     position: absolute;
@@ -1661,6 +1675,16 @@
   }
   .frog-svg { animation: frogBlink 4s ease-in-out infinite; }
 </style>
+
+<style>
+h1 {
+    text-align: center !important;
+    margin: 0 auto !important;
+    display: block !important;
+    width: 100% !important;
+}
+</style>
+
 </head>
 <body>
 <!-- AMBIENT BACKGROUND BLOBS -->
@@ -1724,7 +1748,7 @@
 <span class="user-badge-name" id="userBadgeName"></span>
 <button class="user-badge-logout" onclick="doLogout()">logout</button>
 </div>
-<!-- GAMBLEz TAB -->
+<!-- GAMBLE TAB -->
 <button class="gamble-tab" id="gambleTab" onclick="openCasino()">
 <span class="tab-arrow">◀</span>
   GAMBLE
@@ -2002,7 +2026,14 @@
 </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAtMH_AvVGskpK2TxMlXjf0IXRb9HT-q_Y",
@@ -2017,7 +2048,45 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // ── Constants ──
+  
+  const auth = getAuth(app);
+
+  // Firebase Auth expects an email. We map your username into a project email.
+  function __usernameToEmail(u){
+    return String(u || "").trim().toLowerCase() + "@projectwars.local";
+  }
+
+
+
+  // ─────────────────────────────
+  // Firebase Auth session handling
+  // ─────────────────────────────
+  onAuthStateChanged(auth, (user) => {
+    const loginScreen = document.getElementById("loginScreen");
+    const appShell = document.getElementById("app") || document.getElementById("main") || document.body;
+
+    if (user) {
+      const uid = user.uid;
+      window.__currentUserId = uid;
+
+      // Keep current user profile fresh
+      onValue(ref(db, "players/" + uid), (snap) => {
+        window.__currentUser = snap.val() || null;
+      });
+
+      if (loginScreen) loginScreen.style.display = "none";
+    } else {
+      window.__currentUser = null;
+      window.__currentUserId = null;
+      if (loginScreen) loginScreen.style.display = "";
+    }
+  });
+
+  function logout() {
+    signOut(auth);
+  }
+
+// ── Constants ──
   const COINS_PER_HOUR = 10;
 
   // ── State ──
