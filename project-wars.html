@@ -2972,11 +2972,18 @@
       // For each player: keep name + password, reset everything else
       const updates = {};
       Object.entries(players).forEach(([id, p]) => {
-        updates[`players/${id}/coins`]      = 0;
-        updates[`players/${id}/projects`]   = null;
-        updates[`players/${id}/equippedFx`] = null;
-        updates[`players/${id}/ownedFx`]    = null;
+        updates[`players/${id}/coins`]       = 0;
+        updates[`players/${id}/projects`]    = null;
+        updates[`players/${id}/equippedFx`]  = null;
+        updates[`players/${id}/ownedFx`]     = null;
+        updates[`players/${id}/equippedHat`] = null;
+        updates[`players/${id}/ownedHats`]   = null;
+        updates[`players/${id}/equippedPet`] = null;
+        updates[`players/${id}/ownedPets`]   = null;
       });
+      // Reset current user's pet/hat display back to frog
+      setFrogHatLocal('');
+      applyPetDisplay('frog');
       await update(ref(db, '/'), updates);
       window.closeSoftResetModal();
     } catch(e) {
@@ -4263,36 +4270,25 @@
 })();
 
 // ══════════════════ FROG HAT SHOP ══════════════════
-// Hat items are injected into the shop — we hook into renderShopItems
 const FROG_HATS = [
   { id: 'hat_tophat', name: 'Top Hat',    emoji: '🎩', price: 80,  desc: 'Dapper frog' },
   { id: 'hat_party',  name: 'Party Hat',  emoji: '🎉', price: 50,  desc: 'Frog party!' },
 ];
 
-// Persist frog hat selection in localStorage (per-user)
-function getFrogHat() { return localStorage.getItem('frogHat_' + (window.__currentUserId || 'guest')); }
-function setFrogHatLocal(id) {
-  localStorage.setItem('frogHat_' + (window.__currentUserId || 'guest'), id || '');
-  document.getElementById('frogHatEl').textContent = id
-    ? (FROG_HATS.find(h => h.id === id)?.emoji || '')
+// These are now thin wrappers — real data lives in Firebase.
+// The module script below sets window.__playerHatPetData after each Firebase read.
+function getFrogHat()    { return window.__playerHatPetData?.equippedHat  || ''; }
+function getOwnedHats()  { return window.__playerHatPetData?.ownedHats    || []; }
+function getEquippedPet(){ return window.__playerHatPetData?.equippedPet  || 'frog'; }
+function getOwnedPets()  { return window.__playerHatPetData?.ownedPets    || ['frog']; }
+
+function applyHatDisplay(hatId) {
+  document.getElementById('frogHatEl').textContent = hatId
+    ? (FROG_HATS.find(h => h.id === hatId)?.emoji || '')
     : '';
 }
-
-// Owned hats in localStorage too (simple)
-function getOwnedHats() {
-  try { return JSON.parse(localStorage.getItem('ownedHats_' + (window.__currentUserId || 'guest')) || '[]'); }
-  catch { return []; }
-}
-function addOwnedHat(id) {
-  const owned = getOwnedHats();
-  if (!owned.includes(id)) { owned.push(id); localStorage.setItem('ownedHats_' + (window.__currentUserId || 'guest'), JSON.stringify(owned)); }
-}
-
-// Restore hat on page load
-document.addEventListener('DOMContentLoaded', () => {
-  const h = getFrogHat();
-  if (h) setFrogHatLocal(h);
-});
+// Keep setFrogHatLocal as a display-only helper (no localStorage)
+function setFrogHatLocal(id) { applyHatDisplay(id); }
 
 // ══════════════════ PET SYSTEM ══════════════════
 const PETS = [
@@ -4302,38 +4298,16 @@ const PETS = [
   { id: 'cat',    name: 'Cat',    emoji: '🐱',  price: 100, desc: 'Does what it wants' },
 ];
 
-function getEquippedPet() {
-  return localStorage.getItem('equippedPet_' + (window.__currentUserId || 'guest')) || 'frog';
-}
-function setEquippedPet(id) {
-  localStorage.setItem('equippedPet_' + (window.__currentUserId || 'guest'), id);
-  applyPetDisplay(id);
-}
-function getOwnedPets() {
-  try { return JSON.parse(localStorage.getItem('ownedPets_' + (window.__currentUserId || 'guest')) || '["frog"]'); }
-  catch { return ['frog']; }
-}
-function addOwnedPet(id) {
-  const owned = getOwnedPets();
-  if (!owned.includes(id)) {
-    owned.push(id);
-    localStorage.setItem('ownedPets_' + (window.__currentUserId || 'guest'), JSON.stringify(owned));
-  }
-}
-
 function applyPetDisplay(petId) {
   const pet = PETS.find(p => p.id === petId) || PETS[0];
   const frogPet = document.getElementById('frogPet');
   if (!frogPet) return;
-
   if (petId === 'frog') {
-    // restore original frog SVG
     const existing = frogPet.querySelector('.pet-emoji-wrap');
     if (existing) existing.remove();
     const svg = frogPet.querySelector('.frog-svg');
     if (svg) svg.style.display = '';
   } else {
-    // hide SVG, show emoji
     const svg = frogPet.querySelector('.frog-svg');
     if (svg) svg.style.display = 'none';
     let wrap = frogPet.querySelector('.pet-emoji-wrap');
@@ -4345,12 +4319,6 @@ function applyPetDisplay(petId) {
     wrap.innerHTML = `<span class="pet-emoji">${pet.emoji}</span>`;
   }
 }
-
-// Restore pet on load
-document.addEventListener('DOMContentLoaded', () => {
-  const p = getEquippedPet();
-  if (p && p !== 'frog') applyPetDisplay(p);
-});
 
 window.__renderPetSection = function() {
   const body = document.getElementById('shopBody') || document.querySelector('.shop-body');
@@ -4389,12 +4357,8 @@ window.__renderPetSection = function() {
 
 window.togglePet = function(id) {
   const equipped = getEquippedPet();
-  if (equipped === id && id !== 'frog') {
-    setEquippedPet('frog');
-  } else {
-    setEquippedPet(id);
-  }
-  window.__renderPetSection();
+  const newPet = (equipped === id && id !== 'frog') ? 'frog' : id;
+  if (window.__fbSetEquippedPet) window.__fbSetEquippedPet(newPet);
 };
 
 // Hook __awardGrassCoin into the Firebase update system
@@ -4410,6 +4374,14 @@ import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.
 
 const db = getDatabase(getApp());
 
+</script>
+<script type="module">
+// ══════════════════ HAT + PET FIREBASE MODULE ══════════════════
+import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+const db = getDatabase(getApp());
+
 // Override grass coin award
 window.__awardGrassCoin = async function(amount = 1) {
   if (!window.__currentUser) return;
@@ -4417,7 +4389,6 @@ window.__awardGrassCoin = async function(amount = 1) {
   const snap = await new Promise(res => onValue(ref(db, `players/${uid}/coins`), res, { onlyOnce: true }));
   const coins = snap.val() || 0;
   await update(ref(db, `players/${uid}`), { coins: coins + amount });
-  // spawn float
   const el = document.createElement('div');
   el.className = 'coin-float';
   el.textContent = `+${amount} 🪙`;
@@ -4427,9 +4398,53 @@ window.__awardGrassCoin = async function(amount = 1) {
   setTimeout(() => el.remove(), 1000);
 };
 
-// Hook into existing shop to inject hat items
-const _origRenderShopItems = window.renderShopItems;
+// ── Firebase hat/pet helpers ──
+async function fbGetPlayer(uid) {
+  const snap = await new Promise(res => onValue(ref(db, `players/${uid}`), res, { onlyOnce: true }));
+  return snap.val() || {};
+}
 
+// Called whenever the player's Firebase node changes — keeps window.__playerHatPetData fresh
+// and re-applies hat/pet display
+function watchPlayerHatPet(uid) {
+  onValue(ref(db, `players/${uid}`), snap => {
+    const p = snap.val() || {};
+    window.__playerHatPetData = {
+      equippedHat: p.equippedHat || '',
+      ownedHats:   Array.isArray(p.ownedHats)  ? p.ownedHats  : (p.ownedHats  ? Object.values(p.ownedHats)  : []),
+      equippedPet: p.equippedPet || 'frog',
+      ownedPets:   Array.isArray(p.ownedPets)  ? p.ownedPets  : (p.ownedPets  ? Object.values(p.ownedPets)  : ['frog']),
+    };
+    // Ensure frog is always in ownedPets
+    if (!window.__playerHatPetData.ownedPets.includes('frog')) {
+      window.__playerHatPetData.ownedPets.unshift('frog');
+    }
+    applyHatDisplay(window.__playerHatPetData.equippedHat);
+    applyPetDisplay(window.__playerHatPetData.equippedPet);
+    // Re-render shop sections if open
+    if (document.getElementById('shopDrawer')?.classList.contains('open')) {
+      renderHatSection();
+      window.__renderPetSection && window.__renderPetSection();
+    }
+  });
+}
+
+// ── Expose Firebase write helpers to non-module scope ──
+window.__fbSetEquippedPet = async function(petId) {
+  if (!window.__currentUser) return;
+  const uid = window.__currentUser.id;
+  await update(ref(db, `players/${uid}`), { equippedPet: petId });
+  window.__renderPetSection && window.__renderPetSection();
+};
+
+window.__fbSetEquippedHat = async function(hatId) {
+  if (!window.__currentUser) return;
+  const uid = window.__currentUser.id;
+  await update(ref(db, `players/${uid}`), { equippedHat: hatId });
+  renderHatSection();
+};
+
+// ── Hat shop ──
 function renderHatSection() {
   const body = document.getElementById('shopBody') || document.querySelector('.shop-body');
   if (!body) return;
@@ -4439,9 +4454,8 @@ function renderHatSection() {
     hatSection.id = 'hatShopSection';
     body.appendChild(hatSection);
   }
-  const uid = window.__currentUser?.id;
-  const owned = getOwnedHats();
-  const equipped = getFrogHat();
+  const owned    = window.__playerHatPetData?.ownedHats  || [];
+  const equipped = window.__playerHatPetData?.equippedHat || '';
 
   hatSection.innerHTML = `
     <div class="shop-section-title" style="margin-bottom:0.75rem;">🐸 Frog Hats</div>
@@ -4466,14 +4480,11 @@ function renderHatSection() {
     </div>`;
 }
 
-window.toggleFrogHat = function(id) {
-  const equipped = getFrogHat();
-  if (equipped === id) {
-    setFrogHatLocal('');
-    localStorage.setItem('frogHat_' + (window.__currentUser?.id || 'guest'), '');
-  } else {
-    setFrogHatLocal(id);
-  }
+window.toggleFrogHat = async function(id) {
+  if (!window.__currentUser) return;
+  const uid = window.__currentUser.id;
+  const current = window.__playerHatPetData?.equippedHat || '';
+  await update(ref(db, `players/${uid}`), { equippedHat: current === id ? '' : id });
   renderHatSection();
 };
 
@@ -4491,20 +4502,10 @@ window.buyFrogHat = async function(id, price) {
     setTimeout(() => el.remove(), 1000);
     return;
   }
-  await update(ref(db, `players/${uid}`), { coins: coins - price });
-  addOwnedHat(id);
-  setFrogHatLocal(id);
+  const owned = window.__playerHatPetData?.ownedHats || [];
+  if (!owned.includes(id)) owned.push(id);
+  await update(ref(db, `players/${uid}`), { coins: coins - price, ownedHats: owned, equippedHat: id });
   renderHatSection();
-};
-
-// Hook into shop open to render hats + pets
-const origOpenShop = window.openShop;
-window.openShop = function() {
-  if (origOpenShop) origOpenShop();
-  setTimeout(() => {
-    renderHatSection();
-    window.__renderPetSection && window.__renderPetSection();
-  }, 50);
 };
 
 window.buyPet = async function(id, price) {
@@ -4521,29 +4522,39 @@ window.buyPet = async function(id, price) {
     setTimeout(() => el.remove(), 1200);
     return;
   }
-  await update(ref(db, `players/${uid}`), { coins: coins - price });
-  addOwnedPet(id);
-  setEquippedPet(id);
+  const owned = window.__playerHatPetData?.ownedPets || ['frog'];
+  if (!owned.includes(id)) owned.push(id);
+  await update(ref(db, `players/${uid}`), { coins: coins - price, ownedPets: owned, equippedPet: id });
   window.__renderPetSection && window.__renderPetSection();
 };
 
-// Also expose current user ID to grass coin system
-// Poll for currentUser (since it's in a module scope we can't directly patch)
+// Hook into shop open
+const origOpenShop = window.openShop;
+window.openShop = function() {
+  if (origOpenShop) origOpenShop();
+  setTimeout(() => {
+    renderHatSection();
+    window.__renderPetSection && window.__renderPetSection();
+  }, 50);
+};
+
+// Watch for login — start Firebase listener when user logs in
+let watchingUid = null;
 setInterval(() => {
-  const badge = document.getElementById('userBadgeName');
-  if (badge && badge.textContent && badge.closest('#userBadge')?.style.display !== 'none') {
-    // user is logged in — restore hat and pet
-    if (!window.__hatRestored) {
-      window.__hatRestored = true;
-      const h = getFrogHat();
-      if (h) setFrogHatLocal(h);
-      const p = getEquippedPet();
-      if (p && p !== 'frog') applyPetDisplay(p);
-    }
-  } else {
-    window.__hatRestored = false;
+  const uid = window.__currentUserId;
+  if (uid && uid !== watchingUid) {
+    watchingUid = uid;
+    watchPlayerHatPet(uid);
   }
-}, 500);
+  if (!uid && watchingUid) {
+    // logged out — reset display
+    watchingUid = null;
+    window.__playerHatPetData = null;
+    applyHatDisplay('');
+    applyPetDisplay('frog');
+  }
+}, 300);
+
 </script>
 </body>
 </html>
