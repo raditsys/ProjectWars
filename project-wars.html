@@ -2138,6 +2138,24 @@
 </div>
 <div id="history"></div>
 </div>
+<div style="max-width:900px;margin:2.5rem auto 0;text-align:center;">
+  <button onclick="openAdventure()" style="
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.4rem;
+    letter-spacing:4px;
+    padding:0.8rem 2.5rem;
+    background:linear-gradient(135deg,#1a3a1a,#0a1f0a);
+    border:2px solid #4ade80;
+    color:#4ade80;
+    cursor:pointer;
+    transition:all 0.2s;
+    box-shadow:0 0 20px rgba(74,222,128,0.15);
+  " onmouseover="this.style.boxShadow='0 0 30px rgba(74,222,128,0.4)';this.style.color='#fff'"
+     onmouseout="this.style.boxShadow='0 0 20px rgba(74,222,128,0.15)';this.style.color='#4ade80'">
+    ⚔ PLAY: PROJECT WARS ADVENTURE
+  </button>
+  <div style="color:var(--muted);font-size:0.65rem;margin-top:0.5rem;letter-spacing:1px;">3D RS-style minigame · earn coins · buy gear · fight monsters</div>
+</div>
 <div class="reset-section" style="margin-top:3rem;">
 <button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
 <div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
@@ -2746,6 +2764,28 @@
   window.clearHistory = async function() {
     if (!confirm('Clear all activity logs? (Hours and coins are kept.)')) return;
     await remove(ref(db, 'logs'));
+  };
+
+  // ── Adventure Game Launcher ──
+  window.openAdventure = function() {
+    if (!currentUser) { log('Log in first to play!'); return; }
+    // Sync current PW coins to localStorage for the game to read
+    const p = players[currentUser.id];
+    const coins = p ? (p.coins || 0) : 0;
+    localStorage.setItem('pwUserId', currentUser.id);
+    localStorage.setItem('pwCoins_' + currentUser.id, coins);
+    // Open game in new tab
+    window.open('rs-minigame.html', '_blank');
+    // Poll for coin changes every 2s (game writes back via localStorage)
+    const syncInterval = setInterval(async () => {
+      const newCoins = parseInt(localStorage.getItem('pwCoins_' + currentUser.id) || coins);
+      if (newCoins !== coins) {
+        await update(ref(db, `players/${currentUser.id}`), { coins: newCoins });
+        clearInterval(syncInterval);
+      }
+    }, 2000);
+    // Stop polling after 30 min
+    setTimeout(() => clearInterval(syncInterval), 30 * 60 * 1000);
   };
 
   window.resetWeek = async function() {
