@@ -5216,24 +5216,21 @@
 
   function prRebuildZones() {
     const r = prRoundNum;
-    // Miss zones grow aggressively each round (floor at 0.22 start, grow to dominate)
-    const missW    = Math.min(0.26 + r * 0.025, 0.46);
-    // High-value zones shrink hard per round — nearly invisible by round 5
-    const extremeW = Math.max(0.02 - r * 0.003, 0.003);
-    const farW     = Math.max(0.04 - r * 0.005, 0.005);
-    const edgeW    = Math.max(0.06 - r * 0.004, 0.01);
+    // Fixed widths — never change
+    const extremeW = 0.02;
+    const farW     = 0.04;
+    const edgeW    = 0.06;
+    // Miss starts small (0.10) and grows each round
+    const missW    = Math.min(0.10 + r * 0.025, 0.40);
     // Center safe gets whatever remains
-    const sideTotal = missW + extremeW + farW + edgeW;
-    const safeW = Math.max(1 - sideTotal * 2, 0.04);
+    const safeW    = Math.max(1 - (missW + extremeW + farW + edgeW) * 2, 0.04);
 
     const zoneWidths = [missW, extremeW, farW, edgeW, safeW, edgeW, farW, extremeW, missW];
 
     const wrap = document.getElementById('prZones');
     if (!wrap) return;
     const zones = wrap.querySelectorAll('.pr-zone');
-    zones.forEach((el, i) => {
-      el.style.width = (zoneWidths[i] * 100) + '%';
-    });
+    zones.forEach((el, i) => { el.style.width = (zoneWidths[i] * 100) + '%'; });
     PR_ZONES.forEach((z, i) => { z.width = zoneWidths[i]; });
   }
 
