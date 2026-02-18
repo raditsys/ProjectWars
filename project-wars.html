@@ -3713,13 +3713,9 @@
       }
     }
 
-    // 9 pegs on even rows create 8 gaps between them.
-    // 9 buckets sit in those 8 gaps plus one half-gap on each outer side,
-    // centred at startX + (i - 0.5)*colGap ... but cleanest:
-    // bucket i centre = startX - colGap/2 + (i+1)*colGap = startX + (i+0.5)*colGap, i=0..8
     const bucketY = PK_H - PK_BOT_PAD + 4;
     for (let i = 0; i < PK_MULTIPLIERS.length; i++) {
-      const x = startX + (i + 0.5) * colGap;
+      const x = startX + i * colGap;
       pkBuckets.push({ x, y: bucketY, mult: PK_MULTIPLIERS[i], color: PK_COLORS[i], w: colGap });
     }
   }
