@@ -868,6 +868,8 @@
   .bj-btn.hit   { background: var(--green); color: #000; }
   .bj-btn.stand { background: var(--red); color: #000; }
   .bj-btn.dbl   { background: var(--bronze); color: #000; }
+  .bj-btn.surrender { background: #6a2a2a; color: #ffaaaa; }
+  .bj-btn.split     { background: #1a2a4a; color: #88bbff; }
 
   /* Result banner */
   .result-banner {
@@ -2539,6 +2541,14 @@
 <button class="bj-btn hit" disabled="" id="btnHit" onclick="bjHit()">Hit</button>
 <button class="bj-btn stand" disabled="" id="btnStand" onclick="bjStand()">Stand</button>
 <button class="bj-btn dbl" disabled="" id="btnDouble" onclick="bjDouble()">Double</button>
+<button class="bj-btn surrender" disabled="" id="btnSurrender" onclick="bjSurrender()">Surrender</button>
+<button class="bj-btn split" disabled="" id="btnSplit" onclick="bjSplit()">Split</button>
+</div>
+<!-- Split second hand (hidden until split) -->
+<div id="splitHand2Wrap" style="display:none;">
+  <div class="table-section-label" style="margin-top:0.75rem;">Hand 2</div>
+  <div class="cards-row" id="splitHand2Cards"></div>
+  <span id="splitHand2Score"></span>
 </div>
 </div>
 
@@ -4246,6 +4256,15 @@
 
   // BJ state
   let bjDeck = [], bjPlayer = [], bjDealer = [], bjBet = 0, bjPhase = 'bet'; // phases: bet, play, done
+  let bjSplitHands = null; // null or [{cards,bet}, {cards,bet}] when split active
+  let bjSplitIdx   = 0;    // which split hand is active
+
+  function canSplit() {
+    if (bjPlayer.length !== 2 || bjSplitHands) return false;
+    const tenCards = new Set(['10','J','Q','K']);
+    const v1 = bjPlayer[0].r, v2 = bjPlayer[1].r;
+    return v1 === v2 || (tenCards.has(v1) && tenCards.has(v2));
+  }
 
   function renderCard(c, faceDown = false) {
     const div = document.createElement('div');
@@ -4281,10 +4300,13 @@
   }
 
   function setBJButtons(phase) {
-    document.getElementById('btnDeal').disabled   = phase !== 'bet';
-    document.getElementById('btnHit').disabled    = phase !== 'play';
-    document.getElementById('btnStand').disabled  = phase !== 'play';
-    document.getElementById('btnDouble').disabled = phase !== 'play' || bjPlayer.length !== 2;
+    const firstTwo = bjPlayer.length === 2 && !bjSplitHands;
+    document.getElementById('btnDeal').disabled      = phase !== 'bet';
+    document.getElementById('btnHit').disabled       = phase !== 'play';
+    document.getElementById('btnStand').disabled     = phase !== 'play';
+    document.getElementById('btnDouble').disabled    = phase !== 'play' || !firstTwo;
+    document.getElementById('btnSurrender').disabled = phase !== 'play' || !firstTwo;
+    document.getElementById('btnSplit').disabled     = phase !== 'play' || !firstTwo || !canSplit();
   }
 
   function showResult(text, type) {
@@ -4372,6 +4394,10 @@
     bjPlayer = [bjDeck.pop(), bjDeck.pop()];
     bjDealer = [bjDeck.pop(), bjDeck.pop()];
     bjPhase = 'play';
+    bjSplitHands = null;
+    bjSplitIdx = 0;
+    document.getElementById('splitHand2Wrap').style.display = 'none';
+    document.getElementById('splitHand2Cards').innerHTML = '';
 
     setBJButtons('done'); // lock during deal animation
     document.getElementById('resultBanner').className = 'result-banner';
@@ -4389,21 +4415,29 @@
     setBJButtons('done');
     const card = bjDeck.pop();
     bjPlayer.push(card);
+    if (bjSplitHands) bjSplitHands[bjSplitIdx].cards = bjPlayer;
     soundHit();
     document.getElementById('playerCards').appendChild(renderCard(card, false));
+    if (bjSplitHands) renderSplitHands();
     updateScoreDisplay();
     await sleep(120);
     if (handTotal(bjPlayer) >= 21) {
-      await bjResolve();
+      if (bjSplitHands) { await bjSplitAdvanceOrResolve(); }
+      else              { await bjResolve(); }
     } else {
       setBJButtons('play');
-      document.getElementById('btnDouble').disabled = true; // can only double on first 2 cards
+      if (!bjSplitHands) document.getElementById('btnDouble').disabled = true;
     }
   };
 
   // Stand — flip dealer hole card, then draw one at a time
   window.bjStand = async function() {
     setBJButtons('done');
+    if (bjSplitHands) {
+      bjSplitHands[bjSplitIdx].cards = bjPlayer;
+      await bjSplitAdvanceOrResolve();
+      return;
+    }
     bjPhase = 'done';
 
     // Flip dealer hole card
@@ -5353,6 +5387,169 @@
   prBuildZones();
 
 
+  // Surrender — return half bet, end hand
+  window.bjSurrender = async function() {
+    if (bjPhase !== 'play' || bjPlayer.length !== 2 || bjSplitHands) return;
+    setBJButtons('done');
+    bjPhase = 'done';
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+    const returned = Math.floor(bjBet / 2);
+    const lost = bjBet - returned;
+    showResult(`🏳 SURRENDER — lost ${lost} 🪙`, 'lose');
+    playTone(220, 'sawtooth', 0.3, 0.12);
+    setTimeout(() => playTone(180, 'sawtooth', 0.3, 0.15), 150);
+    spawnCoinFloat(`-${lost} 🪙`);
+    await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) - lost));
+    bjBet = 0;
+    updateBetDisplay();
+    setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
+  };
+
+  // Split — split matching pair into two hands
+  window.bjSplit = async function() {
+    if (!canSplit()) return;
+    const p = getCurrentCasinoPlayer();
+    if (!p || bjBet * 2 > (p.coins || 0)) { shakeWallet(); return; }
+
+    setBJButtons('done');
+    // Deduct second bet immediately
+    await setCasinoCoins(p.id, (p.coins || 0) - bjBet);
+
+    // Create two hands, each starting with one card
+    bjSplitHands = [
+      { cards: [bjPlayer[0]], bet: bjBet },
+      { cards: [bjPlayer[1]], bet: bjBet },
+    ];
+    bjSplitIdx = 0;
+
+    // Deal one new card to each hand
+    bjSplitHands[0].cards.push(bjDeck.pop());
+    bjSplitHands[1].cards.push(bjDeck.pop());
+
+    // Show second hand panel
+    document.getElementById('splitHand2Wrap').style.display = '';
+
+    // Set active hand to hand 1 and render
+    bjPlayer = bjSplitHands[0].cards;
+    renderSplitHands();
+    soundDeal();
+    await sleep(300);
+
+    // Label
+    document.getElementById('playerScoreEl').innerHTML =
+      `<span style="font-size:0.6rem;letter-spacing:1px;color:var(--gold);">HAND 1</span>`;
+
+    setBJButtons('play');
+  };
+
+  function renderSplitHands() {
+    // Hand 1 — main player area
+    const pc = document.getElementById('playerCards');
+    pc.innerHTML = '';
+    bjSplitHands[0].cards.forEach(c => pc.appendChild(renderCard(c, false)));
+
+    // Hand 2 — secondary area, greyed if not active
+    const h2 = document.getElementById('splitHand2Cards');
+    h2.innerHTML = '';
+    bjSplitHands[1].cards.forEach((c, i) => {
+      const el = renderCard(c, bjSplitIdx === 0 && i === 1); // hide 2nd card while playing hand 1
+      if (bjSplitIdx === 0) el.style.opacity = '0.45';
+      h2.appendChild(el);
+    });
+
+    // Scores
+    const t1 = handTotal(bjSplitHands[0].cards);
+    const t2 = handTotal(bjSplitHands[1].cards);
+    document.getElementById('playerScoreEl').innerHTML =
+      `<span class="score-badge${t1 > 21 ? ' bust' : ''}">${t1}</span>` +
+      `<span style="font-size:0.55rem;letter-spacing:1px;color:var(--gold);margin-left:0.3rem;">H${bjSplitIdx+1}</span>`;
+    document.getElementById('splitHand2Score').innerHTML =
+      bjSplitIdx === 1
+        ? `<span class="score-badge${t2 > 21 ? ' bust' : ''}">${t2}</span>`
+        : '';
+  }
+
+  async function bjSplitAdvanceOrResolve() {
+    if (bjSplitIdx === 0) {
+      // Move to hand 2
+      bjSplitIdx = 1;
+      bjPlayer = bjSplitHands[1].cards;
+      renderSplitHands();
+      document.getElementById('splitHand2Cards').querySelectorAll('.card').forEach(el => el.style.opacity = '1');
+      // Reveal the face-down card
+      const h2 = document.getElementById('splitHand2Cards');
+      h2.innerHTML = '';
+      bjSplitHands[1].cards.forEach(c => h2.appendChild(renderCard(c, false)));
+      document.getElementById('playerScoreEl').innerHTML =
+        `<span style="font-size:0.6rem;letter-spacing:1px;color:var(--gold);">HAND 2</span>`;
+      await sleep(300);
+      setBJButtons('play');
+    } else {
+      // Both hands done — play dealer and resolve both
+      await bjResolveSplit();
+    }
+  }
+
+  async function bjResolveSplit() {
+    setBJButtons('done');
+    bjPhase = 'done';
+
+    // Flip dealer hole card and draw to 17
+    const dc = document.getElementById('dealerCards');
+    dc.innerHTML = '';
+    bjDealer.forEach(c => dc.appendChild(renderCard(c, false)));
+    updateScoreDisplay();
+    await sleep(300);
+    while (handTotal(bjDealer) < 17) {
+      await sleep(400);
+      const card = bjDeck.pop();
+      bjDealer.push(card);
+      soundHit();
+      dc.appendChild(renderCard(card, false));
+      updateScoreDisplay();
+    }
+    await sleep(200);
+
+    const dt = handTotal(bjDealer);
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+
+    let totalDelta = 0;
+    const results = bjSplitHands.map(hand => {
+      const pt = handTotal(hand.cards);
+      if (pt > 21)      return { delta: -hand.bet, text: 'BUST' };
+      if (dt > 21)      return { delta:  hand.bet, text: 'DEALER BUSTS' };
+      if (pt > dt)      return { delta:  hand.bet, text: 'WIN' };
+      if (pt < dt)      return { delta: -hand.bet, text: 'LOSE' };
+      return               { delta: 0,         text: 'PUSH' };
+    });
+
+    results.forEach(r => totalDelta += r.delta);
+    const summary = results.map((r, i) => `H${i+1}: ${r.text}`).join(' · ');
+    const sign = totalDelta >= 0 ? '+' : '';
+    showResult(`${summary}  (${sign}${totalDelta} 🪙)`, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
+    totalDelta > 0 ? soundWin() : totalDelta < 0 ? soundLose() : soundPush();
+    if (totalDelta > 0) {
+      setTimeout(() => launchParticles('win'), 80);
+      spawnCoinFloat(`+${totalDelta} 🪙`);
+      recordBiggestWin(p.name, p.id, totalDelta);
+    } else if (totalDelta < 0) {
+      spawnCoinFloat(`${totalDelta} 🪙`);
+    }
+
+    await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) + totalDelta));
+
+    // Clean up split UI
+    bjSplitHands = null;
+    bjSplitIdx = 0;
+    document.getElementById('splitHand2Wrap').style.display = 'none';
+    document.getElementById('splitHand2Cards').innerHTML = '';
+    bjBet = 0;
+    updateBetDisplay();
+    setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
+  }
+
   async function bjResolve() {
     bjPhase = 'done';
     setBJButtons('done');
@@ -5414,6 +5611,9 @@
     }
 
     bjBet = 0;
+    bjSplitHands = null;
+    bjSplitIdx = 0;
+    document.getElementById('splitHand2Wrap').style.display = 'none';
     updateBetDisplay();
     setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
   }
