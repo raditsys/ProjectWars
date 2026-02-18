@@ -222,6 +222,54 @@
   .rank-3 .rank-badge { color: var(--bronze); }
 
   .player-name { font-size: 0.95rem; font-weight: 500; }
+
+  /* ── Equipped FX icon + tooltip ── */
+  .fx-icon-wrap {
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    margin-left: 5px;
+    cursor: default;
+  }
+  .fx-icon {
+    font-size: 0.7rem;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+    user-select: none;
+  }
+  .fx-icon-wrap:hover .fx-icon { opacity: 1; }
+  .fx-tooltip {
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0d1f0d;
+    border: 1px solid var(--gold);
+    padding: 0.3rem 0.6rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+    box-shadow: 0 0 12px rgba(245,200,66,0.25);
+  }
+  .fx-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--gold);
+  }
+  .fx-icon-wrap:hover .fx-tooltip { opacity: 1; }
+  .fx-tooltip .wavy-letter {
+    animation: wavyFloat 2.2s ease-in-out infinite;
+    display: inline-block;
+  }
   .streak { font-size: 0.65rem; color: var(--gold); letter-spacing: 1px; }
 
   .player-stats { display: flex; flex-direction: column; align-items: flex-end; gap: 0.1rem; }
@@ -2391,6 +2439,15 @@
   makeWavy(document.getElementById('wavySubtitle'),     'Who ships the most this week?', 0.3, 0.04);
   makeWavy(document.getElementById('wavyLoginTitle'),   'Project Wars',                 0,    0.08);
   makeWavy(document.getElementById('wavyLoginSubtitle'),'Who ships the most this week?', 0.3, 0.04);
+
+  // Build wavy tooltip HTML for an effect name
+  window.makeFxTooltipHtml = function(label) {
+    return [...label].map((ch, i) => {
+      if (ch === ' ') return ' ';
+      const delay = (i * 0.07).toFixed(2);
+      return `<span class="wavy-letter" style="animation-delay:${delay}s">${ch}</span>`;
+    }).join('');
+  };
 </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -2696,12 +2753,17 @@
             </span>`).join('')
         : `<span style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;">no projects yet</span>`;
 
+      const fxItem = p.equippedFx ? window.__shopItems?.find(s => s.id === p.equippedFx) : null;
+      const fxIconHtml = fxItem
+        ? `<span class="fx-icon-wrap"><span class="fx-icon">✦</span><span class="fx-tooltip">${window.makeFxTooltipHtml(fxItem.name)}</span></span>`
+        : '';
+
       return `
         <div class="player-card ${rankClass}${p.equippedFx ? ' fx-' + p.equippedFx : ''}${isMe ? ' is-me' : ''}" id="card-${p.id}">
           <div class="card-top">
             <div class="rank-badge">${medal}</div>
             <div>
-              <div class="player-name">${escHtml(p.name)}${isMe ? ' <span style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;">(you)</span>' : ''}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}${isSundayEST() && mult ? ` <span style="font-size:0.6rem;color:var(--gold);letter-spacing:1px;">${mult}</span>` : ''}</div>
+              <div class="player-name">${escHtml(p.name)}${fxIconHtml}${isMe ? ' <span style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;">(you)</span>' : ''}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}${isSundayEST() && mult ? ` <span style="font-size:0.6rem;color:var(--gold);letter-spacing:1px;">${mult}</span>` : ''}</div>
             </div>
             <div class="player-stats">
               <div class="player-hours">${p.total.toFixed(1)}<small>hrs this week</small></div>
@@ -3043,6 +3105,7 @@
     { id: 'matrix',    name: '🟩 Matrix',      price: 1200,  desc: 'Green code rain & flicker', previewClass: 'fx-matrix' },
     { id: 'inferno',   name: '🔥 Inferno',     price: 1500,  desc: 'Multi-layer raging fire',  previewClass: 'fx-inferno' },
   ];
+  window.__shopItems = SHOP_ITEMS;
 
   window.openShop = function() {
     if (!currentUser) { doLogout(); return; }
