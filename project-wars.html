@@ -3787,18 +3787,25 @@
     });
   }
 
-  function pkStep() {
+  let pkLastTime = 0;
+
+  function pkStep(timestamp) {
+    // Delta time: normalize to 60fps. Cap at 3 frames to avoid huge jumps on tab restore.
+    const elapsed = pkLastTime ? Math.min(timestamp - pkLastTime, 50) : 16.667;
+    pkLastTime = timestamp;
+    const dt = elapsed / 16.667;
+
     const gravity = 0.28;
-    const friction = 0.995;
+    const friction = Math.pow(0.995, dt);
     const bounceFactor = 0.45;
     const bucketY = PK_H - PK_BOT_PAD + 4;
 
     pkBalls.forEach(ball => {
       if (ball.done) return;
-      ball.vy += gravity;
+      ball.vy += gravity * dt;
       ball.vx *= friction;
-      ball.x += ball.vx;
-      ball.y += ball.vy;
+      ball.x += ball.vx * dt;
+      ball.y += ball.vy * dt;
 
       // Collide with pegs
       pkPegs.forEach(peg => {
@@ -3849,6 +3856,7 @@
     if (pkBalls.some(b => !b.done)) {
       pkAnimFrame = requestAnimationFrame(pkStep);
     } else {
+      pkLastTime = 0;
       pkRunning = false;
       document.getElementById('pkDropBtn').disabled = false;
     }
@@ -3938,6 +3946,7 @@
     }];
 
     if (pkAnimFrame) cancelAnimationFrame(pkAnimFrame);
+    pkLastTime = 0;
     pkAnimFrame = requestAnimationFrame(pkStep);
   };
 
