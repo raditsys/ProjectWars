@@ -287,6 +287,17 @@
   .btn.secondary { background: none; color: var(--green); border: 1px solid var(--green); }
   .btn.tertiary { background: none; color: var(--silver); border: 1px solid var(--border); }
 
+  /* ── Tutorial glow ── */
+  @keyframes tutorialPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,200,66,0.0), 0 0 8px 2px rgba(245,200,66,0.3); }
+    50%       { box-shadow: 0 0 0 5px rgba(245,200,66,0.15), 0 0 18px 6px rgba(245,200,66,0.5); }
+  }
+  .tutorial-glow {
+    animation: tutorialPulse 1.6s ease-in-out infinite;
+    border-color: var(--gold) !important;
+    outline: none;
+  }
+
   .msg { font-size: 0.7rem; letter-spacing: 1px; margin-top: 0.75rem; min-height: 1rem; }
   .msg.ok { color: var(--green); }
   .msg.err { color: var(--red); }
@@ -2132,7 +2143,7 @@
 </div>
 <div class="field">
 <label>Hours worked</label>
-<input id="logHours" max="24" min="0.25" placeholder="e.g. 2.5" step="0.25" type="number"/>
+<input id="logHours" max="8" min="0.25" placeholder="e.g. 2.5" step="0.25" type="number"/>
 </div>
 <div class="field">
 <label>Note (optional)</label>
@@ -2425,6 +2436,31 @@
     document.getElementById('loginName').value = '';
     document.getElementById('loginPass').value = '';
     render();
+    startTutorialIfNeeded();
+  }
+
+  function startTutorialIfNeeded() {
+    const key = 'pwTutorialDone_' + currentUser.id;
+    if (localStorage.getItem(key)) return;
+    // Step 1: glow on the project name input
+    const projInput = document.getElementById('projName');
+    projInput.classList.add('tutorial-glow');
+    projInput.focus();
+  }
+
+  function advanceTutorial() {
+    const key = 'pwTutorialDone_' + currentUser.id;
+    if (localStorage.getItem(key)) return;
+    // Step 2: move glow to Log Hours button
+    document.getElementById('projName').classList.remove('tutorial-glow');
+    const logBtn = document.getElementById('logBtn');
+    logBtn.classList.add('tutorial-glow');
+    // Mark fully done after they click Log Hours
+    logBtn.addEventListener('click', function doneTutorial() {
+      logBtn.classList.remove('tutorial-glow');
+      localStorage.setItem(key, '1');
+      logBtn.removeEventListener('click', doneTutorial);
+    }, { once: true });
   }
 
   window.doLogout = function() {
@@ -2652,6 +2688,7 @@
       msg.textContent = `"${projName}" added!`;
       msg.className = 'msg ok';
       setTimeout(() => msg.textContent = '', 3000);
+      advanceTutorial();
     } catch(e) { msg.textContent = 'Error saving.'; msg.className = 'msg err'; }
     btn.disabled = false;
   };
@@ -2665,7 +2702,32 @@
 
     if (!projectId) { msg.textContent = 'Select a project.'; msg.className = 'msg err'; return; }
     if (!hours || hours <= 0) { msg.textContent = 'Enter valid hours.'; msg.className = 'msg err'; return; }
-    if (hours > 24) { msg.textContent = 'Max 24 hours.'; msg.className = 'msg err'; return; }
+    if (hours > 8) { msg.textContent = 'Max 8 hours per log.'; msg.className = 'msg err'; return; }
+
+    // Daily 8h cap — resets at 11:59pm EST each day
+    const MAX_DAILY = 8;
+    const dailyKey = 'pwDailyHours_' + currentUser.id;
+    const dailyDateKey = 'pwDailyDate_' + currentUser.id;
+
+    // Get current EST date string (YYYY-MM-DD)
+    const nowEST = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    // Reset happens at 11:59pm, so "day" rolls over at 11:59pm EST
+    // Treat 11:59pm as part of the NEXT day for cap purposes
+    const estHour = nowEST.getHours(), estMin = nowEST.getMinutes();
+    if (estHour === 23 && estMin >= 59) {
+      nowEST.setDate(nowEST.getDate() + 1); // count toward tomorrow's cap
+    }
+    const estDateStr = nowEST.toISOString().slice(0, 10);
+
+    const storedDate  = localStorage.getItem(dailyDateKey);
+    let dailyLogged   = storedDate === estDateStr ? parseFloat(localStorage.getItem(dailyKey) || '0') : 0;
+
+    if (dailyLogged + hours > MAX_DAILY) {
+      const remaining = Math.max(0, MAX_DAILY - dailyLogged);
+      msg.textContent = `Daily limit reached! ${remaining > 0 ? remaining + 'h remaining today.' : 'Resets at 11:59pm EST.'}`;
+      msg.className = 'msg err';
+      return;
+    }
 
     const player = players[currentUser.id];
     const proj = player?.projects?.[projectId];
@@ -2682,11 +2744,16 @@
       await update(ref(db, `players/${currentUser.id}`), { coins: newCoins });
       await push(ref(db, 'logs'), { player: currentUser.name, project: proj.name, hours, note, ts: new Date().toISOString() });
 
+      // Update daily cap tracker
+      localStorage.setItem(dailyDateKey, estDateStr);
+      localStorage.setItem(dailyKey, String(dailyLogged + hours));
+
       document.getElementById('logHours').value = '';
       document.getElementById('logNote').value = '';
-      msg.textContent = `+${hours}h & +${earnedCoins} coins! 🎉`;
+      const remaining = MAX_DAILY - (dailyLogged + hours);
+      msg.textContent = `+${hours}h & +${earnedCoins} coins! 🎉  (${remaining.toFixed(2).replace(/\.?0+$/, '')}h left today)`;
       msg.className = 'msg ok';
-      setTimeout(() => msg.textContent = '', 3000);
+      setTimeout(() => msg.textContent = '', 4000);
 
       spawnCoinFloat(`+${earnedCoins} 🪙`);
       const card = document.getElementById(`card-${currentUser.id}`);
