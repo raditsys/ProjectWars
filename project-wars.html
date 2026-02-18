@@ -97,6 +97,57 @@
   /* ── Leaderboard ── */
   .leaderboard { max-width: 900px; margin: 0 auto 3rem; }
 
+  /* Biggest Win sidebar */
+  .win-leaderboard {
+    max-width: 900px;
+    margin: 0 auto 2rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+  .win-lb-panel {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+  }
+  .win-lb-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .win-lb-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #1a1a22;
+    font-size: 0.7rem;
+  }
+  .win-lb-row:last-child { border-bottom: none; }
+  .win-lb-rank { color: var(--muted); width: 16px; font-size: 0.65rem; }
+  .win-lb-name { flex: 1; color: var(--text); letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .win-lb-amount { color: var(--gold); font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
+  .win-lb-row.rank-1 .win-lb-name {
+    background: linear-gradient(90deg, #f5c842, #ffe082, #c8971f, #f5c842);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: winShimmer 2s linear infinite;
+    font-weight: bold;
+  }
+  @keyframes winShimmer {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+  }
+  .win-lb-empty { color: var(--muted); font-size: 0.65rem; letter-spacing: 1px; padding: 0.5rem 0; }
+
   .leaderboard-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1.4rem;
@@ -1933,6 +1984,7 @@
 <input autocapitalize="none" autocomplete="username" autocorrect="off" class="login-input" id="regName" maxlength="20" name="new_username" placeholder="Choose a username" spellcheck="false" type="text"/>
 <input autocomplete="new-password" class="login-input" id="regPass" name="new_password" placeholder="Choose a password" type="password"/>
 <input autocomplete="new-password" class="login-input" id="regPass2" name="new_password_confirm" placeholder="Confirm password" type="password"/>
+<div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:0.3rem;opacity:0.8;">⚠ Don't use your real password — this is not a secure system.</div>
 <button class="login-btn" id="registerBtn" type="submit">Create Account</button>
 <div class="login-msg" id="registerMsg"></div>
 </form>
@@ -2114,12 +2166,18 @@
 <div class="week-display" id="weekDisplay"></div><br/>
 <div class="sync-status" id="syncStatus">⬤ connecting...</div>
 </header>
-<div class="leaderboard">
+<div class="win-leaderboard">
+<div class="leaderboard" style="flex:1;margin:0 0 3rem;">
 <div class="leaderboard-title">
 <span>🏆 Leaderboard</span>
 <span class="multiplier-note" id="multiplierNote"></span>
 </div>
 <div id="leaderboard"><div class="empty-state">Connecting to database...</div></div>
+</div>
+<div class="win-lb-panel">
+  <div class="win-lb-title">🎰 Biggest Win</div>
+  <div id="biggestWinList"><div class="win-lb-empty">No wins yet</div></div>
+</div>
 </div>
 <div class="panels">
 <!-- Add Project (for self) -->
@@ -2167,19 +2225,16 @@
 <div id="history"></div>
 </div>
 <div class="reset-section" style="margin-top:3rem;">
-<button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
-<div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
-    Resets hours &amp; logs. Multipliers only apply if run on Sunday EST.
-  </div>
-<div style="margin-top:1.5rem;display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+<div style="font-size:0.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:0.75rem;text-transform:uppercase;">Admin Actions</div>
 <div style="display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center;">
+<button class="reset-btn" onclick="openResetWeekModal()" style="border-color:#60a5fa;color:#60a5fa;">↺ Reset for New Week</button>
 <button class="reset-btn" onclick="openNukeModal()" style="border-color:#f87171;color:#f87171;">☢ Clear All Data</button>
 <button class="reset-btn" onclick="openSoftResetModal()" style="border-color:#f5c842;color:#f5c842;">↺ Reset Progress</button>
 </div>
-<div style="color:var(--muted);font-size:0.65rem;letter-spacing:1px;text-align:center;">
+<div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;text-align:center;">
+  <span style="color:#60a5fa;">Reset Week</span>: resets hours &amp; logs, applies Sunday multipliers &nbsp;|&nbsp;
   <span style="color:#f87171;">Clear All</span>: wipes everything incl. players &nbsp;|&nbsp;
   <span style="color:#f5c842;">Reset Progress</span>: keeps players, resets hours, coins &amp; logs
-</div>
 </div>
 </div>
 <!-- Delete Modal -->
@@ -2227,6 +2282,22 @@
 <div class="modal-btns">
 <button class="btn-cancel" onclick="closeSoftResetModal()">Cancel</button>
 <button class="btn-danger" id="softResetConfirmBtn" onclick="confirmSoftReset()" style="background:var(--gold);color:#000;">Reset</button>
+</div>
+</div>
+</div>
+<!-- Reset Week Modal -->
+<div class="modal-backdrop" id="resetWeekBackdrop">
+<div class="modal">
+<h3 style="color:#60a5fa;">↺ Reset for New Week</h3>
+<p id="resetWeekDesc">Resets all hours &amp; logs. If run on <strong>Sunday EST</strong>, coin multipliers are applied (🥇×1.25 🥈×1.15 🥉×1.10).</p>
+<div class="field">
+<label>Admin password</label>
+<input autocomplete="off" id="resetWeekPassword" placeholder="••••••" type="password"/>
+</div>
+<div class="modal-err" id="resetWeekErr"></div>
+<div class="modal-btns">
+<button class="btn-cancel" onclick="closeResetWeekModal()">Cancel</button>
+<button class="btn-danger" id="resetWeekConfirmBtn" onclick="confirmResetWeek()" style="background:#60a5fa;color:#000;">Reset Week</button>
 </div>
 </div>
 </div>
@@ -2323,7 +2394,7 @@
   const db = getDatabase(app);
 
   // ── Constants ──
-  const COINS_PER_HOUR = 10;
+  const COINS_PER_HOUR = 100;
 
   // ── State ──
   let players = {};
@@ -2367,6 +2438,38 @@
     logs = snap.val() || {};
     render();
   });
+
+  let biggestWins = {};
+  onValue(ref(db, 'biggestWins'), snap => {
+    biggestWins = snap.val() || {};
+    renderBiggestWins();
+  });
+
+  function renderBiggestWins() {
+    const el = document.getElementById('biggestWinList');
+    if (!el) return;
+    const entries = Object.values(biggestWins)
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 8);
+    if (!entries.length) {
+      el.innerHTML = '<div class="win-lb-empty">No wins yet</div>';
+      return;
+    }
+    const medals = ['🥇','🥈','🥉'];
+    el.innerHTML = entries.map((e, i) => `
+      <div class="win-lb-row ${i === 0 ? 'rank-1' : ''}">
+        <div class="win-lb-rank">${medals[i] || (i+1)}</div>
+        <div class="win-lb-name">${escHtml(e.name)}</div>
+        <div class="win-lb-amount">+${e.amount.toLocaleString()} 🪙</div>
+      </div>`).join('');
+  }
+
+  async function recordBiggestWin(playerName, playerId, amount) {
+    if (amount <= 0) return;
+    const existing = biggestWins[playerId];
+    if (existing && existing.amount >= amount) return;
+    await update(ref(db, `biggestWins/${playerId}`), { name: playerName, amount });
+  }
 
   // ── Login System ──
 
@@ -2832,33 +2935,65 @@
     await remove(ref(db, 'logs'));
   };
 
-  window.resetWeek = async function() {
+  window.openResetWeekModal = function() {
     const sunday = isSundayEST();
-    const multMsg = sunday
-      ? '\n\n🥇 1st: ×1.25  🥈 2nd: ×1.15  🥉 3rd: ×1.10'
-      : '\n\nToday is NOT Sunday — hours will reset but NO coin multipliers will be applied.';
-    if (!confirm(`Reset the week?${multMsg}\n\nHours reset to 0. Players, projects & coins kept.`)) return;
-
-    const arr = Object.entries(players)
-      .map(([id, p]) => ({ id, ...p, total: totalHours(p) }))
-      .sort((a, b) => b.total - a.total);
-
-    const updates = {};
-    arr.forEach((p, i) => {
-      // Only apply multiplier on Sunday
-      if (sunday) {
-        const multipliers = [1.25, 1.15, 1.10];
-        const mult = multipliers[i] || 1;
-        updates[`players/${p.id}/coins`] = Math.floor((p.coins || 0) * mult);
-      }
-      Object.keys(p.projects || {}).forEach(projId => {
-        updates[`players/${p.id}/projects/${projId}/hours`] = 0;
-      });
-    });
-
-    await update(ref(db), updates);
-    await remove(ref(db, 'logs'));
+    document.getElementById('resetWeekDesc').innerHTML = sunday
+      ? 'Today is <strong>Sunday EST</strong> — coin multipliers will be applied! 🥇×1.25 🥈×1.15 🥉×1.10. Hours &amp; logs will reset.'
+      : 'Resets all hours &amp; logs. Today is <strong>not Sunday</strong> — no coin multipliers will be applied.';
+    document.getElementById('resetWeekPassword').value = '';
+    document.getElementById('resetWeekErr').textContent = '';
+    document.getElementById('resetWeekBackdrop').classList.add('open');
+    setTimeout(() => document.getElementById('resetWeekPassword').focus(), 50);
   };
+
+  window.closeResetWeekModal = function() {
+    document.getElementById('resetWeekBackdrop').classList.remove('open');
+  };
+
+  window.confirmResetWeek = async function() {
+    const pw = document.getElementById('resetWeekPassword').value;
+    const errEl = document.getElementById('resetWeekErr');
+    if (pw !== 'qwertys1') {
+      errEl.textContent = 'Wrong password.';
+      document.getElementById('resetWeekPassword').value = '';
+      document.getElementById('resetWeekPassword').focus();
+      return;
+    }
+    const btn = document.getElementById('resetWeekConfirmBtn');
+    btn.disabled = true;
+    btn.textContent = 'Resetting…';
+    try {
+      const sunday = isSundayEST();
+      const arr = Object.entries(players)
+        .map(([id, p]) => ({ id, ...p, total: totalHours(p) }))
+        .sort((a, b) => b.total - a.total);
+      const updates = {};
+      arr.forEach((p, i) => {
+        if (sunday) {
+          const mult = [1.25, 1.15, 1.10][i] || 1;
+          updates[`players/${p.id}/coins`] = Math.floor((p.coins || 0) * mult);
+        }
+        Object.keys(p.projects || {}).forEach(projId => {
+          updates[`players/${p.id}/projects/${projId}/hours`] = 0;
+        });
+      });
+      await update(ref(db), updates);
+      await remove(ref(db, 'logs'));
+      window.closeResetWeekModal();
+    } catch(e) {
+      errEl.textContent = 'Error. Check your connection.';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Reset Week';
+  };
+
+  document.getElementById('resetWeekBackdrop').addEventListener('click', e => {
+    if (e.target === document.getElementById('resetWeekBackdrop')) window.closeResetWeekModal();
+  });
+  document.getElementById('resetWeekPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.confirmResetWeek();
+    if (e.key === 'Escape') window.closeResetWeekModal();
+  });
 
   // Enter shortcuts
   document.getElementById('projName').addEventListener('keydown', e => { if (e.key === 'Enter') window.addProject(); });
@@ -3707,6 +3842,7 @@
       soundWin();
       setTimeout(() => launchParticles('win'), 80);
       setTimeout(() => spawnCoinFloat(`+${profit} 🪙`), 400);
+      recordBiggestWin(p.name, p.id, profit);
     } else {
       delta = -rlBet;
       resultText = `❌ ${num} — YOU LOSE`;
@@ -3931,6 +4067,7 @@
       soundWin();
       setTimeout(() => launchParticles('win'), 80);
       setTimeout(() => spawnCoinFloat('+' + profit + ' 🪙'), 300);
+      recordBiggestWin(p.name, p.id, profit);
     } else if (profit === 0) {
       banner.textContent = '🤝 Break even';
       banner.className = 'result-banner show push';
@@ -4056,7 +4193,10 @@
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await update(ref(db, `players/${p.id}`), { coins: newCoins });
 
-    if (delta > 0) setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 400);
+    if (delta > 0) {
+      setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 400);
+      recordBiggestWin(p.name, p.id, delta);
+    }
 
     bjBet = 0;
     updateBetDisplay();
