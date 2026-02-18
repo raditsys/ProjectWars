@@ -99,11 +99,12 @@
 
   /* Biggest Win sidebar */
   .win-leaderboard {
-    max-width: 1200px;
+    /* Center the main leaderboard column, keep Biggest Win on the right */
     margin: 0 auto 2rem;
     display: grid;
-    grid-template-columns: 1fr 260px;
+    grid-template-columns: minmax(0, 900px) 260px;
     gap: 2rem;
+    justify-content: center;
     align-items: start;
   }
   .win-lb-panel {
