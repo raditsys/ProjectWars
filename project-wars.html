@@ -2143,9 +2143,15 @@
 <div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
     Resets hours &amp; logs. Multipliers only apply if run on Sunday EST.
   </div>
-<div style="margin-top:1.5rem;">
+<div style="margin-top:1.5rem;display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+<div style="display:flex;gap:0.75rem;flex-wrap:wrap;justify-content:center;">
 <button class="reset-btn" onclick="openNukeModal()" style="border-color:#f87171;color:#f87171;">☢ Clear All Data</button>
-<div style="color:var(--muted);font-size:0.65rem;margin-top:0.5rem;letter-spacing:1px;">Wipes everything — players, hours, coins, effects, logs</div>
+<button class="reset-btn" onclick="openSoftResetModal()" style="border-color:#f5c842;color:#f5c842;">↺ Reset Progress</button>
+</div>
+<div style="color:var(--muted);font-size:0.65rem;letter-spacing:1px;text-align:center;">
+  <span style="color:#f87171;">Clear All</span>: wipes everything incl. players &nbsp;|&nbsp;
+  <span style="color:#f5c842;">Reset Progress</span>: keeps players, resets hours, coins &amp; logs
+</div>
 </div>
 </div>
 <!-- Delete Modal -->
@@ -2177,6 +2183,22 @@
 <div class="modal-btns">
 <button class="btn-cancel" onclick="closeNukeModal()">Cancel</button>
 <button class="btn-danger" id="nukeConfirmBtn" onclick="confirmNuke()">Nuke It</button>
+</div>
+</div>
+</div>
+<!-- Soft Reset Modal -->
+<div class="modal-backdrop" id="softResetBackdrop">
+<div class="modal">
+<h3 style="color:var(--gold);">↺ Reset Progress</h3>
+<p>This will reset <strong>all hours, coins, projects, and logs</strong> — but keeps all player accounts. There is no undo.</p>
+<div class="field">
+<label>Admin password</label>
+<input autocomplete="off" id="softResetPassword" placeholder="••••••" type="password"/>
+</div>
+<div class="modal-err" id="softResetErr"></div>
+<div class="modal-btns">
+<button class="btn-cancel" onclick="closeSoftResetModal()">Cancel</button>
+<button class="btn-danger" id="softResetConfirmBtn" onclick="confirmSoftReset()" style="background:var(--gold);color:#000;">Reset</button>
 </div>
 </div>
 </div>
@@ -2918,6 +2940,57 @@
   document.getElementById('nukePassword').addEventListener('keydown', e => {
     if (e.key === 'Enter') window.confirmNuke();
     if (e.key === 'Escape') window.closeNukeModal();
+  });
+
+  // ── Soft Reset (keep players, wipe progress) ──
+  window.openSoftResetModal = function() {
+    document.getElementById('softResetPassword').value = '';
+    document.getElementById('softResetErr').textContent = '';
+    document.getElementById('softResetBackdrop').classList.add('open');
+    setTimeout(() => document.getElementById('softResetPassword').focus(), 50);
+  };
+
+  window.closeSoftResetModal = function() {
+    document.getElementById('softResetBackdrop').classList.remove('open');
+  };
+
+  window.confirmSoftReset = async function() {
+    const pw = document.getElementById('softResetPassword').value;
+    const errEl = document.getElementById('softResetErr');
+    if (pw !== 'qwertys1') {
+      errEl.textContent = 'Wrong password.';
+      document.getElementById('softResetPassword').value = '';
+      document.getElementById('softResetPassword').focus();
+      return;
+    }
+    const btn = document.getElementById('softResetConfirmBtn');
+    btn.disabled = true;
+    btn.textContent = 'Resetting…';
+    try {
+      // Wipe logs entirely
+      await remove(ref(db, 'logs'));
+      // For each player: keep name + password, reset everything else
+      const updates = {};
+      Object.entries(players).forEach(([id, p]) => {
+        updates[`players/${id}/coins`]      = 0;
+        updates[`players/${id}/projects`]   = null;
+        updates[`players/${id}/equippedFx`] = null;
+      });
+      await update(ref(db, '/'), updates);
+      window.closeSoftResetModal();
+    } catch(e) {
+      errEl.textContent = 'Error. Check your connection.';
+    }
+    btn.disabled = false;
+    btn.textContent = 'Reset';
+  };
+
+  document.getElementById('softResetBackdrop').addEventListener('click', e => {
+    if (e.target === document.getElementById('softResetBackdrop')) window.closeSoftResetModal();
+  });
+  document.getElementById('softResetPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.confirmSoftReset();
+    if (e.key === 'Escape') window.closeSoftResetModal();
   });
 
 
