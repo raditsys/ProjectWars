@@ -1,0 +1,3549 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Project Wars 🏆</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --border: #2a2a2a;
+    --gold: #f5c842;
+    --silver: #a8b2bd;
+    --bronze: #cd7f42;
+    --green: #4ade80;
+    --text: #f0f0f0;
+    --muted: #666;
+    --red: #f87171;
+    --casino: #0d2b0d;
+    --casino-felt: #1a4a1a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    overflow-x: hidden;
+  }
+
+  header { text-align: center; margin-bottom: 3rem; display: flex; flex-direction: column; align-items: center; }
+
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 7rem);
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--gold), #ff8c42);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .subtitle { color: var(--muted); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-top: 0.5rem; }
+
+  /* ── Wavy text ── */
+  .wavy-letter {
+    display: inline-block;
+    animation: wavyFloat 2.2s ease-in-out infinite;
+  }
+  .wavy-letter.space { display: inline; }
+
+  @keyframes wavyFloat {
+    0%   { transform: translateY(0px) rotate(0deg) scaleX(1); }
+    15%  { transform: translateY(-8px) rotate(-3deg) scaleX(0.95); }
+    30%  { transform: translateY(-14px) rotate(2deg) scaleX(1.05); }
+    45%  { transform: translateY(-8px) rotate(-1deg) scaleX(0.98); }
+    60%  { transform: translateY(4px) rotate(2deg) scaleX(1.03); }
+    75%  { transform: translateY(8px) rotate(-2deg) scaleX(0.97); }
+    90%  { transform: translateY(3px) rotate(1deg) scaleX(1.01); }
+    100% { transform: translateY(0px) rotate(0deg) scaleX(1); }
+  }
+
+  .subtitle .wavy-letter {
+    animation-name: wavyFloatSubtle;
+    color: var(--muted);
+  }
+  @keyframes wavyFloatSubtle {
+    0%   { transform: translateY(0px) rotate(0deg); }
+    25%  { transform: translateY(-4px) rotate(-2deg); }
+    50%  { transform: translateY(5px) rotate(1.5deg); }
+    75%  { transform: translateY(-3px) rotate(-1deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+  }
+
+  .week-display {
+    display: inline-block;
+    border: 1px solid var(--border);
+    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-top: 1rem;
+    text-transform: uppercase;
+  }
+
+  .sync-status { display: inline-block; font-size: 0.65rem; letter-spacing: 2px; margin-top: 0.5rem; color: var(--muted); }
+  .sync-status.live { color: var(--green); }
+  .sync-status.err { color: var(--red); }
+
+  /* ── Leaderboard ── */
+  .leaderboard { max-width: 900px; margin: 0 auto 3rem; }
+
+  .leaderboard-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .multiplier-note {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--gold);
+    letter-spacing: 1px;
+    border: 1px solid var(--gold);
+    padding: 0.2rem 0.6rem;
+    opacity: 0.7;
+  }
+
+  .player-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+    transition: border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .player-card.rank-1 { border-color: var(--gold); }
+  .player-card.rank-2 { border-color: var(--silver); }
+  .player-card.rank-3 { border-color: var(--bronze); }
+
+  .player-card.rank-1::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gold);
+  }
+
+  .card-top {
+    display: grid;
+    grid-template-columns: 2rem 1fr auto auto auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem 0.75rem;
+  }
+
+  .rank-badge { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; text-align: center; }
+  .rank-1 .rank-badge { color: var(--gold); }
+  .rank-2 .rank-badge { color: var(--silver); }
+  .rank-3 .rank-badge { color: var(--bronze); }
+
+  .player-name { font-size: 0.95rem; font-weight: 500; }
+  .streak { font-size: 0.65rem; color: var(--gold); letter-spacing: 1px; }
+
+  .player-stats { display: flex; flex-direction: column; align-items: flex-end; gap: 0.1rem; }
+  .player-hours { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--green); white-space: nowrap; }
+  .player-hours small { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); display: block; text-align: right; margin-top: -4px; letter-spacing: 1px; }
+  .player-coins { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--gold); white-space: nowrap; }
+  .player-coins small { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: var(--muted); letter-spacing: 1px; }
+
+  .log-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.4rem 0.6rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .log-btn:hover { border-color: var(--green); color: var(--green); }
+
+  .card-projects {
+    padding: 0 1.25rem 0.85rem 3.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .proj-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 0.25rem 0.6rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    border-radius: 2px;
+  }
+
+  .proj-pill .proj-hrs { color: var(--text); font-weight: 500; }
+
+  .proj-pill .remove-proj {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    line-height: 1;
+    padding: 0 0 0 2px;
+    transition: color 0.15s;
+  }
+  .proj-pill .remove-proj:hover { color: var(--red); }
+
+  .bar-wrap { padding: 0 1.25rem 1rem; }
+  .bar-track { height: 3px; background: var(--border); width: 100%; }
+  .bar-fill { height: 3px; background: var(--green); transition: width 0.5s ease; }
+  .rank-1 .bar-fill { background: var(--gold); }
+  .rank-2 .bar-fill { background: var(--silver); }
+  .rank-3 .bar-fill { background: var(--bronze); }
+
+  .empty-state {
+    text-align: center; color: var(--muted); font-size: 0.8rem;
+    padding: 3rem; border: 1px dashed var(--border); letter-spacing: 1px;
+  }
+
+  /* ── Panels ── */
+  .panels {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 800px) { .panels { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 500px) { .panels { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; }
+
+  .panel h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .field { margin-bottom: 0.75rem; }
+
+  .field label {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--gold); }
+
+  .btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.secondary { background: none; color: var(--green); border: 1px solid var(--green); }
+  .btn.tertiary { background: none; color: var(--silver); border: 1px solid var(--border); }
+
+  .msg { font-size: 0.7rem; letter-spacing: 1px; margin-top: 0.75rem; min-height: 1rem; }
+  .msg.ok { color: var(--green); }
+  .msg.err { color: var(--red); }
+
+  /* ── History ── */
+  .history-section { max-width: 900px; margin: 2rem auto 0; }
+
+  .history-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .clear-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .clear-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-who { color: var(--text); }
+  .log-detail { color: var(--muted); font-size: 0.65rem; }
+  .log-amount { text-align: right; }
+  .log-amount .hrs { color: var(--green); font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
+  .log-amount .coins { color: var(--gold); font-size: 0.65rem; display: block; text-align: right; }
+
+  /* ── Reset ── */
+  .reset-section { max-width: 900px; margin: 2rem auto 0; text-align: center; }
+  .reset-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 2px;
+    padding: 0.5rem 1.5rem; cursor: pointer; transition: all 0.15s; text-transform: uppercase;
+  }
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── Music Player ── */
+  .music-player {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .music-icon-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .music-icon-btn:hover,
+  .music-player:hover .music-icon-btn,
+  .music-icon-btn.playing {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: #1e1a00;
+  }
+
+  @keyframes musicWiggle {
+    0%   { transform: rotate(0deg) scale(1); }
+    10%  { transform: rotate(-12deg) scale(1.1); }
+    20%  { transform: rotate(10deg) scale(1.05); }
+    30%  { transform: rotate(-8deg) scale(1.1); }
+    40%  { transform: rotate(8deg) scale(1.05); }
+    50%  { transform: rotate(-5deg) scale(1.08); }
+    60%  { transform: rotate(5deg) scale(1.04); }
+    70%  { transform: rotate(-3deg) scale(1.06); }
+    80%  { transform: rotate(3deg) scale(1.02); }
+    90%  { transform: rotate(-1deg) scale(1.01); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+
+  .music-icon-btn.playing {
+    animation: musicWiggle 1.8s ease-in-out infinite;
+    animation-delay: 0s;
+  }
+
+  .music-slider-wrap {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    max-width: 0;
+    opacity: 0;
+    transition: max-width 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.35s ease;
+    padding-left: 0;
+    background: var(--surface);
+    border: 1px solid transparent;
+    border-left: none;
+    border-radius: 0 2rem 2rem 0;
+    margin-left: -1px;
+  }
+
+  .music-player:hover .music-slider-wrap {
+    max-width: 160px;
+    opacity: 1;
+    padding-left: 0.75rem;
+    padding-right: 1rem;
+    border-color: var(--border);
+    border-left: none;
+  }
+
+  .music-vol-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 110px;
+    height: 3px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .music-vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .music-vol-slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+  .music-vol-slider::-moz-range-thumb {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    cursor: pointer;
+  }
+
+  .music-label {
+    font-size: 0.55rem;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-right: 0.5rem;
+  }
+
+  /* ── GAMBLE BUTTON (fixed tab) ── */
+  .gamble-tab {
+    position: fixed;
+    right: 0;
+    top: calc(50% - 80px);
+    transform: translateY(-50%);
+    z-index: 200;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    background: var(--gold);
+    color: #000;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+    padding: 1.5rem 0.6rem;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s, padding 0.2s;
+    box-shadow: -4px 0 20px rgba(245,200,66,0.3);
+  }
+  .gamble-tab:hover { background: #ffd000; }
+  .gamble-tab .tab-arrow { font-size: 0.9rem; }
+
+  /* ── CASINO DRAWER ── */
+  .casino-drawer {
+    position: fixed;
+    top: 0;
+    right: -520px;
+    width: 500px;
+    max-width: 95vw;
+    height: 100vh;
+    background: var(--casino);
+    border-left: 2px solid #2a5a2a;
+    z-index: 300;
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .casino-drawer.open { right: 0; }
+
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 299;
+    display: none;
+    backdrop-filter: blur(2px);
+  }
+  .drawer-overlay.open { display: block; }
+
+  .drawer-header {
+    background: #0a1f0a;
+    border-bottom: 1px solid #2a5a2a;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .drawer-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, var(--gold), #ff8c42);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .drawer-close {
+    background: none;
+    border: 1px solid #2a5a2a;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .drawer-close:hover { border-color: var(--red); color: var(--red); }
+
+  .drawer-body { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  /* Player picker inside drawer */
+  .casino-player-pick {
+    background: #0a1f0a;
+    border: 1px solid #2a5a2a;
+    padding: 1rem;
+  }
+
+  .casino-player-pick label {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: #4a8a4a;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .casino-player-pick select {
+    width: 100%;
+    background: var(--casino);
+    border: 1px solid #2a5a2a;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  .casino-wallet {
+    text-align: center;
+    padding: 0.75rem;
+    background: #0a1f0a;
+    border: 1px solid #2a5a2a;
+  }
+
+  .wallet-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .wallet-label {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: #4a8a4a;
+    text-transform: uppercase;
+    margin-top: 0.25rem;
+  }
+
+  /* ── FELT TABLE ── */
+  .felt-table {
+    background: var(--casino-felt);
+    border: 2px solid #2a5a2a;
+    border-radius: 4px;
+    padding: 1.25rem;
+    position: relative;
+  }
+
+  .table-section-label {
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    color: #4a8a4a;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .cards-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    min-height: 90px;
+    align-items: center;
+  }
+
+  /* Playing card */
+  .card {
+    width: 58px;
+    height: 84px;
+    background: #fff;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #111;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    position: relative;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+
+  .card.red { color: #c00; }
+  .card.face-down {
+    background: linear-gradient(135deg, #1a3a8a 25%, #0a2060 25%, #0a2060 50%, #1a3a8a 50%, #1a3a8a 75%, #0a2060 75%);
+    background-size: 10px 10px;
+    color: transparent;
+  }
+
+  .card .rank { font-size: 1rem; line-height: 1; }
+  .card .suit { font-size: 1.1rem; line-height: 1; }
+
+  @keyframes dealCard {
+    from { opacity: 0; transform: translateY(-20px) scale(0.8); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .card.deal-anim { animation: dealCard 0.25s ease forwards; }
+
+  .score-badge {
+    display: inline-block;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #2a5a2a;
+    padding: 0.2rem 0.6rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+  .score-badge.bust { color: var(--red); border-color: var(--red); }
+  .score-badge.bj { color: var(--gold); border-color: var(--gold); }
+
+  /* Bet section */
+  .bet-section { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+
+  .chip {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 3px dashed rgba(255,255,255,0.4);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s, opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .chip:hover:not(:disabled) { transform: scale(1.1); }
+  .chip:disabled { opacity: 0.3; cursor: not-allowed; }
+  .chip-1   { background: #888; color: #fff; }
+  .chip-5   { background: #aa3399; color: #fff; }
+  .chip-10  { background: #2255cc; color: #fff; }
+  .chip-25  { background: #229922; color: #fff; }
+  .chip-50  { background: #882222; color: #fff; }
+  .chip-100 { background: #333; color: var(--gold); border-color: var(--gold); }
+
+  .bet-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    min-width: 80px;
+    text-align: center;
+  }
+  .bet-display small { display: block; font-family: 'DM Mono', monospace; font-size: 0.55rem; color: #4a8a4a; letter-spacing: 1px; text-transform: uppercase; }
+
+  .clear-bet-btn {
+    background: none;
+    border: 1px solid #2a5a2a;
+    color: #4a8a4a;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .clear-bet-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Action buttons */
+  .bj-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+
+  .bj-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 0.6rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .bj-btn:hover:not(:disabled) { opacity: 0.85; transform: scale(1.02); }
+  .bj-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .bj-btn.deal  { background: var(--gold); color: #000; }
+  .bj-btn.hit   { background: var(--green); color: #000; }
+  .bj-btn.stand { background: var(--red); color: #000; }
+  .bj-btn.dbl   { background: var(--bronze); color: #000; }
+
+  /* Result banner */
+  .result-banner {
+    text-align: center;
+    padding: 1rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 4px;
+    border: 2px solid;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .result-banner.show { opacity: 1; }
+  .result-banner.win  { color: var(--gold); border-color: var(--gold); background: rgba(245,200,66,0.08); }
+  .result-banner.lose { color: var(--red);  border-color: var(--red);  background: rgba(248,113,113,0.08); }
+  .result-banner.push { color: var(--silver); border-color: var(--silver); background: rgba(168,178,189,0.08); }
+  .result-banner.bj   { color: var(--gold); border-color: var(--gold); background: rgba(245,200,66,0.15); }
+
+  /* ── Delete Modal ── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 400;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--red);
+    padding: 2rem;
+    width: 100%;
+    max-width: 360px;
+    margin: 1rem;
+  }
+
+  .modal h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 3px;
+    color: var(--red);
+    margin-bottom: 0.5rem;
+  }
+
+  .modal p {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+  }
+  .modal p strong { color: var(--text); }
+  .modal .field { margin-bottom: 1rem; }
+  .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 1rem; }
+
+  .btn-danger {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--red);
+    color: #000;
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-danger:hover { opacity: 0.85; }
+  .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-cancel {
+    width: 100%;
+    padding: 0.75rem;
+    background: none;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-cancel:hover { border-color: var(--muted); color: var(--text); }
+
+  .modal-err { font-size: 0.7rem; color: var(--red); letter-spacing: 1px; margin-top: 0.5rem; min-height: 1rem; }
+
+  /* ── Misc ── */
+  @keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  .popped { animation: pop 0.3s ease; }
+
+  @keyframes coinPop {
+    0%   { opacity:1; transform: translateY(0) scale(1); }
+    100% { opacity:0; transform: translateY(-40px) scale(1.4); }
+  }
+  .coin-float {
+    position: fixed;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    pointer-events: none;
+    z-index: 999;
+    animation: coinPop 1s ease forwards;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-6px); }
+    40%,80% { transform: translateX(6px); }
+  }
+  .shake { animation: shake 0.4s ease; }
+
+  /* ── LOGIN SCREEN ── */
+  .login-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0;
+  }
+  .login-screen.hidden { display: none; }
+
+  .login-box {
+    width: 100%;
+    max-width: 380px;
+    padding: 0 1.5rem;
+  }
+
+  .login-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 12vw, 5rem);
+    letter-spacing: 4px;
+    text-align: center;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+  }
+  .login-title .wavy-letter {
+    background: linear-gradient(135deg, var(--gold), #ff8c42);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .login-subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    white-space: nowrap;
+  }
+
+  .login-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .login-tab {
+    padding: 0.6rem;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .login-tab.active { background: var(--surface); color: var(--text); }
+
+  .login-form { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .login-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .login-input:focus { border-color: var(--gold); }
+  .login-input::placeholder { color: var(--muted); }
+
+  .login-btn {
+    width: 100%;
+    padding: 0.85rem;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    margin-top: 0.25rem;
+  }
+  .login-btn:hover { opacity: 0.85; }
+  .login-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .login-msg {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-align: center;
+    min-height: 1rem;
+    margin-top: 0.25rem;
+  }
+  .login-msg.err { color: var(--red); }
+  .login-msg.ok  { color: var(--green); }
+
+  /* ── User badge (top right when logged in) ── */
+  .user-badge {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.75rem;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+  }
+  .user-badge-name { color: var(--gold); font-weight: 500; }
+  .user-badge-logout {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    padding: 0;
+    transition: color 0.15s;
+  }
+  .user-badge-logout:hover { color: var(--red); }
+
+  /* ══ SHOP EFFECT KEYFRAMES ══ */
+
+  @keyframes lava {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  /* ══ SHOP EFFECTS — applied to .player-card.fx-* ══ */
+
+  @keyframes lava {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .player-card.fx-lava {
+    background: linear-gradient(135deg,#1a0000,#ff4400,#ff9900,#cc0000,#1a0000) !important;
+    background-size: 300% 300% !important;
+    animation: lava 3s ease infinite !important;
+  }
+
+  @keyframes rainbow-scroll {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .player-card.fx-rainbow {
+    background: linear-gradient(135deg,#1a0000,#880000,#885500,#338800,#004488,#440088,#1a0000) !important;
+    background-size: 200% 200% !important;
+    animation: rainbow-scroll 3s linear infinite !important;
+    border-color: transparent !important;
+    outline: 2px solid transparent;
+    box-shadow: inset 0 0 0 2px transparent;
+  }
+  .player-card.fx-rainbow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,#ff0000,#ff8800,#ffff00,#00ff00,#0088ff,#8800ff,#ff0000);
+    background-size: 200% 100%;
+    animation: rainbow-scroll 2s linear infinite;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    padding: 2px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  @keyframes plasma-shift {
+    0%   { background-position: 0% 50%;   filter: hue-rotate(0deg); }
+    50%  { background-position: 100% 50%; filter: hue-rotate(180deg); }
+    100% { background-position: 0% 50%;   filter: hue-rotate(360deg); }
+  }
+  .player-card.fx-plasma {
+    background: linear-gradient(135deg,#0a0020,#4400aa,#001540,#aa0060,#0a0020) !important;
+    background-size: 300% 300% !important;
+    animation: plasma-shift 2s ease infinite !important;
+  }
+
+  @keyframes glitch-card {
+    0%,93%,100% { transform: skewX(0deg); filter: none; }
+    94% { transform: skewX(-2deg) translateX(-3px); filter: hue-rotate(90deg) brightness(1.5); }
+    95% { transform: skewX(2deg)  translateX(3px);  filter: hue-rotate(200deg); }
+    96% { transform: skewX(-1deg) translateX(-1px); filter: hue-rotate(270deg) brightness(1.3); }
+    97% { transform: skewX(0deg); filter: none; }
+  }
+  .player-card.fx-glitch {
+    background: linear-gradient(135deg,#000a1a,#003344) !important;
+    border-color: #00ffcc !important;
+    animation: glitch-card 3s steps(1) infinite !important;
+    box-shadow: 2px 0 8px #00ffcc, -2px 0 8px #ff00aa !important;
+  }
+
+  @keyframes fire-card {
+    0%,100% { filter: brightness(1); }
+    25%     { filter: brightness(1.15) saturate(1.2); }
+    50%     { filter: brightness(0.95); }
+    75%     { filter: brightness(1.1) saturate(1.1); }
+  }
+  .player-card.fx-fire {
+    background: linear-gradient(180deg,#1a0000 0%,#440000 40%,#cc2200 80%,#ff6600 100%) !important;
+    border-color: #ff4400 !important;
+    animation: fire-card 0.9s ease infinite !important;
+    box-shadow: 0 4px 20px rgba(255,80,0,0.5) !important;
+  }
+
+  @keyframes aurora-flow {
+    0%   { background-position: 0% 50%;   filter: hue-rotate(0deg) brightness(1); }
+    50%  { background-position: 100% 50%; filter: hue-rotate(80deg) brightness(1.1); }
+    100% { background-position: 0% 50%;   filter: hue-rotate(0deg) brightness(1); }
+  }
+  .player-card.fx-aurora {
+    background: linear-gradient(135deg,#001a10,#003322,#001520,#001a10) !important;
+    background-size: 300% 300% !important;
+    animation: aurora-flow 4s ease infinite !important;
+    border-color: #00ff88 !important;
+    box-shadow: 0 0 16px rgba(0,255,136,0.25) !important;
+  }
+
+  @keyframes galaxy-drift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .player-card.fx-galaxy {
+    background: linear-gradient(135deg,#0d0221,#1b0057,#3d00b3,#0d0221,#1b0057) !important;
+    background-size: 300% 300% !important;
+    animation: galaxy-drift 5s ease infinite !important;
+    border-color: #6a0dad !important;
+    box-shadow: 0 0 20px rgba(106,13,173,0.5), inset 0 0 30px rgba(61,0,179,0.2) !important;
+  }
+
+  @keyframes neon-pulse-card {
+    0%,100% { box-shadow: 0 0 8px #00ffcc, 0 0 20px rgba(0,255,204,0.3); border-color: #00ffcc; }
+    50%     { box-shadow: 0 0 20px #00ffcc, 0 0 40px rgba(0,255,204,0.5); border-color: #aafff0; }
+  }
+  .player-card.fx-neon {
+    background: #050f0e !important;
+    animation: neon-pulse-card 1.2s ease-in-out infinite !important;
+  }
+
+  @keyframes holo-card {
+    0%   { filter: hue-rotate(0deg) saturate(1.5); background-position: 0% 50%; }
+    100% { filter: hue-rotate(360deg) saturate(1.5); background-position: 100% 50%; }
+  }
+  .player-card.fx-holo {
+    background: linear-gradient(135deg,#1a0010,#1a0a00,#001a05,#001020,#10001a) !important;
+    background-size: 200% 200% !important;
+    animation: holo-card 3s linear infinite !important;
+    border-color: #ff00aa !important;
+    box-shadow: 0 0 10px rgba(255,0,170,0.4), 0 0 30px rgba(0,207,255,0.2) !important;
+  }
+
+  @keyframes shimmer-card {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+  .player-card.fx-shimmer {
+    background: linear-gradient(90deg,#1a1200,#3a2a00,#ffd700 40%,#fffacd 50%,#ffd700 60%,#3a2a00,#1a1200) !important;
+    background-size: 300% 100% !important;
+    animation: shimmer-card 2s linear infinite !important;
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 12px rgba(255,215,0,0.3) !important;
+  }
+
+  @keyframes ice-card {
+    0%,100% { filter: brightness(1) saturate(1); }
+    50%     { filter: brightness(1.2) saturate(1.3); }
+  }
+  .player-card.fx-ice {
+    background: linear-gradient(135deg,#001520,#002a40,#004060,#002a40) !important;
+    background-size: 200% 200% !important;
+    animation: ice-card 2.5s ease infinite !important;
+    border-color: #80d0ff !important;
+    box-shadow: 0 0 15px rgba(0,191,255,0.3), inset 0 0 20px rgba(168,237,234,0.05) !important;
+  }
+
+  @keyframes toxic-card {
+    0%,100% { box-shadow: 0 0 8px #39ff14, 0 0 16px rgba(57,255,20,0.3); border-color: #39ff14; }
+    50%     { box-shadow: 0 0 20px #39ff14, 0 0 40px rgba(57,255,20,0.5); border-color: #aaff80; }
+  }
+  .player-card.fx-toxic {
+    background: linear-gradient(135deg,#000d00,#002200,#003a00) !important;
+    animation: toxic-card 0.9s ease-in-out infinite !important;
+  }
+
+  @keyframes vaporwave-card {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .player-card.fx-vaporwave {
+    background: linear-gradient(135deg,#1a0020,#200010,#001a10,#001520,#1a0020) !important;
+    background-size: 200% 200% !important;
+    animation: vaporwave-card 4s linear infinite !important;
+    border-color: #ff71ce !important;
+    box-shadow: 0 0 12px rgba(255,113,206,0.35), 0 0 24px rgba(185,103,255,0.2) !important;
+  }
+
+  @keyframes glow-border-card {
+    0%   { box-shadow: 0 0 10px 2px rgba(255,0,255,0.7),  inset 0 0 10px rgba(255,0,255,0.05);  border-color: #ff00ff; }
+    33%  { box-shadow: 0 0 14px 3px rgba(0,255,255,0.7),  inset 0 0 14px rgba(0,255,255,0.05);  border-color: #00ffff; }
+    66%  { box-shadow: 0 0 14px 3px rgba(255,255,0,0.7),  inset 0 0 14px rgba(255,255,0,0.05);  border-color: #ffff00; }
+    100% { box-shadow: 0 0 10px 2px rgba(255,0,255,0.7),  inset 0 0 10px rgba(255,0,255,0.05);  border-color: #ff00ff; }
+  }
+  .player-card.fx-glow {
+    background: #0d0d0d !important;
+    animation: glow-border-card 2s ease-in-out infinite !important;
+  }
+
+  @keyframes star-float {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-20px) scale(0.5); }
+  }
+  .player-card.fx-stars::after {
+    content: '✦  ✧  ✦  ✧  ✦  ✧  ✦  ✧';
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 0.55rem;
+    color: var(--gold);
+    letter-spacing: 6px;
+    animation: star-float 1.6s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .player-card.fx-stars { padding-bottom: 4px; }
+
+  /* ── MATRIX — scrolling green code rain ── */
+  @keyframes matrix-drop {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 0% 100%; }
+  }
+  @keyframes matrix-flicker {
+    0%,100% { opacity: 1; }
+    92%     { opacity: 1; }
+    93%     { opacity: 0.5; }
+    94%     { opacity: 1; }
+    97%     { opacity: 0.7; }
+    98%     { opacity: 1; }
+  }
+  .player-card.fx-matrix {
+    background-color: #000 !important;
+    background-image:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0px,
+        transparent 18px,
+        rgba(0,255,65,0.07) 18px,
+        rgba(0,255,65,0.07) 19px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0px,
+        transparent 10px,
+        rgba(0,255,65,0.04) 10px,
+        rgba(0,255,65,0.04) 11px
+      ) !important;
+    border-color: #00ff41 !important;
+    box-shadow: 0 0 12px rgba(0,255,65,0.4), inset 0 0 30px rgba(0,255,65,0.06) !important;
+    animation: matrix-flicker 4s steps(1) infinite !important;
+    color: #00ff41 !important;
+  }
+  .player-card.fx-matrix .player-name,
+  .player-card.fx-matrix .player-hours,
+  .player-card.fx-matrix .streak { color: #00ff41 !important; -webkit-text-fill-color: #00ff41 !important; }
+  .player-card.fx-matrix .rank-badge { color: #00ff41 !important; }
+  .player-card.fx-matrix .player-coins { color: #80ffb0 !important; }
+  .player-card.fx-matrix::after {
+    content: '01 10 11 00 10 01 11 00 01 10';
+    position: absolute;
+    bottom: 4px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 0.4rem;
+    letter-spacing: 4px;
+    color: rgba(0,255,65,0.35);
+    pointer-events: none;
+    font-family: 'DM Mono', monospace;
+    z-index: 2;
+  }
+
+  /* ── INFERNO — multi-layer animated fire with sparks ── */
+  @keyframes inferno-base {
+    0%,100% { background-position: 50% 100%; filter: brightness(1) saturate(1.2); }
+    25%     { background-position: 45% 80%;  filter: brightness(1.3) saturate(1.5); }
+    50%     { background-position: 55% 90%;  filter: brightness(0.95) saturate(1); }
+    75%     { background-position: 50% 85%;  filter: brightness(1.2) saturate(1.3); }
+  }
+  @keyframes inferno-glow {
+    0%,100% { box-shadow: 0 4px 20px rgba(255,60,0,0.6), 0 -2px 14px rgba(255,180,0,0.3), inset 0 0 20px rgba(255,40,0,0.1); }
+    50%     { box-shadow: 0 8px 35px rgba(255,80,0,0.8), 0 -4px 20px rgba(255,220,0,0.5), inset 0 0 30px rgba(255,60,0,0.15); }
+  }
+  @keyframes inferno-border {
+    0%,100% { border-color: #ff4400; }
+    33%     { border-color: #ff9900; }
+    66%     { border-color: #ffcc00; }
+  }
+  .player-card.fx-inferno {
+    background:
+      radial-gradient(ellipse at 30% 100%, #ff6600 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 100%, #ff3300 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 80%,  #ff9900 0%, transparent 60%),
+      linear-gradient(180deg, #0a0000 0%, #220000 30%, #550000 60%, #cc2200 85%, #ff6600 100%) !important;
+    background-size: 200% 200% !important;
+    animation: inferno-base 1.1s ease infinite, inferno-glow 1.1s ease infinite, inferno-border 1.1s ease infinite !important;
+  }
+  .player-card.fx-inferno::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      180deg,
+      transparent 0%, transparent 85%,
+      rgba(255,120,0,0.08) 90%,
+      transparent 100%
+    );
+    background-size: 100% 8px;
+    animation: matrix-drop 0.4s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+  }
+
+  .bar-wrap { position: relative; padding: 0 1.25rem 1rem; }
+
+  /* ── SHOP DRAWER ── */
+  .shop-tab {
+    position: fixed;
+    right: 0;
+    top: calc(50% + 140px);
+    transform: translateY(-50%);
+    z-index: 200;
+    writing-mode: vertical-rl;
+    background: #6a0dad;
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+    padding: 1.5rem 0.6rem;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s;
+    box-shadow: -4px 0 20px rgba(106,13,173,0.4);
+  }
+  .shop-tab:hover { background: #8b00ff; }
+
+  .shop-drawer {
+    position: fixed;
+    top: 0;
+    right: -520px;
+    width: 500px;
+    max-width: 95vw;
+    height: 100vh;
+    background: #0d0221;
+    border-left: 2px solid #3d00b3;
+    z-index: 300;
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .shop-drawer.open { right: 0; }
+
+  .shop-header {
+    background: #0a0118;
+    border-bottom: 1px solid #3d00b3;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .shop-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #cc00ff, #00cfff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .shop-close {
+    background: none;
+    border: 1px solid #3d00b3;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .shop-close:hover { border-color: var(--red); color: var(--red); }
+
+  .shop-body { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .shop-player-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .shop-field {
+    background: #0a0118;
+    border: 1px solid #3d00b3;
+    padding: 0.85rem;
+  }
+  .shop-field label {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: #8844cc;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .shop-field select {
+    width: 100%;
+    background: #0d0221;
+    border: 1px solid #3d00b3;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.5rem;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .shop-wallet-box {
+    background: #0a0118;
+    border: 1px solid #3d00b3;
+    padding: 0.85rem;
+    text-align: center;
+  }
+  .shop-wallet-coins {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .shop-wallet-lbl { font-size: 0.55rem; letter-spacing: 2px; color: #8844cc; text-transform: uppercase; }
+
+  .shop-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    color: #8844cc;
+    border-bottom: 1px solid #3d00b3;
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+
+  .shop-item {
+    background: #0a0118;
+    border: 2px solid #1a0057;
+    padding: 0.85rem 0.75rem;
+    transition: border-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    cursor: pointer;
+    user-select: none;
+  }
+  .shop-item:hover:not(.owned) { border-color: #aa00ff; transform: translateY(-2px); box-shadow: 0 4px 16px rgba(106,13,173,0.4); }
+  .shop-item.owned { cursor: default; border-color: #1a3a1a; }
+  .shop-item.equipped { border-color: var(--gold) !important; box-shadow: 0 0 12px rgba(245,200,66,0.25) !important; }
+
+  .shop-item-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .shop-preview-wrap { height: 8px; background: #1a0057; border-radius: 1px; overflow: visible; margin-bottom: 0.5rem; }
+  .shop-preview-fill { height: 100%; border-radius: 1px; }
+
+  .shop-item-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .shop-price { font-size: 0.65rem; color: var(--gold); letter-spacing: 1px; }
+  .shop-tag {
+    font-size: 0.5rem;
+    letter-spacing: 1px;
+    padding: 0.15rem 0.4rem;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+  .tag-buy    { background: #6a0dad; color: #fff; }
+  .tag-owned  { background: #1a3a1a; color: var(--green); }
+  .tag-on     { background: #3a2a00; color: var(--gold); }
+
+  .shop-equip-row { margin-top: 0.5rem; }
+  .shop-equip-btn {
+    width: 100%;
+    padding: 0.35rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .shop-equip-btn:hover { opacity: 0.8; }
+  .btn-equip   { background: var(--gold); color: #000; }
+  .btn-unequip { background: transparent; color: var(--muted); border: 1px solid #3d00b3 !important; }
+
+  /* ── AMBIENT BACKGROUND ── */
+  .bg-blobs {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+    overflow: hidden;
+  }
+  .bg-blobs::before, .bg-blobs::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.12;
+    animation: blobDrift 18s ease-in-out infinite alternate;
+  }
+  .bg-blobs::before {
+    width: 60vw; height: 60vw;
+    background: radial-gradient(circle, #f5c842 0%, transparent 70%);
+    top: -15vw; left: -10vw;
+    animation-delay: 0s;
+  }
+  .bg-blobs::after {
+    width: 50vw; height: 50vw;
+    background: radial-gradient(circle, #4ade80 0%, transparent 70%);
+    bottom: -10vw; right: -5vw;
+    animation-delay: -9s;
+  }
+  .bg-blobs-mid {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+    overflow: hidden;
+  }
+  .bg-blobs-mid::before {
+    content: '';
+    position: absolute;
+    width: 45vw; height: 45vw;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.07;
+    background: radial-gradient(circle, #a78bfa 0%, transparent 70%);
+    top: 40%; left: 30%;
+    animation: blobDrift 22s ease-in-out infinite alternate;
+    animation-delay: -5s;
+  }
+  @keyframes blobDrift {
+    0%   { transform: translate(0, 0) scale(1); }
+    33%  { transform: translate(4vw, -3vw) scale(1.05); }
+    66%  { transform: translate(-2vw, 4vw) scale(0.97); }
+    100% { transform: translate(3vw, 2vw) scale(1.03); }
+  }
+
+  /* Login bg sits at 999, blobs at 1000, login box at 1001 */
+  .login-screen { background: transparent !important; }
+  .login-screen-bg {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 999;
+  }
+  /* When logged in, blobs drop below normal content (which has no z-index) */
+  body.logged-in .bg-blobs,
+  body.logged-in .bg-blobs-mid { z-index: -1; }
+  #loginScreen { z-index: 1001; }
+
+  /* ── GRASS ── */
+#grassLayer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 90px;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+
+/* A clump is the clickable unit */
+.grass-clump {
+  position: absolute;
+  bottom: 0;
+  height: 90px;
+  pointer-events: all;
+  cursor: pointer;
+  transform-origin: bottom center;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+}
+.grass-clump:hover { transform: scaleY(1.06); }
+
+/* Blades live inside the clump */
+.grass-blade {
+  position: absolute;
+  bottom: 0;
+  width: 6px;
+  transform-origin: bottom center;
+  pointer-events: none; /* click the clump, not individual blades */
+}
+.grass-blade svg { display: block; }
+
+.scissors-cursor { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext y='20' font-size='20'%3E✂%3C/text%3E%3C/svg%3E") 12 12, crosshair; }
+
+@keyframes bladeSway {
+  0%,100% { transform: rotate(var(--sway-base)); }
+  50%      { transform: rotate(calc(var(--sway-base) + var(--sway-amt))); }
+}
+@keyframes bladeGrow {
+  from { transform: scaleY(0) rotate(var(--sway-base)); opacity: 0; }
+  to   { transform: scaleY(1) rotate(var(--sway-base)); opacity: 1; }
+}
+
+/* Cutting a clump */
+@keyframes clumpCut {
+  0%   { transform: scaleY(1) translateX(0px); opacity: 1; }
+  40%  { transform: scaleY(0.35) translateX(22px); opacity: 0.7; }
+  100% { transform: scaleY(0) translateX(44px); opacity: 0; }
+}
+.grass-clump.cutting { animation: clumpCut 0.32s ease forwards !important; pointer-events: none; }
+
+/* Coin pop for grass */
+  .grass-coin {
+    position: fixed;
+    font-size: 1rem;
+    pointer-events: none;
+    z-index: 200;
+    animation: grassCoinPop 0.9s ease forwards;
+  }
+  @keyframes grassCoinPop {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
+  }
+
+  /* ── FROG ── */
+  #frogPet {
+    position: fixed;
+    bottom: 20px;
+    left: 100px;
+    width: 52px;
+    height: 52px;
+    z-index: 60;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.05s;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+  }
+  body:not(.logged-in) #frogPet { z-index: 1000; }
+  #frogPet:active { transform: scale(0.88); }
+  #frogPet .frog-hat {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.4rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+  @keyframes frogHop {
+    0%   { transform: translateY(0); }
+    30%  { transform: translateY(-22px); }
+    55%  { transform: translateY(-8px); }
+    75%  { transform: translateY(-16px); }
+    100% { transform: translateY(0); }
+  }
+  #frogPet.hopping { animation: frogHop 0.45s ease forwards; }
+  @keyframes frogBlink {
+    0%,95%,100% { transform: scaleY(1); }
+    97%          { transform: scaleY(0.1); }
+  }
+  .frog-svg { animation: frogBlink 4s ease-in-out infinite; }
+</style>
+</head>
+<body>
+<!-- AMBIENT BACKGROUND BLOBS -->
+<div class="login-screen-bg" id="loginBg"></div>
+<div class="bg-blobs"></div>
+<div class="bg-blobs-mid"></div>
+<!-- GRASS LAYER -->
+<div id="grassLayer"></div>
+<!-- FROG PET -->
+<div id="frogPet" onclick="frogClick()" title="Click me!">
+<svg class="frog-svg" fill="none" height="52" viewbox="0 0 52 52" width="52" xmlns="http://www.w3.org/2000/svg">
+<!-- Body -->
+<ellipse cx="26" cy="34" fill="#3a9e3a" rx="18" ry="14"></ellipse>
+<ellipse cx="26" cy="32" fill="#4ade80" rx="15" ry="12"></ellipse>
+<!-- Belly -->
+<ellipse cx="26" cy="36" fill="#86efac" opacity="0.6" rx="9" ry="7"></ellipse>
+<!-- Eyes -->
+<circle cx="17" cy="22" fill="#3a9e3a" r="7"></circle>
+<circle cx="35" cy="22" fill="#3a9e3a" r="7"></circle>
+<circle cx="17" cy="22" fill="#f0f0f0" r="5"></circle>
+<circle cx="35" cy="22" fill="#f0f0f0" r="5"></circle>
+<circle cx="18" cy="22" fill="#111" r="2.5"></circle>
+<circle cx="36" cy="22" fill="#111" r="2.5"></circle>
+<!-- Nostrils -->
+<circle cx="23" cy="28" fill="#2d7a2d" r="1"></circle>
+<circle cx="29" cy="28" fill="#2d7a2d" r="1"></circle>
+<!-- Mouth -->
+<path d="M20 33 Q26 37 32 33" fill="none" stroke="#2d7a2d" stroke-linecap="round" stroke-width="1.5"></path>
+<!-- Legs -->
+<ellipse cx="10" cy="44" fill="#3a9e3a" rx="7" ry="4" transform="rotate(-15 10 44)"></ellipse>
+<ellipse cx="42" cy="44" fill="#3a9e3a" rx="7" ry="4" transform="rotate(15 42 44)"></ellipse>
+</svg>
+<div class="frog-hat" id="frogHatEl"></div>
+</div>
+<div class="login-screen" id="loginScreen">
+<div class="login-box">
+<div aria-label="Project Wars" class="login-title" id="wavyLoginTitle"></div>
+<div aria-label="Who ships the most this week?" class="login-subtitle" id="wavyLoginSubtitle"></div>
+<div class="login-tabs">
+<button class="login-tab active" id="tabLogin" onclick="switchLoginTab('login')">Login</button>
+<button class="login-tab" id="tabRegister" onclick="switchLoginTab('register')">Register</button>
+</div>
+<form action="#" autocomplete="on" class="login-form" id="loginForm" method="post" onsubmit="event.preventDefault(); doLogin();">
+<input autocapitalize="none" autocomplete="username" autocorrect="off" class="login-input" id="loginName" maxlength="20" name="username" placeholder="Username" spellcheck="false" type="text"/>
+<input autocomplete="current-password" class="login-input" id="loginPass" name="password" placeholder="Password" type="password"/>
+<button class="login-btn" id="loginBtn" type="submit">Login</button>
+<div class="login-msg" id="loginMsg"></div>
+</form>
+<form action="#" autocomplete="on" class="login-form" id="registerForm" method="post" onsubmit="event.preventDefault(); doRegister();" style="display:none;">
+<input autocapitalize="none" autocomplete="username" autocorrect="off" class="login-input" id="regName" maxlength="20" name="new_username" placeholder="Choose a username" spellcheck="false" type="text"/>
+<input autocomplete="new-password" class="login-input" id="regPass" name="new_password" placeholder="Choose a password" type="password"/>
+<input autocomplete="new-password" class="login-input" id="regPass2" name="new_password_confirm" placeholder="Confirm password" type="password"/>
+<button class="login-btn" id="registerBtn" type="submit">Create Account</button>
+<div class="login-msg" id="registerMsg"></div>
+</form>
+</div>
+</div>
+<!-- USER BADGE -->
+<div class="user-badge" id="userBadge" style="display:none;">
+<span>👤</span>
+<span class="user-badge-name" id="userBadgeName"></span>
+<button class="user-badge-logout" onclick="doLogout()">logout</button>
+</div>
+<!-- GAMBLEz TAB -->
+<button class="gamble-tab" id="gambleTab" onclick="openCasino()">
+<span class="tab-arrow">◀</span>
+  GAMBLE
+</button>
+<!-- CASINO DRAWER OVERLAY -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop();"></div>
+<!-- CASINO DRAWER -->
+<div class="casino-drawer" id="casinoDrawer">
+<div class="drawer-header">
+<h2>🃏 Casino</h2>
+<button class="drawer-close" onclick="closeCasino()">✕ Close</button>
+</div>
+<div class="drawer-body">
+<!-- Who's playing -->
+<div class="casino-player-pick">
+<label>Playing as</label>
+<div id="casinoPlayerDisplay" style="color:var(--text);font-size:0.85rem;padding:0.4rem 0;">— log in first —</div>
+</div>
+<!-- Wallet -->
+<div class="casino-wallet">
+<div class="wallet-amount" id="walletDisplay">—</div>
+<div class="wallet-label">🪙 coins</div>
+</div>
+<!-- Felt Table -->
+<div class="felt-table">
+<div class="table-section-label">Dealer <span id="dealerScoreEl"></span></div>
+<div class="cards-row" id="dealerCards"></div>
+<div style="margin: 1rem 0; border-top: 1px solid #2a5a2a;"></div>
+<div class="table-section-label">You <span id="playerScoreEl"></span></div>
+<div class="cards-row" id="playerCards"></div>
+<div style="margin-top:1rem;">
+<div class="result-banner" id="resultBanner"></div>
+</div>
+</div>
+<!-- Bet chips -->
+<div>
+<div class="table-section-label" style="margin-bottom:0.5rem;">Place your bet</div>
+<div class="bet-section">
+<button class="chip chip-1" id="chip1" onclick="addBet(1)">1</button>
+<button class="chip chip-5" id="chip5" onclick="addBet(5)">5</button>
+<button class="chip chip-10" id="chip10" onclick="addBet(10)">10</button>
+<button class="chip chip-25" id="chip25" onclick="addBet(25)">25</button>
+<button class="chip chip-50" id="chip50" onclick="addBet(50)">50</button>
+<button class="chip chip-100" id="chip100" onclick="addBet(100)">100</button>
+<div class="bet-display" id="betDisplay">0<small>bet</small></div>
+<button class="clear-bet-btn" onclick="clearBet()">Clear</button>
+</div>
+</div>
+<!-- Action buttons -->
+<div class="bj-actions">
+<button class="bj-btn deal" id="btnDeal" onclick="bjDeal()">Deal</button>
+<button class="bj-btn hit" disabled="" id="btnHit" onclick="bjHit()">Hit</button>
+<button class="bj-btn stand" disabled="" id="btnStand" onclick="bjStand()">Stand</button>
+<button class="bj-btn dbl" disabled="" id="btnDouble" onclick="bjDouble()">Double</button>
+</div>
+</div>
+</div>
+<!-- SHOP TAB -->
+<button class="shop-tab" id="shopTab" onclick="openShop()">
+<span id="shopTabArrow">◀</span>
+  SHOP
+</button>
+<!-- SHOP DRAWER -->
+<div class="shop-drawer" id="shopDrawer">
+<div class="shop-header">
+<h2>✨ Effect Shop</h2>
+<button class="shop-close" onclick="closeShop()">✕ Close</button>
+</div>
+<div class="shop-body">
+<div class="shop-wallet-box" style="text-align:center;padding:0.85rem;background:#0a0118;border:1px solid #3d00b3;">
+<div class="shop-wallet-coins" id="shopWalletDisplay">—</div>
+<div class="shop-wallet-lbl">🪙 coins</div>
+</div>
+<div>
+<div class="shop-section-title">Bar Effects</div>
+<div class="shop-grid" id="shopGrid">
+<div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Log in to shop</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ═══════════════════ MAIN PAGE ═══════════════════ -->
+<header>
+<h1 aria-label="Project Wars" id="wavyTitle"></h1>
+<div aria-label="Who ships the most this week?" class="subtitle" id="wavySubtitle"></div>
+<div class="week-display" id="weekDisplay"></div><br/>
+<div class="sync-status" id="syncStatus">⬤ connecting...</div>
+</header>
+<div class="leaderboard">
+<div class="leaderboard-title">
+<span>🏆 Leaderboard</span>
+<span class="multiplier-note" id="multiplierNote"></span>
+</div>
+<div id="leaderboard"><div class="empty-state">Connecting to database...</div></div>
+</div>
+<div class="panels">
+<!-- Add Project (for self) -->
+<div class="panel">
+<h2>Add Project</h2>
+<div class="field">
+<label>Project name</label>
+<input id="projName" maxlength="30" placeholder="e.g. iOS app" type="text"/>
+</div>
+<button class="btn tertiary" id="addProjBtn" onclick="addProject()">Add Project</button>
+<div class="msg" id="projMsg"></div>
+</div>
+<!-- Log Hours -->
+<div class="panel">
+<h2>Log Hours</h2>
+<div class="field">
+<label>Project</label>
+<select id="logProject">
+<option value="">— select project —</option>
+</select>
+</div>
+<div class="field">
+<label>Hours worked</label>
+<input id="logHours" max="24" min="0.25" placeholder="e.g. 2.5" step="0.25" type="number"/>
+</div>
+<div class="field">
+<label>Note (optional)</label>
+<input id="logNote" maxlength="60" placeholder="what did you work on?" type="text"/>
+</div>
+<button class="btn secondary" id="logBtn" onclick="logHours()">+ Log Hours</button>
+<div class="msg" id="logMsg"></div>
+</div>
+<!-- Delete Project -->
+<div class="panel">
+<h2>Delete</h2>
+<div class="field">
+<label>Delete one of your projects</label>
+<select id="deleteProjectSel">
+<option value="">— select —</option>
+</select>
+</div>
+<button class="btn" onclick="openDeleteProjectSelf()" style="background:none;color:var(--red);border:1px solid var(--red);margin-bottom:0.5rem;">Delete Project</button>
+<div style="margin-top:1rem; border-top: 1px solid var(--border); padding-top:1rem;">
+<div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-bottom:0.5rem;">ADMIN — Delete any player</div>
+<select id="deletePlayer" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:0.8rem;padding:0.5rem;margin-bottom:0.5rem;-webkit-appearance:none;">
+<option value="">— select —</option>
+</select>
+<button class="btn" onclick="openDeletePlayer()" style="background:none;color:var(--red);border:1px solid var(--red);">Delete Player</button>
+</div>
+<div class="msg" id="deleteMsg"></div>
+</div>
+<!-- Quick stats panel -->
+<div class="panel">
+<h2>This Week</h2>
+<div id="selfStats" style="color:var(--muted);font-size:0.75rem;line-height:2;">Log in to see your stats</div>
+</div>
+</div>
+<div class="history-section">
+<div class="history-title">
+<span>Recent Activity</span>
+<button class="clear-btn" onclick="clearHistory()">Clear log</button>
+</div>
+<div id="history"></div>
+</div>
+<div class="reset-section" style="margin-top:3rem;">
+<button class="reset-btn" onclick="resetWeek()">↺ Reset for new week</button>
+<div style="color:var(--muted);font-size:0.65rem;margin-top:0.75rem;letter-spacing:1px;">
+    Resets hours &amp; logs. Multipliers only apply if run on Sunday EST.
+  </div>
+<div style="margin-top:1.5rem;">
+<button class="reset-btn" onclick="openNukeModal()" style="border-color:#f87171;color:#f87171;">☢ Clear All Data</button>
+<div style="color:var(--muted);font-size:0.65rem;margin-top:0.5rem;letter-spacing:1px;">Wipes everything — players, hours, coins, effects, logs</div>
+</div>
+</div>
+<!-- Delete Modal -->
+<div class="modal-backdrop" id="modalBackdrop">
+<div class="modal">
+<h3 id="modalTitle">Confirm Delete</h3>
+<p id="modalDesc">Enter the admin password to continue.</p>
+<div class="field">
+<label>Password</label>
+<input autocomplete="off" id="modalPassword" placeholder="••••••" type="password"/>
+</div>
+<div class="modal-err" id="modalErr"></div>
+<div class="modal-btns">
+<button class="btn-cancel" onclick="closeModal()">Cancel</button>
+<button class="btn-danger" id="modalConfirmBtn" onclick="confirmDelete()">Delete</button>
+</div>
+</div>
+</div>
+<!-- Nuke Modal -->
+<div class="modal-backdrop" id="nukeBackdrop">
+<div class="modal">
+<h3 style="color:var(--red);">☢ Clear All Data</h3>
+<p>This will <strong>permanently delete everything</strong> — all players, hours, coins, shop effects, and logs. There is no undo.</p>
+<div class="field">
+<label>Admin password</label>
+<input autocomplete="off" id="nukePassword" placeholder="••••••" type="password"/>
+</div>
+<div class="modal-err" id="nukeErr"></div>
+<div class="modal-btns">
+<button class="btn-cancel" onclick="closeNukeModal()">Cancel</button>
+<button class="btn-danger" id="nukeConfirmBtn" onclick="confirmNuke()">Nuke It</button>
+</div>
+</div>
+</div>
+<!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+<!-- Music Player -->
+<div class="music-player" id="musicPlayer">
+<button class="music-icon-btn" id="musicBtn" onclick="toggleMusic()" title="Toggle music">🎵</button>
+<div class="music-slider-wrap">
+<span class="music-label">vol</span>
+<input class="music-vol-slider" id="volSlider" max="1" min="0" oninput="setVolume(this.value)" step="0.01" type="range" value="0.18"/>
+</div>
+</div>
+<script>
+  (function() {
+    const audio = new Audio("ShopMusic.mp3");
+    audio.loop = true;
+    audio.volume = 0.18;
+
+    let playing = false;
+    const btn = document.getElementById('musicBtn');
+
+    function startMusic() {
+      audio.play().then(() => {
+        playing = true;
+        btn.textContent = '🔊';
+        btn.classList.add('playing');
+      }).catch(() => {});
+    }
+
+    // Auto-start on first interaction (browsers block autoplay before gesture)
+    function onFirstInteraction() {
+      if (!playing) startMusic();
+      document.removeEventListener('click', onFirstInteraction);
+      document.removeEventListener('keydown', onFirstInteraction);
+    }
+    document.addEventListener('click', onFirstInteraction);
+    document.addEventListener('keydown', onFirstInteraction);
+
+    // Also try immediate autoplay (works in some browsers)
+    startMusic();
+
+    window.toggleMusic = function() {
+      if (playing) {
+        audio.pause();
+        playing = false;
+        btn.textContent = '🎵';
+        btn.classList.remove('playing');
+      } else {
+        startMusic();
+      }
+    };
+
+    window.setVolume = function(val) {
+      audio.volume = parseFloat(val);
+    };
+  })();
+</script>
+<script>
+  // ── Wavy Text ──
+  function makeWavy(el, text, baseDelay, stagger) {
+    el.innerHTML = '';
+    [...text].forEach((ch, i) => {
+      if (ch === ' ') {
+        el.appendChild(document.createTextNode(' '));
+      } else {
+        const span = document.createElement('span');
+        span.className = 'wavy-letter';
+        span.textContent = ch;
+        span.style.animationDelay = (baseDelay + i * stagger) + 's';
+        el.appendChild(span);
+      }
+    });
+  }
+  makeWavy(document.getElementById('wavyTitle'),        'Project Wars',                 0,    0.08);
+  makeWavy(document.getElementById('wavySubtitle'),     'Who ships the most this week?', 0.3, 0.04);
+  makeWavy(document.getElementById('wavyLoginTitle'),   'Project Wars',                 0,    0.08);
+  makeWavy(document.getElementById('wavyLoginSubtitle'),'Who ships the most this week?', 0.3, 0.04);
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAtMH_AvVGskpK2TxMlXjf0IXRb9HT-q_Y",
+    authDomain: "projectwars-60a92.firebaseapp.com",
+    databaseURL: "https://projectwars-60a92-default-rtdb.firebaseio.com",
+    projectId: "projectwars-60a92",
+    storageBucket: "projectwars-60a92.firebasestorage.app",
+    messagingSenderId: "308228931446",
+    appId: "1:308228931446:web:39c1921f7e9be891980457"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // ── Constants ──
+  const COINS_PER_HOUR = 10;
+
+  // ── State ──
+  let players = {};
+  let logs = {};
+  let currentUser = null; // { id, name, ...playerData }
+
+  const syncEl = document.getElementById('syncStatus');
+
+  onValue(ref(db, 'players'), snap => {
+    players = snap.val() || {};
+    syncEl.textContent = '⬤ live';
+    syncEl.className = 'sync-status live';
+    // Refresh currentUser data from latest snapshot
+    if (currentUser) {
+      const fresh = players[currentUser.id];
+      if (fresh) currentUser = { id: currentUser.id, ...fresh };
+    }
+    render();
+    if (document.getElementById('shopDrawer')?.classList.contains('open')) renderShopItems();
+  }, () => {
+    syncEl.textContent = '⬤ connection error';
+    syncEl.className = 'sync-status err';
+  });
+
+  onValue(ref(db, 'logs'), snap => {
+    logs = snap.val() || {};
+    render();
+  });
+
+  // ── Login System ──
+
+  window.switchLoginTab = function(tab) {
+    document.getElementById('loginForm').style.display    = tab === 'login'    ? 'flex' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'flex' : 'none';
+    document.getElementById('tabLogin').classList.toggle('active',    tab === 'login');
+    document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+    document.getElementById('loginMsg').textContent = '';
+    document.getElementById('registerMsg').textContent = '';
+  };
+
+  window.doLogin = async function() {
+    const name = document.getElementById('loginName').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const msg  = document.getElementById('loginMsg');
+    if (!name || !pass) { msg.textContent = 'Fill in both fields.'; msg.className = 'login-msg err'; return; }
+
+    const entry = Object.entries(players).find(([, p]) => p.name.toLowerCase() === name.toLowerCase());
+    if (!entry) { msg.textContent = 'No account found.'; msg.className = 'login-msg err'; return; }
+    const [id, player] = entry;
+    if (player.password !== pass) { msg.textContent = 'Wrong password.'; msg.className = 'login-msg err'; return; }
+
+    currentUser = { id, ...player };
+    window.__currentUser = currentUser;
+    window.__currentUserId = currentUser.id;
+    onLoggedIn();
+  };
+
+  window.doRegister = async function() {
+    const name  = document.getElementById('regName').value.trim();
+    const pass  = document.getElementById('regPass').value;
+    const pass2 = document.getElementById('regPass2').value;
+    const msg   = document.getElementById('registerMsg');
+
+    if (!name) { msg.textContent = 'Enter a username.'; msg.className = 'login-msg err'; return; }
+    if (!pass)  { msg.textContent = 'Enter a password.'; msg.className = 'login-msg err'; return; }
+    if (pass !== pass2) { msg.textContent = 'Passwords do not match.'; msg.className = 'login-msg err'; return; }
+    if (pass.length < 3) { msg.textContent = 'Password too short (min 3 chars).'; msg.className = 'login-msg err'; return; }
+    if (Object.values(players).find(p => p.name.toLowerCase() === name.toLowerCase())) {
+      msg.textContent = 'Username already taken.'; msg.className = 'login-msg err'; return;
+    }
+
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true;
+    msg.textContent = 'Creating account...'; msg.className = 'login-msg';
+    try {
+      const newRef = await push(ref(db, 'players'), { name, password: pass, projects: {}, coins: 0 });
+      currentUser = { id: newRef.key, name, password: pass, projects: {}, coins: 0 };
+      window.__currentUser = currentUser;
+      window.__currentUserId = currentUser.id;
+      onLoggedIn();
+    } catch(e) {
+      msg.textContent = 'Error creating account.'; msg.className = 'login-msg err';
+    }
+    btn.disabled = false;
+  };
+
+  function onLoggedIn() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('loginBg').style.display = 'none';
+    document.body.classList.add('logged-in');
+    document.getElementById('userBadge').style.display = 'flex';
+    document.getElementById('userBadgeName').textContent = currentUser.name;
+    document.getElementById('loginName').value = '';
+    document.getElementById('loginPass').value = '';
+    render();
+  }
+
+  window.doLogout = function() {
+    currentUser = null;
+    window.__currentUser = null;
+    window.__currentUserId = null;
+    document.body.classList.remove('logged-in');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('loginBg').style.display = '';
+    document.getElementById('userBadge').style.display = 'none';
+    closeCasino(); closeShop();
+  };
+
+  // Enter key shortcuts for login
+  document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); });
+  document.getElementById('loginName').addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); });
+  document.getElementById('regPass2').addEventListener('keydown', e => { if (e.key === 'Enter') window.doRegister(); });
+
+  // ── Helpers ──
+  function totalHours(player) {
+    if (!player.projects) return 0;
+    return Object.values(player.projects).reduce((s, p) => s + (p.hours || 0), 0);
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function timeAgo(date) {
+    const secs = Math.floor((Date.now() - date) / 1000);
+    if (secs < 60) return 'just now';
+    if (secs < 3600) return `${Math.floor(secs/60)}m ago`;
+    if (secs < 86400) return `${Math.floor(secs/3600)}h ago`;
+    return `${Math.floor(secs/86400)}d ago`;
+  }
+
+  function getStreak(name) {
+    const days = new Set(
+      Object.values(logs).filter(l => l.player === name).map(l => new Date(l.ts).toDateString())
+    );
+    let streak = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      if (days.has(d.toDateString())) streak++; else break;
+    }
+    return streak;
+  }
+
+  function isSundayEST() {
+    const now = new Date();
+    const est = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    return est.getDay() === 0;
+  }
+
+  function getTimeUntilSundayEST() {
+    const now = new Date();
+    const estNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const daysUntilSun = (7 - estNow.getDay()) % 7 || 7;
+    const estSunday = new Date(estNow);
+    estSunday.setDate(estNow.getDate() + daysUntilSun);
+    estSunday.setHours(23, 59, 0, 0);
+    const diffMs = estSunday - estNow;
+    const h = Math.floor(diffMs / 3600000);
+    const m = Math.floor((diffMs % 3600000) / 60000);
+    return `${h}h ${m}m`;
+  }
+
+  // ── Render ──
+  function render() {
+    renderWeek();
+    renderLeaderboard();
+    renderSelfPanels();
+    renderAdminSelects();
+    renderHistory();
+  }
+
+  function renderWeek() {
+    const d = new Date();
+    const start = new Date(d); start.setDate(d.getDate() - d.getDay());
+    const end = new Date(start); end.setDate(start.getDate() + 6);
+    const fmt = x => x.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    document.getElementById('weekDisplay').textContent = `Week of ${fmt(start)} – ${fmt(end)}`;
+    const note = document.getElementById('multiplierNote');
+    note.textContent = isSundayEST() ? '🏅 Multiplier day!' : `🏅 Multipliers in ${getTimeUntilSundayEST()}`;
+  }
+
+  function renderLeaderboard() {
+    const lb = document.getElementById('leaderboard');
+    const arr = Object.entries(players).map(([id, p]) => ({ id, ...p, total: totalHours(p) }));
+    if (!arr.length) {
+      lb.innerHTML = '<div class="empty-state">No players yet — register to join!</div>';
+      return;
+    }
+    arr.sort((a, b) => b.total - a.total);
+    const max = arr[0].total || 1;
+
+    lb.innerHTML = arr.map((p, i) => {
+      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      const mult = i === 0 ? '×1.25' : i === 1 ? '×1.15' : i === 2 ? '×1.10' : '';
+      const pct = Math.round((p.total / max) * 100);
+      const streak = getStreak(p.name);
+      const coins = p.coins || 0;
+      const isMe = currentUser && currentUser.id === p.id;
+
+      const projEntries = Object.entries(p.projects || {});
+      const pillsHtml = projEntries.length
+        ? projEntries.map(([pid, proj]) => `
+            <span class="proj-pill">
+              <span>${escHtml(proj.name)}</span>
+              <span class="proj-hrs">${(proj.hours || 0).toFixed(1)}h</span>
+              ${isMe ? `<button class="remove-proj" title="Remove project" onclick="window._removeProject('${p.id}','${pid}','${escHtml(proj.name)}','${escHtml(p.name)}')">×</button>` : ''}
+            </span>`).join('')
+        : `<span style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;">no projects yet</span>`;
+
+      return `
+        <div class="player-card ${rankClass}${p.equippedFx ? ' fx-' + p.equippedFx : ''}${isMe ? ' is-me' : ''}" id="card-${p.id}">
+          <div class="card-top">
+            <div class="rank-badge">${medal}</div>
+            <div>
+              <div class="player-name">${escHtml(p.name)}${isMe ? ' <span style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;">(you)</span>' : ''}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}${isSundayEST() && mult ? ` <span style="font-size:0.6rem;color:var(--gold);letter-spacing:1px;">${mult}</span>` : ''}</div>
+            </div>
+            <div class="player-stats">
+              <div class="player-hours">${p.total.toFixed(1)}<small>hrs this week</small></div>
+            </div>
+            <div class="player-stats">
+              <div class="player-coins">🪙 ${coins.toLocaleString()}<small>coins</small></div>
+            </div>
+            ${isMe ? `<button class="log-btn" onclick="document.querySelector('.panels').scrollIntoView({behavior:'smooth'})">+ Log</button>` : ''}
+          </div>
+          <div class="card-projects">${pillsHtml}</div>
+          <div class="bar-wrap">
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // Populate the "your projects" dropdown and self stats panel
+  function renderSelfPanels() {
+    if (!currentUser) return;
+    const player = players[currentUser.id];
+    if (!player) return;
+
+    // Log project select
+    const sel = document.getElementById('logProject');
+    const cur = sel.value;
+    sel.innerHTML = '';
+    const projs = Object.entries(player.projects || {});
+    if (!projs.length) {
+      sel.innerHTML = '<option value="">— no projects yet —</option>';
+    } else {
+      projs.forEach(([pid, proj]) => {
+        const o = document.createElement('option');
+        o.value = pid;
+        o.textContent = `${proj.name} (${(proj.hours||0).toFixed(1)}h)`;
+        if (pid === cur) o.selected = true;
+        sel.appendChild(o);
+      });
+    }
+
+    // Delete project select
+    const dsel = document.getElementById('deleteProjectSel');
+    const dcur = dsel.value;
+    dsel.innerHTML = '<option value="">— select —</option>';
+    projs.forEach(([pid, proj]) => {
+      const o = document.createElement('option');
+      o.value = pid;
+      o.textContent = proj.name;
+      if (pid === dcur) o.selected = true;
+      dsel.appendChild(o);
+    });
+
+    // Self stats
+    const total = totalHours(player);
+    const coins = player.coins || 0;
+    const streak = getStreak(currentUser.name);
+    const projCount = projs.length;
+    const statsEl = document.getElementById('selfStats');
+    statsEl.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <div style="border:1px solid var(--border);padding:0.75rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--green);">${total.toFixed(1)}</div>
+          <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">hours</div>
+        </div>
+        <div style="border:1px solid var(--border);padding:0.75rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);">${coins.toLocaleString()}</div>
+          <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">coins</div>
+        </div>
+        <div style="border:1px solid var(--border);padding:0.75rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--text);">${streak}</div>
+          <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">day streak</div>
+        </div>
+        <div style="border:1px solid var(--border);padding:0.75rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--text);">${projCount}</div>
+          <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">projects</div>
+        </div>
+      </div>`;
+  }
+
+  function renderAdminSelects() {
+    const sel = document.getElementById('deletePlayer');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— select —</option>';
+    Object.values(players).forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.name; o.textContent = p.name;
+      if (p.name === cur) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+
+  function renderHistory() {
+    const el = document.getElementById('history');
+    const arr = Object.values(logs).sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 20);
+    if (!arr.length) {
+      el.innerHTML = '<div style="color:var(--muted);font-size:0.75rem;padding:1rem 0;">No activity logged yet.</div>';
+      return;
+    }
+    el.innerHTML = arr.map(l => `
+      <div class="log-item">
+        <div>
+          <div class="log-who">${escHtml(l.player)} · <span style="color:var(--muted)">${escHtml(l.project || '')}</span></div>
+          <div class="log-detail">${l.note ? escHtml(l.note) : 'no note'} · ${timeAgo(new Date(l.ts))}</div>
+        </div>
+        <div class="log-amount">
+          <span class="hrs">+${l.hours}h</span>
+          <span class="coins">+${Math.floor(l.hours * COINS_PER_HOUR)} 🪙</span>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── Main Actions ──
+
+  window.addProject = async function() {
+    if (!currentUser) return;
+    const projName = document.getElementById('projName').value.trim();
+    const msg = document.getElementById('projMsg');
+    if (!projName) { msg.textContent = 'Enter a project name.'; msg.className = 'msg err'; return; }
+    const player = players[currentUser.id];
+    const existing = Object.values(player?.projects || {}).find(p => p.name.toLowerCase() === projName.toLowerCase());
+    if (existing) { msg.textContent = 'Project already exists.'; msg.className = 'msg err'; return; }
+    const btn = document.getElementById('addProjBtn');
+    btn.disabled = true;
+    try {
+      await push(ref(db, `players/${currentUser.id}/projects`), { name: projName, hours: 0 });
+      document.getElementById('projName').value = '';
+      msg.textContent = `"${projName}" added!`;
+      msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+    } catch(e) { msg.textContent = 'Error saving.'; msg.className = 'msg err'; }
+    btn.disabled = false;
+  };
+
+  window.logHours = async function() {
+    if (!currentUser) return;
+    const projectId = document.getElementById('logProject').value;
+    const hours     = parseFloat(document.getElementById('logHours').value);
+    const note      = document.getElementById('logNote').value.trim();
+    const msg       = document.getElementById('logMsg');
+
+    if (!projectId) { msg.textContent = 'Select a project.'; msg.className = 'msg err'; return; }
+    if (!hours || hours <= 0) { msg.textContent = 'Enter valid hours.'; msg.className = 'msg err'; return; }
+    if (hours > 24) { msg.textContent = 'Max 24 hours.'; msg.className = 'msg err'; return; }
+
+    const player = players[currentUser.id];
+    const proj = player?.projects?.[projectId];
+    if (!proj) return;
+
+    const btn = document.getElementById('logBtn');
+    btn.disabled = true;
+    try {
+      const newHours    = Math.round(((proj.hours || 0) + hours) * 100) / 100;
+      const earnedCoins = Math.floor(hours * COINS_PER_HOUR);
+      const newCoins    = (player.coins || 0) + earnedCoins;
+
+      await update(ref(db, `players/${currentUser.id}/projects/${projectId}`), { hours: newHours });
+      await update(ref(db, `players/${currentUser.id}`), { coins: newCoins });
+      await push(ref(db, 'logs'), { player: currentUser.name, project: proj.name, hours, note, ts: new Date().toISOString() });
+
+      document.getElementById('logHours').value = '';
+      document.getElementById('logNote').value = '';
+      msg.textContent = `+${hours}h & +${earnedCoins} coins! 🎉`;
+      msg.className = 'msg ok';
+      setTimeout(() => msg.textContent = '', 3000);
+
+      spawnCoinFloat(`+${earnedCoins} 🪙`);
+      const card = document.getElementById(`card-${currentUser.id}`);
+      if (card) { card.classList.remove('popped'); void card.offsetWidth; card.classList.add('popped'); }
+    } catch(e) { msg.textContent = 'Error saving.'; msg.className = 'msg err'; }
+    btn.disabled = false;
+  };
+
+  function spawnCoinFloat(text) {
+    const el = document.createElement('div');
+    el.className = 'coin-float';
+    el.textContent = text;
+    el.style.left = (Math.random() * 60 + 20) + 'vw';
+    el.style.top = '60vh';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1100);
+  }
+  window.spawnCoinFloat = spawnCoinFloat;
+
+  // ── Delete Modal ──
+  let pendingDelete = null;
+
+  window.openDeleteProjectSelf = function() {
+    if (!currentUser) return;
+    const sel = document.getElementById('deleteProjectSel');
+    const projId = sel.value;
+    const msg = document.getElementById('deleteMsg');
+    if (!projId) { msg.textContent = 'Select a project.'; msg.className = 'msg err'; setTimeout(() => msg.textContent='',3000); return; }
+    const proj = players[currentUser.id]?.projects?.[projId];
+    if (!proj) return;
+    pendingDelete = { type: 'project', playerId: currentUser.id, projId, projName: proj.name, playerName: currentUser.name };
+    document.getElementById('modalTitle').textContent = 'Delete Project';
+    document.getElementById('modalDesc').innerHTML = `Permanently delete <strong>${escHtml(proj.name)}</strong>?`;
+    openModal();
+  };
+
+  window.openDeletePlayer = function() {
+    const playerName = document.getElementById('deletePlayer').value;
+    const msg = document.getElementById('deleteMsg');
+    if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; setTimeout(() => msg.textContent='',3000); return; }
+    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
+    if (!entry) return;
+    pendingDelete = { type: 'player', playerId: entry[0], playerName };
+    document.getElementById('modalTitle').textContent = 'Delete Player';
+    document.getElementById('modalDesc').innerHTML = `Permanently delete <strong>${escHtml(playerName)}</strong> and all their data?`;
+    openModal();
+  };
+
+  window._removeProject = function(playerId, projId, projName, playerName) {
+    pendingDelete = { type: 'project', playerId, projId, projName, playerName };
+    document.getElementById('modalTitle').textContent = 'Delete Project';
+    document.getElementById('modalDesc').innerHTML = `Permanently delete <strong>${escHtml(projName)}</strong>?`;
+    openModal();
+  };
+
+  function openModal() {
+    document.getElementById('modalPassword').value = '';
+    document.getElementById('modalErr').textContent = '';
+    document.getElementById('modalBackdrop').classList.add('open');
+    setTimeout(() => document.getElementById('modalPassword').focus(), 50);
+  }
+
+  window.closeModal = function() {
+    document.getElementById('modalBackdrop').classList.remove('open');
+    pendingDelete = null;
+  };
+
+  window.confirmDelete = async function() {
+    const pw = document.getElementById('modalPassword').value;
+    const errEl = document.getElementById('modalErr');
+    if (pw !== 'ass') {
+      errEl.textContent = 'Wrong password.';
+      document.getElementById('modalPassword').value = '';
+      document.getElementById('modalPassword').focus();
+      return;
+    }
+    const btn = document.getElementById('modalConfirmBtn');
+    btn.disabled = true;
+    try {
+      if (pendingDelete.type === 'player') {
+        await remove(ref(db, `players/${pendingDelete.playerId}`));
+        // If deleting self, log out
+        if (currentUser && currentUser.id === pendingDelete.playerId) window.doLogout();
+      } else {
+        await remove(ref(db, `players/${pendingDelete.playerId}/projects/${pendingDelete.projId}`));
+      }
+      window.closeModal();
+    } catch(e) { errEl.textContent = 'Error deleting.'; }
+    btn.disabled = false;
+  };
+
+  document.getElementById('modalBackdrop').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalBackdrop')) window.closeModal();
+  });
+  document.getElementById('modalPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.confirmDelete();
+    if (e.key === 'Escape') window.closeModal();
+  });
+
+  window.clearHistory = async function() {
+    if (!confirm('Clear all activity logs? (Hours and coins are kept.)')) return;
+    await remove(ref(db, 'logs'));
+  };
+
+  window.resetWeek = async function() {
+    const sunday = isSundayEST();
+    const multMsg = sunday
+      ? '\n\n🥇 1st: ×1.25  🥈 2nd: ×1.15  🥉 3rd: ×1.10'
+      : '\n\nToday is NOT Sunday — hours will reset but NO coin multipliers will be applied.';
+    if (!confirm(`Reset the week?${multMsg}\n\nHours reset to 0. Players, projects & coins kept.`)) return;
+
+    const arr = Object.entries(players)
+      .map(([id, p]) => ({ id, ...p, total: totalHours(p) }))
+      .sort((a, b) => b.total - a.total);
+
+    const updates = {};
+    arr.forEach((p, i) => {
+      // Only apply multiplier on Sunday
+      if (sunday) {
+        const multipliers = [1.25, 1.15, 1.10];
+        const mult = multipliers[i] || 1;
+        updates[`players/${p.id}/coins`] = Math.floor((p.coins || 0) * mult);
+      }
+      Object.keys(p.projects || {}).forEach(projId => {
+        updates[`players/${p.id}/projects/${projId}/hours`] = 0;
+      });
+    });
+
+    await update(ref(db), updates);
+    await remove(ref(db, 'logs'));
+  };
+
+  // Enter shortcuts
+  document.getElementById('projName').addEventListener('keydown', e => { if (e.key === 'Enter') window.addProject(); });
+  ['logHours','logNote'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') window.logHours(); });
+  });
+
+  renderWeek();
+  setInterval(renderWeek, 60000);
+
+  // ══════════════════════════════════════════
+  // ── SHOP ──
+  // ══════════════════════════════════════════
+
+  const SHOP_ITEMS = [
+    { id: 'lava',      name: '🌋 Lava',       price: 150,  desc: 'Molten fire gradient',     previewClass: 'fx-lava' },
+    { id: 'rainbow',   name: '🌈 Rainbow',     price: 100,  desc: 'Scrolling rainbow',        previewClass: 'fx-rainbow' },
+    { id: 'plasma',    name: '⚡ Plasma',      price: 200,  desc: 'Electric hue-shifting',    previewClass: 'fx-plasma' },
+    { id: 'glitch',    name: '📺 Glitch',      price: 250,  desc: 'Corrupted signal',         previewClass: 'fx-glitch' },
+    { id: 'fire',      name: '🔥 Fire',        price: 175,  desc: 'Flickering flames',        previewClass: 'fx-fire' },
+    { id: 'aurora',    name: '🌌 Aurora',      price: 200,  desc: 'Northern lights',          previewClass: 'fx-aurora' },
+    { id: 'galaxy',    name: '🪐 Galaxy',      price: 300,  desc: 'Deep space glow',          previewClass: 'fx-galaxy' },
+    { id: 'neon',      name: '💡 Neon',        price: 125,  desc: 'Pulsing cyan glow',        previewClass: 'fx-neon' },
+    { id: 'holo',      name: '💿 Holographic', price: 350,  desc: 'Full-spectrum holo',       previewClass: 'fx-holo' },
+    { id: 'shimmer',   name: '✨ Gold Shimmer', price: 225,  desc: 'Gleaming gold sweep',     previewClass: 'fx-shimmer' },
+    { id: 'ice',       name: '🧊 Ice',         price: 150,  desc: 'Frozen crystal flow',      previewClass: 'fx-ice' },
+    { id: 'toxic',     name: '☢️ Toxic',       price: 275,  desc: 'Radioactive green pulse',  previewClass: 'fx-toxic' },
+    { id: 'vaporwave', name: '🌸 Vaporwave',   price: 200,  desc: 'Pastel synthwave dream',   previewClass: 'fx-vaporwave' },
+    { id: 'glow',      name: '🔮 Glow Border', price: 175,  desc: 'Cycling neon border',      previewClass: null, trackFx: true },
+    { id: 'stars',     name: '⭐ Stars',       price: 125,  desc: 'Floating star particles',  previewClass: null, wrapFx: true },
+    { id: 'matrix',    name: '🟩 Matrix',      price: 600,  desc: 'Green code rain & flicker', previewClass: 'fx-matrix' },
+    { id: 'inferno',   name: '🔥 Inferno',     price: 750,  desc: 'Multi-layer raging fire',  previewClass: 'fx-inferno' },
+  ];
+
+  window.openShop = function() {
+    if (!currentUser) { doLogout(); return; }
+    closeCasino();
+    document.getElementById('shopDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('shopTabArrow').textContent = '▶';
+    renderShopItems();
+  };
+
+  window.closeShop = function() {
+    document.getElementById('shopDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('shopTabArrow').textContent = '◀';
+  };
+
+  window.renderShopItems = function() {
+    if (!currentUser) {
+      document.getElementById('shopGrid').innerHTML = '<div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Log in to shop</div>';
+      document.getElementById('shopWalletDisplay').textContent = '—';
+      return;
+    }
+    const p = players[currentUser.id] || currentUser;
+    document.getElementById('shopWalletDisplay').textContent = (p.coins || 0).toLocaleString();
+
+    const owned    = p.ownedFx    ? Object.keys(p.ownedFx)    : [];
+    const equipped = p.equippedFx || null;
+
+    const grid = document.getElementById('shopGrid');
+    grid.innerHTML = SHOP_ITEMS.map(item => {
+      const isOwned    = owned.includes(item.id);
+      const isEquipped = equipped === item.id;
+      const canAfford  = (p.coins || 0) >= item.price;
+
+      let previewInner = '';
+      if (item.previewClass) {
+        previewInner = `<div class="shop-preview-fill ${item.previewClass}" style="width:70%;"></div>`;
+      } else if (item.trackFx) {
+        previewInner = `<div class="shop-preview-fill" style="width:70%;background:#00ff88;"></div>`;
+      } else if (item.wrapFx) {
+        previewInner = `<div class="shop-preview-fill" style="width:70%;background:linear-gradient(90deg,var(--gold),#fff,var(--gold));background-size:200%;animation:gold-shimmer 1.5s linear infinite;"></div>`;
+      }
+
+      const itemClasses = ['shop-item', isOwned ? 'owned' : '', isEquipped ? 'equipped' : ''].filter(Boolean).join(' ');
+      const tag = isEquipped ? '<span class="shop-tag tag-on">ON</span>'
+                : isOwned   ? '<span class="shop-tag tag-owned">Owned</span>'
+                            : `<span class="shop-tag tag-buy">${canAfford ? 'Buy' : '🪙 Need more'}</span>`;
+      const buyAction = !isOwned && canAfford ? `onclick="buyEffect('${item.id}')"` : '';
+      const equipBtn = isOwned
+        ? isEquipped
+          ? `<div class="shop-equip-row"><button class="shop-equip-btn btn-unequip" onclick="unequipEffect()">Unequip</button></div>`
+          : `<div class="shop-equip-row"><button class="shop-equip-btn btn-equip" onclick="equipEffect('${item.id}')">Equip</button></div>`
+        : '';
+
+      return `
+        <div class="${itemClasses}" ${buyAction}>
+          <div class="shop-item-name">${item.name}</div>
+          <div class="shop-preview-wrap">${previewInner}</div>
+          <div class="shop-item-bottom">
+            <span class="shop-price">${isOwned ? '✓ owned' : '🪙 ' + item.price}</span>
+            ${tag}
+          </div>
+          ${equipBtn}
+        </div>`;
+    }).join('');
+  };
+
+  window.buyEffect = async function(fxId) {
+    if (!currentUser) return;
+    const p = players[currentUser.id];
+    const item = SHOP_ITEMS.find(i => i.id === fxId);
+    if (!item || !p || (p.coins || 0) < item.price) return;
+    const updates = {};
+    updates[`players/${currentUser.id}/coins`] = (p.coins || 0) - item.price;
+    updates[`players/${currentUser.id}/ownedFx/${fxId}`] = true;
+    await update(ref(db, '/'), updates);
+    soundShopBuy();
+    spawnCoinFloat(`-${item.price} 🪙`);
+  };
+
+  window.equipEffect = async function(fxId) {
+    if (!currentUser) return;
+    await update(ref(db, `players/${currentUser.id}`), { equippedFx: fxId });
+  };
+
+  window.unequipEffect = async function() {
+    if (!currentUser) return;
+    await update(ref(db, `players/${currentUser.id}`), { equippedFx: null });
+  };
+
+  // Re-render shop wallet when firebase updates
+  // (handled via patched onValue above — renders shop if open)
+
+  // ── Nuke Modal ──
+  window.openNukeModal = function() {
+    document.getElementById('nukePassword').value = '';
+    document.getElementById('nukeErr').textContent = '';
+    document.getElementById('nukeBackdrop').classList.add('open');
+    setTimeout(() => document.getElementById('nukePassword').focus(), 50);
+  };
+
+  window.closeNukeModal = function() {
+    document.getElementById('nukeBackdrop').classList.remove('open');
+  };
+
+  window.confirmNuke = async function() {
+    const pw = document.getElementById('nukePassword').value;
+    const errEl = document.getElementById('nukeErr');
+    if (pw !== 'qwertys1') {
+      errEl.textContent = 'Wrong password.';
+      document.getElementById('nukePassword').value = '';
+      document.getElementById('nukePassword').focus();
+      return;
+    }
+    const btn = document.getElementById('nukeConfirmBtn');
+    btn.disabled = true;
+    try {
+      await remove(ref(db, 'players'));
+      await remove(ref(db, 'logs'));
+      window.closeNukeModal();
+    } catch(e) {
+      errEl.textContent = 'Error. Check your connection.';
+    }
+    btn.disabled = false;
+  };
+
+  document.getElementById('nukeBackdrop').addEventListener('click', e => {
+    if (e.target === document.getElementById('nukeBackdrop')) window.closeNukeModal();
+  });
+  document.getElementById('nukePassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.confirmNuke();
+    if (e.key === 'Escape') window.closeNukeModal();
+  });
+
+
+  // Web Audio for sounds
+  let audioCtx = null;
+  function getAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function playTone(freq, type, duration, vol = 0.15) {
+    try {
+      const ctx = getAudio();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = type; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      o.start(); o.stop(ctx.currentTime + duration);
+    } catch(e) {}
+  }
+
+  function soundDeal()  {
+    playTone(300, 'sine', 0.06, 0.1);
+    setTimeout(() => playTone(420, 'sine', 0.06, 0.08), 70);
+  }
+  function soundHit()   { playTone(360, 'sine', 0.06, 0.08); setTimeout(() => playTone(440, 'sine', 0.04, 0.06), 50); }
+  function soundChip()  { playTone(900, 'triangle', 0.04, 0.08); setTimeout(() => playTone(700, 'triangle', 0.02, 0.06), 40); }
+
+  function soundWin() {
+    const melody = [523, 659, 784, 1047, 1319];
+    melody.forEach((f, i) => setTimeout(() => playTone(f, 'sine', 0.25, 0.2), i * 90));
+  }
+
+  function soundBJ() {
+    // Big ascending fanfare
+    const melody = [392, 523, 659, 784, 1047, 1319, 1568];
+    melody.forEach((f, i) => setTimeout(() => {
+      playTone(f, 'sine', 0.3, 0.22);
+      if (i > 3) playTone(f * 0.5, 'sine', 0.3, 0.15); // bass harmony
+    }, i * 70));
+  }
+
+  function soundLose()  {
+    playTone(300, 'sawtooth', 0.3, 0.12);
+    setTimeout(() => playTone(220, 'sawtooth', 0.3, 0.15), 140);
+    setTimeout(() => playTone(160, 'sawtooth', 0.3, 0.25), 300);
+  }
+
+  function soundPush() {
+    playTone(440, 'sine', 0.12, 0.1);
+    setTimeout(() => playTone(440, 'sine', 0.12, 0.1), 200);
+  }
+
+  function soundShopBuy() {
+    // Ascending chime: C E G C
+    [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => {
+      playTone(f, 'sine', 0.2, 0.15);
+    }, i * 80));
+    setTimeout(() => playTone(1047, 'sine', 0.35, 0.12), 400);
+  }
+
+  // ── Particle Fanfare ──
+  function launchParticles(type) {
+    const drawer = document.getElementById('casinoDrawer');
+    const rect = drawer.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height * 0.45;
+
+    const configs = {
+      win:  { count: 40, colors: ['#f5c842','#4ade80','#fff','#ff8c42'], emojis: ['🪙','✨','💰'], spread: 260 },
+      bj:   { count: 80, colors: ['#f5c842','#fff','#ff8c42','#ffdd00','#fffacd'], emojis: ['🃏','🪙','⭐','💎','🎰'], spread: 360 },
+      bust: { count: 20, colors: ['#f87171','#ff4400','#880000'], emojis: ['💀','❌'], spread: 180 },
+    };
+    const cfg = configs[type] || configs.win;
+
+    // Emoji bursts
+    cfg.emojis.forEach((em, ei) => {
+      setTimeout(() => {
+        for (let j = 0; j < (type === 'bj' ? 3 : 1); j++) {
+          const el = document.createElement('div');
+          el.style.cssText = `
+            position:fixed; left:${cx + (Math.random()-0.5)*80}px; top:${cy}px;
+            font-size:${1.2 + Math.random()}rem; pointer-events:none; z-index:9999;
+            transform:translate(-50%,-50%); transition:none;
+          `;
+          el.textContent = em;
+          document.body.appendChild(el);
+          const angle = (Math.random() * cfg.spread) - cfg.spread/2;
+          const dist  = 80 + Math.random() * 160;
+          const dur   = 700 + Math.random() * 600;
+          el.animate([
+            { transform: 'translate(-50%,-50%) scale(0.5)', opacity: 1 },
+            { transform: `translate(calc(-50% + ${Math.cos(angle*Math.PI/180)*dist}px), calc(-50% + ${Math.sin(angle*Math.PI/180)*dist - 60}px)) scale(${0.8+Math.random()*0.8})`, opacity: 0 }
+          ], { duration: dur, easing: 'cubic-bezier(0,0.9,0.57,1)', fill: 'forwards' })
+            .onfinish = () => el.remove();
+        }
+      }, ei * 80);
+    });
+
+    // Dot particles
+    for (let i = 0; i < cfg.count; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        const color = cfg.colors[Math.floor(Math.random() * cfg.colors.length)];
+        const size  = 4 + Math.random() * 7;
+        el.style.cssText = `
+          position:fixed; left:${cx + (Math.random()-0.5)*40}px; top:${cy + (Math.random()-0.5)*20}px;
+          width:${size}px; height:${size}px; border-radius:50%;
+          background:${color}; pointer-events:none; z-index:9998;
+        `;
+        document.body.appendChild(el);
+        const angle = Math.random() * 360;
+        const dist  = 60 + Math.random() * 200;
+        const dur   = 500 + Math.random() * 800;
+        el.animate([
+          { transform: 'scale(1)', opacity: 1 },
+          { transform: `translate(${Math.cos(angle*Math.PI/180)*dist}px, ${Math.sin(angle*Math.PI/180)*dist - 100}px) scale(0)`, opacity: 0 }
+        ], { duration: dur, easing: 'cubic-bezier(0,0.9,0.57,1)', fill: 'forwards' })
+          .onfinish = () => el.remove();
+      }, Math.random() * 200);
+    }
+
+    // Screen flash for BJ
+    if (type === 'bj') {
+      const flash = document.createElement('div');
+      flash.style.cssText = `
+        position:fixed; inset:0; background:rgba(245,200,66,0.18);
+        pointer-events:none; z-index:9997;
+      `;
+      document.body.appendChild(flash);
+      flash.animate([{opacity:1},{opacity:0}], {duration:500, fill:'forwards'}).onfinish = () => flash.remove();
+    }
+  }
+
+  // ── Animated card dealing (one at a time) ──
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function dealCardsAnimated() {
+    const dc = document.getElementById('dealerCards');
+    const pc = document.getElementById('playerCards');
+    dc.innerHTML = ''; pc.innerHTML = '';
+    updateScoreDisplay();
+
+    // Deal order: player1, dealer1, player2, dealer2 (face down)
+    const order = [
+      { hand: 'player', idx: 0 },
+      { hand: 'dealer', idx: 0 },
+      { hand: 'player', idx: 1 },
+      { hand: 'dealer', idx: 1, faceDown: true },
+    ];
+
+    for (const step of order) {
+      await sleep(160);
+      soundDeal();
+      if (step.hand === 'player') {
+        pc.appendChild(renderCard(bjPlayer[step.idx], false));
+      } else {
+        dc.appendChild(renderCard(bjDealer[step.idx], !!step.faceDown));
+      }
+      updateScoreDisplay();
+    }
+  }
+
+  function updateScoreDisplay() {
+    const dScore = bjPhase === 'play'
+      ? handTotal([bjDealer[0]]).toString()
+      : handTotal(bjDealer).toString();
+    const pTotal = handTotal(bjPlayer);
+    document.getElementById('dealerScoreEl').innerHTML =
+      bjDealer.length ? `<span class="score-badge${bjPhase !== 'play' && handTotal(bjDealer) > 21 ? ' bust' : ''}">${dScore}</span>` : '';
+    document.getElementById('playerScoreEl').innerHTML =
+      bjPlayer.length ? `<span class="score-badge${pTotal > 21 ? ' bust' : pTotal === 21 && bjPlayer.length === 2 ? ' bj' : ''}">${pTotal}</span>` : '';
+  }
+
+  // Deck
+  const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  const SUITS = ['♠','♥','♦','♣'];
+
+  function buildDeck() {
+    const d = [];
+    for (const s of SUITS) for (const r of RANKS) d.push({ r, s });
+    return d;
+  }
+
+  function shuffle(d) {
+    for (let i = d.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [d[i], d[j]] = [d[j], d[i]];
+    }
+    return d;
+  }
+
+  function cardValue(r) {
+    if (r === 'A') return 11;
+    if (['J','Q','K'].includes(r)) return 10;
+    return parseInt(r);
+  }
+
+  function handTotal(hand) {
+    let total = 0, aces = 0;
+    for (const c of hand) {
+      total += cardValue(c.r);
+      if (c.r === 'A') aces++;
+    }
+    while (total > 21 && aces > 0) { total -= 10; aces--; }
+    return total;
+  }
+
+  function isRed(s) { return s === '♥' || s === '♦'; }
+
+  // BJ state
+  let bjDeck = [], bjPlayer = [], bjDealer = [], bjBet = 0, bjPhase = 'bet'; // phases: bet, play, done
+
+  function renderCard(c, faceDown = false) {
+    const div = document.createElement('div');
+    div.className = 'card deal-anim' + (faceDown ? ' face-down' : (isRed(c.s) ? ' red' : ''));
+    if (!faceDown) {
+      const rank = document.createElement('div'); rank.className = 'rank'; rank.textContent = c.r;
+      const suit = document.createElement('div'); suit.className = 'suit'; suit.textContent = c.s;
+      div.appendChild(rank); div.appendChild(suit);
+    }
+    return div;
+  }
+
+  function renderBJTable() {
+    const dc = document.getElementById('dealerCards');
+    const pc = document.getElementById('playerCards');
+    dc.innerHTML = ''; pc.innerHTML = '';
+
+    bjDealer.forEach((c, i) => {
+      dc.appendChild(renderCard(c, bjPhase === 'play' && i === 1));
+    });
+    bjPlayer.forEach(c => pc.appendChild(renderCard(c)));
+
+    // Scores
+    const dScore = bjPhase === 'play'
+      ? handTotal([bjDealer[0]]).toString()
+      : handTotal(bjDealer).toString();
+    const pTotal = handTotal(bjPlayer);
+
+    document.getElementById('dealerScoreEl').innerHTML =
+      `<span class="score-badge${bjPhase !== 'play' && handTotal(bjDealer) > 21 ? ' bust' : ''}">${dScore}</span>`;
+    document.getElementById('playerScoreEl').innerHTML =
+      `<span class="score-badge${pTotal > 21 ? ' bust' : pTotal === 21 && bjPlayer.length === 2 ? ' bj' : ''}">${pTotal}</span>`;
+  }
+
+  function setBJButtons(phase) {
+    document.getElementById('btnDeal').disabled   = phase !== 'bet';
+    document.getElementById('btnHit').disabled    = phase !== 'play';
+    document.getElementById('btnStand').disabled  = phase !== 'play';
+    document.getElementById('btnDouble').disabled = phase !== 'play' || bjPlayer.length !== 2;
+  }
+
+  function showResult(text, type) {
+    const b = document.getElementById('resultBanner');
+    b.textContent = text;
+    b.className = `result-banner show ${type}`;
+    setTimeout(() => { b.classList.remove('show'); }, 2500);
+  }
+
+  window.openCasino = function() {
+    if (!currentUser) { doLogout(); return; }
+    closeShop();
+    document.getElementById('casinoDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '▶';
+    document.getElementById('casinoPlayerDisplay').textContent = currentUser.name;
+    refreshCasinoWallet();
+  };
+
+  window.closeCasino = function() {
+    document.getElementById('casinoDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '◀';
+  };
+
+  function refreshCasinoWallet() {
+    if (!currentUser) { document.getElementById('walletDisplay').textContent = '—'; return; }
+    const p = players[currentUser.id];
+    document.getElementById('walletDisplay').textContent = p ? (p.coins || 0).toLocaleString() : '—';
+  }
+
+  function getCurrentCasinoPlayer() {
+    if (!currentUser) return null;
+    const p = players[currentUser.id];
+    return p ? { id: currentUser.id, ...p } : null;
+  }
+
+  // Bet
+  window.addBet = function(amount) {
+    if (bjPhase !== 'bet') return;
+    const p = getCurrentCasinoPlayer();
+    if (!p) { shakeWallet(); return; }
+    if (bjBet + amount > (p.coins || 0)) { shakeWallet(); return; }
+    bjBet += amount;
+    soundChip();
+    updateBetDisplay();
+  };
+
+  window.clearBet = function() {
+    if (bjPhase !== 'bet') return;
+    bjBet = 0;
+    updateBetDisplay();
+  };
+
+  function updateBetDisplay() {
+    document.getElementById('betDisplay').innerHTML = `${bjBet}<small>bet</small>`;
+  }
+
+  function shakeWallet() {
+    const w = document.getElementById('walletDisplay');
+    w.classList.remove('shake'); void w.offsetWidth; w.classList.add('shake');
+    playTone(150, 'sawtooth', 0.15, 0.1);
+  }
+
+  // Deal
+  window.bjDeal = async function() {
+    const p = getCurrentCasinoPlayer();
+    if (!p) { document.getElementById('resultBanner').textContent = 'Select a player first!'; document.getElementById('resultBanner').className = 'result-banner show lose'; return; }
+    if (bjBet < 1) { shakeWallet(); return; }
+    if (bjBet > (p.coins || 0)) { shakeWallet(); return; }
+
+    bjDeck = shuffle(buildDeck());
+    bjPlayer = [bjDeck.pop(), bjDeck.pop()];
+    bjDealer = [bjDeck.pop(), bjDeck.pop()];
+    bjPhase = 'play';
+
+    setBJButtons('done'); // lock during deal animation
+    document.getElementById('resultBanner').className = 'result-banner';
+    await dealCardsAnimated();
+    setBJButtons('play');
+
+    // Blackjack check
+    if (handTotal(bjPlayer) === 21) {
+      await bjResolve();
+    }
+  };
+
+  // Hit — append one card with animation
+  window.bjHit = async function() {
+    setBJButtons('done');
+    const card = bjDeck.pop();
+    bjPlayer.push(card);
+    soundHit();
+    document.getElementById('playerCards').appendChild(renderCard(card, false));
+    updateScoreDisplay();
+    await sleep(120);
+    if (handTotal(bjPlayer) >= 21) {
+      await bjResolve();
+    } else {
+      setBJButtons('play');
+      document.getElementById('btnDouble').disabled = true; // can only double on first 2 cards
+    }
+  };
+
+  // Stand — flip dealer hole card, then draw one at a time
+  window.bjStand = async function() {
+    setBJButtons('done');
+    bjPhase = 'done';
+
+    // Flip dealer hole card
+    const dc = document.getElementById('dealerCards');
+    dc.innerHTML = '';
+    bjDealer.forEach(c => dc.appendChild(renderCard(c, false)));
+    updateScoreDisplay();
+    await sleep(300);
+
+    // Dealer draws to 17 one at a time
+    while (handTotal(bjDealer) < 17) {
+      await sleep(400);
+      const card = bjDeck.pop();
+      bjDealer.push(card);
+      soundHit();
+      dc.appendChild(renderCard(card, false));
+      updateScoreDisplay();
+    }
+
+    await sleep(200);
+    await bjResolve();
+  };
+
+  // Double down
+  window.bjDouble = async function() {
+    const p = getCurrentCasinoPlayer();
+    if (!p || bjBet * 2 > (p.coins || 0)) { shakeWallet(); return; }
+    bjBet *= 2;
+    updateBetDisplay();
+    setBJButtons('done');
+
+    const card = bjDeck.pop();
+    bjPlayer.push(card);
+    soundHit();
+    document.getElementById('playerCards').appendChild(renderCard(card, false));
+    updateScoreDisplay();
+    await sleep(300);
+
+    // Auto-stand: flip dealer, draw to 17
+    bjPhase = 'done';
+    const dc = document.getElementById('dealerCards');
+    dc.innerHTML = '';
+    bjDealer.forEach(c => dc.appendChild(renderCard(c, false)));
+    updateScoreDisplay();
+    await sleep(300);
+
+    while (handTotal(bjDealer) < 17) {
+      await sleep(400);
+      const dc2 = bjDeck.pop();
+      bjDealer.push(dc2);
+      soundHit();
+      document.getElementById('dealerCards').appendChild(renderCard(dc2, false));
+      updateScoreDisplay();
+    }
+
+    await sleep(200);
+    await bjResolve();
+  };
+
+  async function bjResolve() {
+    bjPhase = 'done';
+    setBJButtons('done');
+    updateScoreDisplay();
+
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+
+    const pt = handTotal(bjPlayer);
+    const dt = handTotal(bjDealer);
+    const isBJ = pt === 21 && bjPlayer.length === 2;
+    let delta = 0, resultText = '', resultType = '';
+
+    if (pt > 21) {
+      delta = -bjBet;
+      resultText = '💀 BUST — YOU LOSE';
+      resultType = 'lose';
+      soundLose();
+      setTimeout(() => launchParticles('bust'), 100);
+    } else if (isBJ && dt !== 21) {
+      delta = Math.floor(bjBet * 1.5);
+      resultText = '🃏 BLACKJACK!  +' + delta + ' 🪙';
+      resultType = 'bj';
+      soundBJ();
+      setTimeout(() => launchParticles('bj'), 80);
+    } else if (dt > 21) {
+      delta = bjBet;
+      resultText = '🎉 DEALER BUSTS!  +' + delta + ' 🪙';
+      resultType = 'win';
+      soundWin();
+      setTimeout(() => launchParticles('win'), 80);
+    } else if (pt > dt) {
+      delta = bjBet;
+      resultText = '✅ YOU WIN!  +' + delta + ' 🪙';
+      resultType = 'win';
+      soundWin();
+      setTimeout(() => launchParticles('win'), 80);
+    } else if (pt < dt) {
+      delta = -bjBet;
+      resultText = '❌ DEALER WINS';
+      resultType = 'lose';
+      soundLose();
+      setTimeout(() => launchParticles('bust'), 100);
+    } else {
+      delta = 0;
+      resultText = '🤝 PUSH — BET RETURNED';
+      resultType = 'push';
+      soundPush();
+    }
+
+    showResult(resultText, resultType);
+
+    const newCoins = Math.max(0, (p.coins || 0) + delta);
+    await update(ref(db, `players/${p.id}`), { coins: newCoins });
+
+    if (delta > 0) setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 400);
+
+    bjBet = 0;
+    updateBetDisplay();
+    setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
+  }
+
+</script>
+<script>
+// ══════════════════ GRASS SYSTEM ══════════════════
+(function() {
+  const layer = document.getElementById('grassLayer');
+
+  // Slow + random growth tuning
+  const INITIAL_CLUMPS = 6;           // start sparse
+  const MAX_CLUMPS = 10;              // never exceed this many on screen
+
+  const MIN_REGROW_MS = 30_000;       // 30s
+  const MAX_REGROW_MS = 120_000;      // 120s (2 min)
+
+  const SPAWN_TICK_MS = 8_000;        // every 8s, maybe spawn one
+  const SPAWN_CHANCE_PER_TICK = 0.18; // 18% chance each tick (~one spawn every ~45s average)
+
+  // Coin tuning: only sometimes
+  const COIN_CHANCE_ON_CUT = 0.15;    // 15% chance to get a coin when cutting a clump
+
+  const clumps = [];
+  const greens = ['#3a9e3a','#4ade80','#2d7a2d','#56c456','#38a838','#65d465'];
+
+  function rand(min, max) { return min + Math.random() * (max - min); }
+  function randi(min, max) { return Math.floor(rand(min, max + 1)); }
+
+  function makeBladeHTML(h, g) {
+    return `<svg width="6" height="${h}" viewBox="0 0 6 ${h}" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 ${h} Q1 ${h*0.5} 2 0 Q4 ${h*0.5} 3 ${h}Z" fill="${g}" opacity="0.92"/>
+    </svg>`;
+  }
+
+  function spawnCoinPopAt(x, y) {
+    const coin = document.createElement('div');
+    coin.className = 'grass-coin';
+    coin.textContent = '🪙';
+    coin.style.left = x + 'px';
+    coin.style.top  = y + 'px';
+    document.body.appendChild(coin);
+    setTimeout(() => coin.remove(), 1000);
+  }
+
+  function spawnClumpAtRandomX() {
+    if (clumps.length >= MAX_CLUMPS) return;
+
+    const newX = Math.random() * (window.innerWidth - 90);
+    const clump = makeClumpEl(Math.max(0, Math.min(window.innerWidth - 90, newX)));
+    clumps.push(clump);
+    layer.appendChild(clump);
+  }
+
+  function scheduleRegrow() {
+    // random, slow regrow
+    const delay = Math.floor(rand(MIN_REGROW_MS, MAX_REGROW_MS));
+    setTimeout(() => {
+      spawnClumpAtRandomX();
+      scheduleRegrow();
+    }, delay);
+  }
+
+  function makeClumpEl(x) {
+    const width = randi(42, 86);
+    const bladeCount = randi(8, 18);
+    const baseHeight = randi(26, 42);
+
+    const clump = document.createElement('div');
+    clump.className = 'grass-clump scissors-cursor';
+    clump.style.left = x + 'px';
+    clump.style.width = width + 'px';
+
+    const clumpLean = (Math.random() - 0.5) * 6;
+    clump.style.transform = `rotate(${clumpLean}deg)`;
+
+    for (let i = 0; i < bladeCount; i++) {
+      const blade = document.createElement('div');
+      blade.className = 'grass-blade';
+
+      const t = i / Math.max(1, bladeCount - 1);
+      const px = t * (width - 6) + rand(-6, 6);
+      blade.style.left = `${Math.max(0, Math.min(width - 6, px))}px`;
+
+      const centerBias = 1 - Math.abs(t - 0.5) * 1.4;
+      const h = Math.round(baseHeight + centerBias * rand(10, 26) + rand(-6, 10));
+
+      const g = greens[Math.floor(Math.random() * greens.length)];
+      const swayBase = (Math.random() - 0.5) * 10;
+      const swayAmt  = (Math.random() > 0.5 ? 1 : -1) * (4 + Math.random() * 7);
+      const delay    = (Math.random() * 2.8).toFixed(2);
+      const dur      = (1.6 + Math.random() * 2.3).toFixed(2);
+
+      blade.style.setProperty('--sway-base', swayBase + 'deg');
+      blade.style.setProperty('--sway-amt',  swayAmt  + 'deg');
+      blade.style.animation = `bladeSway ${dur}s ${delay}s ease-in-out infinite, bladeGrow 0.45s ease forwards`;
+
+      blade.innerHTML = makeBladeHTML(h, g);
+      clump.appendChild(blade);
+    }
+
+    clump.addEventListener('click', function() {
+      if (clump.classList.contains('cutting')) return;
+      clump.classList.add('cutting');
+
+      // Random coin drop (instead of deterministic payouts)
+      if (Math.random() < COIN_CHANCE_ON_CUT) {
+        const rect = clump.getBoundingClientRect();
+        spawnCoinPopAt(rect.left + rect.width * 0.5 + rand(-10, 10), rect.top + rand(-6, 6));
+        if (window.__awardGrassCoin) window.__awardGrassCoin();
+      }
+
+      // Remove this clump after the cut animation
+      setTimeout(() => {
+        clump.remove();
+        const idx = clumps.indexOf(clump);
+        if (idx !== -1) clumps.splice(idx, 1);
+      }, 350);
+    });
+
+    return clump;
+  }
+
+  function init() {
+    // Start with fewer clumps
+    for (let i = 0; i < INITIAL_CLUMPS; i++) {
+      spawnClumpAtRandomX();
+    }
+
+    // Very slow background growth: occasional new clump
+    setInterval(() => {
+      if (clumps.length < MAX_CLUMPS && Math.random() < SPAWN_CHANCE_PER_TICK) {
+        spawnClumpAtRandomX();
+      }
+    }, SPAWN_TICK_MS);
+
+    // Long random regrow pulses
+    scheduleRegrow();
+  }
+
+  init();
+})();
+
+// ══════════════════ FROG PET ══════════════════
+(function() {
+  const frog = document.getElementById('frogPet');
+  let posX = 120, posY = 20; // from bottom
+  let velX = 1.2;
+  let isHopping = false;
+  let hopInterval, moveInterval;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function ribbit() {
+    try {
+      const g = audioCtx.createGain();
+      g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+
+      const o1 = audioCtx.createOscillator();
+      o1.type = 'sine';
+      o1.frequency.setValueAtTime(260, audioCtx.currentTime);
+      o1.frequency.exponentialRampToValueAtTime(180, audioCtx.currentTime + 0.15);
+      o1.connect(g);
+      o1.start(audioCtx.currentTime);
+      o1.stop(audioCtx.currentTime + 0.15);
+
+      setTimeout(() => {
+        const g2 = audioCtx.createGain();
+        g2.connect(audioCtx.destination);
+        g2.gain.setValueAtTime(0.14, audioCtx.currentTime);
+        g2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        const o2 = audioCtx.createOscillator();
+        o2.type = 'sine';
+        o2.frequency.setValueAtTime(240, audioCtx.currentTime);
+        o2.frequency.exponentialRampToValueAtTime(160, audioCtx.currentTime + 0.2);
+        o2.connect(g2);
+        o2.start(audioCtx.currentTime);
+        o2.stop(audioCtx.currentTime + 0.2);
+      }, 180);
+    } catch(e) {}
+  }
+
+  function hop() {
+    if (isHopping) return;
+    isHopping = true;
+    frog.classList.add('hopping');
+    // reverse direction sometimes
+    if (Math.random() < 0.3) velX = -velX;
+    frog.addEventListener('animationend', () => {
+      frog.classList.remove('hopping');
+      isHopping = false;
+    }, { once: true });
+  }
+
+  // Move frog continuously
+  moveInterval = setInterval(() => {
+    posX += velX;
+    if (posX < 10) { posX = 10; velX = Math.abs(velX); }
+    if (posX > window.innerWidth - 60) { posX = window.innerWidth - 60; velX = -Math.abs(velX); }
+    frog.style.left = posX + 'px';
+    frog.style.bottom = posY + 'px';
+    // Flip sprite based on direction
+    frog.style.transform = velX < 0 ? 'scaleX(-1)' : '';
+  }, 30);
+
+  // Hop periodically
+  hopInterval = setInterval(() => {
+    if (Math.random() < 0.6) hop();
+  }, 1400);
+
+  window.frogClick = function() {
+    ribbit();
+    hop();
+  };
+})();
+
+// ══════════════════ FROG HAT SHOP ══════════════════
+// Hat items are injected into the shop — we hook into renderShopItems
+const FROG_HATS = [
+  { id: 'hat_tophat', name: 'Top Hat',    emoji: '🎩', price: 80,  desc: 'Dapper frog' },
+  { id: 'hat_party',  name: 'Party Hat',  emoji: '🎉', price: 50,  desc: 'Frog party!' },
+];
+
+// Persist frog hat selection in localStorage (per-user)
+function getFrogHat() { return localStorage.getItem('frogHat_' + (window.__currentUserId || 'guest')); }
+function setFrogHatLocal(id) {
+  localStorage.setItem('frogHat_' + (window.__currentUserId || 'guest'), id || '');
+  document.getElementById('frogHatEl').textContent = id
+    ? (FROG_HATS.find(h => h.id === id)?.emoji || '')
+    : '';
+}
+
+// Owned hats in localStorage too (simple)
+function getOwnedHats() {
+  try { return JSON.parse(localStorage.getItem('ownedHats_' + (window.__currentUserId || 'guest')) || '[]'); }
+  catch { return []; }
+}
+function addOwnedHat(id) {
+  const owned = getOwnedHats();
+  if (!owned.includes(id)) { owned.push(id); localStorage.setItem('ownedHats_' + (window.__currentUserId || 'guest'), JSON.stringify(owned)); }
+}
+
+// Restore hat on page load
+document.addEventListener('DOMContentLoaded', () => {
+  const h = getFrogHat();
+  if (h) setFrogHatLocal(h);
+});
+
+// Hook __awardGrassCoin into the Firebase update system
+// We'll define it here; the module script will override with a DB-aware version
+window.__awardGrassCoin = function() {
+  // fallback: no-op if not logged in
+};
+</script>
+<script type="module">
+// Extend the Firebase module with grass coin award + hat shop
+import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+const db = getDatabase(getApp());
+
+// Override grass coin award
+window.__awardGrassCoin = async function() {
+  if (!window.__currentUser) return;
+  const uid = window.__currentUser.id;
+  const snap = await new Promise(res => onValue(ref(db, `players/${uid}/coins`), res, { onlyOnce: true }));
+  const coins = snap.val() || 0;
+  await update(ref(db, `players/${uid}`), { coins: coins + 1 });
+  // spawn float
+  const el = document.createElement('div');
+  el.className = 'coin-float';
+  el.textContent = '+1 🪙';
+  el.style.left = (Math.random() * window.innerWidth * 0.6 + window.innerWidth * 0.2) + 'px';
+  el.style.top  = (window.innerHeight - 80) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+};
+
+// Hook into existing shop to inject hat items
+const _origRenderShopItems = window.renderShopItems;
+
+function renderHatSection() {
+  const body = document.getElementById('shopBody') || document.querySelector('.shop-body');
+  if (!body) return;
+  let hatSection = document.getElementById('hatShopSection');
+  if (!hatSection) {
+    hatSection = document.createElement('div');
+    hatSection.id = 'hatShopSection';
+    body.appendChild(hatSection);
+  }
+  const uid = window.__currentUser?.id;
+  const owned = getOwnedHats();
+  const equipped = getFrogHat();
+
+  hatSection.innerHTML = `
+    <div class="shop-section-title" style="margin-bottom:0.75rem;">🐸 Frog Hats</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+    ${FROG_HATS.map(hat => {
+      const isOwned = owned.includes(hat.id);
+      const isOn    = equipped === hat.id;
+      return `<div style="background:#0a0118;border:1px solid ${isOn ? '#f5c842' : '#3d00b3'};padding:0.85rem;display:flex;flex-direction:column;gap:0.4rem;">
+        <div style="font-size:2rem;text-align:center;">${hat.emoji}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:2px;color:#f0f0f0;">${hat.name}</div>
+        <div style="font-size:0.6rem;color:#666;letter-spacing:1px;">${hat.desc}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.25rem;">
+          <span class="shop-price">🪙 ${hat.price}</span>
+          <span class="shop-tag ${isOn ? 'tag-on' : isOwned ? 'tag-owned' : 'tag-buy'}">${isOn ? 'ON' : isOwned ? 'OWNED' : 'BUY'}</span>
+        </div>
+        ${isOwned
+          ? `<button class="shop-equip-btn ${isOn ? 'btn-unequip' : 'btn-equip'}" onclick="window.toggleFrogHat('${hat.id}')">${isOn ? 'Remove' : 'Wear'}</button>`
+          : `<button class="shop-equip-btn btn-equip" onclick="window.buyFrogHat('${hat.id}',${hat.price})">Buy</button>`
+        }
+      </div>`;
+    }).join('')}
+    </div>`;
+}
+
+window.toggleFrogHat = function(id) {
+  const equipped = getFrogHat();
+  if (equipped === id) {
+    setFrogHatLocal('');
+    localStorage.setItem('frogHat_' + (window.__currentUser?.id || 'guest'), '');
+  } else {
+    setFrogHatLocal(id);
+  }
+  renderHatSection();
+};
+
+window.buyFrogHat = async function(id, price) {
+  if (!window.__currentUser) return;
+  const uid = window.__currentUser.id;
+  const snap = await new Promise(res => onValue(ref(db, `players/${uid}/coins`), res, { onlyOnce: true }));
+  const coins = snap.val() || 0;
+  if (coins < price) {
+    const el = document.createElement('div');
+    el.className = 'coin-float';
+    el.textContent = '❌ Not enough coins';
+    el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:100px;font-size:0.8rem;color:#f87171;z-index:999;animation:coinPop 1s ease forwards;pointer-events:none;';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+    return;
+  }
+  await update(ref(db, `players/${uid}`), { coins: coins - price });
+  addOwnedHat(id);
+  setFrogHatLocal(id);
+  renderHatSection();
+};
+
+// Hook into shop open to render hats
+const origOpenShop = window.openShop;
+window.openShop = function() {
+  if (origOpenShop) origOpenShop();
+  setTimeout(renderHatSection, 50);
+};
+
+// Also expose current user ID to grass coin system
+const origOnLoggedIn = window.__onLoggedInHook;
+// Poll for currentUser (since it's in a module scope we can't directly patch)
+setInterval(() => {
+  const badge = document.getElementById('userBadgeName');
+  if (badge && badge.textContent && badge.closest('#userBadge')?.style.display !== 'none') {
+    // user is logged in — restore hat
+    if (!window.__hatRestored) {
+      window.__hatRestored = true;
+      const h = getFrogHat();
+      if (h) setFrogHatLocal(h);
+    }
+  } else {
+    window.__hatRestored = false;
+  }
+}, 500);
+</script>
+</body>
+</html>
