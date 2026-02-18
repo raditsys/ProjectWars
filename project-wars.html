@@ -3685,9 +3685,9 @@
   setTimeout(() => rlDrawWheel(rlAngle), 100);
 
   // ══════════════════ PLINKO ══════════════════
-  const PK_ROWS = 12;
-  const PK_MULTIPLIERS = [20, 6, 3, 1.5, 0.5, 0.2, 0.1, 0.2, 0.5, 1.5, 3, 6, 20];
-  const PK_COLORS      = ['#f5c842','#f5c842','#cd7f42','#4ade80','#f87171','#f87171','#f87171','#f87171','#f87171','#4ade80','#cd7f42','#f5c842','#f5c842'];
+  const PK_ROWS = 10;
+  const PK_MULTIPLIERS = [15, 4, 1.5, 0.5, 0.2, 0.1, 0.2, 0.5, 1.5, 4, 15];
+  const PK_COLORS = ['#f5c842','#cd7f42','#4ade80','#f87171','#f87171','#f87171','#f87171','#f87171','#4ade80','#cd7f42','#f5c842'];
 
   let pkBet = 0;
   let pkRunning = false;
@@ -3713,38 +3713,26 @@
   function pkBuildLayout() {
     pkPegs = [];
     pkBuckets = [];
-
-    // Bottom row has PK_ROWS+1 pegs. All rows share the same horizontal peg spacing.
-    const bottomPegs = PK_ROWS + 1;
-    const totalWidth  = PK_W * 0.84;
-    const pegSpacingX = totalWidth / (bottomPegs - 1);
-    const startXBase  = (PK_W - totalWidth) / 2;
-
-    const usableH    = PK_H - PK_TOP_PAD - PK_BOT_PAD;
-    const pegSpacingY = usableH / PK_ROWS;
-
+    const usableH = PK_H - PK_TOP_PAD - PK_BOT_PAD;
+    const rowGapY = usableH / (PK_ROWS + 0.5);
     for (let row = 0; row < PK_ROWS; row++) {
-      const pegsInRow = row + 2;                          // row 0 → 2 pegs, row 11 → 13 pegs
-      const rowWidth  = pegSpacingX * (pegsInRow - 1);
-      const startX    = (PK_W - rowWidth) / 2;
-      const y         = PK_TOP_PAD + row * pegSpacingY;
+      const pegsInRow = row + 3;
+      const totalWidth = PK_W * 0.82;
+      const gapX = totalWidth / (pegsInRow - 1);
+      const startX = (PK_W - totalWidth) / 2;
+      const y = PK_TOP_PAD + (row + 0.5) * rowGapY;
       for (let col = 0; col < pegsInRow; col++) {
-        pkPegs.push({ x: startX + col * pegSpacingX, y });
+        pkPegs.push({ x: startX + col * gapX, y });
       }
     }
-
-    // Buckets sit below the bottom row, aligned to the gaps between bottom-row pegs
-    // Bottom row has PK_ROWS+1 pegs → PK_ROWS+2 gaps (including outer edges) → PK_MULTIPLIERS.length buckets
-    const bottomRowY   = PK_TOP_PAD + (PK_ROWS - 1) * pegSpacingY;
-    const bottomStartX = (PK_W - pegSpacingX * PK_ROWS) / 2;
-    const bucketY      = PK_H - PK_BOT_PAD + 4;
-    for (let i = 0; i < PK_MULTIPLIERS.length; i++) {
-      pkBuckets.push({
-        x:     bottomStartX + i * pegSpacingX,
-        y:     bucketY,
-        mult:  PK_MULTIPLIERS[i],
-        color: PK_COLORS[i],
-      });
+    // Buckets
+    const bucketCount = PK_MULTIPLIERS.length;
+    const totalWidth = PK_W * 0.82;
+    const gapX = totalWidth / (bucketCount - 1);
+    const startX = (PK_W - totalWidth) / 2;
+    const bucketY = PK_H - PK_BOT_PAD + 4;
+    for (let i = 0; i < bucketCount; i++) {
+      pkBuckets.push({ x: startX + i * gapX, y: bucketY, mult: PK_MULTIPLIERS[i], color: PK_COLORS[i] });
     }
   }
 
@@ -3769,17 +3757,17 @@
     });
 
     // Draw buckets
-    const bucketW = pkBuckets.length > 1 ? (pkBuckets[1].x - pkBuckets[0].x) : 30;
     pkBuckets.forEach((b, i) => {
-      const bx = b.x - bucketW * 0.48;
+      const w = (PK_W * 0.82) / (PK_MULTIPLIERS.length - 1);
+      const bx = b.x - w * 0.45;
       const bh = PK_BOT_PAD - 8;
       ctx.fillStyle = b.color + '33';
       ctx.strokeStyle = b.color;
       ctx.lineWidth = 1.5;
-      ctx.fillRect(bx, b.y, bucketW * 0.96, bh);
-      ctx.strokeRect(bx, b.y, bucketW * 0.96, bh);
+      ctx.fillRect(bx, b.y, w * 0.9, bh);
+      ctx.strokeRect(bx, b.y, w * 0.9, bh);
       ctx.fillStyle = b.color;
-      ctx.font = `bold ${b.mult >= 3 ? 10 : 8}px DM Mono, monospace`;
+      ctx.font = `bold ${b.mult >= 3 ? 11 : 9}px DM Mono, monospace`;
       ctx.textAlign = 'center';
       ctx.fillText(b.mult + 'x', b.x, b.y + bh * 0.6);
     });
