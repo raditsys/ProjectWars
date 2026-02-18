@@ -3133,16 +3133,16 @@
 
   // Slow + random growth tuning
   const INITIAL_CLUMPS = 6;           // start sparse
-  const MAX_CLUMPS = 10;              // never exceed this many on screen
+  const MAX_CLUMPS = 20;              // never exceed this many on screen
 
-  const MIN_REGROW_MS = 30_000;       // 30s
-  const MAX_REGROW_MS = 120_000;      // 120s (2 min)
+  const MIN_REGROW_MS = 20_000;       // 20s
+  const MAX_REGROW_MS = 110_000;      // 110s (2ish min)
 
-  const SPAWN_TICK_MS = 8_000;        // every 8s, maybe spawn one
-  const SPAWN_CHANCE_PER_TICK = 0.18; // 18% chance each tick (~one spawn every ~45s average)
+  const SPAWN_TICK_MS = 6_000;        // every 6s, maybe spawn one
+  const SPAWN_CHANCE_PER_TICK = 0.25; // 25% chance each tick (~one spawn every ~45s average)
 
   // Coin tuning: only sometimes
-  const COIN_CHANCE_ON_CUT = 0.15;    // 15% chance to get a coin when cutting a clump
+  const COIN_CHANCE_ON_CUT = 0.2;    // 20% chance to get a coin when cutting a clump
 
   const clumps = [];
   const greens = ['#3a9e3a','#4ade80','#2d7a2d','#56c456','#38a838','#65d465'];
