@@ -2324,6 +2324,32 @@
   .garden-buy-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .garden-buy-btn.maxed-btn { background: #3a2a00; color: var(--gold); border-color: var(--gold); cursor: default; }
 
+  /* ── GARDEN GNOME ── */
+  #gardenGnome {
+    position: fixed;
+    bottom: 22px;
+    left: 200px;
+    z-index: 90;
+    font-size: 2.4rem;
+    cursor: default;
+    user-select: none;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    transition: transform 0.1s;
+  }
+  #gardenGnome.gnome-flip { transform: scaleX(-1); }
+  .gnome-coin {
+    position: fixed;
+    font-size: 1.1rem;
+    pointer-events: none;
+    z-index: 91;
+    animation: gnomeCoinPop 1.1s ease forwards;
+  }
+  @keyframes gnomeCoinPop {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    60%  { opacity: 1; transform: translateY(-40px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-70px) scale(0.8); }
+  }
+
   /* ── AMBIENT BACKGROUND ── */
   .bg-blobs {
     position: fixed;
@@ -2567,6 +2593,7 @@
 <div class="bg-blobs-mid"></div>
 <!-- GRASS LAYER -->
 <div id="grassLayer"></div>
+<div id="gardenGnome" style="display:none;">🧙</div>
 <!-- FROG PET -->
 <div id="frogPet" onclick="frogClick()" title="Click me!">
 <svg class="frog-svg" fill="none" height="52" viewbox="0 0 52 52" width="52" xmlns="http://www.w3.org/2000/svg">
@@ -5843,6 +5870,7 @@
     spawnChanceBonus: 0,
     maxClumpsBonus: 0,
     coinChanceBonus: 0,
+    flowerChanceBonus: 0,
   };
 
   const clumps = [];
@@ -5925,7 +5953,8 @@
 
     const newX = Math.random() * (window.innerWidth - 90);
     const x = Math.max(0, Math.min(window.innerWidth - 90, newX));
-    const clump = Math.random() < FLOWER_CHANCE ? makeFlowerEl(x) : makeClumpEl(x);
+    const effectiveFlowerChance = Math.min(FLOWER_CHANCE + (boost.flowerChanceBonus || 0), 0.95);
+    const clump = Math.random() < effectiveFlowerChance ? makeFlowerEl(x) : makeClumpEl(x);
     clumps.push(clump);
     layer.appendChild(clump);
   }
@@ -6022,6 +6051,66 @@
   }
 
   init();
+})();
+
+// ══════════════════ GARDEN GNOME SYSTEM ══════════════════
+(function() {
+  const gnomeEl = document.getElementById('gardenGnome');
+  if (!gnomeEl) return;
+
+  let gnomeActive = false;
+  let gnomePosX = 160;
+  let gnomeVelX = 0.8;
+  let gnomeMoveInterval = null;
+  let gnomeCoinInterval = null;
+
+  function gnomeSpawnCoin() {
+    if (!gnomeActive) return;
+    const rect = gnomeEl.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top;
+
+    const coinEl = document.createElement('div');
+    coinEl.className = 'gnome-coin';
+    coinEl.textContent = '+2 🪙';
+    coinEl.style.left = cx + 'px';
+    coinEl.style.top  = cy + 'px';
+    document.body.appendChild(coinEl);
+    setTimeout(() => coinEl.remove(), 1200);
+
+    if (window.__awardGrassCoin) window.__awardGrassCoin(2);
+  }
+
+  function gnomeStart() {
+    if (gnomeActive) return;
+    gnomeActive = true;
+    gnomeEl.style.display = '';
+    gnomePosX = Math.random() * (window.innerWidth * 0.5) + 100;
+    gnomeEl.style.left = gnomePosX + 'px';
+
+    // Move gnome slowly across screen
+    gnomeMoveInterval = setInterval(() => {
+      gnomePosX += gnomeVelX;
+      if (gnomePosX > window.innerWidth - 60) { gnomePosX = window.innerWidth - 60; gnomeVelX = -Math.abs(gnomeVelX); gnomeEl.classList.add('gnome-flip'); }
+      if (gnomePosX < 10) { gnomePosX = 10; gnomeVelX = Math.abs(gnomeVelX); gnomeEl.classList.remove('gnome-flip'); }
+      gnomeEl.style.left = gnomePosX + 'px';
+    }, 40);
+
+    // Award a coin every 20–35 seconds
+    function scheduleNextCoin() {
+      const delay = 20000 + Math.random() * 15000;
+      gnomeCoinInterval = setTimeout(() => {
+        gnomeSpawnCoin();
+        scheduleNextCoin();
+      }, delay);
+    }
+    scheduleNextCoin();
+  }
+
+  // Expose so applyGardenBoosts can trigger it
+  window.__spawnGnome = function() {
+    gnomeStart();
+  };
 })();
 
 // ══════════════════ FROG PET ══════════════════
@@ -6222,6 +6311,28 @@ const GARDEN_UPGRADES = [
     effect: 'Coin Chance',
     effectDesc: lvl => `+${lvl * 8}% coin chance on cut`,
   },
+  {
+    id: 'flowerSeeds',
+    name: '🌸 Flower Seeds',
+    emoji: '🌸',
+    desc: 'Scatter flower seeds — each level increases the chance of flowers spawning instead of plain grass.',
+    maxLevel: 5,
+    baseCost: 120,
+    costMultiplier: 2.0,
+    effect: 'Flower Chance',
+    effectDesc: lvl => `+${lvl * 12}% flower spawn chance`,
+  },
+  {
+    id: 'gnome',
+    name: '🧙 Garden Gnome',
+    emoji: '🧙',
+    desc: 'A friendly gnome moves through your garden and periodically finds a coin for you.',
+    maxLevel: 1,
+    baseCost: 100,
+    costMultiplier: 1,
+    effect: 'Passive Income',
+    effectDesc: () => 'Gnome active — finding coins!',
+  },
 ];
 
 function gardenUpgradeCost(upgrade, currentLevel) {
@@ -6336,14 +6447,22 @@ window.buyGardenUpgrade = async function(upgradeId) {
 // Apply garden upgrades to the grass system
 window.__applyGardenBoosts = function(gardenLevels) {
   if (!gardenLevels) return;
-  const seedsLvl  = gardenLevels.seeds  || 0;
-  const trowelLvl = gardenLevels.trowel || 0;
+  const seedsLvl       = gardenLevels.seeds       || 0;
+  const trowelLvl      = gardenLevels.trowel      || 0;
+  const flowerSeedsLvl = gardenLevels.flowerSeeds || 0;
+  const gnomeLvl       = gardenLevels.gnome       || 0;
 
   // Patch grass globals exposed on window by the grass IIFE
   if (window.__grassConfig) {
-    window.__grassConfig.spawnChanceBonus = seedsLvl * 0.20;
-    window.__grassConfig.maxClumpsBonus   = seedsLvl;
-    window.__grassConfig.coinChanceBonus  = trowelLvl * 0.08;
+    window.__grassConfig.spawnChanceBonus  = seedsLvl * 0.20;
+    window.__grassConfig.maxClumpsBonus    = seedsLvl;
+    window.__grassConfig.coinChanceBonus   = trowelLvl * 0.08;
+    window.__grassConfig.flowerChanceBonus = flowerSeedsLvl * 0.12;
+  }
+
+  // Spawn gnome if unlocked and not already on screen
+  if (gnomeLvl >= 1) {
+    window.__spawnGnome && window.__spawnGnome();
   }
 };
 </script>
