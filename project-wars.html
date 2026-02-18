@@ -2009,6 +2009,8 @@
 
   const syncEl = document.getElementById('syncStatus');
 
+  let autoLoginDone = false;
+
   onValue(ref(db, 'players'), snap => {
     players = snap.val() || {};
     syncEl.textContent = '⬤ live';
@@ -2017,6 +2019,19 @@
     if (currentUser) {
       const fresh = players[currentUser.id];
       if (fresh) currentUser = { id: currentUser.id, ...fresh };
+    }
+    // Auto-login from saved session (only once, on first data load)
+    if (!autoLoginDone && !currentUser) {
+      autoLoginDone = true;
+      const savedId = localStorage.getItem('pwUserId');
+      if (savedId && players[savedId]) {
+        const player = players[savedId];
+        currentUser = { id: savedId, ...player };
+        window.__currentUser = currentUser;
+        window.__currentUserId = savedId;
+        onLoggedIn();
+        return; // onLoggedIn calls render(), skip the render below
+      }
     }
     render();
     if (document.getElementById('shopDrawer')?.classList.contains('open')) renderShopItems();
@@ -2055,6 +2070,7 @@
     currentUser = { id, ...player };
     window.__currentUser = currentUser;
     window.__currentUserId = currentUser.id;
+    localStorage.setItem('pwUserId', id);
     onLoggedIn();
   };
 
@@ -2080,6 +2096,7 @@
       currentUser = { id: newRef.key, name, password: pass, projects: {}, coins: 0 };
       window.__currentUser = currentUser;
       window.__currentUserId = currentUser.id;
+      localStorage.setItem('pwUserId', newRef.key);
       onLoggedIn();
     } catch(e) {
       msg.textContent = 'Error creating account.'; msg.className = 'login-msg err';
@@ -2102,6 +2119,7 @@
     currentUser = null;
     window.__currentUser = null;
     window.__currentUserId = null;
+    localStorage.removeItem('pwUserId');
     document.body.classList.remove('logged-in');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('loginBg').style.display = '';
