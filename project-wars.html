@@ -1701,6 +1701,29 @@
     97%          { transform: scaleY(0.1); }
   }
   .frog-svg { animation: frogBlink 4s ease-in-out infinite; }
+
+  /* ── PETS (non-frog) ── */
+  .pet-emoji-wrap {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pet-emoji {
+    font-size: 2.6rem;
+    line-height: 1;
+    display: block;
+    animation: petBob 1.8s ease-in-out infinite;
+    transform-origin: bottom center;
+    user-select: none;
+  }
+  @keyframes petBob {
+    0%,100% { transform: translateY(0px) rotate(-2deg); }
+    50%      { transform: translateY(-5px) rotate(2deg); }
+  }
+  #frogPet.hopping .pet-emoji { animation: frogHop 0.45s ease forwards; }
 </style>
 </head>
 <body>
@@ -3463,6 +3486,109 @@ document.addEventListener('DOMContentLoaded', () => {
   if (h) setFrogHatLocal(h);
 });
 
+// ══════════════════ PET SYSTEM ══════════════════
+const PETS = [
+  { id: 'frog',   name: 'Frog',   emoji: '🐸',  price: 0,   desc: 'Your trusty companion', free: true },
+  { id: 'monkey', name: 'Monkey', emoji: '🐒',  price: 120, desc: 'Chaotic lil guy' },
+  { id: 'rat',    name: 'Rat',    emoji: '🐀',  price: 80,  desc: 'Sneaky & fast' },
+  { id: 'cat',    name: 'Cat',    emoji: '🐱',  price: 100, desc: 'Does what it wants' },
+];
+
+function getEquippedPet() {
+  return localStorage.getItem('equippedPet_' + (window.__currentUserId || 'guest')) || 'frog';
+}
+function setEquippedPet(id) {
+  localStorage.setItem('equippedPet_' + (window.__currentUserId || 'guest'), id);
+  applyPetDisplay(id);
+}
+function getOwnedPets() {
+  try { return JSON.parse(localStorage.getItem('ownedPets_' + (window.__currentUserId || 'guest')) || '["frog"]'); }
+  catch { return ['frog']; }
+}
+function addOwnedPet(id) {
+  const owned = getOwnedPets();
+  if (!owned.includes(id)) {
+    owned.push(id);
+    localStorage.setItem('ownedPets_' + (window.__currentUserId || 'guest'), JSON.stringify(owned));
+  }
+}
+
+function applyPetDisplay(petId) {
+  const pet = PETS.find(p => p.id === petId) || PETS[0];
+  const frogPet = document.getElementById('frogPet');
+  if (!frogPet) return;
+
+  if (petId === 'frog') {
+    // restore original frog SVG
+    const existing = frogPet.querySelector('.pet-emoji-wrap');
+    if (existing) existing.remove();
+    const svg = frogPet.querySelector('.frog-svg');
+    if (svg) svg.style.display = '';
+  } else {
+    // hide SVG, show emoji
+    const svg = frogPet.querySelector('.frog-svg');
+    if (svg) svg.style.display = 'none';
+    let wrap = frogPet.querySelector('.pet-emoji-wrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.className = 'pet-emoji-wrap';
+      frogPet.insertBefore(wrap, frogPet.firstChild);
+    }
+    wrap.innerHTML = `<span class="pet-emoji">${pet.emoji}</span>`;
+  }
+}
+
+// Restore pet on load
+document.addEventListener('DOMContentLoaded', () => {
+  const p = getEquippedPet();
+  if (p && p !== 'frog') applyPetDisplay(p);
+});
+
+window.__renderPetSection = function() {
+  const body = document.getElementById('shopBody') || document.querySelector('.shop-body');
+  if (!body) return;
+  let section = document.getElementById('petShopSection');
+  if (!section) {
+    section = document.createElement('div');
+    section.id = 'petShopSection';
+    body.appendChild(section);
+  }
+  const owned = getOwnedPets();
+  const equipped = getEquippedPet();
+
+  section.innerHTML = `
+    <div class="shop-section-title" style="margin-bottom:0.75rem;">🐾 Pets</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+    ${PETS.map(pet => {
+      const isOwned = owned.includes(pet.id) || pet.free;
+      const isOn    = equipped === pet.id;
+      return `<div style="background:#0a0118;border:1px solid ${isOn ? '#f5c842' : '#3d00b3'};padding:0.85rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color 0.2s;">
+        <div style="font-size:2rem;text-align:center;">${pet.emoji}</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:2px;color:#f0f0f0;">${pet.name}</div>
+        <div style="font-size:0.6rem;color:#666;letter-spacing:1px;">${pet.desc}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.25rem;">
+          <span class="shop-price">${pet.free ? 'FREE' : '🪙 ' + pet.price}</span>
+          <span class="shop-tag ${isOn ? 'tag-on' : isOwned ? 'tag-owned' : 'tag-buy'}">${isOn ? 'ON' : isOwned ? 'OWNED' : 'BUY'}</span>
+        </div>
+        ${isOwned
+          ? `<button class="shop-equip-btn ${isOn ? 'btn-unequip' : 'btn-equip'}" onclick="window.togglePet('${pet.id}')">${isOn ? 'Remove' : 'Equip'}</button>`
+          : `<button class="shop-equip-btn btn-equip" onclick="window.buyPet('${pet.id}',${pet.price})">Buy</button>`
+        }
+      </div>`;
+    }).join('')}
+    </div>`;
+};
+
+window.togglePet = function(id) {
+  const equipped = getEquippedPet();
+  if (equipped === id && id !== 'frog') {
+    setEquippedPet('frog');
+  } else {
+    setEquippedPet(id);
+  }
+  window.__renderPetSection();
+};
+
 // Hook __awardGrassCoin into the Firebase update system
 // We'll define it here; the module script will override with a DB-aware version
 window.__awardGrassCoin = function() {
@@ -3563,24 +3689,48 @@ window.buyFrogHat = async function(id, price) {
   renderHatSection();
 };
 
-// Hook into shop open to render hats
+// Hook into shop open to render hats + pets
 const origOpenShop = window.openShop;
 window.openShop = function() {
   if (origOpenShop) origOpenShop();
-  setTimeout(renderHatSection, 50);
+  setTimeout(() => {
+    renderHatSection();
+    window.__renderPetSection && window.__renderPetSection();
+  }, 50);
+};
+
+window.buyPet = async function(id, price) {
+  if (!window.__currentUser) return;
+  const uid = window.__currentUser.id;
+  const snap = await new Promise(res => onValue(ref(db, `players/${uid}/coins`), res, { onlyOnce: true }));
+  const coins = snap.val() || 0;
+  if (coins < price) {
+    const el = document.createElement('div');
+    el.className = 'coin-float';
+    el.textContent = '❌ Not enough coins';
+    el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:100px;font-size:0.8rem;color:#f87171;z-index:999;animation:coinPop 1s ease forwards;pointer-events:none;';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+    return;
+  }
+  await update(ref(db, `players/${uid}`), { coins: coins - price });
+  addOwnedPet(id);
+  setEquippedPet(id);
+  window.__renderPetSection && window.__renderPetSection();
 };
 
 // Also expose current user ID to grass coin system
-const origOnLoggedIn = window.__onLoggedInHook;
 // Poll for currentUser (since it's in a module scope we can't directly patch)
 setInterval(() => {
   const badge = document.getElementById('userBadgeName');
   if (badge && badge.textContent && badge.closest('#userBadge')?.style.display !== 'none') {
-    // user is logged in — restore hat
+    // user is logged in — restore hat and pet
     if (!window.__hatRestored) {
       window.__hatRestored = true;
       const h = getFrogHat();
       if (h) setFrogHatLocal(h);
+      const p = getEquippedPet();
+      if (p && p !== 'frog') applyPetDisplay(p);
     }
   } else {
     window.__hatRestored = false;
