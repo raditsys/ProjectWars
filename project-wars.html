@@ -3668,8 +3668,8 @@
   // ══════════════════ PLINKO ══════════════════
   const PK_ROWS = 12;
   const PK_COLS = 9;
-  const PK_MULTIPLIERS = [8, 3, 1.2, 0.5, 0.3, 0.3, 0.5, 1.2, 3, 8];
-  const PK_COLORS      = ['#f5c842','#cd7f42','#4ade80','#f87171','#f87171','#f87171','#f87171','#4ade80','#cd7f42','#f5c842'];
+  const PK_MULTIPLIERS = [1.5, 1.2, 0.5, 0.3, 0.2, 0.3, 0.5, 1.2, 1.5];
+  const PK_COLORS      = ['#cd7f42','#4ade80','#f87171','#f87171','#f87171','#f87171','#f87171','#4ade80','#cd7f42'];
 
   let pkBet = 0;
   let pkRunning = false;
@@ -3713,13 +3713,13 @@
       }
     }
 
-    // 9 pegs on even rows sit at startX + i*colGap (i = 0..8).
-    // The ball lands in one of 10 slots — one on each side of every peg gap.
-    // Each slot is colGap wide and centred on startX + i*colGap for i = 0..9
-    //   (i=0 is the leftmost half-slot, i=9 is the rightmost half-slot).
+    // 9 pegs on even rows create 8 gaps between them.
+    // 9 buckets sit in those 8 gaps plus one half-gap on each outer side,
+    // centred at startX + (i - 0.5)*colGap ... but cleanest:
+    // bucket i centre = startX - colGap/2 + (i+1)*colGap = startX + (i+0.5)*colGap, i=0..8
     const bucketY = PK_H - PK_BOT_PAD + 4;
     for (let i = 0; i < PK_MULTIPLIERS.length; i++) {
-      const x = startX + i * colGap;
+      const x = startX + (i + 0.5) * colGap;
       pkBuckets.push({ x, y: bucketY, mult: PK_MULTIPLIERS[i], color: PK_COLORS[i], w: colGap });
     }
   }
