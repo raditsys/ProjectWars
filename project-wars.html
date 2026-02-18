@@ -3776,9 +3776,10 @@
   async function pkOnLand(ball, bucket) {
     const p = getCurrentCasinoPlayer();
     if (!p) return;
+    const bet = ball.bet || pkBet;
     const mult = bucket.mult;
-    const payout = Math.floor(pkBet * mult);
-    const profit = payout - pkBet;
+    const payout = Math.floor(bet * mult);
+    const profit = payout - bet;
 
     const resultEl = document.getElementById('plinkoResultNum');
     resultEl.textContent = mult + 'x  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙';
@@ -3801,8 +3802,10 @@
     }
     setTimeout(() => banner.classList.remove('show'), 3000);
 
-    const newCoins = Math.max(0, (p.coins || 0) + profit);
-    await update(ref(db, 'players/' + p.id), { coins: newCoins });
+    // Bet was already deducted in pkDrop — read fresh coins from DB and add payout
+    const snap = await new Promise(res => onValue(ref(db, `players/${p.id}/coins`), res, { onlyOnce: true }));
+    const currentCoins = snap.val() || 0;
+    await update(ref(db, 'players/' + p.id), { coins: currentCoins + payout });
   }
 
   window.pkAddBet = function(amount) {
@@ -3842,13 +3845,15 @@
     await update(ref(db, 'players/' + p.id), { coins: newCoins });
 
     // Drop ball from random position near top center
+    const betSnapshot = pkBet; // capture bet before async operations
     pkBalls = [{
       x: PK_W / 2 + (Math.random() - 0.5) * 30,
       y: PK_TOP_PAD - 20,
       vx: (Math.random() - 0.5) * 1.5,
       vy: 1,
       done: false,
-      bucket: null
+      bucket: null,
+      bet: betSnapshot
     }];
 
     if (pkAnimFrame) cancelAnimationFrame(pkAnimFrame);
