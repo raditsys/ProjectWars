@@ -760,6 +760,131 @@
   .result-banner.push { color: var(--silver); border-color: var(--silver); background: rgba(168,178,189,0.08); }
   .result-banner.bj   { color: var(--gold); border-color: var(--gold); background: rgba(245,200,66,0.15); }
 
+  /* ── Game Tabs ── */
+  .game-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid #2a5a2a;
+    margin-bottom: 0;
+  }
+  .game-tab {
+    flex: 1;
+    padding: 0.6rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    background: none;
+    border: none;
+    color: #4a8a4a;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .game-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .game-tab:hover:not(.active) { color: var(--text); }
+  .game-panel { display: none; flex-direction: column; gap: 1.25rem; }
+  .game-panel.active { display: flex; }
+
+  /* ── Roulette ── */
+  .roulette-wheel-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 0 0;
+  }
+  .roulette-canvas-wrap {
+    position: relative;
+    width: 220px;
+    height: 220px;
+  }
+  #rouletteCanvas {
+    border-radius: 50%;
+    display: block;
+    filter: drop-shadow(0 0 14px rgba(245,200,66,0.3));
+  }
+  .roulette-pointer {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.6rem;
+    z-index: 2;
+    filter: drop-shadow(0 2px 4px #000);
+    pointer-events: none;
+  }
+  .roulette-result-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.8rem;
+    letter-spacing: 2px;
+    min-height: 3.5rem;
+    text-align: center;
+    line-height: 1;
+  }
+  .roulette-result-num.red  { color: #e53935; }
+  .roulette-result-num.black { color: #ccc; }
+  .roulette-result-num.green { color: var(--green); }
+
+  /* Bet board */
+  .roulette-board {
+    background: var(--casino-felt);
+    border: 1px solid #2a5a2a;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .roulette-bet-row {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .r-bet-btn {
+    flex: 1;
+    padding: 0.5rem 0.3rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    border: 1px solid #2a5a2a;
+    background: #0d2b0d;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.12s;
+    text-align: center;
+    user-select: none;
+  }
+  .r-bet-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+  .r-bet-btn.selected { border-color: var(--gold); background: #3a2a00; color: var(--gold); }
+  .r-bet-btn.red-btn  { border-color: #883333; color: #e53935; }
+  .r-bet-btn.red-btn.selected  { background: #3a0d0d; border-color: #e53935; }
+  .r-bet-btn.black-btn { border-color: #555; color: #ccc; }
+  .r-bet-btn.black-btn.selected { background: #1a1a1a; border-color: #ccc; }
+  .r-bet-btn.green-btn { border-color: #2a5a2a; color: var(--green); }
+  .r-bet-btn.green-btn.selected { background: #0a1f0a; border-color: var(--green); }
+  .r-bet-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .r-payout-label {
+    font-size: 0.55rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-align: center;
+    margin-top: 0.2rem;
+  }
+
+  .r-spin-btn {
+    width: 100%;
+    padding: 0.75rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .r-spin-btn:hover:not(:disabled) { opacity: 0.85; }
+  .r-spin-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
   /* ── Delete Modal ── */
   .modal-backdrop {
     display: none;
@@ -1812,6 +1937,14 @@
 <div class="wallet-amount" id="walletDisplay">—</div>
 <div class="wallet-label">🪙 coins</div>
 </div>
+<!-- Game tabs -->
+<div class="game-tabs">
+  <button class="game-tab active" id="tabBJ" onclick="switchGame('bj')">🃏 Blackjack</button>
+  <button class="game-tab" id="tabRL" onclick="switchGame('rl')">🎡 Roulette</button>
+</div>
+
+<!-- ── BLACKJACK PANEL ── -->
+<div class="game-panel active" id="panelBJ">
 <!-- Felt Table -->
 <div class="felt-table">
 <div class="table-section-label">Dealer <span id="dealerScoreEl"></span></div>
@@ -1844,6 +1977,57 @@
 <button class="bj-btn stand" disabled="" id="btnStand" onclick="bjStand()">Stand</button>
 <button class="bj-btn dbl" disabled="" id="btnDouble" onclick="bjDouble()">Double</button>
 </div>
+</div>
+
+<!-- ── ROULETTE PANEL ── -->
+<div class="game-panel" id="panelRL">
+<div class="roulette-wheel-wrap">
+  <div class="roulette-canvas-wrap">
+    <div class="roulette-pointer">▼</div>
+    <canvas height="220" id="rouletteCanvas" width="220"></canvas>
+  </div>
+  <div class="roulette-result-num" id="rouletteResultNum">—</div>
+</div>
+<!-- Bet board -->
+<div class="roulette-board">
+  <div class="table-section-label" style="margin-bottom:0.25rem;">Choose your bet</div>
+  <!-- Even money -->
+  <div class="roulette-bet-row">
+    <button class="r-bet-btn red-btn" id="rbRed" onclick="rlSelectBet('red')">🔴 Red</button>
+    <button class="r-bet-btn black-btn" id="rbBlack" onclick="rlSelectBet('black')">⚫ Black</button>
+    <button class="r-bet-btn green-btn" id="rbGreen" onclick="rlSelectBet('green')">0 Green</button>
+  </div>
+  <div class="roulette-bet-row">
+    <button class="r-bet-btn" id="rbOdd" onclick="rlSelectBet('odd')">Odd</button>
+    <button class="r-bet-btn" id="rbEven" onclick="rlSelectBet('even')">Even</button>
+    <button class="r-bet-btn" id="rb1to18" onclick="rlSelectBet('1to18')">1–18</button>
+    <button class="r-bet-btn" id="rb19to36" onclick="rlSelectBet('19to36')">19–36</button>
+  </div>
+  <div class="roulette-bet-row">
+    <button class="r-bet-btn" id="rb1st12" onclick="rlSelectBet('1st12')">1st 12</button>
+    <button class="r-bet-btn" id="rb2nd12" onclick="rlSelectBet('2nd12')">2nd 12</button>
+    <button class="r-bet-btn" id="rb3rd12" onclick="rlSelectBet('3rd12')">3rd 12</button>
+  </div>
+  <div class="r-payout-label" id="rlPayoutLabel">Select a bet type</div>
+</div>
+<!-- Bet amount -->
+<div>
+<div class="table-section-label" style="margin-bottom:0.5rem;">Bet amount</div>
+<div class="bet-section">
+<button class="chip chip-1" onclick="rlAddBet(1)">1</button>
+<button class="chip chip-5" onclick="rlAddBet(5)">5</button>
+<button class="chip chip-10" onclick="rlAddBet(10)">10</button>
+<button class="chip chip-25" onclick="rlAddBet(25)">25</button>
+<button class="chip chip-50" onclick="rlAddBet(50)">50</button>
+<button class="chip chip-100" onclick="rlAddBet(100)">100</button>
+<div class="bet-display" id="rlBetDisplay">0<small>bet</small></div>
+<button class="clear-bet-btn" onclick="rlClearBet()">Clear</button>
+</div>
+</div>
+<div class="result-banner" id="rlResultBanner"></div>
+<button class="r-spin-btn" id="rlSpinBtn" onclick="rlSpin()">🎡 Spin</button>
+</div>
+
 </div>
 </div>
 <!-- SHOP TAB -->
@@ -3127,7 +3311,270 @@
     await bjResolve();
   };
 
-  async function bjResolve() {
+  // ── Game Tab Switcher ──
+  window.switchGame = function(game) {
+    document.getElementById('panelBJ').classList.toggle('active', game === 'bj');
+    document.getElementById('panelRL').classList.toggle('active', game === 'rl');
+    document.getElementById('tabBJ').classList.toggle('active', game === 'bj');
+    document.getElementById('tabRL').classList.toggle('active', game === 'rl');
+    if (game === 'rl') { rlDrawWheel(rlAngle); }
+  };
+
+  // ══════════════════ ROULETTE ══════════════════
+  // European roulette: 37 pockets (0–36)
+  const RL_SEQUENCE = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+  const RL_REDS = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+
+  function rlColor(n) {
+    if (n === 0) return '#1a7a1a';
+    return RL_REDS.has(n) ? '#c0392b' : '#1a1a1a';
+  }
+  function rlTextColor(n) {
+    return n === 0 ? '#fff' : '#fff';
+  }
+
+  let rlAngle = 0; // current wheel rotation in radians
+  let rlBet = 0;
+  let rlBetType = null;
+  let rlSpinning = false;
+
+  const RL_BET_CONFIG = {
+    red:    { label: 'Red (×2)',    payout: 1 },
+    black:  { label: 'Black (×2)',  payout: 1 },
+    green:  { label: 'Green (×36)', payout: 35 },
+    odd:    { label: 'Odd (×2)',    payout: 1 },
+    even:   { label: 'Even (×2)',   payout: 1 },
+    '1to18':  { label: '1–18 (×2)', payout: 1 },
+    '19to36': { label: '19–36 (×2)',payout: 1 },
+    '1st12':  { label: '1st 12 (×3)',payout: 2 },
+    '2nd12':  { label: '2nd 12 (×3)',payout: 2 },
+    '3rd12':  { label: '3rd 12 (×3)',payout: 2 },
+  };
+
+  function rlDrawWheel(angle) {
+    const canvas = document.getElementById('rouletteCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, cx = W/2, cy = W/2, r = cx - 4;
+    const slices = RL_SEQUENCE.length;
+    const sliceAngle = (2 * Math.PI) / slices;
+
+    ctx.clearRect(0, 0, W, W);
+
+    // Draw each pocket
+    for (let i = 0; i < slices; i++) {
+      const start = angle + i * sliceAngle - Math.PI / 2;
+      const end   = start + sliceAngle;
+      const num   = RL_SEQUENCE[i];
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, start, end);
+      ctx.closePath();
+      ctx.fillStyle = rlColor(num);
+      ctx.fill();
+      ctx.strokeStyle = '#0d2b0d';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Number label
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(start + sliceAngle / 2);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${slices > 20 ? 9 : 11}px DM Mono, monospace`;
+      ctx.fillText(num, r - 5, 4);
+      ctx.restore();
+    }
+
+    // Center hub
+    ctx.beginPath();
+    ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+    ctx.fillStyle = '#0a1f0a';
+    ctx.fill();
+    ctx.strokeStyle = '#f5c842';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Hub dot
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#f5c842';
+    ctx.fill();
+  }
+
+  function rlWinCheck(num, betType) {
+    const isRed   = RL_REDS.has(num);
+    const isBlack = num !== 0 && !isRed;
+    switch(betType) {
+      case 'red':    return isRed;
+      case 'black':  return isBlack;
+      case 'green':  return num === 0;
+      case 'odd':    return num !== 0 && num % 2 === 1;
+      case 'even':   return num !== 0 && num % 2 === 0;
+      case '1to18':  return num >= 1 && num <= 18;
+      case '19to36': return num >= 19 && num <= 36;
+      case '1st12':  return num >= 1 && num <= 12;
+      case '2nd12':  return num >= 13 && num <= 24;
+      case '3rd12':  return num >= 25 && num <= 36;
+    }
+    return false;
+  }
+
+  window.rlSelectBet = function(type) {
+    if (rlSpinning) return;
+    rlBetType = type;
+    // Update button highlights
+    const allBtns = document.querySelectorAll('.r-bet-btn');
+    allBtns.forEach(b => b.classList.remove('selected'));
+    const btn = document.getElementById('rb' + {
+      red:'Red', black:'Black', green:'Green',
+      odd:'Odd', even:'Even',
+      '1to18':'1to18', '19to36':'19to36',
+      '1st12':'1st12', '2nd12':'2nd12', '3rd12':'3rd12'
+    }[type]);
+    if (btn) btn.classList.add('selected');
+    const cfg = RL_BET_CONFIG[type];
+    document.getElementById('rlPayoutLabel').textContent = cfg ? cfg.label : '';
+  };
+
+  window.rlAddBet = function(amount) {
+    if (rlSpinning) return;
+    const p = getCurrentCasinoPlayer();
+    if (!p) { shakeWallet(); return; }
+    if (rlBet + amount > (p.coins || 0)) { shakeWallet(); return; }
+    rlBet += amount;
+    soundChip();
+    document.getElementById('rlBetDisplay').innerHTML = `${rlBet}<small>bet</small>`;
+  };
+
+  window.rlClearBet = function() {
+    if (rlSpinning) return;
+    rlBet = 0;
+    document.getElementById('rlBetDisplay').innerHTML = `0<small>bet</small>`;
+  };
+
+  window.rlSpin = async function() {
+    if (rlSpinning) return;
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+    if (!rlBetType) {
+      const el = document.getElementById('rlResultBanner');
+      el.textContent = 'SELECT A BET TYPE FIRST';
+      el.className = 'result-banner show lose';
+      setTimeout(() => el.classList.remove('show'), 2000);
+      return;
+    }
+    if (rlBet < 1) { shakeWallet(); return; }
+    if (rlBet > (p.coins || 0)) { shakeWallet(); return; }
+
+    rlSpinning = true;
+    document.getElementById('rlSpinBtn').disabled = true;
+    document.getElementById('rlResultBanner').className = 'result-banner';
+    document.getElementById('rouletteResultNum').textContent = '…';
+    document.getElementById('rouletteResultNum').className = 'roulette-result-num';
+
+    // Pick random result pocket
+    const resultIdx = Math.floor(Math.random() * RL_SEQUENCE.length);
+    const resultNum = RL_SEQUENCE[resultIdx];
+
+    // Calculate target angle: pointer is at top (−π/2 offset handled in draw)
+    // Each slice = 2π/37. We want pocket resultIdx to land under the top pointer.
+    const sliceAngle = (2 * Math.PI) / RL_SEQUENCE.length;
+    // Angle where pocket resultIdx center lands at pointer (top):
+    // pocket i center is at angle + i*sliceAngle + sliceAngle/2 - π/2 = -π/2 (top)
+    // So: rlAngle = -resultIdx * sliceAngle - sliceAngle/2
+    // Add multiple full spins for flair
+    const totalSpins = 5 + Math.random() * 4; // 5–9 full rotations
+    const baseAngle = -resultIdx * sliceAngle - sliceAngle / 2;
+    const targetAngle = baseAngle - totalSpins * 2 * Math.PI;
+
+    // Ease-out animation
+    const duration = 4000 + Math.random() * 1500;
+    const startAngle = rlAngle;
+    const startTime = performance.now();
+
+    function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+    function animate(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      rlAngle = startAngle + (targetAngle - startAngle) * easeOut(t);
+      rlDrawWheel(rlAngle);
+      if (t < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        rlAngle = ((targetAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+        rlDrawWheel(rlAngle);
+        rlFinish(resultNum, p);
+      }
+    }
+
+    // Sound: tick on each pocket crossing
+    let lastTick = 0;
+    function tickAnimate(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const currentA = startAngle + (targetAngle - startAngle) * easeOut(t);
+      const pocketsCrossed = Math.floor(Math.abs(currentA - startAngle) / sliceAngle);
+      if (pocketsCrossed > lastTick) {
+        lastTick = pocketsCrossed;
+        // Speed-dependent tick pitch
+        const speed = (1 - easeOut(t));
+        playTone(300 + speed * 400, 'square', 0.04, 0.04);
+      }
+      if (t < 1) requestAnimationFrame(tickAnimate);
+    }
+
+    requestAnimationFrame(animate);
+    requestAnimationFrame(tickAnimate);
+  };
+
+  async function rlFinish(num, p) {
+    const col = num === 0 ? 'green' : (RL_REDS.has(num) ? 'red' : 'black');
+    const numEl = document.getElementById('rouletteResultNum');
+    numEl.textContent = num;
+    numEl.className = `roulette-result-num ${col}`;
+
+    const won = rlWinCheck(num, rlBetType);
+    const cfg = RL_BET_CONFIG[rlBetType];
+    let delta = 0, resultText = '', resultType = '';
+
+    if (won) {
+      delta = rlBet * cfg.payout + rlBet; // return stake + winnings
+      const profit = rlBet * cfg.payout;
+      resultText = `✅ ${num} — YOU WIN +${profit} 🪙`;
+      resultType = 'win';
+      soundWin();
+      setTimeout(() => launchParticles('win'), 80);
+      setTimeout(() => spawnCoinFloat(`+${profit} 🪙`), 400);
+    } else {
+      delta = -rlBet;
+      resultText = `❌ ${num} — YOU LOSE`;
+      resultType = 'lose';
+      soundLose();
+      setTimeout(() => launchParticles('bust'), 100);
+    }
+
+    const banner = document.getElementById('rlResultBanner');
+    banner.textContent = resultText;
+    banner.className = `result-banner show ${resultType}`;
+    setTimeout(() => banner.classList.remove('show'), 3000);
+
+    const newCoins = Math.max(0, (p.coins || 0) + delta);
+    await update(ref(db, `players/${p.id}`), { coins: newCoins });
+
+    rlBet = 0;
+    document.getElementById('rlBetDisplay').innerHTML = `0<small>bet</small>`;
+    rlSpinning = false;
+    document.getElementById('rlSpinBtn').disabled = false;
+  }
+
+  // Draw wheel on first load (in case user opens roulette tab)
+  setTimeout(() => rlDrawWheel(rlAngle), 100);
+
+
     bjPhase = 'done';
     setBJButtons('done');
     updateScoreDisplay();
