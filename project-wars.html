@@ -3713,15 +3713,14 @@
       }
     }
 
-    // 9 even-row pegs span startX to startX+8*colGap.
-    // That creates 10 equal slots each of width colGap,
-    // starting half a colGap before the first peg.
-    // Bucket i centre: startX - colGap/2 + (i + 0.5) * colGap  =  startX + i * colGap
+    // 9 pegs on even rows sit at startX + i*colGap (i = 0..8).
+    // The ball lands in one of 10 slots — one on each side of every peg gap.
+    // Each slot is colGap wide and centred on startX + i*colGap for i = 0..9
+    //   (i=0 is the leftmost half-slot, i=9 is the rightmost half-slot).
     const bucketY = PK_H - PK_BOT_PAD + 4;
-    const n = PK_MULTIPLIERS.length; // 10
-    for (let i = 0; i < n; i++) {
-      const x = startX - colGap / 2 + (i + 0.5) * colGap;
-      pkBuckets.push({ x, y: bucketY, mult: PK_MULTIPLIERS[i], color: PK_COLORS[i] });
+    for (let i = 0; i < PK_MULTIPLIERS.length; i++) {
+      const x = startX + i * colGap;
+      pkBuckets.push({ x, y: bucketY, mult: PK_MULTIPLIERS[i], color: PK_COLORS[i], w: colGap });
     }
   }
 
@@ -3746,16 +3745,14 @@
     });
 
     // Draw buckets
-    const bucketSpacing = pkBuckets.length > 1 ? pkBuckets[1].x - pkBuckets[0].x : 30;
     pkBuckets.forEach((b) => {
-      const bx = b.x - bucketSpacing * 0.47;
-      const bw = bucketSpacing * 0.94;
+      const bx = b.x - b.w / 2;
       const bh = PK_BOT_PAD - 8;
       ctx.fillStyle = b.color + '33';
       ctx.strokeStyle = b.color;
       ctx.lineWidth = 1.5;
-      ctx.fillRect(bx, b.y, bw, bh);
-      ctx.strokeRect(bx, b.y, bw, bh);
+      ctx.fillRect(bx, b.y, b.w, bh);
+      ctx.strokeRect(bx, b.y, b.w, bh);
       ctx.fillStyle = b.color;
       ctx.font = `bold ${b.mult >= 3 ? 10 : 9}px DM Mono, monospace`;
       ctx.textAlign = 'center';
