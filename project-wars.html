@@ -228,7 +228,7 @@
     max-width: 900px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 1rem;
   }
 
@@ -1851,25 +1851,7 @@
 <button class="btn secondary" id="logBtn" onclick="logHours()">+ Log Hours</button>
 <div class="msg" id="logMsg"></div>
 </div>
-<!-- Delete Project -->
-<div class="panel">
-<h2>Delete</h2>
-<div class="field">
-<label>Delete one of your projects</label>
-<select id="deleteProjectSel">
-<option value="">— select —</option>
-</select>
-</div>
-<button class="btn" onclick="openDeleteProjectSelf()" style="background:none;color:var(--red);border:1px solid var(--red);margin-bottom:0.5rem;">Delete Project</button>
-<div style="margin-top:1rem; border-top: 1px solid var(--border); padding-top:1rem;">
-<div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-bottom:0.5rem;">ADMIN — Delete any player</div>
-<select id="deletePlayer" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:0.8rem;padding:0.5rem;margin-bottom:0.5rem;-webkit-appearance:none;">
-<option value="">— select —</option>
-</select>
-<button class="btn" onclick="openDeletePlayer()" style="background:none;color:var(--red);border:1px solid var(--red);">Delete Player</button>
-</div>
-<div class="msg" id="deleteMsg"></div>
-</div>
+
 <!-- Quick stats panel -->
 <div class="panel">
 <h2>This Week</h2>
@@ -2186,7 +2168,6 @@
     renderWeek();
     renderLeaderboard();
     renderSelfPanels();
-    renderAdminSelects();
     renderHistory();
   }
 
@@ -2275,18 +2256,6 @@
       });
     }
 
-    // Delete project select
-    const dsel = document.getElementById('deleteProjectSel');
-    const dcur = dsel.value;
-    dsel.innerHTML = '<option value="">— select —</option>';
-    projs.forEach(([pid, proj]) => {
-      const o = document.createElement('option');
-      o.value = pid;
-      o.textContent = proj.name;
-      if (pid === dcur) o.selected = true;
-      dsel.appendChild(o);
-    });
-
     // Self stats
     const total = totalHours(player);
     const coins = player.coins || 0;
@@ -2312,18 +2281,6 @@
           <div style="font-size:0.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;">projects</div>
         </div>
       </div>`;
-  }
-
-  function renderAdminSelects() {
-    const sel = document.getElementById('deletePlayer');
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">— select —</option>';
-    Object.values(players).forEach(p => {
-      const o = document.createElement('option');
-      o.value = p.name; o.textContent = p.name;
-      if (p.name === cur) o.selected = true;
-      sel.appendChild(o);
-    });
   }
 
   function renderHistory() {
@@ -2420,32 +2377,6 @@
 
   // ── Delete Modal ──
   let pendingDelete = null;
-
-  window.openDeleteProjectSelf = function() {
-    if (!currentUser) return;
-    const sel = document.getElementById('deleteProjectSel');
-    const projId = sel.value;
-    const msg = document.getElementById('deleteMsg');
-    if (!projId) { msg.textContent = 'Select a project.'; msg.className = 'msg err'; setTimeout(() => msg.textContent='',3000); return; }
-    const proj = players[currentUser.id]?.projects?.[projId];
-    if (!proj) return;
-    pendingDelete = { type: 'project', playerId: currentUser.id, projId, projName: proj.name, playerName: currentUser.name };
-    document.getElementById('modalTitle').textContent = 'Delete Project';
-    document.getElementById('modalDesc').innerHTML = `Permanently delete <strong>${escHtml(proj.name)}</strong>?`;
-    openModal();
-  };
-
-  window.openDeletePlayer = function() {
-    const playerName = document.getElementById('deletePlayer').value;
-    const msg = document.getElementById('deleteMsg');
-    if (!playerName) { msg.textContent = 'Select a player.'; msg.className = 'msg err'; setTimeout(() => msg.textContent='',3000); return; }
-    const entry = Object.entries(players).find(([, p]) => p.name === playerName);
-    if (!entry) return;
-    pendingDelete = { type: 'player', playerId: entry[0], playerName };
-    document.getElementById('modalTitle').textContent = 'Delete Player';
-    document.getElementById('modalDesc').innerHTML = `Permanently delete <strong>${escHtml(playerName)}</strong> and all their data?`;
-    openModal();
-  };
 
   window._removeProject = function(playerId, projId, projName, playerName) {
     pendingDelete = { type: 'project', playerId, projId, projName, playerName };
