@@ -3713,12 +3713,11 @@
       }
     }
 
-    // Buckets: one per slot between the bottom-row pegs (10 slots → 11 buckets for 9-col even row)
-    const isEvenBottom = (PK_ROWS - 1) % 2 === 0;
-    const bottomOffset = isEvenBottom ? 0 : colGap / 2;
+    // 11 buckets filling the full even-row width (startX → startX + 8*colGap)
+    // Each bucket is colGap wide; bucket i is centred at startX + (i + 0.5) * colGap
     const bucketY = PK_H - PK_BOT_PAD + 4;
     for (let i = 0; i < PK_MULTIPLIERS.length; i++) {
-      const x = startX + bottomOffset - colGap / 2 + i * colGap;
+      const x = startX + (i + 0.5) * colGap;
       pkBuckets.push({ x, y: bucketY, mult: PK_MULTIPLIERS[i], color: PK_COLORS[i] });
     }
   }
