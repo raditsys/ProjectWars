@@ -232,10 +232,11 @@
     cursor: default;
   }
   .fx-icon {
-    font-size: 0.7rem;
-    opacity: 0.6;
+    font-size: 1rem;
+    opacity: 0.55;
     transition: opacity 0.15s;
     user-select: none;
+    line-height: 1;
   }
   .fx-icon-wrap:hover .fx-icon { opacity: 1; }
   .fx-tooltip {
@@ -2032,7 +2033,7 @@
 </div>
 <div class="login-screen" id="loginScreen">
 <div class="login-box">
-<div aria-label="Project Wars" class="login-title" id="wavyLoginTitle"></div>
+<div aria-label="Project Wars" class="login-title" id="wavyLoginTitle" onclick="devModeClick()" style="cursor:default;"></div>
 <div aria-label="Who ships the most this week?" class="login-subtitle" id="wavyLoginSubtitle"></div>
 <div class="login-tabs">
 <button class="login-tab active" id="tabLogin" onclick="switchLoginTab('login')">Login</button>
@@ -2052,6 +2053,7 @@
 <button class="login-btn" id="registerBtn" type="submit">Create Account</button>
 <div class="login-msg" id="registerMsg"></div>
 </form>
+<button id="devModeBtn" onclick="enterDevMode()" style="display:none;margin-top:0.75rem;background:none;border:1px dashed #444;color:#555;font-size:0.6rem;letter-spacing:2px;padding:0.3rem 0.75rem;cursor:pointer;font-family:'DM Mono',monospace;width:100%;">⚙ DEV MODE</button>
 </div>
 </div>
 <!-- USER BADGE -->
@@ -2440,6 +2442,42 @@
   makeWavy(document.getElementById('wavyLoginTitle'),   'Project Wars',                 0,    0.08);
   makeWavy(document.getElementById('wavyLoginSubtitle'),'Who ships the most this week?', 0.3, 0.04);
 
+  // ── Dev Mode (secret: click title 10 times) ──
+  let _devClicks = 0;
+  window.devModeClick = function() {
+    _devClicks++;
+    if (_devClicks >= 10) {
+      document.getElementById('devModeBtn').style.display = 'block';
+    }
+  };
+
+  window.enterDevMode = function() {
+    // Inject a fake dev player into window globals so casino works without Firebase
+    const devPlayer = {
+      id: '__dev__',
+      name: 'DEV',
+      coins: 99999,
+      projects: {},
+      password: '',
+      equippedFx: null,
+    };
+    // Expose via the same globals the module script uses
+    window.__currentUser   = devPlayer;
+    window.__currentUserId = '__dev__';
+    window.__devMode = true;
+
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('loginBg').style.display = 'none';
+    document.body.classList.add('logged-in');
+    document.getElementById('userBadge').style.display = 'flex';
+    document.getElementById('userBadgeName').textContent = '⚙ DEV';
+    document.getElementById('devModeBtn').style.display = 'none';
+    _devClicks = 0;
+
+    // Signal the module to enter dev mode
+    document.dispatchEvent(new CustomEvent('devModeEnter', { detail: devPlayer }));
+  };
+
   // Build wavy tooltip HTML for an effect name
   window.makeFxTooltipHtml = function(label) {
     return [...label].map((ch, i) => {
@@ -2651,6 +2689,17 @@
     closeCasino(); closeShop();
   };
 
+  // ── Dev Mode ──
+  document.addEventListener('devModeEnter', (e) => {
+    const dev = e.detail;
+    currentUser = dev;
+    window.__currentUser = dev;
+    window.__currentUserId = dev.id;
+    // Inject a fake player record so casino reads coins correctly
+    players['__dev__'] = { name: 'DEV', coins: 99999, projects: {} };
+    render();
+  });
+
   // Enter key shortcuts for login
   document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); });
   document.getElementById('loginName').addEventListener('keydown', e => { if (e.key === 'Enter') window.doLogin(); });
@@ -2754,8 +2803,10 @@
         : `<span style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;">no projects yet</span>`;
 
       const fxItem = p.equippedFx ? window.__shopItems?.find(s => s.id === p.equippedFx) : null;
+      // Extract just the emoji (everything before the first space)
+      const fxEmoji = fxItem ? fxItem.name.split(' ')[0] : '';
       const fxIconHtml = fxItem
-        ? `<span class="fx-icon-wrap"><span class="fx-icon">✦</span><span class="fx-tooltip">${window.makeFxTooltipHtml(fxItem.name)}</span></span>`
+        ? `<span class="fx-icon-wrap"><span class="fx-icon">${fxEmoji}</span><span class="fx-tooltip">${window.makeFxTooltipHtml(fxItem.name)}</span></span>`
         : '';
 
       return `
@@ -3583,8 +3634,20 @@
 
   function getCurrentCasinoPlayer() {
     if (!currentUser) return null;
+    if (currentUser.id === '__dev__') {
+      return { id: '__dev__', ...players['__dev__'] };
+    }
     const p = players[currentUser.id];
     return p ? { id: currentUser.id, ...p } : null;
+  }
+
+  // Update coins — skips Firebase in dev mode, updates local store instead
+  async function setCasinoCoins(playerId, newCoins) {
+    if (playerId === '__dev__') {
+      players['__dev__'].coins = newCoins;
+      return;
+    }
+    await update(ref(db, `players/${playerId}`), { coins: newCoins });
   }
 
   // Bet
@@ -3936,7 +3999,7 @@
     setTimeout(() => banner.classList.remove('show'), 3000);
 
     const newCoins = Math.max(0, (p.coins || 0) + delta);
-    await update(ref(db, `players/${p.id}`), { coins: newCoins });
+    await setCasinoCoins(p.id, newCoins);
 
     rlBet = 0;
     document.getElementById('rlBetDisplay').innerHTML = `0<small>bet</small>`;
@@ -4160,7 +4223,7 @@
     // Bet was already deducted in pkDrop — read fresh coins from DB and add payout
     const snap = await new Promise(res => onValue(ref(db, `players/${p.id}/coins`), res, { onlyOnce: true }));
     const currentCoins = snap.val() || 0;
-    await update(ref(db, 'players/' + p.id), { coins: currentCoins + payout });
+    await setCasinoCoins(p.id, currentCoins + payout);
   }
 
   window.pkAddBet = function(amount) {
@@ -4197,7 +4260,7 @@
 
     // Deduct bet immediately
     const newCoins = Math.max(0, (p.coins || 0) - pkBet);
-    await update(ref(db, 'players/' + p.id), { coins: newCoins });
+    await setCasinoCoins(p.id, newCoins);
 
     // Drop ball from random position near top center
     const betSnapshot = pkBet; // capture bet before async operations
@@ -4270,7 +4333,7 @@
     showResult(resultText, resultType);
 
     const newCoins = Math.max(0, (p.coins || 0) + delta);
-    await update(ref(db, `players/${p.id}`), { coins: newCoins });
+    await setCasinoCoins(p.id, newCoins);
 
     if (delta > 0) {
       setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 400);
