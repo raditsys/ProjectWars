@@ -2975,6 +2975,7 @@
         updates[`players/${id}/coins`]      = 0;
         updates[`players/${id}/projects`]   = null;
         updates[`players/${id}/equippedFx`] = null;
+        updates[`players/${id}/ownedFx`]    = null;
       });
       await update(ref(db, '/'), updates);
       window.closeSoftResetModal();
