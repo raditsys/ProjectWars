@@ -99,11 +99,12 @@
 
   /* Biggest Win sidebar */
   .win-leaderboard {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto 2rem;
-    display: flex;
-    gap: 1.5rem;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    gap: 2rem;
+    align-items: start;
   }
   .win-lb-panel {
     width: 220px;
@@ -2167,7 +2168,7 @@
 <div class="sync-status" id="syncStatus">⬤ connecting...</div>
 </header>
 <div class="win-leaderboard">
-<div class="leaderboard" style="flex:1;margin:0 0 3rem;">
+<div class="leaderboard">
 <div class="leaderboard-title">
 <span>🏆 Leaderboard</span>
 <span class="multiplier-note" id="multiplierNote"></span>
