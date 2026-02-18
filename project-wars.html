@@ -2155,6 +2155,175 @@
   .btn-equip   { background: var(--gold); color: #000; }
   .btn-unequip { background: transparent; color: var(--muted); border: 1px solid #3d00b3 !important; }
 
+  /* ── GARDEN TAB & DRAWER ── */
+  .garden-tab {
+    position: fixed;
+    right: 0;
+    top: calc(50% + 290px);
+    transform: translateY(-50%);
+    z-index: 200;
+    writing-mode: vertical-rl;
+    background: #1a6b1a;
+    color: #d4f0c0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+    padding: 1.5rem 0.6rem;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s;
+    box-shadow: -4px 0 20px rgba(26,107,26,0.45);
+  }
+  .garden-tab:hover { background: #228b22; }
+
+  .garden-drawer {
+    position: fixed;
+    top: 0;
+    right: -520px;
+    width: 500px;
+    max-width: 95vw;
+    height: 100vh;
+    background: #071407;
+    border-left: 2px solid #2a6a2a;
+    z-index: 300;
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .garden-drawer.open { right: 0; }
+
+  .garden-header {
+    background: #0a1f0a;
+    border-bottom: 1px solid #2a6a2a;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .garden-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #4ade80, #a3e635);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .garden-close {
+    background: none;
+    border: 1px solid #2a6a2a;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .garden-close:hover { border-color: var(--red); color: var(--red); }
+
+  .garden-body { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .garden-wallet-box {
+    background: #0a1f0a;
+    border: 1px solid #2a6a2a;
+    padding: 0.85rem;
+    text-align: center;
+  }
+  .garden-wallet-coins {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .garden-wallet-lbl { font-size: 0.55rem; letter-spacing: 2px; color: #4a8a4a; text-transform: uppercase; }
+
+  .garden-desc {
+    font-size: 0.7rem;
+    color: #4a8a4a;
+    letter-spacing: 0.5px;
+    line-height: 1.6;
+    border: 1px solid #1a3a1a;
+    background: #0a1f0a;
+    padding: 0.75rem 1rem;
+  }
+
+  .garden-section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    color: #4ade80;
+    border-bottom: 1px solid #2a6a2a;
+    padding-bottom: 0.4rem;
+  }
+
+  .garden-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .garden-upgrade-card {
+    background: #0a1f0a;
+    border: 1px solid #1a3a1a;
+    padding: 1rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: border-color 0.2s;
+  }
+  .garden-upgrade-card:hover { border-color: #4ade80; }
+  .garden-upgrade-card.maxed { border-color: #f5c842; opacity: 0.8; }
+
+  .garden-upgrade-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .garden-upgrade-emoji { font-size: 2rem; flex-shrink: 0; }
+  .garden-upgrade-info { flex: 1; }
+  .garden-upgrade-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: #d4f0c0;
+  }
+  .garden-upgrade-desc { font-size: 0.65rem; color: #4a8a4a; letter-spacing: 0.5px; margin-top: 0.15rem; line-height: 1.5; }
+  .garden-upgrade-level {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    color: #4ade80;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .garden-upgrade-bar-wrap { height: 4px; background: #1a3a1a; border-radius: 2px; overflow: hidden; }
+  .garden-upgrade-bar { height: 100%; background: linear-gradient(90deg, #2d7a2d, #4ade80); border-radius: 2px; transition: width 0.4s ease; }
+
+  .garden-upgrade-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .garden-upgrade-cost { font-size: 0.65rem; color: var(--gold); letter-spacing: 1px; }
+  .garden-buy-btn {
+    padding: 0.35rem 0.85rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    background: #1a6b1a;
+    color: #d4f0c0;
+    border: 1px solid #2a6a2a;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .garden-buy-btn:hover:not(:disabled) { background: #228b22; }
+  .garden-buy-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .garden-buy-btn.maxed-btn { background: #3a2a00; color: var(--gold); border-color: var(--gold); cursor: default; }
+
   /* ── AMBIENT BACKGROUND ── */
   .bg-blobs {
     position: fixed;
@@ -2482,7 +2651,7 @@
   GAMBLE
 </button>
 <!-- CASINO DRAWER OVERLAY -->
-<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop();"></div>
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop(); if(window.closeGarden) window.closeGarden();"></div>
 <!-- CASINO DRAWER -->
 <div class="casino-drawer" id="casinoDrawer">
 <div class="drawer-header">
@@ -2675,6 +2844,10 @@
 <span id="shopTabArrow">◀</span>
   SHOP
 </button>
+<button class="garden-tab" id="gardenTab" onclick="openGarden()">
+<span id="gardenTabArrow">◀</span>
+  GARDEN
+</button>
 <!-- SHOP DRAWER -->
 <div class="shop-drawer" id="shopDrawer">
 <div class="shop-header">
@@ -2691,6 +2864,24 @@
 <div class="shop-grid" id="shopGrid">
 <div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Log in to shop</div>
 </div>
+</div>
+</div>
+</div>
+<!-- GARDEN DRAWER -->
+<div class="garden-drawer" id="gardenDrawer">
+<div class="garden-header">
+<h2>🌱 Garden</h2>
+<button class="garden-close" onclick="closeGarden()">✕ Close</button>
+</div>
+<div class="garden-body" id="gardenBody">
+<div class="garden-wallet-box">
+<div class="garden-wallet-coins" id="gardenWalletDisplay">—</div>
+<div class="garden-wallet-lbl">🪙 coins</div>
+</div>
+<div class="garden-desc">Spend coins on garden upgrades to grow more grass and earn more coins automatically.</div>
+<div class="garden-section-title">🌿 Upgrades</div>
+<div id="gardenUpgradeGrid" class="garden-grid">
+  <div style="color:var(--muted);font-size:0.75rem;grid-column:1/-1;padding:1rem 0;text-align:center;">Log in to view garden</div>
 </div>
 </div>
 </div>
@@ -3855,6 +4046,7 @@
   window.openShop = function() {
     if (!currentUser) { doLogout(); return; }
     closeCasino();
+    if (window.closeGarden) window.closeGarden();
     document.getElementById('shopDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('shopTabArrow').textContent = '▶';
@@ -4319,6 +4511,7 @@
   window.openCasino = function() {
     if (!currentUser) { doLogout(); return; }
     closeShop();
+    if (window.closeGarden) window.closeGarden();
     document.getElementById('casinoDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '▶';
@@ -5025,7 +5218,7 @@
   let prTotalPayout = 0;     // running cashout value shown at top
   let prNeedlePos  = 0.5;
   let prDirection  = 1;
-  let prSpeed      = 0.012;
+  let prSpeed      = 0.048;
   let prSafeHalf   = 0.12;
   let prRafId      = null;
   let prMusicNodes = [];
@@ -5102,9 +5295,14 @@
     lbl.className = 'pr-multiplier-label ' + ml.cls;
   }
 
-  function prLoop() {
+  let prLastTime = null;
+  function prLoop(timestamp) {
     if (!prRunning) return;
-    prNeedlePos += prDirection * prSpeed;
+    if (prLastTime === null) prLastTime = timestamp;
+    const dt = Math.min((timestamp - prLastTime) / 1000, 0.05); // seconds, capped at 50ms to avoid jumps on tab focus
+    prLastTime = timestamp;
+    // prSpeed was tuned at 60fps, so multiply by 60 to convert to units/second
+    prNeedlePos += prDirection * prSpeed * 60 * dt;
     if (prNeedlePos >= 1) { prNeedlePos = 1; prDirection = -1; }
     if (prNeedlePos <= 0) { prNeedlePos = 0; prDirection =  1; }
     prUpdateNeedle();
@@ -5186,6 +5384,7 @@
 
     if (zone.mult === 0 || zone.mult === 0.5) {
       // MISS or 0.5× center — lose half bet, reset, auto-restart
+      prStopMusic();
       playTone(80, 'sawtooth', 0.5, 0.18);
       setTimeout(() => playTone(60, 'sawtooth', 0.5, 0.2), 200);
       flash.style.background = '#ff000044';
@@ -5277,6 +5476,7 @@
     if (prPhase !== 'result' || prStreak === 0) return;
     const p = getCurrentCasinoPlayer();
     if (!p) return;
+    prStopMusic();
     const payout = Math.floor(prBet * prAccumMult);
     const profit = payout - prBet;
     await setCasinoCoins(p.id, (p.coins||0) + profit);
@@ -5322,13 +5522,14 @@
     prNeedlePos = 0.5;
     prDirection = Math.random() > 0.5 ? 1 : -1;
     prUpdateNeedle();
+    prLastTime = null;
     prRafId = requestAnimationFrame(prLoop);
     if (prStreak === 0) prStartMusic(0);
     document.getElementById('prStartBtn').style.display = 'none';
   };
 
   function prApplyRoundDifficulty() {
-    prSpeed = Math.min(0.012 + prRoundNum * 0.004, 0.045);
+    prSpeed = Math.min(0.048 + prRoundNum * 0.016, 0.18);
     prRebuildZones();
     prUpdateArenaClass();
   }
@@ -5341,7 +5542,7 @@
     prStreak = 0;
     prRoundNum = 0;
     prAccumMult = 1.0;
-    prSpeed = 0.012;
+    prSpeed = 0.048;
     prSafeHalf = 0.12;
     prRebuildZones();
   };
@@ -5637,6 +5838,13 @@
   // Coin tuning: only sometimes
   const COIN_CHANCE_ON_CUT = 0.15;    // 15% chance to get a coin when cutting a clump
 
+  // Expose config for garden upgrades
+  window.__grassConfig = {
+    spawnChanceBonus: 0,
+    maxClumpsBonus: 0,
+    coinChanceBonus: 0,
+  };
+
   const clumps = [];
   const greens = ['#3a9e3a','#4ade80','#2d7a2d','#56c456','#38a838','#65d465'];
 
@@ -5711,7 +5919,9 @@
   }
 
   function spawnClumpAtRandomX() {
-    if (clumps.length >= MAX_CLUMPS) return;
+    const boost = window.__grassConfig || {};
+    const effectiveMax = MAX_CLUMPS + (boost.maxClumpsBonus || 0);
+    if (clumps.length >= effectiveMax) return;
 
     const newX = Math.random() * (window.innerWidth - 90);
     const x = Math.max(0, Math.min(window.innerWidth - 90, newX));
@@ -5772,7 +5982,9 @@
       clump.classList.add('cutting');
 
       // Random coin drop (instead of deterministic payouts)
-      if (Math.random() < COIN_CHANCE_ON_CUT) {
+      const boost = window.__grassConfig || {};
+      const effectiveCoinChance = COIN_CHANCE_ON_CUT + (boost.coinChanceBonus || 0);
+      if (Math.random() < effectiveCoinChance) {
         const rect = clump.getBoundingClientRect();
         spawnCoinPopAt(rect.left + rect.width * 0.5 + rand(-10, 10), rect.top + rand(-6, 6), 1);
         if (window.__awardGrassCoin) window.__awardGrassCoin(1);
@@ -5797,7 +6009,10 @@
 
     // Very slow background growth: occasional new clump
     setInterval(() => {
-      if (clumps.length < MAX_CLUMPS && Math.random() < SPAWN_CHANCE_PER_TICK) {
+      const boost = window.__grassConfig || {};
+      const effectiveMax = MAX_CLUMPS + (boost.maxClumpsBonus || 0);
+      const effectiveChance = SPAWN_CHANCE_PER_TICK + (boost.spawnChanceBonus || 0) * SPAWN_CHANCE_PER_TICK;
+      if (clumps.length < effectiveMax && Math.random() < effectiveChance) {
         spawnClumpAtRandomX();
       }
     }, SPAWN_TICK_MS);
@@ -5980,6 +6195,205 @@ window.togglePet = function(id) {
 window.__awardGrassCoin = function() {
   // fallback: no-op if not logged in
 };
+</script>
+<script>
+// ══════════════════ GARDEN SYSTEM ══════════════════
+
+const GARDEN_UPGRADES = [
+  {
+    id: 'seeds',
+    name: '🌱 Bag of Seeds',
+    emoji: '🌱',
+    desc: 'Faster grass growth — each level increases spawn chance and max clumps on screen.',
+    maxLevel: 5,
+    baseCost: 80,
+    costMultiplier: 1.8,
+    effect: 'Growth Rate',
+    effectDesc: lvl => `+${lvl * 20}% spawn chance · +${lvl} max clumps`,
+  },
+  {
+    id: 'trowel',
+    name: '🪚 Golden Trowel',
+    emoji: '🪚',
+    desc: 'Lucky digging — each level increases the coin drop chance when cutting grass.',
+    maxLevel: 5,
+    baseCost: 150,
+    costMultiplier: 2.2,
+    effect: 'Coin Chance',
+    effectDesc: lvl => `+${lvl * 8}% coin chance on cut`,
+  },
+];
+
+function gardenUpgradeCost(upgrade, currentLevel) {
+  return Math.round(upgrade.baseCost * Math.pow(upgrade.costMultiplier, currentLevel));
+}
+
+window.openGarden = function() {
+  closeShop && closeShop();
+  closeCasino && closeCasino();
+  document.getElementById('gardenDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('gardenTabArrow').textContent = '▶';
+  renderGarden();
+};
+
+window.closeGarden = function() {
+  document.getElementById('gardenDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('gardenTabArrow').textContent = '◀';
+};
+
+window.renderGarden = function() {
+  const user = window.__currentUser;
+  if (!user) {
+    document.getElementById('gardenUpgradeGrid').innerHTML =
+      '<div style="color:var(--muted);font-size:0.75rem;padding:1rem 0;text-align:center;">Log in to view garden</div>';
+    document.getElementById('gardenWalletDisplay').textContent = '—';
+    return;
+  }
+
+  // Read player data from the shared players object (exposed by Firebase module)
+  const playerData = window.__playersCache ? window.__playersCache[user.id] : user;
+  const coins = (playerData && playerData.coins != null) ? playerData.coins : (user.coins || 0);
+  const gardenLevels = (playerData && playerData.garden) ? playerData.garden : (user.garden || {});
+
+  document.getElementById('gardenWalletDisplay').textContent = coins.toLocaleString();
+
+  const grid = document.getElementById('gardenUpgradeGrid');
+  grid.innerHTML = GARDEN_UPGRADES.map(upg => {
+    const lvl = gardenLevels[upg.id] || 0;
+    const isMax = lvl >= upg.maxLevel;
+    const cost = isMax ? 0 : gardenUpgradeCost(upg, lvl);
+    const canAfford = coins >= cost;
+    const pct = (lvl / upg.maxLevel) * 100;
+
+    return `<div class="garden-upgrade-card ${isMax ? 'maxed' : ''}">
+      <div class="garden-upgrade-top">
+        <div class="garden-upgrade-emoji">${upg.emoji}</div>
+        <div class="garden-upgrade-info">
+          <div class="garden-upgrade-name">${upg.name}</div>
+          <div class="garden-upgrade-desc">${upg.desc}</div>
+          ${lvl > 0 ? `<div class="garden-upgrade-desc" style="color:#4ade80;margin-top:0.25rem;">▲ ${upg.effectDesc(lvl)}</div>` : ''}
+        </div>
+        <div class="garden-upgrade-level">${lvl} / ${upg.maxLevel}</div>
+      </div>
+      <div class="garden-upgrade-bar-wrap">
+        <div class="garden-upgrade-bar" style="width:${pct}%"></div>
+      </div>
+      <div class="garden-upgrade-footer">
+        <span class="garden-upgrade-cost">${isMax ? '✓ MAX LEVEL' : `🪙 ${cost} per level`}</span>
+        ${isMax
+          ? `<button class="garden-buy-btn maxed-btn" disabled>Maxed</button>`
+          : `<button class="garden-buy-btn" onclick="buyGardenUpgrade('${upg.id}')" ${canAfford ? '' : 'disabled'}>
+              ${canAfford ? 'Upgrade ▲' : '🪙 Need more'}
+            </button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.buyGardenUpgrade = async function(upgradeId) {
+  const user = window.__currentUser;
+  if (!user) return;
+
+  const upg = GARDEN_UPGRADES.find(u => u.id === upgradeId);
+  if (!upg) return;
+
+  const playerData = window.__playersCache ? window.__playersCache[user.id] : user;
+  const coins = (playerData && playerData.coins != null) ? playerData.coins : (user.coins || 0);
+  const gardenLevels = (playerData && playerData.garden) ? { ...playerData.garden } : (user.garden ? { ...user.garden } : {});
+
+  const lvl = gardenLevels[upgradeId] || 0;
+  if (lvl >= upg.maxLevel) return;
+
+  const cost = gardenUpgradeCost(upg, lvl);
+  if (coins < cost) return;
+
+  gardenLevels[upgradeId] = lvl + 1;
+
+  // Use the Firebase update exposed by the module
+  if (window.__fbBuyGardenUpgrade) {
+    await window.__fbBuyGardenUpgrade(upgradeId, gardenLevels, cost);
+  }
+
+  // Play a gentle chime
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [440, 554, 659].forEach((f, i) => {
+      setTimeout(() => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.12, ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+        o.start(); o.stop(ctx.currentTime + 0.25);
+      }, i * 100);
+    });
+  } catch(e) {}
+};
+
+// Apply garden upgrades to the grass system
+window.__applyGardenBoosts = function(gardenLevels) {
+  if (!gardenLevels) return;
+  const seedsLvl  = gardenLevels.seeds  || 0;
+  const trowelLvl = gardenLevels.trowel || 0;
+
+  // Patch grass globals exposed on window by the grass IIFE
+  if (window.__grassConfig) {
+    window.__grassConfig.spawnChanceBonus = seedsLvl * 0.20;
+    window.__grassConfig.maxClumpsBonus   = seedsLvl;
+    window.__grassConfig.coinChanceBonus  = trowelLvl * 0.08;
+  }
+};
+</script>
+<script type="module">
+// ══════════════════ GARDEN FIREBASE MODULE ══════════════════
+import { getDatabase, ref, update, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+const db = getDatabase(getApp());
+
+window.__fbBuyGardenUpgrade = async function(upgradeId, newGardenLevels, cost) {
+  const user = window.__currentUser;
+  if (!user) return;
+  const uid = user.id;
+  const snap = await new Promise(res => onValue(ref(db, `players/${uid}/coins`), res, { onlyOnce: true }));
+  const coins = snap.val() || 0;
+  if (coins < cost) return;
+  await update(ref(db, `players/${uid}`), {
+    coins: coins - cost,
+    garden: newGardenLevels,
+  });
+  window.__applyGardenBoosts && window.__applyGardenBoosts(newGardenLevels);
+  window.renderGarden && window.renderGarden();
+  // Show coin float
+  const el = document.createElement('div');
+  el.className = 'coin-float';
+  el.textContent = `-${cost} 🪙`;
+  el.style.left = (Math.random() * window.innerWidth * 0.6 + window.innerWidth * 0.2) + 'px';
+  el.style.top  = (window.innerHeight - 80) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+};
+
+// Watch for player data changes to update garden and coin display
+let gardenWatchingUid = null;
+setInterval(() => {
+  const uid = window.__currentUserId;
+  if (uid && uid !== gardenWatchingUid) {
+    gardenWatchingUid = uid;
+    onValue(ref(db, `players/${uid}`), snap => {
+      const p = snap.val() || {};
+      window.__playersCache = window.__playersCache || {};
+      window.__playersCache[uid] = p;
+      window.__applyGardenBoosts && window.__applyGardenBoosts(p.garden || {});
+      if (document.getElementById('gardenDrawer')?.classList.contains('open')) {
+        window.renderGarden && window.renderGarden();
+      }
+    });
+  }
+}, 300);
 </script>
 <script type="module">
 // Extend the Firebase module with grass coin award + hat shop
