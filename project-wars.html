@@ -1032,6 +1032,145 @@
   .r-spin-btn:hover:not(:disabled) { opacity: 0.85; }
   .r-spin-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
+  /* ══ PRECISION RISK ══ */
+  .pr-arena {
+    background: #050d05;
+    border: 1px solid #1a3a1a;
+    padding: 1.5rem 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.1s;
+  }
+  .pr-arena.shake {
+    animation: prShake 0.35s ease;
+  }
+  @keyframes prShake {
+    0%  { transform: translate(0,0) rotate(0deg); }
+    15% { transform: translate(-4px, 2px) rotate(-0.8deg); }
+    30% { transform: translate(4px, -2px) rotate(0.8deg); }
+    45% { transform: translate(-3px, 3px) rotate(-0.5deg); }
+    60% { transform: translate(3px, -1px) rotate(0.5deg); }
+    75% { transform: translate(-2px, 2px) rotate(-0.3deg); }
+    100%{ transform: translate(0,0) rotate(0deg); }
+  }
+
+  .pr-streak-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+  .pr-streak-display.hot { color: #ff8c00; text-shadow: 0 0 8px #ff4400; }
+
+  .pr-multiplier-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    letter-spacing: 4px;
+    color: var(--text);
+    line-height: 1;
+    transition: color 0.2s, text-shadow 0.2s;
+    min-height: 4rem;
+    text-align: center;
+  }
+  .pr-multiplier-label.safe  { color: var(--green); }
+  .pr-multiplier-label.edge  { color: #f5c842; text-shadow: 0 0 12px rgba(245,200,66,0.5); }
+  .pr-multiplier-label.far   { color: #ff8c00; text-shadow: 0 0 16px rgba(255,140,0,0.6); }
+  .pr-multiplier-label.extreme { color: #ff3333; text-shadow: 0 0 20px rgba(255,50,50,0.8); animation: prExtreme 0.4s ease-in-out infinite alternate; }
+  @keyframes prExtreme {
+    from { letter-spacing: 4px; }
+    to   { letter-spacing: 7px; }
+  }
+
+  .pr-bar-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    height: 54px;
+    background: #0a1a0a;
+    border: 1px solid #2a4a2a;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  .pr-zones {
+    position: absolute;
+    inset: 0;
+    display: flex;
+  }
+  .pr-zone {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    opacity: 0.9;
+    user-select: none;
+    transition: filter 0.15s;
+    flex-shrink: 0;
+  }
+  .pr-needle {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 4px;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 20px rgba(255,255,255,0.4);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    transition: box-shadow 0.1s;
+  }
+  .pr-flash {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    border-radius: 2px;
+  }
+
+  .pr-hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+  .pr-hint kbd {
+    background: #1a2a1a;
+    border: 1px solid #3a5a3a;
+    padding: 0.1rem 0.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text);
+    border-radius: 2px;
+  }
+
+  .pr-result {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    min-height: 2rem;
+    text-align: center;
+    transition: color 0.2s;
+  }
+  .pr-result.win     { color: var(--green); }
+  .pr-result.jackpot { color: #ff3333; text-shadow: 0 0 16px rgba(255,50,50,0.8); }
+  .pr-result.miss    { color: #f87171; }
+
+  /* Music intensity pulse on arena bg */
+  .pr-arena.intense-1 { border-color: #2a5a2a; }
+  .pr-arena.intense-2 { border-color: #4a8a1a; box-shadow: inset 0 0 30px rgba(74,138,26,0.1); }
+  .pr-arena.intense-3 { border-color: #f5c842; box-shadow: inset 0 0 40px rgba(245,200,66,0.08); }
+  .pr-arena.intense-4 { border-color: #ff8c00; box-shadow: inset 0 0 50px rgba(255,140,0,0.12); animation: prPulse 0.6s ease-in-out infinite alternate; }
+  .pr-arena.intense-5 { border-color: #ff3333; box-shadow: inset 0 0 60px rgba(255,50,50,0.18); animation: prPulse 0.4s ease-in-out infinite alternate; }
+  @keyframes prPulse {
+    from { box-shadow: inset 0 0 40px rgba(255,50,50,0.1); }
+    to   { box-shadow: inset 0 0 80px rgba(255,50,50,0.25); }
+  }
+
   /* ── Delete Modal ── */
   .modal-backdrop {
     display: none;
@@ -2272,6 +2411,7 @@
   <button class="game-tab active" id="tabBJ" onclick="switchGame('bj')">🃏 Blackjack</button>
   <button class="game-tab" id="tabRL" onclick="switchGame('rl')">🎡 Roulette</button>
   <button class="game-tab" id="tabPK" onclick="switchGame('pk')">🔵 Plinko</button>
+  <button class="game-tab" id="tabPR" onclick="switchGame('pr')">🎯 Precision</button>
 </div>
 
 <!-- ── BLACKJACK PANEL ── -->
@@ -2380,9 +2520,47 @@
 <button class="r-spin-btn" id="pkDropBtn" onclick="pkDrop()">🔵 Drop Ball</button>
 </div>
 
+<!-- ── PRECISION RISK PANEL ── -->
+<div class="game-panel" id="panelPR">
+
+  <!-- Bar arena -->
+  <div class="pr-arena" id="prArena">
+    <div class="pr-streak-display" id="prStreakDisplay">STREAK: 0</div>
+    <div class="pr-multiplier-label" id="prMultLabel">1.0×</div>
+    <div class="pr-bar-wrap" id="prBarWrap">
+      <div class="pr-zones" id="prZones"></div>
+      <div class="pr-needle" id="prNeedle"></div>
+      <div class="pr-flash" id="prFlash"></div>
+    </div>
+    <div class="pr-hint" id="prHint">Press <kbd>SPACE</kbd> or tap to lock in</div>
+    <div class="pr-result" id="prResult"></div>
+  </div>
+
+  <!-- Bet row -->
+  <div>
+    <div class="table-section-label" style="margin-bottom:0.25rem;">Bet amount</div>
+    <div style="font-size:0.6rem;color:#f87171;letter-spacing:2px;margin-bottom:0.5rem;">MIN BET: 10</div>
+    <div class="bet-section">
+      <button class="chip chip-1"   onclick="prAddBet(1)"   disabled style="opacity:0.25;cursor:not-allowed;">1</button>
+      <button class="chip chip-5"   onclick="prAddBet(5)"   disabled style="opacity:0.25;cursor:not-allowed;">5</button>
+      <button class="chip chip-10"  onclick="prAddBet(10)">10</button>
+      <button class="chip chip-25"  onclick="prAddBet(25)">25</button>
+      <button class="chip chip-50"  onclick="prAddBet(50)">50</button>
+      <button class="chip chip-100" onclick="prAddBet(100)">100</button>
+      <div class="bet-display" id="prBetDisplay">0<small>bet</small></div>
+      <button class="clear-bet-btn" onclick="prClearBet()">Clear</button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+    <button class="r-spin-btn" id="prStartBtn" onclick="prStart()" style="flex:1;">🎯 Start Round</button>
+    <button class="r-spin-btn" id="prCashBtn" onclick="prCashOut()" style="flex:1;background:#1a3a1a;border-color:var(--green);color:var(--green);display:none;">💰 Cash Out</button>
+  </div>
+
+</div>
+
 </div>
 </div>
-<!-- SHOP TAB -->
 <button class="shop-tab" id="shopTab" onclick="openShop()">
 <span id="shopTabArrow">◀</span>
   SHOP
@@ -4190,11 +4368,14 @@
     document.getElementById('panelBJ').classList.toggle('active', game === 'bj');
     document.getElementById('panelRL').classList.toggle('active', game === 'rl');
     document.getElementById('panelPK').classList.toggle('active', game === 'pk');
+    document.getElementById('panelPR').classList.toggle('active', game === 'pr');
     document.getElementById('tabBJ').classList.toggle('active', game === 'bj');
     document.getElementById('tabRL').classList.toggle('active', game === 'rl');
     document.getElementById('tabPK').classList.toggle('active', game === 'pk');
+    document.getElementById('tabPR').classList.toggle('active', game === 'pr');
     if (game === 'rl') { rlBuildGrid(); }
     if (game === 'pk') { pkInitCanvas(); }
+    if (game !== 'pr') { prStop(); }
   };
 
   // ══════════════════ ROULETTE ══════════════════
@@ -4684,6 +4865,365 @@
     pkLastTime = 0;
     pkAnimFrame = requestAnimationFrame(pkStep);
   };
+
+
+  // ══════════════════ PRECISION RISK ══════════════════
+
+  const PR_ZONES = [
+    { id: 'miss-l',    width: 0.26, mult: 0,   label: 'MISS', color: '#3a0a0a', text: '#6a2a2a' },
+    { id: 'extreme-l', width: 0.02, mult: 5.0, label: '5×',   color: '#2a0a1a', text: '#ff3333' },
+    { id: 'far-l',     width: 0.04, mult: 2.0, label: '2×',   color: '#1a1000', text: '#ff8c00' },
+    { id: 'edge-l',    width: 0.06, mult: 1.2, label: '1.2×', color: '#1a1a00', text: '#f5c842' },
+    { id: 'safe',      width: 0.24, mult: 0.5, label: '0.5×', color: '#0a1a0a', text: '#4ade80' },
+    { id: 'edge-r',    width: 0.06, mult: 1.2, label: '1.2×', color: '#1a1a00', text: '#f5c842' },
+    { id: 'far-r',     width: 0.04, mult: 2.0, label: '2×',   color: '#1a1000', text: '#ff8c00' },
+    { id: 'extreme-r', width: 0.02, mult: 5.0, label: '5×',   color: '#2a0a1a', text: '#ff3333' },
+    { id: 'miss-r',    width: 0.26, mult: 0,   label: 'MISS', color: '#3a0a0a', text: '#6a2a2a' },
+  ];
+
+  // State
+  let prBet        = 0;
+  let prRunning    = false;
+  let prPhase      = 'idle';
+  let prStreak     = 0;
+  let prRoundNum   = 0;      // increments every round start, never resets mid-session
+  let prAccumMult  = 1.0;
+  let prNeedlePos  = 0.5;
+  let prDirection  = 1;
+  let prSpeed      = 0.012;
+  let prSafeHalf   = 0.12;
+  let prRafId      = null;
+  let prMusicNodes = [];
+  let prMusicCtx   = null;
+  let prSpaceDown  = false;
+
+  // Build zone DOM once
+  function prBuildZones() {
+    const wrap = document.getElementById('prZones');
+    if (!wrap) return;
+    wrap.innerHTML = PR_ZONES.map((z, i) => `
+      <div class="pr-zone" id="prZone_${i}"
+        style="width:${z.width*100}%;background:${z.color};color:${z.text};">
+        ${z.label}
+      </div>`).join('');
+  }
+
+  function prGetZoneAtPos(pos) {
+    let x = 0;
+    for (const z of PR_ZONES) {
+      if (pos >= x && pos < x + z.width) return z;
+      x += z.width;
+    }
+    return PR_ZONES[PR_ZONES.length - 1];
+  }
+
+  function prGetMultLabel(mult) {
+    if (mult === 0)   return { label: '—', cls: '' };
+    if (mult <= 1.0)  return { label: '1.0×', cls: 'safe' };
+    if (mult <= 1.5)  return { label: '1.5×', cls: 'edge' };
+    if (mult <= 2.5)  return { label: '2.5×', cls: 'far' };
+    return               { label: '5×',   cls: 'extreme' };
+  }
+
+  function prUpdateNeedle() {
+    const needle = document.getElementById('prNeedle');
+    if (!needle) return;
+    needle.style.left = (prNeedlePos * 100) + '%';
+    // Colour needle by current zone
+    const z = prGetZoneAtPos(prNeedlePos);
+    if (z.mult === 0)       needle.style.background = '#6a2a2a';
+    else if (z.mult >= 5)   needle.style.background = '#ff3333';
+    else if (z.mult >= 2.5) needle.style.background = '#ff8c00';
+    else if (z.mult >= 1.5) needle.style.background = '#f5c842';
+    else                    needle.style.background = '#4ade80';
+
+    const ml = prGetMultLabel(z.mult);
+    const lbl = document.getElementById('prMultLabel');
+    lbl.textContent = z.mult === 0 ? 'MISS' : ml.label;
+    lbl.className = 'pr-multiplier-label ' + ml.cls;
+  }
+
+  function prLoop() {
+    if (!prRunning) return;
+    prNeedlePos += prDirection * prSpeed;
+    if (prNeedlePos >= 1) { prNeedlePos = 1; prDirection = -1; }
+    if (prNeedlePos <= 0) { prNeedlePos = 0; prDirection =  1; }
+    prUpdateNeedle();
+    prRafId = requestAnimationFrame(prLoop);
+  }
+
+  function prIntensityClass() {
+    if (prStreak <= 0) return 'intense-1';
+    if (prStreak === 1) return 'intense-2';
+    if (prStreak === 2) return 'intense-3';
+    if (prStreak === 3) return 'intense-4';
+    return 'intense-5';
+  }
+
+  function prUpdateArenaClass() {
+    const arena = document.getElementById('prArena');
+    arena.className = 'pr-arena ' + prIntensityClass();
+  }
+
+  // Generative music — drones that get more intense
+  function prStartMusic(intensity) {
+    prStopMusic();
+    try {
+      const ctx = getAudio();
+      prMusicCtx = ctx;
+      const masterGain = ctx.createGain();
+      masterGain.gain.value = 0.06 + intensity * 0.04;
+      masterGain.connect(ctx.destination);
+
+      const baseFreqs = [55, 110, 165][Math.min(intensity, 2)];
+      const notes = [baseFreqs, baseFreqs * 1.5, baseFreqs * 2, baseFreqs * 2.67];
+
+      prMusicNodes = notes.map((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const lfo = ctx.createOscillator();
+        const lfoGain = ctx.createGain();
+
+        lfo.frequency.value = 0.5 + intensity * 0.8 + i * 0.3;
+        lfoGain.gain.value = 3 + intensity * 8;
+        lfo.connect(lfoGain); lfoGain.connect(osc.frequency);
+
+        osc.type = intensity >= 3 ? 'sawtooth' : 'sine';
+        osc.frequency.value = freq;
+        gain.gain.value = (i === 0 ? 0.4 : 0.15) / (i + 1);
+        osc.connect(gain); gain.connect(masterGain);
+
+        lfo.start(); osc.start();
+        return { osc, gain, lfo, masterGain };
+      });
+      prMusicNodes._master = masterGain;
+    } catch(e) {}
+  }
+
+  function prStopMusic() {
+    prMusicNodes.forEach(n => {
+      try { n.osc.stop(); n.lfo.stop(); } catch(e) {}
+    });
+    prMusicNodes = [];
+  }
+
+  function prLockIn() {
+    if (prPhase !== 'running') return;
+    prPhase = 'locked';
+    cancelAnimationFrame(prRafId);
+    prRunning = false;
+
+    const z = prGetZoneAtPos(prNeedlePos);
+    prResolveLock(z);
+  }
+
+  async function prResolveLock(zone) {
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+
+    const arena = document.getElementById('prArena');
+    const flash = document.getElementById('prFlash');
+    const result = document.getElementById('prResult');
+
+    if (zone.mult === 0) {
+      // MISS — lose half bet, reset streak, auto-restart
+      playTone(80, 'sawtooth', 0.5, 0.18);
+      setTimeout(() => playTone(60, 'sawtooth', 0.5, 0.2), 200);
+      flash.style.background = '#ff000044';
+      flash.animate([{opacity:0.8},{opacity:0}], {duration:400,fill:'forwards'});
+      arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
+      const lost = Math.floor(prBet / 2);
+      await setCasinoCoins(p.id, Math.max(0, (p.coins||0) - lost));
+      spawnCoinFloat(`-${lost} 🪙`);
+      result.textContent = `MISS — lost ${lost} 🪙`;
+      result.className = 'pr-result miss';
+      prStreak = 0;
+      prRoundNum = 0;
+      prAccumMult = 1.0;
+      document.getElementById('prStreakDisplay').className = 'pr-streak-display';
+      prUpdateArenaClass();
+      // Auto-restart after brief pause
+      prPhase = 'result';
+      prShowCashOut(false);
+      setTimeout(() => {
+        if (prPhase === 'result') {
+          result.textContent = '';
+          prStart();
+        }
+      }, 900);
+      return;
+    }
+
+    // HIT
+    prStreak++;
+    prAccumMult *= zone.mult;
+    const totalPayout = Math.floor(prBet * prAccumMult);
+
+    flash.style.background = zone.mult >= 5 ? '#ff000066' : zone.mult >= 2.5 ? '#ff8c0044' : zone.mult >= 1.5 ? '#f5c84244' : '#4ade8044';
+    flash.animate([{opacity:1},{opacity:0}], {duration:300, fill:'forwards'});
+
+    if (zone.mult >= 2.5) {
+      arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
+    }
+
+    // Sound: pitch rises with streak
+    const hitFreqs = [440, 523, 659, 784, 1047];
+    playTone(hitFreqs[Math.min(prStreak-1, 4)], 'sine', 0.25, 0.2);
+    if (zone.mult >= 5) setTimeout(() => playTone(1568, 'sine', 0.3, 0.15), 100);
+
+    // Update UI
+    const ml = prGetMultLabel(zone.mult);
+    result.textContent = `HIT ${ml.label} — TOTAL ${prAccumMult.toFixed(2)}× (+${totalPayout} 🪙)`;
+    result.className   = zone.mult >= 5 ? 'pr-result jackpot' : 'pr-result win';
+    document.getElementById('prStreakDisplay').textContent = `STREAK: ${prStreak}`;
+    document.getElementById('prStreakDisplay').className = 'pr-streak-display' + (prStreak >= 3 ? ' hot' : '');
+
+    // Intensify music
+    prStartMusic(Math.min(prStreak, 5));
+    prUpdateArenaClass();
+
+    // Show cash out, offer continue
+    prShowCashOut(true);
+    prPhase = 'result';
+  }
+
+  function prRebuildZones() {
+    const r = prRoundNum;
+    // Miss zones grow aggressively each round (floor at 0.22 start, grow to dominate)
+    const missW    = Math.min(0.26 + r * 0.025, 0.46);
+    // High-value zones shrink hard per round — nearly invisible by round 5
+    const extremeW = Math.max(0.02 - r * 0.003, 0.003);
+    const farW     = Math.max(0.04 - r * 0.005, 0.005);
+    const edgeW    = Math.max(0.06 - r * 0.004, 0.01);
+    // Center safe gets whatever remains
+    const sideTotal = missW + extremeW + farW + edgeW;
+    const safeW = Math.max(1 - sideTotal * 2, 0.04);
+
+    const zoneWidths = [missW, extremeW, farW, edgeW, safeW, edgeW, farW, extremeW, missW];
+
+    const wrap = document.getElementById('prZones');
+    if (!wrap) return;
+    const zones = wrap.querySelectorAll('.pr-zone');
+    zones.forEach((el, i) => {
+      el.style.width = (zoneWidths[i] * 100) + '%';
+    });
+    PR_ZONES.forEach((z, i) => { z.width = zoneWidths[i]; });
+  }
+
+  function prShowCashOut(show) {
+    document.getElementById('prCashBtn').style.display = show ? '' : 'none';
+    document.getElementById('prStartBtn').style.display = show ? 'none' : '';
+  }
+
+  window.prCashOut = async function() {
+    if (prPhase !== 'result' || prStreak === 0) return;
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+    const payout = Math.floor(prBet * prAccumMult);
+    const profit = payout - prBet;
+    await setCasinoCoins(p.id, (p.coins||0) + profit);
+    if (profit > 0) {
+      soundWin();
+      spawnCoinFloat(`+${profit} 🪙`);
+      setTimeout(() => launchParticles('win'), 80);
+      recordBiggestWin(p.name, p.id, profit);
+    }
+    const result = document.getElementById('prResult');
+    result.textContent = `CASHED OUT +${profit} 🪙`;
+    result.className = 'pr-result win';
+    prStreak = 0;
+    prRoundNum = 0;
+    prAccumMult = 1.0;
+    document.getElementById('prStreakDisplay').textContent = 'STREAK: 0';
+    document.getElementById('prStreakDisplay').className = 'pr-streak-display';
+    prUpdateArenaClass();
+    prPhase = 'idle';
+  };
+
+  window.prStart = function() {
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+    if (prBet < 10) { shakeWallet(); return; }
+    if (prBet > (p.coins||0)) { shakeWallet(); return; }
+    if (prPhase === 'running') return;
+
+    // Continue from streak result — next hit
+    if (prPhase === 'result' && prStreak > 0) {
+      prShowCashOut(false);
+    }
+
+    // Increment round counter and apply escalating difficulty
+    prRoundNum++;
+    prApplyRoundDifficulty();
+
+    document.getElementById('prResult').textContent = '';
+    document.getElementById('prResult').className = 'pr-result';
+    prPhase = 'running';
+    prRunning = true;
+    prNeedlePos = 0.5;
+    prDirection = Math.random() > 0.5 ? 1 : -1;
+    prUpdateNeedle();
+    prRafId = requestAnimationFrame(prLoop);
+    if (prStreak === 0) prStartMusic(0);
+    document.getElementById('prStartBtn').style.display = 'none';
+  };
+
+  function prApplyRoundDifficulty() {
+    prSpeed = Math.min(0.012 + prRoundNum * 0.004, 0.045);
+    prRebuildZones();
+    prUpdateArenaClass();
+  }
+
+  window.prStop = function() {
+    prRunning = false;
+    cancelAnimationFrame(prRafId);
+    prStopMusic();
+    prPhase = 'idle';
+    prStreak = 0;
+    prRoundNum = 0;
+    prAccumMult = 1.0;
+    prSpeed = 0.012;
+    prSafeHalf = 0.12;
+    prRebuildZones();
+  };
+
+  // Spacebar / tap to lock in
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && document.getElementById('panelPR')?.classList.contains('active')) {
+      if (prPhase === 'idle' || (prPhase === 'result' && prStreak > 0)) {
+        e.preventDefault();
+        prStart();
+      } else if (prPhase === 'running') {
+        e.preventDefault();
+        prLockIn();
+      }
+    }
+  });
+
+  document.getElementById('prBarWrap')?.addEventListener('click', () => {
+    if (prPhase === 'running') prLockIn();
+    else if (prPhase === 'idle' || (prPhase === 'result' && prStreak > 0)) prStart();
+  });
+
+  window.prAddBet = function(amt) {
+    if (amt < 10) return;
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+    if (prPhase === 'running') return;
+    if (prBet + amt > (p.coins||0)) { shakeWallet(); return; }
+    prBet += amt;
+    document.getElementById('prBetDisplay').innerHTML = `${prBet}<small>bet</small>`;
+    soundChip();
+  };
+
+  window.prClearBet = function() {
+    if (prPhase === 'running') return;
+    prBet = 0;
+    document.getElementById('prBetDisplay').innerHTML = `0<small>bet</small>`;
+  };
+
+  // Init on load
+  prBuildZones();
 
 
   async function bjResolve() {
