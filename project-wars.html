@@ -1941,6 +1941,7 @@
 <div class="game-tabs">
   <button class="game-tab active" id="tabBJ" onclick="switchGame('bj')">🃏 Blackjack</button>
   <button class="game-tab" id="tabRL" onclick="switchGame('rl')">🎡 Roulette</button>
+  <button class="game-tab" id="tabPK" onclick="switchGame('pk')">🔵 Plinko</button>
 </div>
 
 <!-- ── BLACKJACK PANEL ── -->
@@ -2026,6 +2027,30 @@
 </div>
 <div class="result-banner" id="rlResultBanner"></div>
 <button class="r-spin-btn" id="rlSpinBtn" onclick="rlSpin()">🎡 Spin</button>
+</div>
+
+<!-- ── PLINKO PANEL ── -->
+<div class="game-panel" id="panelPK">
+<div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
+  <canvas id="plinkoCanvas" width="380" height="420" style="background:#0a1f0a;border:1px solid #2a5a2a;display:block;max-width:100%;"></canvas>
+  <div class="roulette-result-num" id="plinkoResultNum" style="min-height:2.5rem;">—</div>
+</div>
+<!-- Bet amount -->
+<div>
+<div class="table-section-label" style="margin-bottom:0.5rem;">Bet amount</div>
+<div class="bet-section">
+<button class="chip chip-1" onclick="pkAddBet(1)">1</button>
+<button class="chip chip-5" onclick="pkAddBet(5)">5</button>
+<button class="chip chip-10" onclick="pkAddBet(10)">10</button>
+<button class="chip chip-25" onclick="pkAddBet(25)">25</button>
+<button class="chip chip-50" onclick="pkAddBet(50)">50</button>
+<button class="chip chip-100" onclick="pkAddBet(100)">100</button>
+<div class="bet-display" id="pkBetDisplay">0<small>bet</small></div>
+<button class="clear-bet-btn" onclick="pkClearBet()">Clear</button>
+</div>
+</div>
+<div class="result-banner" id="pkResultBanner"></div>
+<button class="r-spin-btn" id="pkDropBtn" onclick="pkDrop()">🔵 Drop Ball</button>
 </div>
 
 </div>
@@ -3315,9 +3340,12 @@
   window.switchGame = function(game) {
     document.getElementById('panelBJ').classList.toggle('active', game === 'bj');
     document.getElementById('panelRL').classList.toggle('active', game === 'rl');
+    document.getElementById('panelPK').classList.toggle('active', game === 'pk');
     document.getElementById('tabBJ').classList.toggle('active', game === 'bj');
     document.getElementById('tabRL').classList.toggle('active', game === 'rl');
+    document.getElementById('tabPK').classList.toggle('active', game === 'pk');
     if (game === 'rl') { rlDrawWheel(rlAngle); }
+    if (game === 'pk') { pkInitCanvas(); }
   };
 
   // ══════════════════ ROULETTE ══════════════════
@@ -3573,6 +3601,259 @@
 
   // Draw wheel on first load (in case user opens roulette tab)
   setTimeout(() => rlDrawWheel(rlAngle), 100);
+
+  // ══════════════════ PLINKO ══════════════════
+  const PK_ROWS = 10;
+  const PK_MULTIPLIERS = [10, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 10];
+  const PK_COLORS = ['#f5c842','#cd7f42','#4ade80','#a8b2bd','#f87171','#f87171','#a8b2bd','#4ade80','#cd7f42','#f5c842'];
+
+  let pkBet = 0;
+  let pkRunning = false;
+  let pkCanvas = null, pkCtx = null;
+  let pkPegs = [];
+  let pkBalls = [];
+  let pkBuckets = [];
+  let pkAnimFrame = null;
+  const PK_W = 380, PK_H = 420;
+  const PK_PEG_R = 5;
+  const PK_BALL_R = 8;
+  const PK_TOP_PAD = 40;
+  const PK_BOT_PAD = 52;
+
+  function pkInitCanvas() {
+    pkCanvas = document.getElementById('plinkoCanvas');
+    if (!pkCanvas) return;
+    pkCtx = pkCanvas.getContext('2d');
+    pkBuildLayout();
+    pkDraw();
+  }
+
+  function pkBuildLayout() {
+    pkPegs = [];
+    pkBuckets = [];
+    const usableH = PK_H - PK_TOP_PAD - PK_BOT_PAD;
+    const rowGapY = usableH / (PK_ROWS + 0.5);
+    for (let row = 0; row < PK_ROWS; row++) {
+      const pegsInRow = row + 3;
+      const totalWidth = PK_W * 0.82;
+      const gapX = totalWidth / (pegsInRow - 1);
+      const startX = (PK_W - totalWidth) / 2;
+      const y = PK_TOP_PAD + (row + 0.5) * rowGapY;
+      for (let col = 0; col < pegsInRow; col++) {
+        pkPegs.push({ x: startX + col * gapX, y });
+      }
+    }
+    // Buckets
+    const bucketCount = PK_MULTIPLIERS.length;
+    const totalWidth = PK_W * 0.82;
+    const gapX = totalWidth / (bucketCount - 1);
+    const startX = (PK_W - totalWidth) / 2;
+    const bucketY = PK_H - PK_BOT_PAD + 4;
+    for (let i = 0; i < bucketCount; i++) {
+      pkBuckets.push({ x: startX + i * gapX, y: bucketY, mult: PK_MULTIPLIERS[i], color: PK_COLORS[i] });
+    }
+  }
+
+  function pkDraw() {
+    if (!pkCtx) return;
+    const ctx = pkCtx;
+    ctx.clearRect(0, 0, PK_W, PK_H);
+
+    // Background
+    ctx.fillStyle = '#0a1f0a';
+    ctx.fillRect(0, 0, PK_W, PK_H);
+
+    // Draw pegs
+    pkPegs.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, PK_PEG_R, 0, Math.PI * 2);
+      ctx.fillStyle = '#a8b2bd';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    });
+
+    // Draw buckets
+    pkBuckets.forEach((b, i) => {
+      const w = (PK_W * 0.82) / (PK_MULTIPLIERS.length - 1);
+      const bx = b.x - w * 0.45;
+      const bh = PK_BOT_PAD - 8;
+      ctx.fillStyle = b.color + '33';
+      ctx.strokeStyle = b.color;
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(bx, b.y, w * 0.9, bh);
+      ctx.strokeRect(bx, b.y, w * 0.9, bh);
+      ctx.fillStyle = b.color;
+      ctx.font = `bold ${b.mult >= 3 ? 11 : 9}px DM Mono, monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillText(b.mult + 'x', b.x, b.y + bh * 0.6);
+    });
+
+    // Draw balls
+    pkBalls.forEach(ball => {
+      const grd = ctx.createRadialGradient(ball.x - 2, ball.y - 2, 1, ball.x, ball.y, PK_BALL_R);
+      grd.addColorStop(0, '#a0d8ff');
+      grd.addColorStop(1, '#2255cc');
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, PK_BALL_R, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+  }
+
+  function pkStep() {
+    const gravity = 0.28;
+    const friction = 0.995;
+    const bounceFactor = 0.45;
+    const bucketY = PK_H - PK_BOT_PAD + 4;
+
+    pkBalls.forEach(ball => {
+      if (ball.done) return;
+      ball.vy += gravity;
+      ball.vx *= friction;
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // Collide with pegs
+      pkPegs.forEach(peg => {
+        const dx = ball.x - peg.x;
+        const dy = ball.y - peg.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const minDist = PK_PEG_R + PK_BALL_R;
+        if (dist < minDist && dist > 0.01) {
+          // Push ball out
+          const nx = dx / dist, ny = dy / dist;
+          const overlap = minDist - dist;
+          ball.x += nx * overlap;
+          ball.y += ny * overlap;
+          // Reflect velocity
+          const dot = ball.vx * nx + ball.vy * ny;
+          ball.vx = (ball.vx - 2 * dot * nx) * bounceFactor;
+          ball.vy = (ball.vy - 2 * dot * ny) * bounceFactor;
+          // Add slight random horizontal nudge
+          ball.vx += (Math.random() - 0.5) * 1.2;
+          // Play tick sound
+          playTone(600 + Math.random() * 200, 'sine', 0.02, 0.04);
+        }
+      });
+
+      // Wall bounce
+      if (ball.x < PK_BALL_R) { ball.x = PK_BALL_R; ball.vx = Math.abs(ball.vx) * bounceFactor; }
+      if (ball.x > PK_W - PK_BALL_R) { ball.x = PK_W - PK_BALL_R; ball.vx = -Math.abs(ball.vx) * bounceFactor; }
+
+      // Landing in bucket
+      if (ball.y >= bucketY && !ball.done) {
+        ball.done = true;
+        ball.y = bucketY + PK_BOT_PAD * 0.35;
+        ball.vx = 0; ball.vy = 0;
+        // Find closest bucket
+        let closest = pkBuckets[0], minD = Infinity;
+        pkBuckets.forEach(b => {
+          const d = Math.abs(ball.x - b.x);
+          if (d < minD) { minD = d; closest = b; }
+        });
+        ball.bucket = closest;
+        pkOnLand(ball, closest);
+      }
+    });
+
+    pkDraw();
+
+    // Keep animating until all balls done
+    if (pkBalls.some(b => !b.done)) {
+      pkAnimFrame = requestAnimationFrame(pkStep);
+    } else {
+      pkRunning = false;
+      document.getElementById('pkDropBtn').disabled = false;
+    }
+  }
+
+  async function pkOnLand(ball, bucket) {
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+    const mult = bucket.mult;
+    const payout = Math.floor(pkBet * mult);
+    const profit = payout - pkBet;
+
+    const resultEl = document.getElementById('plinkoResultNum');
+    resultEl.textContent = mult + 'x  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙';
+    resultEl.className = 'roulette-result-num ' + (profit > 0 ? 'green' : profit === 0 ? '' : 'red');
+
+    const banner = document.getElementById('pkResultBanner');
+    if (profit > 0) {
+      banner.textContent = '✅ +' + profit + ' 🪙';
+      banner.className = 'result-banner show win';
+      soundWin();
+      setTimeout(() => launchParticles('win'), 80);
+      setTimeout(() => spawnCoinFloat('+' + profit + ' 🪙'), 300);
+    } else if (profit === 0) {
+      banner.textContent = '🤝 Break even';
+      banner.className = 'result-banner show push';
+    } else {
+      banner.textContent = '❌ ' + profit + ' 🪙';
+      banner.className = 'result-banner show lose';
+      soundLose();
+    }
+    setTimeout(() => banner.classList.remove('show'), 3000);
+
+    const newCoins = Math.max(0, (p.coins || 0) + profit);
+    await update(ref(db, 'players/' + p.id), { coins: newCoins });
+  }
+
+  window.pkAddBet = function(amount) {
+    if (pkRunning) return;
+    const p = getCurrentCasinoPlayer();
+    if (!p) { shakeWallet(); return; }
+    if (pkBet + amount > (p.coins || 0)) { shakeWallet(); return; }
+    pkBet += amount;
+    soundChip();
+    document.getElementById('pkBetDisplay').innerHTML = pkBet + '<small>bet</small>';
+  };
+
+  window.pkClearBet = function() {
+    if (pkRunning) return;
+    pkBet = 0;
+    document.getElementById('pkBetDisplay').innerHTML = '0<small>bet</small>';
+  };
+
+  window.pkDrop = async function() {
+    if (pkRunning) return;
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+    if (pkBet < 1) { shakeWallet(); return; }
+    if (pkBet > (p.coins || 0)) { shakeWallet(); return; }
+
+    if (!pkCanvas) pkInitCanvas();
+    if (!pkCanvas) return;
+
+    pkRunning = true;
+    document.getElementById('pkDropBtn').disabled = true;
+    document.getElementById('pkResultBanner').className = 'result-banner';
+    document.getElementById('plinkoResultNum').textContent = '…';
+    document.getElementById('plinkoResultNum').className = 'roulette-result-num';
+
+    // Deduct bet immediately
+    const newCoins = Math.max(0, (p.coins || 0) - pkBet);
+    await update(ref(db, 'players/' + p.id), { coins: newCoins });
+
+    // Drop ball from random position near top center
+    pkBalls = [{
+      x: PK_W / 2 + (Math.random() - 0.5) * 30,
+      y: PK_TOP_PAD - 20,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: 1,
+      done: false,
+      bucket: null
+    }];
+
+    if (pkAnimFrame) cancelAnimationFrame(pkAnimFrame);
+    pkAnimFrame = requestAnimationFrame(pkStep);
+  };
+
 
   async function bjResolve() {
     bjPhase = 'done';
