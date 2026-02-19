@@ -6562,6 +6562,7 @@
   let prMusicNodes = [];
   let prMusicCtx   = null;
   let prSpaceDown  = false;
+  let prContinueBoost = 1.0;
 
   // Build zone DOM once
   function prBuildZones() {
@@ -6613,6 +6614,10 @@
     if (mult <= 1.2)  return { label: `${mult}×`, cls: 'edge' };
     if (mult <= 2.0)  return { label: `${mult}×`, cls: 'far' };
     return                   { label: `${mult}×`, cls: 'extreme' };
+  }
+
+  function prGetContinueBoost() {
+    return 1 + Math.min(0.15 + prStreak * 0.07 + prRoundNum * 0.03, 0.7);
   }
 
   function prUpdateNeedle() {
@@ -6736,6 +6741,7 @@
       prStreak = 0;
       prRoundNum = 0;
       prAccumMult = 1.0;
+      prContinueBoost = 1.0;
       document.getElementById('prStreakDisplay').className = 'pr-streak-display';
       prUpdateCashoutDisplay();
       prUpdateArenaClass();
@@ -6752,8 +6758,11 @@
     }
 
     // HIT
+    const appliedMult = zone.mult * prContinueBoost;
+    const usedBoost = prContinueBoost;
+    prContinueBoost = 1.0;
     prStreak++;
-    prAccumMult *= zone.mult;
+    prAccumMult *= appliedMult;
     const totalPayout = Math.floor(prBet * prAccumMult);
 
     flash.style.background = zone.mult >= 5 ? '#ff000066' : zone.mult >= 2.5 ? '#ff8c0044' : zone.mult >= 1.5 ? '#f5c84244' : '#4ade8044';
@@ -6770,7 +6779,8 @@
 
     // Update UI
     const ml = prGetMultLabel(zone.mult);
-    result.textContent = `HIT ${ml.label} — TOTAL ${prAccumMult.toFixed(2)}× (+${totalPayout} 🪙)`;
+    const boostSuffix = usedBoost > 1 ? ` (pressure ${usedBoost.toFixed(2)}×)` : '';
+    result.textContent = `HIT ${ml.label}${boostSuffix} — TOTAL ${prAccumMult.toFixed(2)}× (+${totalPayout} 🪙)`;
     result.className   = zone.mult >= 5 ? 'pr-result jackpot' : 'pr-result win';
     document.getElementById('prStreakDisplay').textContent = `STREAK: ${prStreak}`;
     document.getElementById('prStreakDisplay').className = 'pr-streak-display' + (prStreak >= 3 ? ' hot' : '');
@@ -6779,6 +6789,8 @@
     // Intensify music
     prStartMusic(Math.min(prStreak, 5));
     prUpdateArenaClass();
+    const nextBoost = prGetContinueBoost();
+    document.getElementById('prHint').innerHTML = `Cash out now, or <strong>risk it</strong> for a <strong>${nextBoost.toFixed(2)}×</strong> pressure boost on your next hit.`;
 
     // Show cash out, offer continue
     prShowCashOut(true);
@@ -6830,11 +6842,13 @@
     prStreak = 0;
     prRoundNum = 0;
     prAccumMult = 1.0;
+    prContinueBoost = 1.0;
     document.getElementById('prStreakDisplay').textContent = 'STREAK: 0';
     document.getElementById('prStreakDisplay').className = 'pr-streak-display';
     prUpdateCashoutDisplay();
     prUpdateArenaClass();
     prPhase = 'idle';
+    document.getElementById('prHint').innerHTML = 'Press <kbd>SPACE</kbd> or tap to lock in';
   };
 
   window.prStart = function() {
@@ -6846,7 +6860,11 @@
 
     // Continue from streak result — next hit
     if (prPhase === 'result' && prStreak > 0) {
+      prContinueBoost = prGetContinueBoost();
       prShowCashOut(false);
+    } else {
+      prContinueBoost = 1.0;
+      document.getElementById('prHint').innerHTML = 'Press <kbd>SPACE</kbd> or tap to lock in';
     }
 
     // Increment round counter and apply escalating difficulty
