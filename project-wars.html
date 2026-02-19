@@ -3862,7 +3862,7 @@
 <!-- ── PLINKO PANEL ── -->
 <div class="game-panel" id="panelPK">
 <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
-  <canvas id="plinkoCanvas" width="380" height="440" style="background:#0a1f0a;border:1px solid #2a5a2a;display:block;max-width:100%;"></canvas>
+  <canvas id="plinkoCanvas" width="520" height="620" style="background:#0a1f0a;border:1px solid #2a5a2a;display:block;max-width:100%;"></canvas>
   <div class="roulette-result-num" id="plinkoResultNum" style="min-height:2.5rem;">—</div>
 </div>
 <!-- Bet amount -->
@@ -6230,7 +6230,7 @@
     let delta = 0, resultText = '', resultType = '';
 
     if (won) {
-      delta = rlBet * payout + rlBet;
+      delta = rlBet * payout;
       const profit = rlBet * payout;
       resultText = `✅ ${num} — YOU WIN +${profit} 🪙`;
       resultType = 'win';
@@ -6254,8 +6254,7 @@
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
 
-    rlBet = 0;
-    document.getElementById('rlBetDisplay').innerHTML = `0<small>bet</small>`;
+    // Keep last roulette bet selected between spins (Precision-style remember bet)
     rlSpinning = false;
     document.getElementById('rlSpinBtn').disabled = false;
   }
@@ -6264,10 +6263,10 @@
   setTimeout(() => rlBuildGrid(), 100);
 
   // ══════════════════ PLINKO ══════════════════
-  const PK_ROWS = 12;
-  const PK_COLS = 9;
-  const PK_MULTIPLIERS = [2.0, 1.5, 1.0, 0.5, 0.0, 0.5, 1.0, 1.5, 2.0];
-  const PK_COLORS      = ['#cd7f42','#4ade80','#f87171','#f87171','#f87171','#f87171','#f87171','#4ade80','#cd7f42'];
+  const PK_ROWS = 15;
+  const PK_COLS = 11;
+  const PK_MULTIPLIERS = [12.0, 6.0, 3.0, 1.8, 1.2, 0.8, 1.2, 1.8, 3.0, 6.0, 12.0];
+  const PK_COLORS      = ['#ff4d4d','#ff7a3d','#f5c842','#4ade80','#4ade80','#6ee7b7','#4ade80','#4ade80','#f5c842','#ff7a3d','#ff4d4d'];
 
   let pkBet = 0;
   let pkRunning = false;
@@ -6276,15 +6275,16 @@
   let pkBalls = [];
   let pkBuckets = [];
   let pkAnimFrame = null;
-  const PK_W = 380, PK_H = 440;
+  const PK_W = 520, PK_H = 620;
   const PK_PEG_R = 5;
   const PK_BALL_R = 7;
-  const PK_TOP_PAD = 38;
-  const PK_BOT_PAD = 54;
+  const PK_TOP_PAD = 44;
+  const PK_BOT_PAD = 84;
 
   function pkInitCanvas() {
     pkCanvas = document.getElementById('plinkoCanvas');
     if (!pkCanvas) return;
+    pkCanvas.width = PK_W;
     pkCanvas.height = PK_H;
     pkCtx = pkCanvas.getContext('2d');
     pkBuildLayout();
@@ -6341,14 +6341,14 @@
     // Draw buckets
     pkBuckets.forEach((b) => {
       const bx = b.x - b.w / 2;
-      const bh = PK_BOT_PAD - 8;
+      const bh = PK_BOT_PAD - 10;
       ctx.fillStyle = b.color + '33';
       ctx.strokeStyle = b.color;
       ctx.lineWidth = 1.5;
       ctx.fillRect(bx, b.y, b.w, bh);
       ctx.strokeRect(bx, b.y, b.w, bh);
       ctx.fillStyle = b.color;
-      ctx.font = `bold ${b.mult >= 3 ? 10 : 9}px DM Mono, monospace`;
+      ctx.font = `bold ${b.mult >= 3 ? 14 : 12}px DM Mono, monospace`;
       ctx.textAlign = 'center';
       ctx.fillText(b.mult + 'x', b.x, b.y + bh * 0.62);
     });
@@ -6518,7 +6518,7 @@
     // Drop ball from random position near top center
     const betSnapshot = pkBet; // capture bet before async operations
     pkBalls = [{
-      x: PK_W / 2 + (Math.random() - 0.5) * 30,
+      x: PK_W / 2 + (Math.random() - 0.5) * 45,
       y: PK_TOP_PAD - 20,
       vx: (Math.random() - 0.5) * 1.5,
       vy: 1,
@@ -6941,7 +6941,7 @@
     setTimeout(() => playTone(180, 'sawtooth', 0.3, 0.15), 150);
     spawnCoinFloat(`-${lost} 🪙`);
     await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) - lost));
-    bjBet = 0;
+    // Keep last blackjack bet selected between hands (Precision-style remember bet)
     updateBetDisplay();
     setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
   };
@@ -7085,7 +7085,7 @@
     bjSplitIdx = 0;
     document.getElementById('splitHand2Wrap').style.display = 'none';
     document.getElementById('splitHand2Cards').innerHTML = '';
-    bjBet = 0;
+    // Keep last blackjack bet selected between hands (Precision-style remember bet)
     updateBetDisplay();
     setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
   }
@@ -7150,7 +7150,6 @@
       recordBiggestWin(p.name, p.id, delta);
     }
 
-    bjBet = 0;
     bjSplitHands = null;
     bjSplitIdx = 0;
     document.getElementById('splitHand2Wrap').style.display = 'none';
