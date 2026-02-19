@@ -2243,6 +2243,235 @@
     overflow: hidden;
   }
   .garden-drawer.open { right: 0; }
+  /* ── CHANGELOG TAB ── */
+  .changelog-tab {
+    position: fixed;
+    right: 0;
+    top: calc(50% + 440px);
+    transform: translateY(-50%);
+    z-index: 200;
+    writing-mode: vertical-rl;
+    background: #1a3a5c;
+    color: #a8d4f0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+    padding: 1.5rem 0.6rem;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.2s;
+    box-shadow: -4px 0 20px rgba(26,90,140,0.45);
+  }
+  .changelog-tab:hover { background: #1e4d7a; }
+
+  .changelog-drawer {
+    position: fixed;
+    top: 0;
+    right: -520px;
+    width: 500px;
+    max-width: 95vw;
+    height: 100vh;
+    background: #04080f;
+    border-left: 2px solid #1a3a5c;
+    z-index: 300;
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .changelog-drawer.open { right: 0; }
+
+  .changelog-header {
+    background: #050d1a;
+    border-bottom: 1px solid #1a3a5c;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .changelog-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #60a5fa, #93c5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+  }
+  .changelog-close {
+    background: none;
+    border: 1px solid #1a3a5c;
+    color: #4a7aaa;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    padding: 0.4rem 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .changelog-close:hover { border-color: #60a5fa; color: #93c5fd; }
+
+  .changelog-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    scrollbar-width: thin;
+    scrollbar-color: #1a3a5c transparent;
+  }
+  .changelog-body::-webkit-scrollbar { width: 4px; }
+  .changelog-body::-webkit-scrollbar-thumb { background: #1a3a5c; border-radius: 2px; }
+
+  .cl-empty {
+    color: #2a4a6a;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-align: center;
+    padding: 3rem 0;
+  }
+  .cl-entry {
+    border-left: 2px solid #1a3a5c;
+    padding: 0 0 0 1rem;
+  }
+  .cl-entry-top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .cl-version {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 3px;
+    color: #60a5fa;
+  }
+  .cl-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: #2a4a6a;
+    letter-spacing: 1px;
+  }
+  .cl-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: #7a9ab8;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .changelog-admin-bar {
+    border-top: 1px solid #0e1f30;
+    padding: 0.75rem 1.5rem;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .changelog-admin-btn {
+    background: none;
+    border: 1px solid #0e1f30;
+    color: #1a3a5c;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .changelog-admin-btn:hover { border-color: #1a3a5c; color: #4a7aaa; }
+
+  /* ── Changelog Admin Modal ── */
+  .cl-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 600;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .cl-modal-overlay.open { display: flex; }
+  .cl-modal {
+    background: #050d1a;
+    border: 1px solid #1a3a5c;
+    padding: 1.75rem;
+    width: 420px;
+    max-width: 92vw;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .cl-modal h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 4px;
+    color: #60a5fa;
+    margin: 0 0 0.25rem;
+  }
+  .cl-modal input,
+  .cl-modal textarea {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #1a3a5c;
+    color: #c0d8f0;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.6rem 0.8rem;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .cl-modal input:focus,
+  .cl-modal textarea:focus { border-color: #3a6a9c; }
+  .cl-modal textarea { min-height: 120px; }
+  .cl-modal-row {
+    display: flex;
+    gap: 0.6rem;
+    justify-content: flex-end;
+  }
+  .cl-modal-cancel {
+    background: none;
+    border: 1px solid #1a3a5c;
+    color: #4a7aaa;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+  }
+  .cl-modal-post {
+    background: rgba(26,90,140,0.3);
+    border: 1px solid #3a6a9c;
+    color: #93c5fd;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .cl-modal-post:hover { background: rgba(26,90,140,0.55); }
+  .cl-modal-msg {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    min-height: 1rem;
+    text-align: center;
+  }
+  .cl-modal-msg.ok  { color: #4ade80; }
+  .cl-modal-msg.err { color: #f87171; }
+
+
 
   .garden-header {
     background: #0a1f0a;
@@ -3441,7 +3670,7 @@
   GAMBLE
 </button>
 <!-- CASINO DRAWER OVERLAY -->
-<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop(); if(window.closeGarden) window.closeGarden();"></div>
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop(); if(window.closeGarden) window.closeGarden(); if(window.closeChangelog) window.closeChangelog();"></div>
 <!-- CASINO DRAWER -->
 <div class="casino-drawer" id="casinoDrawer">
 <div class="drawer-header">
@@ -3675,6 +3904,42 @@
 </div>
 </div>
 </div>
+
+<!-- CHANGELOG TAB -->
+<button class="changelog-tab" id="changelogTab" onclick="openChangelog()">
+<span id="changelogTabArrow">◀</span>
+  CHANGELOG
+</button>
+
+<!-- CHANGELOG DRAWER -->
+<div class="changelog-drawer" id="changelogDrawer">
+  <div class="changelog-header">
+    <h2>📋 Changelog</h2>
+    <button class="changelog-close" onclick="closeChangelog()">✕ Close</button>
+  </div>
+  <div class="changelog-body" id="changelogBody">
+    <div class="cl-empty">LOADING...</div>
+  </div>
+  <div class="changelog-admin-bar">
+    <button class="changelog-admin-btn" onclick="openChangelogAdmin()">🔒 Post Update</button>
+  </div>
+</div>
+
+<!-- CHANGELOG ADMIN MODAL -->
+<div class="cl-modal-overlay" id="clModalOverlay" onclick="if(event.target===this)closeChangelogAdmin()">
+  <div class="cl-modal">
+    <h3>📋 Post Update</h3>
+    <input id="clAdminPass"    type="password" placeholder="Admin password" autocomplete="off" />
+    <input id="clAdminVersion" type="text"     placeholder="Version  (e.g. v1.4)" maxlength="24" />
+    <textarea id="clAdminBody" placeholder="Describe what changed..."></textarea>
+    <div class="cl-modal-row">
+      <button class="cl-modal-cancel" onclick="closeChangelogAdmin()">Cancel</button>
+      <button class="cl-modal-post"   onclick="submitChangelogEntry()">Post</button>
+    </div>
+    <div class="cl-modal-msg" id="clModalMsg"></div>
+  </div>
+</div>
+
 <!-- ═══════════════════ MAIN PAGE ═══════════════════ -->
 <header>
 <h1 aria-label="Project Wars" id="wavyTitle"></h1>
@@ -8903,5 +9168,115 @@ window.openShop = function() {
 // Garden watching consolidated in garden module's __startGardenWatch
 
 </script>
+<script type="module">
+// ══════════════════ CHANGELOG MODULE ══════════════════
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+const db = getDatabase(getApp());
+const clRef = ref(db, 'changelog');
+const ADMIN_PASS = 'buyandsell';
+
+// ── Live listener: render entries newest-first ──
+onValue(clRef, snap => {
+  const data = snap.val() || {};
+  const entries = Object.entries(data)
+    .map(([key, val]) => ({ key, ...val }))
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+  const body = document.getElementById('changelogBody');
+  if (!body) return;
+
+  if (!entries.length) {
+    body.innerHTML = '<div class="cl-empty">NO UPDATES YET</div>';
+    return;
+  }
+
+  body.innerHTML = entries.map(e => {
+    const d = e.ts ? new Date(e.ts) : null;
+    const dateStr = d ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    const safeBody = (e.body || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const safeVer  = (e.version || 'UPDATE').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return `<div class="cl-entry">
+      <div class="cl-entry-top">
+        <span class="cl-version">${safeVer}</span>
+        <span class="cl-date">${dateStr}</span>
+      </div>
+      <div class="cl-text">${safeBody}</div>
+    </div>`;
+  }).join('');
+});
+
+// ── Post a new entry ──
+window.submitChangelogEntry = async function() {
+  const pass    = document.getElementById('clAdminPass').value;
+  const version = document.getElementById('clAdminVersion').value.trim();
+  const body    = document.getElementById('clAdminBody').value.trim();
+  const msg     = document.getElementById('clModalMsg');
+
+  if (pass !== ADMIN_PASS) {
+    msg.textContent = 'Wrong password.';
+    msg.className = 'cl-modal-msg err';
+    return;
+  }
+  if (!version) {
+    msg.textContent = 'Version tag is required.';
+    msg.className = 'cl-modal-msg err';
+    return;
+  }
+  if (!body) {
+    msg.textContent = 'Notes cannot be empty.';
+    msg.className = 'cl-modal-msg err';
+    return;
+  }
+
+  msg.textContent = 'Posting...';
+  msg.className = 'cl-modal-msg';
+
+  try {
+    await push(clRef, { version, body, ts: Date.now() });
+    msg.textContent = '✓ Posted!';
+    msg.className = 'cl-modal-msg ok';
+    document.getElementById('clAdminPass').value    = '';
+    document.getElementById('clAdminVersion').value = '';
+    document.getElementById('clAdminBody').value    = '';
+    setTimeout(window.closeChangelogAdmin, 1000);
+  } catch (e) {
+    msg.textContent = 'Error — check Firebase rules.';
+    msg.className = 'cl-modal-msg err';
+  }
+};
+
+</script>
+
+<script>
+// ══════════════════ CHANGELOG UI HELPERS ══════════════════
+window.openChangelog = function() {
+  if (window.closeCasino) closeCasino();
+  if (window.closeShop)   closeShop();
+  if (window.closeGarden) closeGarden();
+  document.getElementById('changelogDrawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('changelogTabArrow').textContent = '▶';
+};
+
+window.closeChangelog = function() {
+  document.getElementById('changelogDrawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('changelogTabArrow').textContent = '◀';
+};
+
+window.openChangelogAdmin = function() {
+  document.getElementById('clModalMsg').textContent = '';
+  document.getElementById('clModalMsg').className = 'cl-modal-msg';
+  document.getElementById('clModalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('clAdminPass').focus(), 60);
+};
+
+window.closeChangelogAdmin = function() {
+  document.getElementById('clModalOverlay').classList.remove('open');
+};
+</script>
+
 </body>
 </html>
