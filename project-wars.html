@@ -4000,6 +4000,42 @@
     renderBiggestWins();
   });
 
+
+  // ── Per-player resource node cooldowns (prevents refresh abuse) ──
+  // Stored in Firebase at: nodeCooldown/{playerId}/{nodeId} = readyAtMs
+  let nodeCooldowns = {}; // { [nodeId]: readyAtMs }
+  let nodeCooldownUnsub = null;
+
+  function attachNodeCooldownListener(userId) {
+    if (nodeCooldownUnsub) { try { nodeCooldownUnsub(); } catch(e) {} }
+    nodeCooldownUnsub = null;
+    nodeCooldowns = {};
+    window.__nodeCooldowns = nodeCooldowns;
+
+    if (!userId) return;
+
+    nodeCooldownUnsub = onValue(ref(db, `nodeCooldown/${userId}`), snap => {
+      nodeCooldowns = snap.val() || {};
+      window.__nodeCooldowns = nodeCooldowns;
+      if (window.__applyNodeCooldownsToRoom) window.__applyNodeCooldownsToRoom();
+    });
+  }
+
+  async function setNodeCooldown(userId, nodeId, readyAtMs) {
+    if (!userId || !nodeId) return;
+    const updates = {};
+    updates[`nodeCooldown/${userId}/${nodeId}`] = readyAtMs;
+    await update(ref(db, '/'), updates);
+  }
+
+  async function clearNodeCooldown(userId, nodeId) {
+    if (!userId || !nodeId) return;
+    const updates = {};
+    updates[`nodeCooldown/${userId}/${nodeId}`] = null;
+    await update(ref(db, '/'), updates);
+  }
+
+
   function renderBiggestWins() {
     const el = document.getElementById('biggestWinList');
     if (!el) return;
@@ -4091,6 +4127,7 @@
     document.body.classList.add('logged-in');
     document.getElementById('userBadge').style.display = 'flex';
     document.getElementById('userBadgeName').textContent = currentUser.name;
+    attachNodeCooldownListener(currentUser.id);
     document.getElementById('loginName').value = '';
     document.getElementById('loginPass').value = '';
     render();
@@ -4350,6 +4387,7 @@
     window.__currentUser = null;
     window.__currentUserId = null;
     localStorage.removeItem('pwUserId');
+    attachNodeCooldownListener(null);
     document.body.classList.remove('logged-in');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('loginBg').style.display = '';
@@ -7239,6 +7277,32 @@ document.addEventListener('click', e => {
     }
     resContainer.innerHTML = '';
     resourceState = [];
+    // Apply cooldowns from Firebase (nodeCooldown/{playerId}/{nodeId})
+    function applyStateCooldown(state) {
+      const cd = (window.__nodeCooldowns && state.nodeId) ? (window.__nodeCooldowns[state.nodeId] || 0) : (state.cooldownUntil || 0);
+      if (!cd) return;
+      const now = Date.now();
+      if (cd > now) {
+        state.cooldownUntil = cd;
+        state.depleted = true;
+        state.el.classList.add('depleted');
+        if (state._cdTimer) clearTimeout(state._cdTimer);
+        state._cdTimer = setTimeout(() => {
+          state.depleted = false;
+          state.el.classList.remove('depleted');
+          state.cooldownUntil = 0;
+          if (currentUser) clearNodeCooldown(currentUser.id, state.nodeId).catch(()=>{});
+        }, Math.max(50, cd - now));
+      } else {
+        state.cooldownUntil = 0;
+        if (currentUser) clearNodeCooldown(currentUser.id, state.nodeId).catch(()=>{});
+      }
+    }
+
+    window.__applyNodeCooldownsToRoom = function() {
+      (resourceState || []).forEach(applyStateCooldown);
+    };
+
 
     // Decorative fluff
     const decorFn = DECOR[rm.name];
@@ -7263,15 +7327,17 @@ document.addEventListener('click', e => {
         const type = { ...TREE_TYPES[res.type], id: res.type };
         el.innerHTML = makeTreeSVG(type);
         el.title = `${type.name} Tree (WC ${type.reqLevel})`;
-        const state = { el, kind:'tree', type, depleted:false, active:false };
+        const state = { el, kind:'tree', res, type, depleted:false, active:false }; applyCooldownFromRes(state);
         resourceState.push(state);
+        applyStateCooldown(state);
         el.addEventListener('click', () => onTreeClick(state));
       } else {
         const ore = { ...ORE_TYPES[res.type], id: res.type };
         el.innerHTML = makeRockSVG(ore);
         el.title = `${ore.name} Ore (Mining ${ore.reqLevel})`;
-        const state = { el, kind:'ore', ore, depleted:false, active:false };
+        const state = { el, kind:'ore', res, ore, depleted:false, active:false }; applyCooldownFromRes(state);
         resourceState.push(state);
+        applyStateCooldown(state);
         el.addEventListener('click', () => onOreClick(state));
       }
       resContainer.appendChild(el);
@@ -7281,8 +7347,55 @@ document.addEventListener('click', e => {
     renderMinimap();
   }
 
-  function onTreeClick(state) {
-    if (state.active || state.depleted) return;
+  
+  // ── Resource cooldowns (persist while you move rooms) ──
+  function startCooldownVisual(state, ms) {
+    if (!state || !state.el) return;
+    // wipe any previous cooldown ring
+    const old = state.el.querySelector('.cd-ring');
+    if (old) old.remove();
+
+    const ring = makeProgressRing('#666');
+    ring.classList.add('cd-ring');
+    state.el.appendChild(ring);
+    animateRing(ring, ms);
+
+    // cleanup at end (only if still in DOM)
+    setTimeout(() => {
+      if (!document.body.contains(state.el)) return;
+      const r = state.el.querySelector('.cd-ring');
+      if (r) r.remove();
+    }, ms + 80);
+  }
+
+  function applyCooldownFromRes(state) {
+    if (!state || !state.res) return;
+    const until = state.res.cooldownUntil || 0;
+    const now = Date.now();
+    if (until > now) {
+      state.depleted = true;
+      state.el.classList.add('depleted');
+      startCooldownVisual(state, until - now);
+      // auto-clear once the time passes (only if still in DOM)
+      setTimeout(() => {
+        if (!document.body.contains(state.el)) return;
+        if ((state.res.cooldownUntil || 0) <= Date.now()) {
+          state.depleted = false;
+          state.el.classList.remove('depleted');
+          const r = state.el.querySelector('.cd-ring');
+          if (r) r.remove();
+        }
+      }, (until - now) + 120);
+    }
+  }
+
+
+function onTreeClick(state) {
+    // Cooldown check (authoritative from Firebase)
+    const cd = (window.__nodeCooldowns && state.nodeId) ? (window.__nodeCooldowns[state.nodeId] || 0) : (state.cooldownUntil || 0);
+    if (cd && Date.now() < cd) { state.depleted = true; state.el.classList.add('depleted'); return; }
+
+    if (state.active || state.depleted || (state.res && (state.res.cooldownUntil||0) > Date.now())) return;
     const wcLevel = window.__getSkillLevel ? window.__getSkillLevel('wc') : 1;
     if (wcLevel < state.type.reqLevel) {
       const r = state.el.getBoundingClientRect();
@@ -7313,13 +7426,30 @@ document.addEventListener('click', e => {
         state.depleted = true;
         state.el.classList.add('depleted');
         state.el.innerHTML = makeTreeSVG(state.type);
-        setTimeout(() => { state.depleted=false; state.el.classList.remove('depleted'); }, state.type.respawnMs);
+        (function(){
+          const until = Date.now() + state.type.respawnMs;
+          if (state.res) state.res.cooldownUntil = until;
+          startCooldownVisual(state, state.type.respawnMs);
+          setTimeout(() => {
+            if (!document.body.contains(state.el)) return;
+            if (!state.res || state.res.cooldownUntil <= Date.now()) {
+              state.depleted = false;
+              state.el.classList.remove('depleted');
+              const r = state.el.querySelector('.cd-ring');
+              if (r) r.remove();
+            }
+          }, state.type.respawnMs);
+        })();
       }, 560);
     }, state.type.chopMs);
   }
 
   function onOreClick(state) {
-    if (state.active || state.depleted) return;
+    // Cooldown check (authoritative from Firebase)
+    const cd = (window.__nodeCooldowns && state.nodeId) ? (window.__nodeCooldowns[state.nodeId] || 0) : (state.cooldownUntil || 0);
+    if (cd && Date.now() < cd) { state.depleted = true; state.el.classList.add('depleted'); return; }
+
+    if (state.active || state.depleted || (state.res && (state.res.cooldownUntil||0) > Date.now())) return;
     const mineLevel = window.__getSkillLevel ? window.__getSkillLevel('mine') : 1;
     if (mineLevel < state.ore.reqLevel) {
       const r = state.el.getBoundingClientRect();
@@ -7350,7 +7480,20 @@ document.addEventListener('click', e => {
         state.depleted = true;
         state.el.classList.add('depleted');
         state.el.innerHTML = makeRockSVG(state.ore);
-        setTimeout(() => { state.depleted=false; state.el.classList.remove('depleted'); }, state.ore.respawnMs);
+        (function(){
+          const until = Date.now() + state.ore.respawnMs;
+          if (state.res) state.res.cooldownUntil = until;
+          startCooldownVisual(state, state.ore.respawnMs);
+          setTimeout(() => {
+            if (!document.body.contains(state.el)) return;
+            if (!state.res || state.res.cooldownUntil <= Date.now()) {
+              state.depleted = false;
+              state.el.classList.remove('depleted');
+              const r = state.el.querySelector('.cd-ring');
+              if (r) r.remove();
+            }
+          }, state.ore.respawnMs);
+        })();
       }, 420);
     }, state.ore.mineMs);
   }
