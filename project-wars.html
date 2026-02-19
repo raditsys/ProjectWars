@@ -4783,7 +4783,10 @@
     renderHistory();
     refreshCasinoWallet();
     updateChestUI();
-    if (document.getElementById('shopDrawer')?.classList.contains('open')) renderShopItems();
+    if (document.getElementById('shopDrawer')?.classList.contains('open')) {
+      renderShopItems();
+      window.renderTitleSection && window.renderTitleSection();
+    }
   }
 
   function renderWeek() {
@@ -4832,12 +4835,19 @@
         ? `<span class="fx-icon-wrap"><span class="fx-icon">${fxEmoji}</span><span class="fx-tooltip">${window.makeFxTooltipHtml(fxItem.name)}</span></span>`
         : '';
 
+      // Equipped title
+      const titleData = p.equippedTitle ? window.__playerTitles?.find(t => t.id === p.equippedTitle) : null;
+      const titleHtml = titleData
+        ? `<div style="font-size:0.6rem;letter-spacing:1.5px;color:${titleData.color};margin-top:1px;font-family:'Bebas Neue',sans-serif;">${titleData.name}</div>`
+        : '';
+
       return `
         <div class="player-card ${rankClass}${p.equippedFx ? ' fx-' + p.equippedFx : ''}${isMe ? ' is-me' : ''}" id="card-${p.id}">
           <div class="card-top">
             <div class="rank-badge">${medal}</div>
             <div>
               <div class="player-name">${escHtml(p.name)}${fxIconHtml}${isMe ? ' <span style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;">(you)</span>' : ''}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}${isSundayEST() && mult ? ` <span style="font-size:0.6rem;color:var(--gold);letter-spacing:1px;">${mult}</span>` : ''}</div>
+              ${titleHtml}
             </div>
             <div class="player-stats">
               <div class="player-hours">${p.total.toFixed(1)}<small>hrs this week</small></div>
@@ -5181,6 +5191,98 @@
   ];
   window.__shopItems = SHOP_ITEMS;
 
+  // ── Player Titles ──
+  const PLAYER_TITLES = [
+    { id: 'destroyer',   name: '⚔️ Destroyer of Deadlines',    price: 300,  color: '#f87171' },
+    { id: 'goblin',      name: '👺 Certified Goblin Mode',      price: 200,  color: '#4ade80' },
+    { id: 'oracle',      name: '🔮 All-Knowing Oracle',         price: 400,  color: '#a78bfa' },
+    { id: 'caffeinated', name: '☕ Dangerously Caffeinated',    price: 150,  color: '#cd7f42' },
+    { id: 'napper',      name: '😴 Professional Napper',        price: 100,  color: '#60a5fa' },
+    { id: 'chaos',       name: '🌀 Agent of Chaos',             price: 350,  color: '#f5c842' },
+    { id: 'overlord',    name: '👑 Supreme Overlord',           price: 800,  color: '#f5c842' },
+    { id: 'baguette',    name: '🥖 Lord of the Baguette',       price: 250,  color: '#cd7f42' },
+    { id: 'bug_whisperer', name: '🐛 Bug Whisperer',            price: 300,  color: '#4ade80' },
+    { id: 'keyboard',    name: '⌨️ Keyboard Destroyer',         price: 200,  color: '#f87171' },
+    { id: 'wizard',      name: '🧙 Senior Chaos Wizard',        price: 500,  color: '#a78bfa' },
+    { id: 'gremlin',     name: '👾 Certified Gremlin',          price: 175,  color: '#4ade80' },
+    { id: 'sigma',       name: '💎 Sigma Grindset Achieved',    price: 600,  color: '#60a5fa' },
+    { id: 'spreadsheet', name: '📊 Spreadsheet Sorcerer',       price: 275,  color: '#f5c842' },
+    { id: 'haunted',     name: '👻 Haunted by Notifications',   price: 225,  color: '#a78bfa' },
+    { id: 'legend',      name: '🏆 Certified Legend',           price: 1000, color: '#f5c842' },
+  ];
+  window.__playerTitles = PLAYER_TITLES;
+
+  window.renderTitleSection = function() {
+    const body = document.getElementById('shopBody') || document.querySelector('.shop-body');
+    if (!body) return;
+    let sec = document.getElementById('titleShopSection');
+    if (!sec) {
+      sec = document.createElement('div');
+      sec.id = 'titleShopSection';
+      // Insert before pet/hat sections
+      const hatSec = document.getElementById('hatShopSection');
+      if (hatSec) body.insertBefore(sec, hatSec);
+      else body.appendChild(sec);
+    }
+    if (!currentUser) { sec.innerHTML = ''; return; }
+    const p = players[currentUser.id] || currentUser;
+    const owned    = Array.isArray(p.ownedTitles)  ? p.ownedTitles  : (p.ownedTitles  ? Object.values(p.ownedTitles)  : []);
+    const equipped = p.equippedTitle || '';
+
+    sec.innerHTML = `
+      <div class="shop-section-title" style="margin-bottom:0.75rem;">🏷️ Player Titles</div>
+      <div style="font-size:0.6rem;color:#8844cc;letter-spacing:1px;margin-bottom:0.75rem;">Displayed under your name on the leaderboard</div>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;">
+      ${PLAYER_TITLES.map(t => {
+        const isOwned = owned.includes(t.id);
+        const isOn    = equipped === t.id;
+        const coins   = p.coins || 0;
+        const canAfford = coins >= t.price;
+        return `<div style="background:#0a0118;border:1px solid ${isOn ? '#f5c842' : '#3d00b3'};padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;">
+          <div style="flex:1;">
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:1.5px;color:${t.color};">${t.name}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+            ${isOwned
+              ? `<button style="padding:0.3rem 0.7rem;font-family:'Bebas Neue',sans-serif;font-size:0.75rem;letter-spacing:1px;border:none;cursor:pointer;background:${isOn ? '#3a2a00' : '#3d00b3'};color:${isOn ? '#f5c842' : '#fff'};" onclick="window.togglePlayerTitle('${t.id}')">${isOn ? 'Remove' : 'Equip'}</button>`
+              : `<span style="font-size:0.6rem;color:#f5c842;letter-spacing:1px;margin-right:0.25rem;">🪙 ${t.price}</span><button style="padding:0.3rem 0.7rem;font-family:'Bebas Neue',sans-serif;font-size:0.75rem;letter-spacing:1px;border:none;cursor:pointer;background:${canAfford ? '#6a0dad' : '#2a2a2a'};color:${canAfford ? '#fff' : '#666'};" onclick="window.buyPlayerTitle('${t.id}',${t.price})" ${canAfford ? '' : 'disabled'}>Buy</button>`
+            }
+          </div>
+        </div>`;
+      }).join('')}
+      </div>`;
+  };
+
+  window.togglePlayerTitle = async function(id) {
+    if (!currentUser) return;
+    const uid = currentUser.id;
+    const p = players[uid] || currentUser;
+    const current = p.equippedTitle || '';
+    await update(ref(db, `players/${uid}`), { equippedTitle: current === id ? '' : id });
+    window.renderTitleSection();
+  };
+
+  window.buyPlayerTitle = async function(id, price) {
+    if (!currentUser) return;
+    const uid = currentUser.id;
+    const p = players[uid] || currentUser;
+    const coins = p.coins || 0;
+    if (coins < price) {
+      const el = document.createElement('div');
+      el.textContent = '❌ Not enough coins';
+      el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:100px;font-size:0.8rem;color:#f87171;z-index:999;animation:coinPop 1s ease forwards;pointer-events:none;';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1000);
+      return;
+    }
+    const owned = Array.isArray(p.ownedTitles) ? [...p.ownedTitles] : (p.ownedTitles ? Object.values(p.ownedTitles) : []);
+    if (!owned.includes(id)) owned.push(id);
+    await update(ref(db, `players/${uid}`), { coins: coins - price, ownedTitles: owned, equippedTitle: id });
+    spawnCoinFloat && spawnCoinFloat(`-${price} 🪙`);
+    soundShopBuy && soundShopBuy();
+    window.renderTitleSection();
+  };
+
   window.openShop = function() {
     if (!currentUser) { doLogout(); return; }
     closeCasino();
@@ -5189,6 +5291,7 @@
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('shopTabArrow').textContent = '▶';
     renderShopItems();
+    window.renderTitleSection && window.renderTitleSection();
   };
 
   window.closeShop = function() {
@@ -5353,6 +5456,8 @@
         updates[`players/${id}/ownedHats`]   = null;
         updates[`players/${id}/equippedPet`] = null;
         updates[`players/${id}/ownedPets`]   = null;
+        updates[`players/${id}/equippedTitle`] = null;
+        updates[`players/${id}/ownedTitles`]   = null;
       });
       // Reset current user's pet/hat display back to frog
       setFrogHatLocal('');
@@ -9162,6 +9267,7 @@ window.openShop = function() {
   setTimeout(() => {
     renderHatSection();
     window.__renderPetSection && window.__renderPetSection();
+    window.renderTitleSection && window.renderTitleSection();
   }, 50);
 };
 
