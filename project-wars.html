@@ -3395,7 +3395,7 @@
       'Tutorial - Dark Cloud 2.mp3',
     ];
 
-    let trackIdx  = 0;
+    let trackIdx  = Math.floor(Math.random() * PLAYLIST.length);
     let playing   = false;
     let volume    = 0.18;
     const btn     = document.getElementById('musicBtn');
