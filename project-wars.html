@@ -2634,38 +2634,78 @@
   }
   .ore-obj.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
 
+  /* ══════════ ADVENTURE BUTTON ══════════ */
+  #adventureBtn {
+    position: fixed;
+    left: 16px;
+    bottom: 90px;
+    z-index: 145;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    background: rgba(8,18,8,0.95);
+    border: 1px solid #2a5a2a;
+    color: #4ade80;
+    padding: 8px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.2s, color 0.2s;
+    animation: adventureGlow 2.4s ease-in-out infinite;
+  }
+  #adventureBtn:hover { border-color: var(--gold); color: var(--gold); animation: none; }
+  #adventureBtn .adv-icon { font-size: 1rem; }
+  @keyframes adventureGlow {
+    0%,100% { box-shadow: 0 0 6px rgba(74,222,128,0.15), 0 0 0 1px rgba(74,222,128,0); }
+    50%      { box-shadow: 0 0 18px rgba(74,222,128,0.55), 0 0 0 1px rgba(74,222,128,0.3); }
+  }
+
   /* ══════════ ENVIRONMENT PANEL ══════════ */
   #envPanel {
     position: fixed;
     left: 16px;
     bottom: 90px;
-    width: 420px;
-    z-index: 140;
-    background: rgba(8,12,8,0.95);
+    width: 300px;
+    z-index: 144;
+    background: rgba(8,12,8,0.97);
     border: 1px solid #2a3a2a;
     backdrop-filter: blur(8px);
-    display: flex;
+    display: none;
     flex-direction: column;
     user-select: none;
   }
+  #envPanel.open { display: flex; }
   #envHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 11px 16px 10px;
+    padding: 8px 12px 7px;
     border-bottom: 1px solid #1e2e1e;
     gap: 8px;
   }
+  #envCloseBtn {
+    background: none;
+    border: none;
+    color: #444;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0 2px;
+    line-height: 1;
+    transition: color 0.15s;
+    flex-shrink: 0;
+  }
+  #envCloseBtn:hover { color: var(--muted); }
   #envRoomName {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.5rem;
-    letter-spacing: 5px;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
     color: var(--gold);
     flex: 1;
   }
   #envCoords {
     font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: #555;
     letter-spacing: 1px;
     white-space: nowrap;
@@ -2673,23 +2713,32 @@
   #envScene {
     position: relative;
     width: 100%;
-    height: 260px;
+    height: 180px;
     overflow: hidden;
     background: linear-gradient(180deg, #0a1a0e 0%, #0d200d 60%, #111a0a 100%);
     transition: background 0.4s ease;
   }
+  #envRoomDesc {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    padding: 5px 10px 6px;
+    border-top: 1px solid #1e2e1e;
+    min-height: 26px;
+  }
   #envGround {
     position: absolute;
     bottom: 0; left: 0;
-    width: 100%; height: 40px;
+    width: 100%; height: 30px;
     background: linear-gradient(180deg, #1a2e10 0%, #0e1a08 100%);
     border-top: 1px solid #2a4a1a;
     transition: background 0.4s ease, border-color 0.4s ease;
   }
   #envResources {
     position: absolute;
-    bottom: 38px; left: 0;
-    width: 100%; height: 222px;
+    bottom: 28px; left: 0;
+    width: 100%; height: 152px;
   }
   .env-resource {
     position: absolute;
@@ -2699,96 +2748,15 @@
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
   }
   .env-resource:hover:not(.depleted) { transform: scale(1.08); }
-  .env-resource.depleted { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; pointer-events: none; }
-  .cooldown-label {
+  .env-decor {
     position: absolute;
-    bottom: calc(100% + 2px);
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    color: #aaa;
-    background: rgba(0,0,0,0.75);
-    padding: 1px 5px;
-    white-space: nowrap;
     pointer-events: none;
-    letter-spacing: 0.5px;
   }
+  .env-resource.depleted { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; pointer-events: none; }
   .env-resource.chopping { animation: treeChop 0.18s ease-in-out infinite; }
   .env-resource.mining   { animation: oreShake 0.12s ease-in-out infinite; }
   .env-resource.falling  { animation: treeFall 0.55s ease-in forwards !important; pointer-events: none; }
   .env-resource.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
-
-
-
-  /* ══════════ MARKET SELL PANEL ══════════ */
-  .env-market-panel {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 8px 10px 6px;
-    background: rgba(10,8,0,0.88);
-    border-top: 1px solid #4a3800;
-    backdrop-filter: blur(2px);
-  }
-  .env-market-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 4px;
-    color: #f5c842;
-    margin-bottom: 7px;
-    text-shadow: 0 0 8px rgba(245,200,66,0.4);
-  }
-  .env-market-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-  }
-  .env-market-tile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2px;
-    padding: 6px 4px 5px;
-    border: 1px solid #2a2000;
-    background: #0a0800;
-    cursor: pointer;
-    transition: border-color 0.1s, background 0.1s;
-    position: relative;
-    min-height: 68px;
-  }
-  .env-market-tile.has-stock {
-    border-color: #2a6a2a;
-    background: #091409;
-    cursor: pointer;
-  }
-  .env-market-tile.has-stock:hover {
-    border-color: #4ade80;
-    background: #0f2a0f;
-  }
-  .env-market-tile.empty {
-    opacity: 0.4;
-    cursor: default;
-  }
-  .env-tile-icon { font-size: 1.3rem; line-height: 1; }
-  .env-tile-count {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.95rem;
-    color: #555;
-    line-height: 1;
-  }
-  .env-market-tile.has-stock .env-tile-count { color: #f5c842; }
-  .env-tile-price {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.62rem;
-    color: #4ade80;
-    letter-spacing: 0.5px;
-    line-height: 1;
-    white-space: nowrap;
-  }
-  .env-market-tile.empty .env-tile-price { color: #333; }
   #envFooter {
     border-top: 1px solid #1e2e1e;
     display: flex;
@@ -2796,23 +2764,43 @@
   }
   #envRoomDesc {
     font-family: 'DM Mono', monospace;
-    font-size: 0.78rem;
+    font-size: 0.65rem;
     color: var(--muted);
     letter-spacing: 1px;
-    padding: 8px 16px 6px;
-    text-align: center;
-    min-height: 28px;
+    padding: 5px 12px 5px;
+    border-bottom: 1px solid #1e2e1e;
+    min-height: 24px;
   }
-  #envControls {
+  #envFooterRow {
     display: flex;
+    flex-direction: row;
+    align-items: stretch;
+  }
+  #envMapPane {
+    flex: 1;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 8px 0 12px;
+    padding: 10px 8px 10px 12px;
+    border-right: 1px solid #1e2e1e;
+  }
+  #envMinimap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #envMinimapCanvas { image-rendering: pixelated; }
+  #envDpadPane {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px 10px 8px;
   }
   #envNavGrid {
     display: grid;
-    grid-template-columns: 52px 64px 52px;
-    grid-template-rows: 44px 60px 44px;
-    gap: 4px;
+    grid-template-columns: 36px 36px 36px;
+    grid-template-rows: 32px 32px 32px;
+    gap: 3px;
     align-items: center;
     justify-items: center;
   }
@@ -2820,9 +2808,9 @@
     background: rgba(255,255,255,0.03);
     border: 1px solid #2a3a2a;
     color: var(--muted);
-    font-size: 1rem;
-    width: 46px;
-    height: 40px;
+    font-size: 0.8rem;
+    width: 34px;
+    height: 30px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -2831,23 +2819,142 @@
   }
   .env-nav-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); background: rgba(245,200,66,0.06); }
   .env-nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
-  /* Mini-map in centre of nav grid */
-  #envMinimap {
-    width: 64px;
-    height: 60px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #envMinimapCanvas {
-    image-rendering: pixelated;
-  }
   @keyframes envSlide {
     from { opacity: 0; transform: translate(var(--sx,0), var(--sy,0)); }
     to   { opacity: 1; transform: translate(0,0); }
   }
   .env-slide { animation: envSlide 0.2s ease; }
+
+  /* ══════════ NPC TALK BUTTON ══════════ */
+  .npc-talk-btn {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    background: rgba(8,8,18,0.9);
+    border: 1px solid #4a4a7a;
+    color: #aaaacc;
+    padding: 5px 14px;
+    cursor: pointer;
+    z-index: 10;
+    transition: border-color 0.15s, color 0.15s;
+    animation: talkPulse 2s ease-in-out infinite;
+  }
+  .npc-talk-btn:hover { border-color: var(--gold); color: var(--gold); animation: none; }
+  @keyframes talkPulse {
+    0%,100% { box-shadow: 0 0 4px rgba(100,100,180,0.2); }
+    50%      { box-shadow: 0 0 12px rgba(100,100,180,0.6); }
+  }
+
+  /* ══════════ DIALOGUE BOX ══════════ */
+  #dialogueBox {
+    position: fixed;
+    left: 16px;
+    bottom: 90px;
+    width: 340px;
+    z-index: 200;
+    background: rgba(6,6,12,0.98);
+    border: 1px solid #3a3a5a;
+    backdrop-filter: blur(12px);
+    display: none;
+    flex-direction: column;
+    font-family: 'DM Mono', monospace;
+    box-shadow: 0 0 40px rgba(60,60,120,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  #dialogueBox.open { display: flex; }
+  #dlgHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px 9px;
+    border-bottom: 1px solid #2a2a42;
+    background: rgba(255,255,255,0.02);
+  }
+  #dlgPortrait {
+    font-size: 1.6rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(40,40,70,0.6);
+    border: 1px solid #3a3a5a;
+    flex-shrink: 0;
+  }
+  #dlgName {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 3px;
+    color: #c8c0e8;
+  }
+  #dlgTitle {
+    font-size: 0.55rem;
+    color: #555570;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  #dlgClose {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #444;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0 2px;
+    transition: color 0.15s;
+    flex-shrink: 0;
+  }
+  #dlgClose:hover { color: var(--muted); }
+  #dlgBody {
+    padding: 14px 14px 10px;
+    min-height: 90px;
+    border-bottom: 1px solid #1e1e30;
+  }
+  #dlgText {
+    font-size: 0.65rem;
+    line-height: 1.7;
+    color: #a8a8c8;
+    white-space: pre-wrap;
+    letter-spacing: 0.3px;
+  }
+  #dlgChoices {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .dlg-choice {
+    background: transparent;
+    border: none;
+    border-top: 1px solid #1a1a28;
+    color: #7a7aaa;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.5px;
+    padding: 9px 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, padding-left 0.12s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dlg-choice::before {
+    content: '▸';
+    color: #3a3a5a;
+    font-size: 0.6rem;
+    flex-shrink: 0;
+    transition: color 0.12s;
+  }
+  .dlg-choice:hover {
+    background: rgba(100,100,180,0.08);
+    color: #c8c0e8;
+    padding-left: 18px;
+  }
+  .dlg-choice:hover::before { color: var(--gold); }
 
   /* ══════════ HOTBAR ══════════ */
   #hotbar {
@@ -2925,44 +3032,11 @@
     color: #4ade80;
     padding: 2px 6px;
     cursor: pointer;
-    transition: background 0.12s, border-color 0.12s;
+    transition: background 0.12s;
     white-space: nowrap;
   }
   .inv-sell-btn:hover:not(:disabled) { background: #22552a; }
   .inv-sell-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  /* When sell is locked because not at market */
-  .inv-sell-btn.market-locked {
-    background: #111;
-    border: 1px solid #2a2a2a;
-    color: #555;
-    cursor: not-allowed;
-    opacity: 1;
-    font-size: 0.55rem;
-    letter-spacing: 0.5px;
-  }
-  .inv-market-hint {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.55rem;
-    color: #665500;
-    letter-spacing: 0.5px;
-    text-align: center;
-    padding: 5px 10px 3px;
-    border-top: 1px solid #1a1a1a;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    justify-content: center;
-  }
-  .inv-market-hint.at-market {
-    color: #4ade80;
-    border-color: #1a3a1a;
-  }
-  .inv-market-hint a {
-    color: #a07800;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-  .inv-market-hint.at-market a { color: #4ade80; }
 
   /* Skills inside hotbar panel */
   .skill-card {
@@ -3076,11 +3150,16 @@
 <div id="grassLayer"></div>
 <div id="resourceLayer"></div>
 <div id="gardenGnome" style="display:none;">🧙</div>
+<!-- ADVENTURE BUTTON -->
+<button id="adventureBtn" onclick="toggleAdventurePanel()">
+  <span class="adv-icon">⚔️</span> Adventure
+</button>
 <!-- ENVIRONMENT PANEL -->
 <div id="envPanel">
   <div id="envHeader">
     <div id="envRoomName">Forest</div>
     <div id="envCoords"></div>
+    <button id="envCloseBtn" onclick="toggleAdventurePanel()" title="Close">✕</button>
   </div>
   <div id="envScene">
     <div id="envGround"></div>
@@ -3088,20 +3167,40 @@
   </div>
   <div id="envFooter">
     <div id="envRoomDesc"></div>
-    <div id="envControls">
-      <div id="envNavGrid">
-        <div></div>
-        <button class="env-nav-btn" id="envBtnN" onclick="envNavigate(0,-1)" title="North">▲</button>
-        <div></div>
-        <button class="env-nav-btn" id="envBtnW" onclick="envNavigate(-1,0)" title="West">◀</button>
+    <div id="envFooterRow">
+      <div id="envMapPane">
         <div id="envMinimap"></div>
-        <button class="env-nav-btn" id="envBtnE" onclick="envNavigate(1,0)" title="East">▶</button>
-        <div></div>
-        <button class="env-nav-btn" id="envBtnS" onclick="envNavigate(0,1)" title="South">▼</button>
-        <div></div>
+      </div>
+      <div id="envDpadPane">
+        <div id="envNavGrid">
+          <div></div>
+          <button class="env-nav-btn" id="envBtnN" onclick="envNavigate(0,-1)" title="North">▲</button>
+          <div></div>
+          <button class="env-nav-btn" id="envBtnW" onclick="envNavigate(-1,0)" title="West">◀</button>
+          <div></div>
+          <button class="env-nav-btn" id="envBtnE" onclick="envNavigate(1,0)" title="East">▶</button>
+          <div></div>
+          <button class="env-nav-btn" id="envBtnS" onclick="envNavigate(0,1)" title="South">▼</button>
+          <div></div>
+        </div>
       </div>
     </div>
   </div>
+</div>
+<!-- DIALOGUE BOX -->
+<div id="dialogueBox">
+  <div id="dlgHeader">
+    <div id="dlgPortrait">⚔️</div>
+    <div id="dlgMeta">
+      <div id="dlgName">Guard</div>
+      <div id="dlgTitle">Royal Gate Guard</div>
+    </div>
+    <button id="dlgClose" onclick="document.getElementById('dialogueBox').classList.remove('open')">✕</button>
+  </div>
+  <div id="dlgBody">
+    <div id="dlgText"></div>
+  </div>
+  <div id="dlgChoices"></div>
 </div>
 <div id="hotbar">
   <!-- Inventory button -->
@@ -3150,9 +3249,6 @@
         <span class="inv-label">Runite Ore</span>
         <span class="inv-count" id="invRuniteOre">0</span>
         <button class="inv-sell-btn" onclick="sellResource('runite_ore')" disabled id="sellRuniteOre">Sell 40🪙</button>
-      </div>
-      <div class="inv-market-hint" id="invMarketHint">
-        🏪 <span id="invMarketHintText">Go to <a onclick="goToMarket()">Market</a> to sell</span>
       </div>
     </div>
   </div>
@@ -6813,41 +6909,13 @@ const SELL_IDS = {
   copper_ore: 'sellCopperOre', iron_ore: 'sellIronOre', gold_ore: 'sellGoldOre', runite_ore: 'sellRuniteOre',
 };
 
-window.__atMarket = false;
-
 function updateInventoryUI() {
-  const atMarket = !!window.__atMarket;
-  const hint = document.getElementById('invMarketHint');
-  const hintText = document.getElementById('invMarketHintText');
-
-  if (hint) {
-    hint.className = 'inv-market-hint' + (atMarket ? ' at-market' : '');
-    if (hintText) {
-      hintText.innerHTML = atMarket
-        ? '✓ Selling enabled'
-        : 'Go to <a onclick="goToMarket()">Market</a> to sell';
-    }
-  }
-
   for (const [key, count] of Object.entries(window.__inventory)) {
     const countEl = document.getElementById(INV_IDS[key]);
     const sellBtn = document.getElementById(SELL_IDS[key]);
     if (countEl) countEl.textContent = count;
-    if (sellBtn) {
-      if (!atMarket) {
-        sellBtn.disabled = true;
-        sellBtn.classList.add('market-locked');
-        sellBtn.textContent = '🏪 Market only';
-      } else {
-        sellBtn.classList.remove('market-locked');
-        sellBtn.disabled = count < 1;
-        const prices = { oak_log:2, willow_log:5, magic_log:20, copper_ore:2, iron_ore:4, gold_ore:12, runite_ore:40 };
-        sellBtn.textContent = `Sell ${prices[key]}🪙`;
-      }
-    }
+    if (sellBtn) sellBtn.disabled = count < 1;
   }
-  // Keep the in-scene market panel in sync
-  if (window.__refreshMarketPanel) window.__refreshMarketPanel();
 }
 
 function addInventoryItem(key, amount = 1) {
@@ -6857,7 +6925,6 @@ function addInventoryItem(key, amount = 1) {
 }
 
 window.sellResource = async function(key) {
-  if (!window.__atMarket) return;
   const count = window.__inventory[key] || 0;
   if (count < 1) return;
   if (window.__inventorySelling) return;
@@ -6904,12 +6971,6 @@ window.__loadInventoryFromPlayer = function(playerData) {
 
 updateInventoryUI();
 
-window.goToMarket = function() {
-  if (window.envGoTo) window.envGoTo(3, 2);
-  document.querySelectorAll('.hotbar-panel').forEach(p => p.classList.remove('open'));
-  document.querySelectorAll('.hotbar-btn').forEach(b => b.classList.remove('active'));
-};
-
 // ── Hotbar toggle ──
 window.hotbarToggle = function(id) {
   const panels  = { inv: 'hotbarInvPanel',  skill: 'hotbarSkillPanel' };
@@ -6931,26 +6992,76 @@ document.addEventListener('click', e => {
 // ══════════════════ ENVIRONMENT SYSTEM ══════════════════
 (function() {
 
-  // ── 2D Grid Map: [col, row] coords ──
-  // Cols 0-3, Rows 0-2  (4 wide × 3 tall)
-  const GRID_W = 4, GRID_H = 3;
+  window.toggleAdventurePanel = function() {
+    const panel = document.getElementById('envPanel');
+    const btn   = document.getElementById('adventureBtn');
+    const open  = panel.classList.toggle('open');
+    btn.style.display = open ? 'none' : '';
+  };
 
-  // null = no room there (blocked/wall)
+  const GRID_W = 8, GRID_H = 6;
+
+  function f(name, desc, sky, ground, groundBorder) {
+    return { name, desc, sky, ground, groundBorder, resources:[] };
+  }
+  function r(name, desc, sky, ground, groundBorder, resources) {
+    return { name, desc, sky, ground, groundBorder, resources };
+  }
+
   const MAP = {
-    '0,0': { name:'Lakeside',    desc:'Willow trees by the water', sky:'linear-gradient(180deg,#061420 0%,#0a1e2a 60%,#0d2210 100%)', ground:'#1a3020', groundBorder:'#2a5a30', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}] },
-    '1,0': { name:'Forest',      desc:'Oak trees, easy woodcutting', sky:'linear-gradient(180deg,#0a1a0e 0%,#0d200d 60%,#111a0a 100%)', ground:'#1a2e10', groundBorder:'#2a4a1a', resources:[{kind:'tree',type:'oak',x:10},{kind:'tree',type:'oak',x:118},{kind:'tree',type:'oak',x:228}] },
-    '2,0': { name:'Birch Glen',  desc:'Mixed oak and willow', sky:'linear-gradient(180deg,#0c1a08 0%,#102208 60%,#0e1c08 100%)', ground:'#1e3210', groundBorder:'#3a5a1a', resources:[{kind:'tree',type:'oak',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}] },
-    '3,0': { name:'Swamp',       desc:'Ancient willow groves', sky:'linear-gradient(180deg,#0a1208 0%,#0e1a0a 60%,#0a1210 100%)', ground:'#102a10', groundBorder:'#1a4a20', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'willow',x:228}] },
+    '0,0': f('Cliff Edge',      'A sheer drop into the mist',         'linear-gradient(180deg,#060c14 0%,#0a1220 70%,#0c1420 100%)', '#1a2a38', '#2a4a5a'),
+    '1,0': f('Stone Pass',      'Ancient carved stone markers',       'linear-gradient(180deg,#0e0e0e 0%,#161616 60%,#121212 100%)', '#282828', '#404040'),
+    '2,0': f('Frozen Peak',     'Snow-dusted rocks and silence',      'linear-gradient(180deg,#0c1020 0%,#101828 60%,#0c1020 100%)', '#202838', '#3a4a5a'),
+    '3,0': f('Howling Ridge',   'Wind tears through the pines',       'linear-gradient(180deg,#0a0e08 0%,#0e1408 60%,#0a0e08 100%)', '#141e0a', '#243010'),
+    '4,0': f('Fog Valley',      'Thick mist clings to the ground',    'linear-gradient(180deg,#101418 0%,#181e24 60%,#101418 100%)', '#1c2428', '#2c3840'),
+    '5,0': f('Dark Pines',      'Tall evergreens block the light',    'linear-gradient(180deg,#060a06 0%,#0a100a 60%,#060a06 100%)', '#0e160e', '#182818'),
+    '6,0': null,
+    '7,0': null,
 
-    '0,1': { name:'Copper Pit',  desc:'Shallow copper deposits', sky:'linear-gradient(180deg,#140e08 0%,#1a1408 60%,#141008 100%)', ground:'#2a1a08', groundBorder:'#4a3010', resources:[{kind:'ore',type:'copper',x:20},{kind:'ore',type:'copper',x:128},{kind:'ore',type:'iron',x:228}] },
-    '1,1': { name:'Iron Ridge',  desc:'Iron and copper veins', sky:'linear-gradient(180deg,#101010 0%,#161616 60%,#101212 100%)', ground:'#202020', groundBorder:'#383838', resources:[{kind:'ore',type:'copper',x:20},{kind:'ore',type:'iron',x:128},{kind:'ore',type:'iron',x:228}] },
-    '2,1': { name:'Deep Woods',  desc:'Willow and magic trees', sky:'linear-gradient(180deg,#0d0a1a 0%,#120d20 60%,#0a0a15 100%)', ground:'#1a1030', groundBorder:'#2a1a4a', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}] },
-    '3,1': { name:'Gold Cavern', desc:'Gold veins run deep here', sky:'linear-gradient(180deg,#100a04 0%,#180e04 60%,#120c04 100%)', ground:'#1e1204', groundBorder:'#3a2208', resources:[{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:128},{kind:'ore',type:'gold',x:228}] },
+    '0,1': f('Mossy Bank',      'Soft green moss over old stone',     'linear-gradient(180deg,#081408 0%,#0c1c0c 60%,#081408 100%)', '#162412', '#2a3e1a'),
+    '1,1': f('Flower Meadow',   'Wildflowers sway in the breeze',     'linear-gradient(180deg,#0c1c08 0%,#10240c 60%,#0c1c08 100%)', '#1e3010', '#3a5020'),
+    '2,1': f('Babbling Brook',  'Clear water over smooth pebbles',    'linear-gradient(180deg,#061420 0%,#0a1e2e 60%,#0c2218 100%)', '#1a2e28', '#2a4e3a'),
+    '3,1': f('Sunlit Clearing', 'A warm patch of open sky',           'linear-gradient(180deg,#101c08 0%,#162408 60%,#101c08 100%)', '#1e3010', '#365020'),
+    '4,1': f('Ruins',           'Crumbling stone walls, long forgot', 'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201a14', '#382e20'),
+    '5,1': f('Mushroom Ring',   'Strange fungi form a perfect circle','linear-gradient(180deg,#120a18 0%,#1a1020 60%,#120a18 100%)', '#1e1028', '#341a3e'),
+    '6,1': f('Overgrown Path',  'The trail is barely visible',        'linear-gradient(180deg,#0a1008 0%,#0e160a 60%,#0a1008 100%)', '#14200e', '#243a18'),
+    '7,1': null,
 
-    '0,2': null,
-    '1,2': { name:'Enchanted Grove', desc:'Magic trees glow at night', sky:'linear-gradient(180deg,#10063a 0%,#180a50 60%,#0e0430 100%)', ground:'#1a0a40', groundBorder:'#3a1a70', resources:[{kind:'tree',type:'magic',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}] },
-    '2,2': { name:'Runite Mine', desc:'Rare runite ore glimmers', sky:'linear-gradient(180deg,#060810 0%,#08100a 60%,#060a10 100%)', ground:'#0e1018', groundBorder:'#1a2030', resources:[{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'runite',x:228}] },
-    '3,2': { name:'Market', desc:'Sell your resources here', sky:'linear-gradient(180deg,#0a0800 0%,#140e00 60%,#0a0a00 100%)', ground:'#1a1400', groundBorder:'#4a3800', resources:[{kind:'market'}] },
+    '0,2': r('Lakeside',        'Willow trees by the water',          'linear-gradient(180deg,#061420 0%,#0a1e2a 60%,#0d2210 100%)', '#1a3020', '#2a5a30', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}]),
+    '1,2': f('Twisted Oaks',    'Gnarled old trees, no timber left',  'linear-gradient(180deg,#0c1808 0%,#101e0c 60%,#0c1808 100%)', '#1a2c10', '#2e4c1a'),
+    '2,2': r('Forest',          'Oak trees, easy woodcutting',        'linear-gradient(180deg,#0a1a0e 0%,#0d200d 60%,#111a0a 100%)', '#1a2e10', '#2a4a1a', [{kind:'tree',type:'oak',x:10},{kind:'tree',type:'oak',x:118},{kind:'tree',type:'oak',x:228}]),
+    '3,2': f('Fern Hollow',     'Lush ferns, nothing to harvest',     'linear-gradient(180deg,#0c1c08 0%,#10220c 60%,#0c1c08 100%)', '#1a2e10', '#2e4e1a'),
+    '4,2': r('Birch Glen',      'Mixed oak and willow',               'linear-gradient(180deg,#0c1a08 0%,#102208 60%,#0e1c08 100%)', '#1e3210', '#3a5a1a', [{kind:'tree',type:'oak',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}]),
+    '5,2': f('Dead Grove',      'Bleached trunks, no life here',      'linear-gradient(180deg,#100e0c 0%,#16120e 60%,#100e0c 100%)', '#201a12', '#302820'),
+    '6,2': r('Swamp',           'Ancient willow groves',              'linear-gradient(180deg,#0a1208 0%,#0e1a0a 60%,#0a1210 100%)', '#102a10', '#1a4a20', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'willow',x:228}]),
+    '7,2': f('Brackish Pool',   'Dark water, no fish',                'linear-gradient(180deg,#060e0c 0%,#0a1410 60%,#060e0c 100%)', '#0e2018', '#183028'),
+
+    '0,3': f('Rocky Foothills', 'Loose scree, hard going',            'linear-gradient(180deg,#0e0c0a 0%,#16120e 60%,#0e0c0a 100%)', '#1e1810', '#302818'),
+    '1,3': f('Cave Mouth',      'A dark opening in the hillside',     'linear-gradient(180deg,#080808 0%,#0e0e0e 60%,#080808 100%)', '#141414', '#222222'),
+    '2,3': r('Copper Pit',      'Shallow copper deposits',            'linear-gradient(180deg,#140e08 0%,#1a1408 60%,#141008 100%)', '#2a1a08', '#4a3010', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'copper',x:128},{kind:'ore',type:'iron',x:228}]),
+    '3,3': f('Gravel Pit',      'Just rocks, nothing valuable',       'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201c14', '#342e20'),
+    '4,3': r('Iron Ridge',      'Iron and copper veins',              'linear-gradient(180deg,#101010 0%,#161616 60%,#101212 100%)', '#202020', '#383838', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'iron',x:128},{kind:'ore',type:'iron',x:228}]),
+    '5,3': f('Sinkhole',        'The ground feels unstable here',     'linear-gradient(180deg,#0c0a08 0%,#12100c 60%,#0c0a08 100%)', '#181410', '#282018'),
+    '6,3': r('Deep Woods',      'Willow and magic trees',             'linear-gradient(180deg,#0d0a1a 0%,#120d20 60%,#0a0a15 100%)', '#1a1030', '#2a1a4a', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}]),
+    '7,3': { name:'Castle Gate', desc:'Massive iron gates. A guard blocks the way.', sky:'linear-gradient(180deg,#080810 0%,#0e0e1c 60%,#080810 100%)', ground:'#181820', groundBorder:'#303048', resources:[], locked:true, npc:'guard' },
+
+    '0,4': null,
+    '1,4': f('Forgotten Shrine','Moss-covered stones and offerings',  'linear-gradient(180deg,#10060a 0%,#180a10 60%,#100608 100%)', '#20100a', '#381a14'),
+    '2,4': f('Lava Fields',     'Cooled black rock, still warm',      'linear-gradient(180deg,#140604 0%,#1c0804 60%,#140604 100%)', '#200808', '#380e0e'),
+    '3,4': r('Gold Cavern',     'Gold veins run deep here',           'linear-gradient(180deg,#100a04 0%,#180e04 60%,#120c04 100%)', '#1e1204', '#3a2208', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:128},{kind:'ore',type:'gold',x:228}]),
+    '4,4': f('Bone Yard',       'Scattered remains of past battles',  'linear-gradient(180deg,#0e0e0e 0%,#141412 60%,#0e0e0e 100%)', '#1c1c18', '#2c2c24'),
+    '5,4': r('Enchanted Grove', 'Magic trees glow at night',          'linear-gradient(180deg,#10063a 0%,#180a50 60%,#0e0430 100%)', '#1a0a40', '#3a1a70', [{kind:'tree',type:'magic',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}]),
+    '6,4': f('Void Hollow',     'The air feels wrong here',           'linear-gradient(180deg,#06060e 0%,#0a0a18 60%,#06060e 100%)', '#0e0e20', '#181830'),
+    '7,4': null,
+
+    '0,5': null,
+    '1,5': null,
+    '2,5': f('Sunken Temple',   'Half-submerged ancient ruins',       'linear-gradient(180deg,#06100c 0%,#0a1814 60%,#06100c 100%)', '#101e18', '#1c3228'),
+    '3,5': f('Magma Chamber',   'Intense heat, nothing survives',     'linear-gradient(180deg,#160604 0%,#200804 60%,#160604 100%)', '#260c06', '#3e1408'),
+    '4,5': r('Runite Mine',     'Rare runite ore glimmers',           'linear-gradient(180deg,#060810 0%,#08100a 60%,#060a10 100%)', '#0e1018', '#1a2030', [{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'runite',x:228}]),
+    '5,5': f('Abyss Edge',      'Looking down into nothing',          'linear-gradient(180deg,#040408 0%,#06060e 60%,#040408 100%)', '#08080e', '#10101a'),
+    '6,5': null,
+    '7,5': null,
   };
 
   const TREE_TYPES = {
@@ -6965,84 +7076,82 @@ document.addEventListener('click', e => {
     runite: { name:'Runite', invKey:'runite_ore', color:'#3a6a8a', shine:'#6ab0d0', reqLevel:85, xp:125, mineMs:18000, respawnMs:600000, coinChance:0.40, coinAmt:8 },
   };
 
-  let cx = 1, cy = 0; // current col, row — start in Forest
-  let resourceState = [];
-
-  // ── Persistent cooldowns ──
-  // Key: "col,row:nodeIdx"  Value: timestamp (ms) when node was harvested
-  const nodeCooldowns = {};
-
-  function nodeKey(col, row, idx) { return `${col},${row}:${idx}`; }
-
-  function isCooling(col, row, idx, respawnMs) {
-    const t = nodeCooldowns[nodeKey(col, row, idx)];
-    if (!t) return false;
-    return (Date.now() - t) < respawnMs;
+  // ── Decorative SVG elements ──
+  function makeSVG(w, h, content) {
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${content}</svg>`;
   }
-
-  function cooldownRemaining(col, row, idx, respawnMs) {
-    const t = nodeCooldowns[nodeKey(col, row, idx)];
-    if (!t) return 0;
-    return Math.max(0, respawnMs - (Date.now() - t));
-  }
-
-  function markHarvested(col, row, idx) {
-    nodeCooldowns[nodeKey(col, row, idx)] = Date.now();
-    if (window.__fbSaveNodeCooldowns) window.__fbSaveNodeCooldowns(nodeCooldowns);
-  }
-
-  window.__loadNodeCooldowns = function(data) {
-    if (!data) return;
-    Object.assign(nodeCooldowns, data);
+  const DECOR = {
+    'Flower Meadow': () => [[30,'#ff6688'],[90,'#ffaa33'],[155,'#cc44ff'],[215,'#44ccff'],[260,'#ff88aa']].map(([x,c])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(20,28,`<rect x="9" y="10" width="2" height="18" rx="1" fill="#3a7a2a"/><circle cx="10" cy="8" r="5" fill="${c}" opacity="0.9"/><circle cx="10" cy="8" r="2" fill="#fff" opacity="0.4"/>`)} </div>`).join(''),
+    'Mushroom Ring': () => [[20,'#cc3333','#ff8888'],[80,'#8833cc','#cc88ff'],[150,'#cc3333','#ff8888'],[220,'#336633','#88ff88'],[260,'#8833cc','#cc88ff']].map(([x,c,t])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(24,30,`<rect x="10" y="16" width="4" height="14" rx="1" fill="#d4b896"/><ellipse cx="12" cy="16" rx="10" ry="7" fill="${c}"/><circle cx="8" cy="14" r="2" fill="${t}" opacity="0.6"/><circle cx="14" cy="11" r="1.5" fill="${t}" opacity="0.5"/>`)}</div>`).join(''),
+    'Ruins': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:80px">${makeSVG(300,80,[[10,40,30,22,'#3a3228'],[55,28,20,15,'#2e2a24'],[100,50,35,18,'#3a3228'],[160,32,18,28,'#2e2a24'],[210,45,28,14,'#3a3228'],[250,22,16,20,'#2e2a24']].map(([x,h,w,d,col])=>`<rect x="${x}" y="${80-h}" width="${w}" height="${h}" rx="1" fill="${col}"/><rect x="${x}" y="${80-h}" width="${w}" height="${d}" fill="#fff" opacity="0.04"/>`).join(''))}</div>`,
+    'Crystal Cave': () => [[20,'#44aaff'],[75,'#aa44ff'],[140,'#44ffcc'],[200,'#ff44aa'],[255,'#44aaff']].map(([x,c])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(16,35,`<polygon points="8,0 14,14 12,35 4,35 2,14" fill="${c}" opacity="0.7"/><polygon points="8,0 14,14 8,10" fill="#fff" opacity="0.25"/>`)}</div>`).join(''),
+    'Frozen Peak': () => [[15,42,28],[80,30,20],[145,50,32],[210,25,18],[260,38,24]].map(([x,h,w])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(w+4,h+6,`<ellipse cx="${(w+4)/2}" cy="${h+2}" rx="${w/2}" ry="${h*0.55}" fill="#3a4050"/><ellipse cx="${(w+4)/2}" cy="${h-2}" rx="${w*0.4}" ry="${h*0.25}" fill="#ddeeff" opacity="0.7"/>`)}</div>`).join(''),
+    'Babbling Brook': () => `<div class="env-decor" style="left:0;bottom:2px;width:300px;height:20px">${makeSVG(300,20,Array.from({length:12},(_,i)=>`<ellipse cx="${i*24+12}" cy="${13}" rx="${4+i%3*2}" ry="3" fill="#607080" opacity="0.6"/>`).join(''))}</div>`,
+    'Cliff Edge': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:80px">${makeSVG(300,80,`<polygon points="0,80 0,30 40,10 90,25 140,5 200,20 260,0 300,15 300,80" fill="#2a3040" opacity="0.9"/><polygon points="0,80 0,50 30,35 80,45 130,30 190,40 250,25 300,38 300,80" fill="#1a2030" opacity="0.7"/>`)}</div>`,
+    'Forgotten Shrine': () => `<div class="env-decor" style="left:90px;bottom:0;width:120px;height:100px">${makeSVG(120,100,`<rect x="45" y="40" width="30" height="60" fill="#2a2018"/><polygon points="10,40 60,5 110,40" fill="#3a3028"/><rect x="50" y="55" width="20" height="30" fill="#1a1408"/><circle cx="60" cy="30" r="6" fill="#d4af37" opacity="0.5"/><rect x="20" y="80" width="15" height="20" fill="#2a2018"/><rect x="85" y="80" width="15" height="20" fill="#2a2018"/>`)}</div>`,
+    'Sunken Temple': () => `<div class="env-decor" style="left:20px;bottom:0;width:260px;height:90px">${makeSVG(260,90,`<rect x="0" y="50" width="260" height="40" fill="#1a2820" opacity="0.6"/><rect x="30" y="20" width="200" height="70" fill="#1e2e20" opacity="0.5"/><rect x="20" y="10" width="220" height="20" fill="#243428"/><rect x="50" y="0" width="160" height="12" fill="#2a3a2e"/>${[50,100,160,210].map(x=>`<rect x="${x}" y="20" width="8" height="70" fill="#1a2818"/>`).join('')}<rect x="90" y="35" width="80" height="55" fill="#101a12"/>`)}</div>`,
+    'Dead Grove': () => [[20,65],[90,55],[160,70],[230,50],[275,60]].map(([x,h])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(30,h+5,`<rect x="12" y="0" width="6" height="${h}" rx="2" fill="#2a2018"/><line x1="15" y1="${h*0.3}" x2="4" y2="${h*0.15}" stroke="#2a2018" stroke-width="3" stroke-linecap="round"/><line x1="15" y1="${h*0.3}" x2="26" y2="${h*0.18}" stroke="#2a2018" stroke-width="3" stroke-linecap="round"/>`)}</div>`).join(''),
+    'Bone Yard': () => `<div class="env-decor" style="left:0;bottom:2px;width:300px;height:30px">${makeSVG(300,30,`<ellipse cx="40" cy="20" rx="18" ry="6" fill="#d4cfc0" opacity="0.6"/><ellipse cx="100" cy="22" rx="12" ry="5" fill="#ccc8b8" opacity="0.5"/><rect x="140" y="14" width="30" height="4" rx="2" fill="#d0cbb8" opacity="0.6"/><ellipse cx="200" cy="19" rx="15" ry="5" fill="#ccc8b8" opacity="0.55"/><rect x="240" y="16" width="22" height="3" rx="1.5" fill="#d0cbb8" opacity="0.5"/><circle cx="58" cy="16" r="5" fill="#c8c4b4" opacity="0.5"/>`)}</div>`,
+    'Cave Mouth': () => `<div class="env-decor" style="left:60px;bottom:0;width:180px;height:100px">${makeSVG(180,100,`<ellipse cx="90" cy="100" rx="80" ry="55" fill="#0a0a0a"/><ellipse cx="90" cy="100" rx="60" ry="40" fill="#060606"/>${[30,60,130,150].map((x,i)=>`<polygon points="${x},${40+i*5} ${x+12},${15+i*3} ${x+24},${42+i*4}" fill="#1a1a1a"/>`).join('')}`)}</div>`,
+    'Magma Chamber': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:60px">${makeSVG(300,60,`<ellipse cx="50" cy="55" rx="40" ry="18" fill="#cc4400" opacity="0.8"/><ellipse cx="150" cy="58" rx="60" ry="15" fill="#dd5500" opacity="0.7"/><ellipse cx="260" cy="54" rx="35" ry="16" fill="#cc4400" opacity="0.75"/><ellipse cx="100" cy="52" rx="25" ry="10" fill="#ff8800" opacity="0.5"/><ellipse cx="210" cy="50" rx="20" ry="8" fill="#ff6600" opacity="0.55"/>${[20,80,140,200,265].map(x=>`<polygon points="${x},30 ${x+8},5 ${x+16},30" fill="#2a1a14" opacity="0.9"/>`).join('')}`)}</div>`,
+    'Lava Fields': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:50px">${makeSVG(300,50,`<rect x="0" y="25" width="300" height="25" fill="#1a0c08"/><ellipse cx="60" cy="25" rx="50" ry="12" fill="#cc3300" opacity="0.6"/><ellipse cx="180" cy="28" rx="70" ry="14" fill="#bb2200" opacity="0.5"/><ellipse cx="270" cy="24" rx="40" ry="10" fill="#cc3300" opacity="0.55"/>${[10,70,130,200,260].map((x,i)=>`<rect x="${x}" y="${5+i%2*8}" width="${20+i*3}" height="${20-i*2}" rx="2" fill="#1a0e08" opacity="0.9"/>`).join('')}`)}</div>`,
+    'Void Hollow': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:80px">${makeSVG(300,80,`<ellipse cx="90" cy="65" rx="70" ry="30" fill="#08081a" opacity="0.8"/><ellipse cx="220" cy="70" rx="60" ry="25" fill="#06060e" opacity="0.7"/>${[...Array(18)].map((_,i)=>`<circle cx="${20+i*15}" cy="${10+i%4*12}" r="1" fill="#5555bb" opacity="0.4"/>`).join('')}`)}</div>`,
+    'Castle Gate': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:175px">${makeSVG(300,175,`
+      <!-- Wall -->
+      <rect x="0" y="40" width="90" height="135" fill="#1e1e28"/>
+      <rect x="210" y="40" width="90" height="135" fill="#1e1e28"/>
+      <!-- Battlements left -->
+      ${[0,18,36,54,72].map(x=>`<rect x="${x}" y="24" width="12" height="18" fill="#1e1e28"/>`).join('')}
+      <!-- Battlements right -->
+      ${[210,228,246,264,282].map(x=>`<rect x="${x}" y="24" width="12" height="18" fill="#1e1e28"/>`).join('')}
+      <!-- Stone lines left wall -->
+      ${[60,80,100,120,140,160].map(y=>`<line x1="0" y1="${y}" x2="90" y2="${y}" stroke="#111118" stroke-width="1" opacity="0.6"/>`).join('')}
+      <line x1="45" y1="40" x2="45" y2="175" stroke="#111118" stroke-width="1" opacity="0.5"/>
+      <!-- Stone lines right wall -->
+      ${[60,80,100,120,140,160].map(y=>`<line x1="210" y1="${y}" x2="300" y2="${y}" stroke="#111118" stroke-width="1" opacity="0.6"/>`).join('')}
+      <line x1="255" y1="40" x2="255" y2="175" stroke="#111118" stroke-width="1" opacity="0.5"/>
+      <!-- Gate arch -->
+      <path d="M88,175 L88,90 Q88,50 150,50 Q212,50 212,90 L212,175 Z" fill="#0a0a12"/>
+      <path d="M95,175 L95,92 Q95,58 150,58 Q205,58 205,92 L205,175 Z" fill="#050508"/>
+      <!-- Gate bars -->
+      ${[105,120,135,150,165,180,195].map(x=>`<rect x="${x}" y="58" width="4" height="117" fill="#1a1a2a" rx="1"/>`).join('')}
+      <rect x="100" y="80" width="100" height="5" fill="#1a1a2a" rx="1"/>
+      <rect x="100" y="110" width="100" height="5" fill="#1a1a2a" rx="1"/>
+      <rect x="100" y="140" width="100" height="5" fill="#1a1a2a" rx="1"/>
+      <!-- Torches -->
+      <rect x="82" y="65" width="6" height="14" fill="#5a3a10" rx="1"/>
+      <ellipse cx="85" cy="63" rx="5" ry="7" fill="#ff8800" opacity="0.85"/>
+      <ellipse cx="85" cy="60" rx="3" ry="5" fill="#ffcc44" opacity="0.7"/>
+      <rect x="212" y="65" width="6" height="14" fill="#5a3a10" rx="1"/>
+      <ellipse cx="215" cy="63" rx="5" ry="7" fill="#ff8800" opacity="0.85"/>
+      <ellipse cx="215" cy="60" rx="3" ry="5" fill="#ffcc44" opacity="0.7"/>
+      <!-- Guard figure -->
+      <rect x="130" y="108" width="22" height="38" fill="#2a2a3a" rx="2"/>
+      <rect x="126" y="115" width="8" height="26" fill="#2a2a3a" rx="1"/>
+      <rect x="146" y="115" width="8" height="26" fill="#2a2a3a" rx="1"/>
+      <rect x="133" y="146" width="7" height="18" fill="#222230" rx="1"/>
+      <rect x="142" y="146" width="7" height="18" fill="#222230" rx="1"/>
+      <circle cx="141" cy="102" r="10" fill="#c8a87a"/>
+      <rect x="130" y="94" width="22" height="12" fill="#3a3a4a" rx="2"/>
+      <polygon points="130,94 152,94 155,86 127,86" fill="#3a3a4a"/>
+      <rect x="128" y="86" width="26" height="4" fill="#555566" rx="1"/>
+      <!-- Spear -->
+      <rect x="158" y="70" width="3" height="95" fill="#5a4a30" rx="1"/>
+      <polygon points="158,70 161,70 159.5,56" fill="#aaaacc"/>
+      <!-- Shield glint -->
+      <ellipse cx="128" cy="122" rx="4" ry="6" fill="#44446a" opacity="0.8"/>
+    `)}</div>`,
   };
 
-  // Expose save function (implemented in Firebase module below)
-  window.__nodeCooldownsRef = nodeCooldowns;
+  let cx = 2, cy = 2;
+  let resourceState = [];
 
-  function fmtTime(ms) {
-    const s = Math.ceil(ms / 1000);
-    if (s < 60) return `${s}s`;
-    const m = Math.floor(s / 60), rs = s % 60;
-    return `${m}m${rs > 0 ? rs + 's' : ''}`;
+  function key(c, rr) { return `${c},${rr}`; }
+  function room(c, rr) {
+    if (c < 0 || c >= GRID_W || rr < 0 || rr >= GRID_H) return null;
+    return MAP[key(c, rr)] || null;
   }
 
-  // Ticker to update all cooldown labels in the current scene
-  let cooldownTicker = null;
-  function startCooldownTicker() {
-    clearInterval(cooldownTicker);
-    cooldownTicker = setInterval(() => {
-      resourceState.forEach(state => {
-        if (!state.depleted) return;
-        const rem = cooldownRemaining(state.col, state.row, state.idx, state.respawnMs);
-        if (rem <= 0) {
-          // Respawn
-          state.depleted = false;
-          state.el.classList.remove('depleted');
-          const lbl = state.el.querySelector('.cooldown-label');
-          if (lbl) lbl.remove();
-        } else {
-          const lbl = state.el.querySelector('.cooldown-label');
-          if (lbl) lbl.textContent = fmtTime(rem);
-        }
-      });
-    }, 1000);
-  }
-
-  function depleteNode(state) {
-    state.depleted = true;
-    state.el.classList.add('depleted');
-    markHarvested(state.col, state.row, state.idx);
-    // Add countdown label
-    const lbl = document.createElement('div');
-    lbl.className = 'cooldown-label';
-    lbl.textContent = fmtTime(state.respawnMs);
-    state.el.appendChild(lbl);
-  }
-
-  function key(c, r) { return `${c},${r}`; }
-  function room(c, r) { return MAP[key(c, r)] || null; }
-
-  // ── SVG makers ──
   function makeTreeSVG(type) {
     const s = type.scale;
     const w = Math.round(56*s), h = Math.round(100*s);
@@ -7067,70 +7176,34 @@ document.addEventListener('click', e => {
     </svg>`;
   }
 
-  // ── Market sell panel ──
-  const MARKET_ITEMS = [
-    { key:'oak_log',     icon:'🪵', label:'Oak Log',     price:2  },
-    { key:'willow_log',  icon:'🌿', label:'Willow Log',  price:5  },
-    { key:'magic_log',   icon:'✨', label:'Magic Log',   price:20 },
-    { key:'copper_ore',  icon:'🟤', label:'Copper Ore',  price:2  },
-    { key:'iron_ore',    icon:'⚙️', label:'Iron Ore',    price:4  },
-    { key:'gold_ore',    icon:'🌕', label:'Gold Ore',    price:12 },
-    { key:'runite_ore',  icon:'💎', label:'Runite Ore',  price:40 },
-  ];
-
-  function buildMarketPanelHTML() {
-    const inv = window.__inventory || {};
-    const tiles = MARKET_ITEMS.map(item => {
-      const count = inv[item.key] || 0;
-      const canSell = count > 0;
-      const total = count * item.price;
-      return `<div class="env-market-tile ${canSell ? 'has-stock' : 'empty'}" data-key="${item.key}" title="${item.label}${canSell ? ` — sell all for ${total}🪙` : ` (${item.price}🪙 ea)`}">
-        <span class="env-tile-icon">${item.icon}</span>
-        <span class="env-tile-count">${count}</span>
-        <span class="env-tile-price">${canSell ? total + '🪙' : item.price + '🪙 ea'}</span>
-      </div>`;
-    }).join('');
-    return `<div class="env-market-title">🏪 Market</div><div class="env-market-grid">${tiles}</div>`;
-  }
-
-  function refreshMarketPanel() {
-    const panel = document.querySelector('.env-market-panel');
-    if (!panel) return;
-    panel.innerHTML = buildMarketPanelHTML();
-    panel.querySelectorAll('.env-market-tile.has-stock').forEach(btn => {
-      btn.addEventListener('click', () => window.sellResource(btn.dataset.key));
-    });
-  }
-  window.__refreshMarketPanel = refreshMarketPanel;
-
-  // ── Mini-map ──
   function renderMinimap() {
     const canvas = document.getElementById('envMinimapCanvas');
     if (!canvas) return;
     const CELL = 13, GAP = 2;
-    const W = GRID_W * (CELL + GAP) - GAP;
-    const H = GRID_H * (CELL + GAP) - GAP;
-    canvas.width = W; canvas.height = H;
+    canvas.width  = GRID_W * (CELL + GAP) - GAP;
+    canvas.height = GRID_H * (CELL + GAP) - GAP;
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, W, H);
-    for (let r = 0; r < GRID_H; r++) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let rr = 0; rr < GRID_H; rr++) {
       for (let c = 0; c < GRID_W; c++) {
-        const px = c * (CELL + GAP), py = r * (CELL + GAP);
-        const rm = room(c, r);
-        if (!rm) { ctx.fillStyle = '#111'; ctx.fillRect(px, py, CELL, CELL); continue; }
-        const isCurrent = c === cx && r === cy;
-        const isMarket = rm.name === 'Market';
-        ctx.fillStyle = isCurrent ? '#f5c842' : isMarket ? '#3a2a00' : '#2a4a2a';
+        const px = c*(CELL+GAP), py = rr*(CELL+GAP);
+        const rm = room(c, rr);
+        if (!rm) { ctx.fillStyle='#0e0e0e'; ctx.fillRect(px,py,CELL,CELL); continue; }
+        let col;
+        if (c===cx && rr===cy)          col = '#f5c842';
+        else if (rm.locked)             col = '#444455';
+        else if (rm.resources?.length)  col = '#1a4a1a';
+        else                            col = '#1e2e1e';
+        ctx.fillStyle = col;
         ctx.fillRect(px, py, CELL, CELL);
-        if (isCurrent) {
-          ctx.fillStyle = '#1a1a1a';
-          ctx.fillRect(px+2, py+2, 1, 1);
+        if (rm.locked) {
+          ctx.fillStyle = '#666688';
+          ctx.fillRect(px + Math.floor(CELL/2)-1, py + Math.floor(CELL/2)-1, 2, 2);
         }
       }
     }
   }
 
-  // ── Nav button states ──
   function updateNavButtons() {
     document.getElementById('envBtnN').disabled = !room(cx, cy-1);
     document.getElementById('envBtnS').disabled = !room(cx, cy+1);
@@ -7138,100 +7211,76 @@ document.addEventListener('click', e => {
     document.getElementById('envBtnE').disabled = !room(cx+1, cy);
   }
 
-  // ── Render room ──
   function renderRoom(dx, dy) {
     const rm = room(cx, cy);
     if (!rm) return;
-
     document.getElementById('envRoomName').textContent = rm.name;
     document.getElementById('envRoomDesc').textContent = rm.desc;
     document.getElementById('envCoords').textContent = `${cx},${cy}`;
-
-    // Update market-sell gate
-    window.__atMarket = (rm.name === 'Market');
-    updateInventoryUI();
-
-    const scene = document.getElementById('envScene');
+    const scene  = document.getElementById('envScene');
     const ground = document.getElementById('envGround');
     scene.style.background = rm.sky;
     ground.style.background = `linear-gradient(180deg, ${rm.ground} 0%, rgba(0,0,0,0.6) 100%)`;
     ground.style.borderTopColor = rm.groundBorder;
 
     const resContainer = document.getElementById('envResources');
-
-    // Slide direction
     if (dx !== 0 || dy !== 0) {
-      const sx = dx * 35, sy = dy * 25;
-      resContainer.style.setProperty('--sx', sx + 'px');
-      resContainer.style.setProperty('--sy', sy + 'px');
+      resContainer.style.setProperty('--sx', (dx*40)+'px');
+      resContainer.style.setProperty('--sy', (dy*30)+'px');
       resContainer.classList.remove('env-slide');
       void resContainer.offsetWidth;
       resContainer.classList.add('env-slide');
     }
-
     resContainer.innerHTML = '';
     resourceState = [];
 
-    rm.resources.forEach((res, idx) => {
+    // Decorative fluff
+    const decorFn = DECOR[rm.name];
+    if (decorFn) resContainer.innerHTML = decorFn();
+
+    // NPC talk button + auto-open on entry
+    if (rm.npc) {
+      const talkBtn = document.createElement('button');
+      talkBtn.className = 'npc-talk-btn';
+      talkBtn.textContent = '💬 Talk';
+      talkBtn.onclick = () => openDialogue(rm.npc);
+      resContainer.appendChild(talkBtn);
+      setTimeout(() => openDialogue(rm.npc), 450);
+    }
+
+    // Interactive resources
+    rm.resources.forEach(res => {
       const el = document.createElement('div');
       el.className = 'env-resource';
       el.style.left = res.x + 'px';
-
       if (res.kind === 'tree') {
         const type = { ...TREE_TYPES[res.type], id: res.type };
         el.innerHTML = makeTreeSVG(type);
         el.title = `${type.name} Tree (WC ${type.reqLevel})`;
-        const cooling = isCooling(cx, cy, idx, type.respawnMs);
-        const state = { el, kind:'tree', type, depleted: cooling, active:false,
-                        col:cx, row:cy, idx, respawnMs: type.respawnMs };
-        if (cooling) {
-          el.classList.add('depleted');
-          const lbl = document.createElement('div');
-          lbl.className = 'cooldown-label';
-          lbl.textContent = fmtTime(cooldownRemaining(cx, cy, idx, type.respawnMs));
-          el.appendChild(lbl);
-        }
+        const state = { el, kind:'tree', type, depleted:false, active:false };
         resourceState.push(state);
         el.addEventListener('click', () => onTreeClick(state));
-      } else if (res.kind === 'market') {
-        el.className = 'env-market-panel';
-        el.style.left = '';
-        el.innerHTML = buildMarketPanelHTML();
-        el.querySelectorAll('.env-market-tile.has-stock').forEach(btn => {
-          btn.addEventListener('click', () => window.sellResource(btn.dataset.key));
-        });
       } else {
         const ore = { ...ORE_TYPES[res.type], id: res.type };
         el.innerHTML = makeRockSVG(ore);
         el.title = `${ore.name} Ore (Mining ${ore.reqLevel})`;
-        const cooling = isCooling(cx, cy, idx, ore.respawnMs);
-        const state = { el, kind:'ore', ore, depleted: cooling, active:false,
-                        col:cx, row:cy, idx, respawnMs: ore.respawnMs };
-        if (cooling) {
-          el.classList.add('depleted');
-          const lbl = document.createElement('div');
-          lbl.className = 'cooldown-label';
-          lbl.textContent = fmtTime(cooldownRemaining(cx, cy, idx, ore.respawnMs));
-          el.appendChild(lbl);
-        }
+        const state = { el, kind:'ore', ore, depleted:false, active:false };
         resourceState.push(state);
         el.addEventListener('click', () => onOreClick(state));
       }
       resContainer.appendChild(el);
     });
 
-    startCooldownTicker();
     updateNavButtons();
     renderMinimap();
   }
 
-  // ── Resource interactions ──
   function onTreeClick(state) {
     if (state.active || state.depleted) return;
     const wcLevel = window.__getSkillLevel ? window.__getSkillLevel('wc') : 1;
     if (wcLevel < state.type.reqLevel) {
       const r = state.el.getBoundingClientRect();
-      spawnSkillFloat(r.left + 30, r.top, `🔒 WC ${state.type.reqLevel}`, 'wc');
+      spawnSkillFloat(r.left+30, r.top, `\uD83D\uDD12 WC ${state.type.reqLevel}`, 'wc');
       return;
     }
     state.active = true;
@@ -7245,18 +7294,20 @@ document.addEventListener('click', e => {
       state.el.classList.add('falling');
       ring.remove();
       const r = state.el.getBoundingClientRect();
-      const cx2 = r.left + r.width/2, cy2 = r.top + r.height/2;
+      const cx2 = r.left+r.width/2, cy2 = r.top+r.height/2;
       if (window.__awardSkillXp) window.__awardSkillXp('wc', state.type.xp, cx2, cy2-20);
       addInventoryItem(state.type.invKey, 1);
       if (Math.random() < state.type.coinChance) {
         if (window.__awardGrassCoin) window.__awardGrassCoin(state.type.coinAmt);
-        spawnCoinFloat(`+${state.type.coinAmt} 🪙`, cx2, cy2-10);
+        spawnCoinFloat(`+${state.type.coinAmt} \uD83E\uDE99`, cx2, cy2-10);
       }
-      spawnResourceFloat(`🪵 ${state.type.name} Log`, cx2, cy2+10, 'wc');
+      spawnResourceFloat(`\uD83E\uDEB5 ${state.type.name} Log`, cx2, cy2+10, 'wc');
       setTimeout(() => {
         state.el.classList.remove('falling');
+        state.depleted = true;
+        state.el.classList.add('depleted');
         state.el.innerHTML = makeTreeSVG(state.type);
-        depleteNode(state);
+        setTimeout(() => { state.depleted=false; state.el.classList.remove('depleted'); }, state.type.respawnMs);
       }, 560);
     }, state.type.chopMs);
   }
@@ -7266,7 +7317,7 @@ document.addEventListener('click', e => {
     const mineLevel = window.__getSkillLevel ? window.__getSkillLevel('mine') : 1;
     if (mineLevel < state.ore.reqLevel) {
       const r = state.el.getBoundingClientRect();
-      spawnSkillFloat(r.left + 24, r.top, `🔒 Mining ${state.ore.reqLevel}`, 'mine');
+      spawnSkillFloat(r.left+24, r.top, `\uD83D\uDD12 Mining ${state.ore.reqLevel}`, 'mine');
       return;
     }
     state.active = true;
@@ -7280,56 +7331,188 @@ document.addEventListener('click', e => {
       state.el.classList.add('breaking');
       ring.remove();
       const r = state.el.getBoundingClientRect();
-      const cx2 = r.left + r.width/2, cy2 = r.top + r.height/2;
+      const cx2 = r.left+r.width/2, cy2 = r.top+r.height/2;
       if (window.__awardSkillXp) window.__awardSkillXp('mine', state.ore.xp, cx2, cy2-20);
       addInventoryItem(state.ore.invKey, 1);
       if (Math.random() < state.ore.coinChance) {
         if (window.__awardGrassCoin) window.__awardGrassCoin(state.ore.coinAmt);
-        spawnCoinFloat(`+${state.ore.coinAmt} 🪙`, cx2, cy2-10);
+        spawnCoinFloat(`+${state.ore.coinAmt} \uD83E\uDE99`, cx2, cy2-10);
       }
-      spawnResourceFloat(`⛏️ ${state.ore.name} Ore`, cx2, cy2+10, 'mine');
+      spawnResourceFloat(`\u26CF\uFE0F ${state.ore.name} Ore`, cx2, cy2+10, 'mine');
       setTimeout(() => {
         state.el.classList.remove('breaking');
+        state.depleted = true;
+        state.el.classList.add('depleted');
         state.el.innerHTML = makeRockSVG(state.ore);
-        depleteNode(state);
+        setTimeout(() => { state.depleted=false; state.el.classList.remove('depleted'); }, state.ore.respawnMs);
       }, 420);
     }, state.ore.mineMs);
   }
 
   function spawnCoinFloat(text, x, y) {
     const el = document.createElement('div');
-    el.className = 'grass-coin';
-    el.textContent = text;
-    el.style.left = x + 'px'; el.style.top = y + 'px';
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1000);
+    el.className='grass-coin'; el.textContent=text;
+    el.style.left=x+'px'; el.style.top=y+'px';
+    document.body.appendChild(el); setTimeout(()=>el.remove(),1000);
   }
   function spawnResourceFloat(text, x, y, cls) {
     const f = document.createElement('div');
-    f.className = `skill-float ${cls}`;
-    f.style.fontSize = '0.75rem';
-    f.textContent = text;
-    f.style.left = x + 'px'; f.style.top = y + 'px';
-    document.body.appendChild(f);
-    setTimeout(() => f.remove(), 1400);
+    f.className=`skill-float ${cls}`; f.style.fontSize='0.75rem'; f.textContent=text;
+    f.style.left=x+'px'; f.style.top=y+'px';
+    document.body.appendChild(f); setTimeout(()=>f.remove(),1400);
   }
 
-  // ── Navigation ──
   window.envNavigate = function(dx, dy) {
-    const nc = cx + dx, nr = cy + dy;
-    if (!room(nc, nr)) return;
-    cx = nc; cy = nr;
-    renderRoom(dx, dy);
+    const nc=cx+dx, nr=cy+dy;
+    if (!room(nc,nr)) return;
+    // Locked rooms block forward movement — player must go back
+    const curRm = room(cx, cy);
+    if (curRm && curRm.locked) {
+      // Allow going back (west, since gate is at east edge)
+      if (dx !== -1) {
+        openDialogue(curRm.npc);
+        return;
+      }
+    }
+    cx=nc; cy=nr;
+    renderRoom(dx,dy);
   };
 
-  window.envGoTo = function(tc, tr) {
-    if (!room(tc, tr)) return;
-    const dx = Math.sign(tc - cx), dy = Math.sign(tr - cy);
-    cx = tc; cy = tr;
-    renderRoom(dx, dy);
+  // ══════════════════ DIALOGUE SYSTEM ══════════════════
+
+  const NPCS = {
+    guard: {
+      name: 'Captain Aldric',
+      title: 'Royal Gate Guard',
+      portrait: '⚔️',
+      tree: {
+        root: {
+          text: `*The guard steps forward, spear raised.*\n\n"Halt. These are the Royal Gates of Veldmoor. No one passes without the King's Seal.\n\nState your business, wanderer."`,
+          choices: [
+            { label: 'What is the King\'s Seal?',  next: 'what_seal' },
+            { label: 'How do I get the Seal?',      next: 'how_seal'  },
+            { label: 'I need to get through.',      next: 'plead'     },
+            { label: '[Leave]',                     next: null        },
+          ]
+        },
+        what_seal: {
+          text: `"The King's Seal is a wax medallion stamped with the Veldmoor crest — a crowned serpent devouring its own tail.\n\nWithout it, these gates stay shut. Captain's orders, and the Captain's orders come from the King himself."`,
+          choices: [
+            { label: 'How do I get one?',      next: 'how_seal'   },
+            { label: 'Who has the Seal?',       next: 'who_seal'   },
+            { label: '[Back]',                  next: 'root'       },
+          ]
+        },
+        how_seal: {
+          text: `"There are two ways.\n\nFirst — prove yourself worthy. The Royal Archivist in the East Tower grants Seals to those who bring him rare materials. He's been mumbling about Runite lately.\n\nSecond — you could try your luck at the Black Market. But I didn't tell you that."`,
+          choices: [
+            { label: 'What materials does the Archivist want?', next: 'archivist'  },
+            { label: 'Tell me more about the Black Market.',    next: 'blackmarket'},
+            { label: '[Back]',                                  next: 'root'       },
+          ]
+        },
+        who_seal: {
+          text: `"The Archivist holds the authority to issue Seals to worthy travellers.\n\nHis name is Erasmus. Old man. Smells of ink and old paper. He keeps to the East Tower — you'll find it past the Runite Mine, they say.\n\nBring him what he asks. He'll do the rest."`,
+          choices: [
+            { label: 'What does Erasmus want?', next: 'archivist'  },
+            { label: '[Back]',                  next: 'root'       },
+          ]
+        },
+        archivist: {
+          text: `"Last I heard, old Erasmus was ranting about a particular ore.\n\nRunite. Said it has properties that let him bind the Seal's enchantment permanently. Quite rare stuff.\n\nBring him Runite Ore and he'll stamp your Seal. That's the honourable path."`,
+          choices: [
+            { label: 'Where is Runite found?',             next: 'runite_hint' },
+            { label: 'Tell me about the Black Market.',    next: 'blackmarket' },
+            { label: '[Back]',                             next: 'root'        },
+          ]
+        },
+        runite_hint: {
+          text: `*The guard lowers his voice slightly.*\n\n"Runite's deep underground. Very deep. The miners who find it don't come back often — and when they do, they don't talk much.\n\nI've heard rumours of a mine far to the south. Dangerous country. If you're brave enough to seek it out, you're brave enough to deserve the Seal."`,
+          choices: [
+            { label: 'I\'ll find it.',  next: 'brave'  },
+            { label: '[Back]',          next: 'root'   },
+          ]
+        },
+        blackmarket: {
+          text: `*The guard glances sideways, then steps closer.*\n\n"...There's a trader. Goes by Morrigan. She operates somewhere in the wetlands — swamp country.\n\nShe deals in... acquired documents. Whether those Seals are genuine is a matter of debate. I personally know nothing about this.\n\n...You didn't hear that from me."`,
+          choices: [
+            { label: 'Understood. Thanks.',  next: 'root'   },
+            { label: '[Back]',               next: 'root'   },
+          ]
+        },
+        plead: {
+          text: `*The guard is unmoved.*\n\n"Everyone who walks up to these gates 'needs' to get through. Merchants, pilgrims, spies.\n\nMy answer is the same for all of them.\n\nBring the Seal. No exceptions."`,
+          choices: [
+            { label: 'Fine. How do I get the Seal?', next: 'how_seal' },
+            { label: '[Back]',                        next: 'root'    },
+          ]
+        },
+        brave: {
+          text: `*The guard nods slowly.*\n\n"Good. I respect that.\n\nDon't die out there. Dead adventurers can't open gates.\n\nWhen you have the Seal, come back. I'll be here."`,
+          choices: [
+            { label: 'I\'ll return.',  next: null  },
+            { label: '[Back]',         next: 'root'},
+          ]
+        },
+      }
+    }
   };
 
-  // Init minimap canvas
+  let activeNPC = null;
+  let activeNode = null;
+
+  window.openDialogue = function(npcKey) {
+    const npc = NPCS[npcKey];
+    if (!npc) return;
+    activeNPC = npc;
+    activeNode = 'root';
+    renderDialogue();
+    document.getElementById('dialogueBox').classList.add('open');
+  };
+
+  window.dialogueChoose = function(next) {
+    if (next === null) {
+      document.getElementById('dialogueBox').classList.remove('open');
+      activeNPC = null; activeNode = null;
+      return;
+    }
+    activeNode = next;
+    renderDialogue();
+  };
+
+  function renderDialogue() {
+    const npc  = activeNPC;
+    const node = npc.tree[activeNode];
+    const box  = document.getElementById('dialogueBox');
+
+    // Typewriter effect for text
+    const textEl = box.querySelector('#dlgText');
+    const text = node.text;
+    textEl.textContent = '';
+    let i = 0;
+    clearInterval(textEl._tw);
+    textEl._tw = setInterval(() => {
+      textEl.textContent += text[i++];
+      if (i >= text.length) clearInterval(textEl._tw);
+    }, 18);
+
+    box.querySelector('#dlgName').textContent    = npc.name;
+    box.querySelector('#dlgTitle').textContent   = npc.title;
+    box.querySelector('#dlgPortrait').textContent = npc.portrait;
+
+    const choicesEl = box.querySelector('#dlgChoices');
+    choicesEl.innerHTML = '';
+    node.choices.forEach((ch, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'dlg-choice';
+      btn.textContent = ch.label;
+      btn.onclick = () => {
+        clearInterval(textEl._tw);
+        window.dialogueChoose(ch.next);
+      };
+      choicesEl.appendChild(btn);
+    });
+  }
   const minimapDiv = document.getElementById('envMinimap');
   const canvas = document.createElement('canvas');
   canvas.id = 'envMinimapCanvas';
@@ -7340,7 +7523,7 @@ document.addEventListener('click', e => {
 
 })();
 
-
+// ══════════════════ SHARED RESOURCE HELPERS ══════════════════
 function makeProgressRing(color = '#4ade80') {
   const ns = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(ns, 'svg');
@@ -7846,18 +8029,6 @@ window.__fbSaveInventory = async function() {
   });
 };
 
-window.__fbSaveNodeCooldowns = async function(cooldowns) {
-  const user = window.__currentUser;
-  if (!user) return;
-  const uid = user.id;
-  // Firebase keys can't contain ',' or ':' — encode them
-  const encoded = {};
-  for (const [k, v] of Object.entries(cooldowns)) {
-    encoded[k.replace(/,/g, '_').replace(/:/g, '__')] = v;
-  }
-  await update(ref(db, `players/${uid}`), { nodeCooldowns: encoded });
-};
-
 setInterval(() => {
   const uid = window.__currentUserId;
   if (uid && uid !== gardenWatchingUid) {
@@ -7869,14 +8040,6 @@ setInterval(() => {
       window.__applyGardenBoosts && window.__applyGardenBoosts(p.garden || {});
       window.__loadSkillsFromPlayer && window.__loadSkillsFromPlayer(p);
       window.__loadInventoryFromPlayer && window.__loadInventoryFromPlayer(p);
-      if (p.nodeCooldowns && window.__loadNodeCooldowns) {
-        // Decode Firebase-safe keys back to original format
-        const decoded = {};
-        for (const [k, v] of Object.entries(p.nodeCooldowns)) {
-          decoded[k.replace(/__/g, ':').replace(/_/g, ',')] = v;
-        }
-        window.__loadNodeCooldowns(decoded);
-      }
       if (document.getElementById('gardenDrawer')?.classList.contains('open')) {
         window.renderGarden && window.renderGarden();
       }
