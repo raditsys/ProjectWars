@@ -2986,7 +2986,7 @@
   .resource-status-tag {
     position: absolute;
     left: 50%;
-    bottom: -30px;
+    bottom: calc(100% + 4px);
     transform: translateX(-50%);
     background: rgba(8,8,8,0.9);
     border: 1px solid #444;
@@ -2996,7 +2996,9 @@
     border-radius: 3px;
     letter-spacing: 0.4px;
     text-align: center;
-    white-space: nowrap;
+    white-space: normal;
+    min-width: 92px;
+    max-width: 120px;
     pointer-events: none;
     line-height: 1.2;
   }
@@ -7740,7 +7742,7 @@ document.addEventListener('click', e => {
     const tag = document.createElement('div');
     tag.className = 'resource-status-tag';
     const by = node.takenBy || 'Unknown';
-    tag.textContent = `Taken by: ${by} • Back in ${secs}s`;
+    tag.innerHTML = `Taken by: ${by}<br/>Back in ${secs}s`;
     state.el.appendChild(tag);
   }
   function refreshResourceVisuals() {
