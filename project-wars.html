@@ -2700,10 +2700,26 @@
   }
   .env-resource:hover:not(.depleted) { transform: scale(1.08); }
   .env-resource.depleted { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; pointer-events: none; }
+  .cooldown-label {
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: #aaa;
+    background: rgba(0,0,0,0.75);
+    padding: 1px 5px;
+    white-space: nowrap;
+    pointer-events: none;
+    letter-spacing: 0.5px;
+  }
   .env-resource.chopping { animation: treeChop 0.18s ease-in-out infinite; }
   .env-resource.mining   { animation: oreShake 0.12s ease-in-out infinite; }
   .env-resource.falling  { animation: treeFall 0.55s ease-in forwards !important; pointer-events: none; }
   .env-resource.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
+
+
 
   /* ══════════ MARKET SELL PANEL ══════════ */
   .env-market-panel {
@@ -6952,6 +6968,77 @@ document.addEventListener('click', e => {
   let cx = 1, cy = 0; // current col, row — start in Forest
   let resourceState = [];
 
+  // ── Persistent cooldowns ──
+  // Key: "col,row:nodeIdx"  Value: timestamp (ms) when node was harvested
+  const nodeCooldowns = {};
+
+  function nodeKey(col, row, idx) { return `${col},${row}:${idx}`; }
+
+  function isCooling(col, row, idx, respawnMs) {
+    const t = nodeCooldowns[nodeKey(col, row, idx)];
+    if (!t) return false;
+    return (Date.now() - t) < respawnMs;
+  }
+
+  function cooldownRemaining(col, row, idx, respawnMs) {
+    const t = nodeCooldowns[nodeKey(col, row, idx)];
+    if (!t) return 0;
+    return Math.max(0, respawnMs - (Date.now() - t));
+  }
+
+  function markHarvested(col, row, idx) {
+    nodeCooldowns[nodeKey(col, row, idx)] = Date.now();
+    if (window.__fbSaveNodeCooldowns) window.__fbSaveNodeCooldowns(nodeCooldowns);
+  }
+
+  window.__loadNodeCooldowns = function(data) {
+    if (!data) return;
+    Object.assign(nodeCooldowns, data);
+  };
+
+  // Expose save function (implemented in Firebase module below)
+  window.__nodeCooldownsRef = nodeCooldowns;
+
+  function fmtTime(ms) {
+    const s = Math.ceil(ms / 1000);
+    if (s < 60) return `${s}s`;
+    const m = Math.floor(s / 60), rs = s % 60;
+    return `${m}m${rs > 0 ? rs + 's' : ''}`;
+  }
+
+  // Ticker to update all cooldown labels in the current scene
+  let cooldownTicker = null;
+  function startCooldownTicker() {
+    clearInterval(cooldownTicker);
+    cooldownTicker = setInterval(() => {
+      resourceState.forEach(state => {
+        if (!state.depleted) return;
+        const rem = cooldownRemaining(state.col, state.row, state.idx, state.respawnMs);
+        if (rem <= 0) {
+          // Respawn
+          state.depleted = false;
+          state.el.classList.remove('depleted');
+          const lbl = state.el.querySelector('.cooldown-label');
+          if (lbl) lbl.remove();
+        } else {
+          const lbl = state.el.querySelector('.cooldown-label');
+          if (lbl) lbl.textContent = fmtTime(rem);
+        }
+      });
+    }, 1000);
+  }
+
+  function depleteNode(state) {
+    state.depleted = true;
+    state.el.classList.add('depleted');
+    markHarvested(state.col, state.row, state.idx);
+    // Add countdown label
+    const lbl = document.createElement('div');
+    lbl.className = 'cooldown-label';
+    lbl.textContent = fmtTime(state.respawnMs);
+    state.el.appendChild(lbl);
+  }
+
   function key(c, r) { return `${c},${r}`; }
   function room(c, r) { return MAP[key(c, r)] || null; }
 
@@ -7085,7 +7172,7 @@ document.addEventListener('click', e => {
     resContainer.innerHTML = '';
     resourceState = [];
 
-    rm.resources.forEach(res => {
+    rm.resources.forEach((res, idx) => {
       const el = document.createElement('div');
       el.className = 'env-resource';
       el.style.left = res.x + 'px';
@@ -7094,7 +7181,16 @@ document.addEventListener('click', e => {
         const type = { ...TREE_TYPES[res.type], id: res.type };
         el.innerHTML = makeTreeSVG(type);
         el.title = `${type.name} Tree (WC ${type.reqLevel})`;
-        const state = { el, kind:'tree', type, depleted:false, active:false };
+        const cooling = isCooling(cx, cy, idx, type.respawnMs);
+        const state = { el, kind:'tree', type, depleted: cooling, active:false,
+                        col:cx, row:cy, idx, respawnMs: type.respawnMs };
+        if (cooling) {
+          el.classList.add('depleted');
+          const lbl = document.createElement('div');
+          lbl.className = 'cooldown-label';
+          lbl.textContent = fmtTime(cooldownRemaining(cx, cy, idx, type.respawnMs));
+          el.appendChild(lbl);
+        }
         resourceState.push(state);
         el.addEventListener('click', () => onTreeClick(state));
       } else if (res.kind === 'market') {
@@ -7108,13 +7204,23 @@ document.addEventListener('click', e => {
         const ore = { ...ORE_TYPES[res.type], id: res.type };
         el.innerHTML = makeRockSVG(ore);
         el.title = `${ore.name} Ore (Mining ${ore.reqLevel})`;
-        const state = { el, kind:'ore', ore, depleted:false, active:false };
+        const cooling = isCooling(cx, cy, idx, ore.respawnMs);
+        const state = { el, kind:'ore', ore, depleted: cooling, active:false,
+                        col:cx, row:cy, idx, respawnMs: ore.respawnMs };
+        if (cooling) {
+          el.classList.add('depleted');
+          const lbl = document.createElement('div');
+          lbl.className = 'cooldown-label';
+          lbl.textContent = fmtTime(cooldownRemaining(cx, cy, idx, ore.respawnMs));
+          el.appendChild(lbl);
+        }
         resourceState.push(state);
         el.addEventListener('click', () => onOreClick(state));
       }
       resContainer.appendChild(el);
     });
 
+    startCooldownTicker();
     updateNavButtons();
     renderMinimap();
   }
@@ -7149,10 +7255,8 @@ document.addEventListener('click', e => {
       spawnResourceFloat(`🪵 ${state.type.name} Log`, cx2, cy2+10, 'wc');
       setTimeout(() => {
         state.el.classList.remove('falling');
-        state.depleted = true;
-        state.el.classList.add('depleted');
         state.el.innerHTML = makeTreeSVG(state.type);
-        setTimeout(() => { state.depleted = false; state.el.classList.remove('depleted'); }, state.type.respawnMs);
+        depleteNode(state);
       }, 560);
     }, state.type.chopMs);
   }
@@ -7186,10 +7290,8 @@ document.addEventListener('click', e => {
       spawnResourceFloat(`⛏️ ${state.ore.name} Ore`, cx2, cy2+10, 'mine');
       setTimeout(() => {
         state.el.classList.remove('breaking');
-        state.depleted = true;
-        state.el.classList.add('depleted');
         state.el.innerHTML = makeRockSVG(state.ore);
-        setTimeout(() => { state.depleted = false; state.el.classList.remove('depleted'); }, state.ore.respawnMs);
+        depleteNode(state);
       }, 420);
     }, state.ore.mineMs);
   }
@@ -7238,7 +7340,7 @@ document.addEventListener('click', e => {
 
 })();
 
-// ══════════════════ SHARED RESOURCE HELPERS ══════════════════
+
 function makeProgressRing(color = '#4ade80') {
   const ns = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(ns, 'svg');
@@ -7744,6 +7846,18 @@ window.__fbSaveInventory = async function() {
   });
 };
 
+window.__fbSaveNodeCooldowns = async function(cooldowns) {
+  const user = window.__currentUser;
+  if (!user) return;
+  const uid = user.id;
+  // Firebase keys can't contain ',' or ':' — encode them
+  const encoded = {};
+  for (const [k, v] of Object.entries(cooldowns)) {
+    encoded[k.replace(/,/g, '_').replace(/:/g, '__')] = v;
+  }
+  await update(ref(db, `players/${uid}`), { nodeCooldowns: encoded });
+};
+
 setInterval(() => {
   const uid = window.__currentUserId;
   if (uid && uid !== gardenWatchingUid) {
@@ -7755,6 +7869,14 @@ setInterval(() => {
       window.__applyGardenBoosts && window.__applyGardenBoosts(p.garden || {});
       window.__loadSkillsFromPlayer && window.__loadSkillsFromPlayer(p);
       window.__loadInventoryFromPlayer && window.__loadInventoryFromPlayer(p);
+      if (p.nodeCooldowns && window.__loadNodeCooldowns) {
+        // Decode Firebase-safe keys back to original format
+        const decoded = {};
+        for (const [k, v] of Object.entries(p.nodeCooldowns)) {
+          decoded[k.replace(/__/g, ':').replace(/_/g, ',')] = v;
+        }
+        window.__loadNodeCooldowns(decoded);
+      }
       if (document.getElementById('gardenDrawer')?.classList.contains('open')) {
         window.renderGarden && window.renderGarden();
       }
