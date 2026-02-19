@@ -6535,15 +6535,17 @@
   // ══════════════════ PRECISION RISK ══════════════════
 
   const PR_ZONES = [
-    { id: 'miss-l',    width: 0.26, mult: 0,   label: 'MISS', color: '#3a0a0a', text: '#6a2a2a' },
-    { id: 'extreme-l', width: 0.02, mult: 5.0, label: '5×',   color: '#2a0a1a', text: '#ff3333' },
-    { id: 'far-l',     width: 0.04, mult: 2.0, label: '2×',   color: '#1a1000', text: '#ff8c00' },
-    { id: 'edge-l',    width: 0.06, mult: 1.2, label: '1.2×', color: '#1a1a00', text: '#f5c842' },
-    { id: 'safe',      width: 0.24, mult: 0.5, label: '0.5×', color: '#0a1a0a', text: '#4ade80' },
-    { id: 'edge-r',    width: 0.06, mult: 1.2, label: '1.2×', color: '#1a1a00', text: '#f5c842' },
-    { id: 'far-r',     width: 0.04, mult: 2.0, label: '2×',   color: '#1a1000', text: '#ff8c00' },
-    { id: 'extreme-r', width: 0.02, mult: 5.0, label: '5×',   color: '#2a0a1a', text: '#ff3333' },
-    { id: 'miss-r',    width: 0.26, mult: 0,   label: 'MISS', color: '#3a0a0a', text: '#6a2a2a' },
+    { id: 'skull-l',   width: 0.04,  mult: 0,   label: '☠',    color: '#240404', text: '#ff4d4d', loss: 'full' },
+    { id: 'miss-l',    width: 0.20,  mult: 0,   label: 'MISS', color: '#3a0a0a', text: '#6a2a2a', loss: 'half' },
+    { id: 'extreme-l', width: 0.02,  mult: 5.0, label: '5×',   color: '#2a0a1a', text: '#ff3333' },
+    { id: 'far-l',     width: 0.04,  mult: 2.0, label: '2×',   color: '#1a1000', text: '#ff8c00' },
+    { id: 'edge-l',    width: 0.075, mult: 1.5, label: '1.5×', color: '#1a1a00', text: '#f5c842' },
+    { id: 'safe',      width: 0.25,  mult: 0.5, label: '0.5×', color: '#0a1a0a', text: '#4ade80', loss: 'half' },
+    { id: 'edge-r',    width: 0.075, mult: 1.5, label: '1.5×', color: '#1a1a00', text: '#f5c842' },
+    { id: 'far-r',     width: 0.04,  mult: 2.0, label: '2×',   color: '#1a1000', text: '#ff8c00' },
+    { id: 'extreme-r', width: 0.02,  mult: 5.0, label: '5×',   color: '#2a0a1a', text: '#ff3333' },
+    { id: 'miss-r',    width: 0.20,  mult: 0,   label: 'MISS', color: '#3a0a0a', text: '#6a2a2a', loss: 'half' },
+    { id: 'skull-r',   width: 0.04,  mult: 0,   label: '☠',    color: '#240404', text: '#ff4d4d', loss: 'full' },
   ];
 
   // State
@@ -6562,6 +6564,7 @@
   let prMusicNodes = [];
   let prMusicCtx   = null;
   let prSpaceDown  = false;
+  let prContinueBoost = 1.0;
 
   // Build zone DOM once
   function prBuildZones() {
@@ -6610,9 +6613,13 @@
 
   function prGetMultLabel(mult) {
     if (mult === 0 || mult === 0.5) return { label: '—', cls: '' };
-    if (mult <= 1.2)  return { label: `${mult}×`, cls: 'edge' };
+    if (mult <= 1.5)  return { label: `${mult}×`, cls: 'edge' };
     if (mult <= 2.0)  return { label: `${mult}×`, cls: 'far' };
     return                   { label: `${mult}×`, cls: 'extreme' };
+  }
+
+  function prGetContinueBoost() {
+    return 1 + Math.min(0.15 + prStreak * 0.07 + prRoundNum * 0.03, 0.7);
   }
 
   function prUpdateNeedle() {
@@ -6629,7 +6636,7 @@
 
     const ml = prGetMultLabel(z.mult);
     const lbl = document.getElementById('prMultLabel');
-    lbl.textContent = z.mult === 0 ? 'MISS' : ml.label;
+    lbl.textContent = z.id.startsWith('skull') ? '☠' : (z.mult === 0 ? 'MISS' : ml.label);
     lbl.className = 'pr-multiplier-label ' + ml.cls;
   }
 
@@ -6721,21 +6728,22 @@
     const result = document.getElementById('prResult');
 
     if (zone.mult === 0 || zone.mult === 0.5) {
-      // MISS or 0.5× center — lose half bet, reset, auto-restart
+      // MISS / SKULL or 0.5× center — lose coins, reset, auto-restart
       prStopMusic();
       playTone(80, 'sawtooth', 0.5, 0.18);
       setTimeout(() => playTone(60, 'sawtooth', 0.5, 0.2), 200);
       flash.style.background = '#ff000044';
       flash.animate([{opacity:0.8},{opacity:0}], {duration:400,fill:'forwards'});
       arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
-      const lost = Math.floor(prBet / 2);
+      const lost = zone.loss === 'full' ? prBet : Math.floor(prBet / 2);
       await setCasinoCoins(p.id, Math.max(0, (p.coins||0) - lost));
       spawnCoinFloat(`-${lost} 🪙`);
-      result.textContent = zone.mult === 0 ? `MISS — lost ${lost} 🪙` : `0.5× — lost ${lost} 🪙`;
+      result.textContent = zone.mult === 0 ? `${zone.loss === 'full' ? '☠ SKULL' : 'MISS'} — lost ${lost} 🪙` : `0.5× — lost ${lost} 🪙`;
       result.className = 'pr-result miss';
       prStreak = 0;
       prRoundNum = 0;
       prAccumMult = 1.0;
+      prContinueBoost = 1.0;
       document.getElementById('prStreakDisplay').className = 'pr-streak-display';
       prUpdateCashoutDisplay();
       prUpdateArenaClass();
@@ -6752,8 +6760,11 @@
     }
 
     // HIT
+    const appliedMult = zone.mult * prContinueBoost;
+    const usedBoost = prContinueBoost;
+    prContinueBoost = 1.0;
     prStreak++;
-    prAccumMult *= zone.mult;
+    prAccumMult *= appliedMult;
     const totalPayout = Math.floor(prBet * prAccumMult);
 
     flash.style.background = zone.mult >= 5 ? '#ff000066' : zone.mult >= 2.5 ? '#ff8c0044' : zone.mult >= 1.5 ? '#f5c84244' : '#4ade8044';
@@ -6770,7 +6781,8 @@
 
     // Update UI
     const ml = prGetMultLabel(zone.mult);
-    result.textContent = `HIT ${ml.label} — TOTAL ${prAccumMult.toFixed(2)}× (+${totalPayout} 🪙)`;
+    const boostSuffix = usedBoost > 1 ? ` (pressure ${usedBoost.toFixed(2)}×)` : '';
+    result.textContent = `HIT ${ml.label}${boostSuffix} — TOTAL ${prAccumMult.toFixed(2)}× (+${totalPayout} 🪙)`;
     result.className   = zone.mult >= 5 ? 'pr-result jackpot' : 'pr-result win';
     document.getElementById('prStreakDisplay').textContent = `STREAK: ${prStreak}`;
     document.getElementById('prStreakDisplay').className = 'pr-streak-display' + (prStreak >= 3 ? ' hot' : '');
@@ -6779,6 +6791,8 @@
     // Intensify music
     prStartMusic(Math.min(prStreak, 5));
     prUpdateArenaClass();
+    const nextBoost = prGetContinueBoost();
+    document.getElementById('prHint').innerHTML = `Cash out now, or <strong>risk it</strong> for a <strong>${nextBoost.toFixed(2)}×</strong> pressure boost on your next hit.`;
 
     // Show cash out, offer continue
     prShowCashOut(true);
@@ -6788,15 +6802,16 @@
   function prRebuildZones() {
     const r = prRoundNum;
     // Fixed widths — never change
+    const skullW   = 0.04;
     const extremeW = 0.02;
     const farW     = 0.04;
-    const edgeW    = 0.06;
-    // Miss starts small (0.10) and grows each round
-    const missW    = Math.min(0.10 + r * 0.025, 0.40);
+    const edgeW    = 0.075;
+    // Miss starts small and grows each round
+    const missW    = Math.min(0.08 + r * 0.02, 0.28);
     // Center safe gets whatever remains
-    const safeW    = Math.max(1 - (missW + extremeW + farW + edgeW) * 2, 0.04);
+    const safeW    = Math.max(1 - (skullW + missW + extremeW + farW + edgeW) * 2, 0.04);
 
-    const zoneWidths = [missW, extremeW, farW, edgeW, safeW, edgeW, farW, extremeW, missW];
+    const zoneWidths = [skullW, missW, extremeW, farW, edgeW, safeW, edgeW, farW, extremeW, missW, skullW];
 
     const wrap = document.getElementById('prZones');
     if (!wrap) return;
@@ -6830,11 +6845,13 @@
     prStreak = 0;
     prRoundNum = 0;
     prAccumMult = 1.0;
+    prContinueBoost = 1.0;
     document.getElementById('prStreakDisplay').textContent = 'STREAK: 0';
     document.getElementById('prStreakDisplay').className = 'pr-streak-display';
     prUpdateCashoutDisplay();
     prUpdateArenaClass();
     prPhase = 'idle';
+    document.getElementById('prHint').innerHTML = 'Press <kbd>SPACE</kbd> or tap to lock in';
   };
 
   window.prStart = function() {
@@ -6846,7 +6863,11 @@
 
     // Continue from streak result — next hit
     if (prPhase === 'result' && prStreak > 0) {
+      prContinueBoost = prGetContinueBoost();
       prShowCashOut(false);
+    } else {
+      prContinueBoost = 1.0;
+      document.getElementById('prHint').innerHTML = 'Press <kbd>SPACE</kbd> or tap to lock in';
     }
 
     // Increment round counter and apply escalating difficulty
