@@ -474,11 +474,12 @@
   /* ── Music Player ── */
   .music-player {
     position: fixed;
-    bottom: 1.5rem;
-    left: 1.5rem;
+    top: 4.5rem;
+    right: 1rem;
     z-index: 400;
     display: flex;
     align-items: center;
+    flex-direction: row-reverse;
     gap: 0;
   }
 
@@ -532,21 +533,21 @@
     max-width: 0;
     opacity: 0;
     transition: max-width 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.35s ease;
-    padding-left: 0;
+    padding-right: 0;
     background: var(--surface);
     border: 1px solid transparent;
-    border-left: none;
-    border-radius: 0 2rem 2rem 0;
-    margin-left: -1px;
+    border-right: none;
+    border-radius: 2rem 0 0 2rem;
+    margin-right: -1px;
   }
 
   .music-player:hover .music-slider-wrap {
     max-width: 160px;
     opacity: 1;
-    padding-left: 0.75rem;
-    padding-right: 1rem;
+    padding-left: 1rem;
+    padding-right: 0.75rem;
     border-color: var(--border);
-    border-left: none;
+    border-right: none;
   }
 
   .music-vol-slider {
@@ -2587,26 +2588,99 @@
   .ore-obj.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
 
   /* ══════════ SKILL HUD ══════════ */
-  #skillHud {
+  /* ══════════ HOTBAR ══════════ */
+  #hotbar {
     position: fixed;
-    bottom: 100px;
-    right: 16px;
+    bottom: 20px;
+    left: 16px;
     z-index: 150;
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    pointer-events: none;
+    gap: 8px;
+    align-items: flex-end;
   }
-  .skill-card {
-    background: rgba(10,10,10,0.88);
-    border: 1px solid #2a2a2a;
-    padding: 5px 9px;
+  .hotbar-btn {
+    width: 48px;
+    height: 48px;
+    background: rgba(10,10,10,0.92);
+    border: 1px solid #333;
+    color: var(--text);
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: border-color 0.15s, background 0.15s;
+    backdrop-filter: blur(6px);
+    flex-shrink: 0;
+  }
+  .hotbar-btn:hover { border-color: var(--gold); background: rgba(20,18,5,0.95); }
+  .hotbar-btn.active { border-color: var(--gold); background: rgba(30,24,5,0.95); }
+  .hotbar-panel {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 0;
+    background: rgba(10,10,10,0.96);
+    border: 1px solid #333;
+    backdrop-filter: blur(8px);
+    min-width: 200px;
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
+  }
+  .hotbar-panel.open { display: flex; }
+  .hotbar-panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    padding: 6px 10px 5px;
+    border-bottom: 1px solid #222;
+  }
+
+  /* Inventory inside hotbar panel */
+  .inv-row {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 5px 10px;
     display: flex;
     align-items: center;
     gap: 7px;
-    min-width: 140px;
-    backdrop-filter: blur(4px);
+    transition: background 0.1s;
   }
+  .inv-row:last-child { border-bottom: none; }
+  .inv-row:hover { background: rgba(255,255,255,0.03); }
+  .inv-icon { font-size: 1rem; flex-shrink: 0; }
+  .inv-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--text); flex: 1; letter-spacing: 0.5px; }
+  .inv-count { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--gold); min-width: 22px; text-align: right; }
+  .inv-sell-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    background: #1a3a1a;
+    border: 1px solid #2a6a2a;
+    color: #4ade80;
+    padding: 2px 6px;
+    cursor: pointer;
+    transition: background 0.12s;
+    white-space: nowrap;
+  }
+  .inv-sell-btn:hover:not(:disabled) { background: #22552a; }
+  .inv-sell-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* Skills inside hotbar panel */
+  .skill-card {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 7px 10px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .skill-card:last-child { border-bottom: none; }
   .skill-icon { font-size: 1rem; flex-shrink: 0; }
   .skill-info { flex: 1; }
   .skill-name { font-family: 'Bebas Neue', sans-serif; font-size: 0.65rem; letter-spacing: 2px; color: var(--muted); line-height: 1; }
@@ -2636,58 +2710,6 @@
     70%  { opacity: 1; }
     100% { opacity: 0; transform: translateY(-60px) scale(0.85); }
   }
-
-  /* ══════════ INVENTORY PANEL ══════════ */
-  #inventoryPanel {
-    position: fixed;
-    bottom: 100px;
-    left: 16px;
-    z-index: 150;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    pointer-events: none;
-    min-width: 170px;
-  }
-  .inv-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.7rem;
-    letter-spacing: 3px;
-    color: var(--muted);
-    padding: 0 2px 3px;
-    border-bottom: 1px solid #222;
-    margin-bottom: 2px;
-  }
-  .inv-row {
-    background: rgba(10,10,10,0.88);
-    border: 1px solid #2a2a2a;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    pointer-events: all;
-    backdrop-filter: blur(4px);
-    transition: border-color 0.15s;
-  }
-  .inv-row:hover { border-color: #444; }
-  .inv-icon { font-size: 1rem; flex-shrink: 0; }
-  .inv-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--text); flex: 1; letter-spacing: 0.5px; }
-  .inv-count { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: var(--gold); min-width: 22px; text-align: right; }
-  .inv-sell-btn {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.65rem;
-    letter-spacing: 1px;
-    background: #1a3a1a;
-    border: 1px solid #2a6a2a;
-    color: #4ade80;
-    padding: 2px 6px;
-    cursor: pointer;
-    transition: background 0.12s;
-    white-space: nowrap;
-    pointer-events: all;
-  }
-  .inv-sell-btn:hover:not(:disabled) { background: #22552a; }
-  .inv-sell-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
   /* ── FROG ── */
   #frogPet {
@@ -2760,74 +2782,84 @@
 <div id="grassLayer"></div>
 <div id="resourceLayer"></div>
 <div id="gardenGnome" style="display:none;">🧙</div>
-<div id="inventoryPanel">
-  <div class="inv-title">🎒 Inventory</div>
-  <!-- logs -->
-  <div class="inv-row" id="invRowOakLog">
-    <span class="inv-icon">🪵</span>
-    <span class="inv-label">Oak Log</span>
-    <span class="inv-count" id="invOakLog">0</span>
-    <button class="inv-sell-btn" onclick="sellResource('oak_log')" disabled id="sellOakLog">Sell 2🪙</button>
-  </div>
-  <div class="inv-row" id="invRowWillowLog">
-    <span class="inv-icon">🌿</span>
-    <span class="inv-label">Willow Log</span>
-    <span class="inv-count" id="invWillowLog">0</span>
-    <button class="inv-sell-btn" onclick="sellResource('willow_log')" disabled id="sellWillowLog">Sell 5🪙</button>
-  </div>
-  <div class="inv-row" id="invRowMagicLog">
-    <span class="inv-icon">✨</span>
-    <span class="inv-label">Magic Log</span>
-    <span class="inv-count" id="invMagicLog">0</span>
-    <button class="inv-sell-btn" onclick="sellResource('magic_log')" disabled id="sellMagicLog">Sell 20🪙</button>
-  </div>
-  <!-- ores -->
-  <div class="inv-row" id="invRowCopperOre">
-    <span class="inv-icon">🟤</span>
-    <span class="inv-label">Copper Ore</span>
-    <span class="inv-count" id="invCopperOre">0</span>
-    <button class="inv-sell-btn" onclick="sellResource('copper_ore')" disabled id="sellCopperOre">Sell 2🪙</button>
-  </div>
-  <div class="inv-row" id="invRowIronOre">
-    <span class="inv-icon">⚙️</span>
-    <span class="inv-label">Iron Ore</span>
-    <span class="inv-count" id="invIronOre">0</span>
-    <button class="inv-sell-btn" onclick="sellResource('iron_ore')" disabled id="sellIronOre">Sell 4🪙</button>
-  </div>
-  <div class="inv-row" id="invRowGoldOre">
-    <span class="inv-icon">🌕</span>
-    <span class="inv-label">Gold Ore</span>
-    <span class="inv-count" id="invGoldOre">0</span>
-    <button class="inv-sell-btn" onclick="sellResource('gold_ore')" disabled id="sellGoldOre">Sell 12🪙</button>
-  </div>
-  <div class="inv-row" id="invRowRuniteOre">
-    <span class="inv-icon">💎</span>
-    <span class="inv-label">Runite Ore</span>
-    <span class="inv-count" id="invRuniteOre">0</span>
-    <button class="inv-sell-btn" onclick="sellResource('runite_ore')" disabled id="sellRuniteOre">Sell 40🪙</button>
-  </div>
-</div>
-<div id="skillHud">
-  <div class="skill-card" id="skillCardWC">
-    <div class="skill-icon">🪓</div>
-    <div class="skill-info">
-      <div class="skill-name">Woodcutting</div>
-      <div class="skill-level-row">
-        <div class="skill-level" id="wcLevel">1</div>
-        <div class="skill-xp-txt" id="wcXpTxt">0 xp</div>
+<!-- HOTBAR -->
+<div id="hotbar">
+  <!-- Inventory button -->
+  <div style="position:relative;">
+    <button class="hotbar-btn" id="hotbarInvBtn" onclick="hotbarToggle('inv')" title="Inventory">🎒</button>
+    <div class="hotbar-panel" id="hotbarInvPanel">
+      <div class="hotbar-panel-title">🎒 Inventory</div>
+      <div class="inv-row" id="invRowOakLog">
+        <span class="inv-icon">🪵</span>
+        <span class="inv-label">Oak Log</span>
+        <span class="inv-count" id="invOakLog">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('oak_log')" disabled id="sellOakLog">Sell 2🪙</button>
       </div>
-      <div class="skill-xp-bar"><div class="skill-xp-fill wc" id="wcXpBar" style="width:0%"></div></div>
+      <div class="inv-row" id="invRowWillowLog">
+        <span class="inv-icon">🌿</span>
+        <span class="inv-label">Willow Log</span>
+        <span class="inv-count" id="invWillowLog">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('willow_log')" disabled id="sellWillowLog">Sell 5🪙</button>
+      </div>
+      <div class="inv-row" id="invRowMagicLog">
+        <span class="inv-icon">✨</span>
+        <span class="inv-label">Magic Log</span>
+        <span class="inv-count" id="invMagicLog">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('magic_log')" disabled id="sellMagicLog">Sell 20🪙</button>
+      </div>
+      <div class="inv-row" id="invRowCopperOre">
+        <span class="inv-icon">🟤</span>
+        <span class="inv-label">Copper Ore</span>
+        <span class="inv-count" id="invCopperOre">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('copper_ore')" disabled id="sellCopperOre">Sell 2🪙</button>
+      </div>
+      <div class="inv-row" id="invRowIronOre">
+        <span class="inv-icon">⚙️</span>
+        <span class="inv-label">Iron Ore</span>
+        <span class="inv-count" id="invIronOre">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('iron_ore')" disabled id="sellIronOre">Sell 4🪙</button>
+      </div>
+      <div class="inv-row" id="invRowGoldOre">
+        <span class="inv-icon">🌕</span>
+        <span class="inv-label">Gold Ore</span>
+        <span class="inv-count" id="invGoldOre">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('gold_ore')" disabled id="sellGoldOre">Sell 12🪙</button>
+      </div>
+      <div class="inv-row" id="invRowRuniteOre">
+        <span class="inv-icon">💎</span>
+        <span class="inv-label">Runite Ore</span>
+        <span class="inv-count" id="invRuniteOre">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('runite_ore')" disabled id="sellRuniteOre">Sell 40🪙</button>
+      </div>
     </div>
   </div>
-  <div class="skill-card" id="skillCardMine">
-    <div class="skill-icon">⛏️</div>
-    <div class="skill-info">
-      <div class="skill-name">Mining</div>
-      <div class="skill-level-row">
-        <div class="skill-level" id="mineLevel">1</div>
-        <div class="skill-xp-txt" id="mineXpTxt">0 xp</div>
+  <!-- Skills button -->
+  <div style="position:relative;">
+    <button class="hotbar-btn" id="hotbarSkillBtn" onclick="hotbarToggle('skill')" title="Skills">⚔️</button>
+    <div class="hotbar-panel" id="hotbarSkillPanel">
+      <div class="hotbar-panel-title">⚔️ Skills</div>
+      <div class="skill-card" id="skillCardWC">
+        <div class="skill-icon">🪓</div>
+        <div class="skill-info">
+          <div class="skill-name">Woodcutting</div>
+          <div class="skill-level-row">
+            <div class="skill-level" id="wcLevel">1</div>
+            <div class="skill-xp-txt" id="wcXpTxt">0 xp</div>
+          </div>
+          <div class="skill-xp-bar"><div class="skill-xp-fill wc" id="wcXpBar" style="width:0%"></div></div>
+        </div>
       </div>
-      <div class="skill-xp-bar"><div class="skill-xp-fill mine" id="mineXpBar" style="width:0%"></div></div>
+      <div class="skill-card" id="skillCardMine">
+        <div class="skill-icon">⛏️</div>
+        <div class="skill-info">
+          <div class="skill-name">Mining</div>
+          <div class="skill-level-row">
+            <div class="skill-level" id="mineLevel">1</div>
+            <div class="skill-xp-txt" id="mineXpTxt">0 xp</div>
+          </div>
+          <div class="skill-xp-bar"><div class="skill-xp-fill mine" id="mineXpBar" style="width:0%"></div></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -3298,6 +3330,7 @@
 <div class="music-slider-wrap">
 <span class="music-label">vol</span>
 <input class="music-vol-slider" id="volSlider" max="1" min="0" oninput="setVolume(this.value)" step="0.01" type="range" value="0.18"/>
+</div>
 </div>
 </div>
 <script>
@@ -6457,6 +6490,24 @@ window.__loadInventoryFromPlayer = function(playerData) {
 };
 
 updateInventoryUI();
+
+// ── Hotbar toggle ──
+window.hotbarToggle = function(id) {
+  const panels  = { inv: 'hotbarInvPanel',  skill: 'hotbarSkillPanel' };
+  const buttons = { inv: 'hotbarInvBtn',    skill: 'hotbarSkillBtn'   };
+  const panelEl = document.getElementById(panels[id]);
+  const btnEl   = document.getElementById(buttons[id]);
+  const isOpen  = panelEl.classList.contains('open');
+  Object.values(panels).forEach(p => document.getElementById(p).classList.remove('open'));
+  Object.values(buttons).forEach(b => document.getElementById(b).classList.remove('active'));
+  if (!isOpen) { panelEl.classList.add('open'); btnEl.classList.add('active'); }
+};
+document.addEventListener('click', e => {
+  if (!document.getElementById('hotbar')?.contains(e.target)) {
+    document.querySelectorAll('.hotbar-panel').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.hotbar-btn').forEach(b => b.classList.remove('active'));
+  }
+});
 
 // ══════════════════ TREE SYSTEM ══════════════════
 (function() {
