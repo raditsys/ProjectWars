@@ -587,6 +587,53 @@
     margin-right: 0.5rem;
   }
 
+  /* ── Now Playing Toast ── */
+  #nowPlayingToast {
+    position: fixed;
+    bottom: 5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(10,10,10,0.92);
+    border: 1px solid #333;
+    backdrop-filter: blur(10px);
+    padding: 0.6rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34,1.3,0.64,1);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #nowPlayingToast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  #nowPlayingToast .np-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  #nowPlayingToast .np-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    color: var(--gold);
+    overflow: hidden;
+    max-width: 240px;
+  }
+  #nowPlayingToast .np-icon {
+    font-size: 1rem;
+    animation: npSpin 2s linear infinite;
+  }
+  @keyframes npSpin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
   /* ── GAMBLE BUTTON (fixed tab) ── */
   .gamble-tab {
     position: fixed;
@@ -3325,6 +3372,12 @@
 </div>
 <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
 <!-- Music Player -->
+<!-- Now Playing Toast -->
+<div id="nowPlayingToast">
+  <span class="np-icon">🎵</span>
+  <span class="np-label">Now Playing</span>
+  <span class="np-title" id="npTitle"></span>
+</div>
 <div class="music-player" id="musicPlayer">
 <button class="music-icon-btn" id="musicBtn" onclick="toggleMusic()" title="Toggle music">🎵</button>
 <div class="music-slider-wrap">
@@ -3335,32 +3388,86 @@
 </div>
 <script>
   (function() {
-    const audio = new Audio("ShopMusic.mp3");
-    audio.loop = true;
-    audio.volume = 0.18;
+    // ── ADD YOUR 3 SONGS HERE ──
+    const PLAYLIST = [
+      'ShopMusic.mp3',
+      'Song2.mp3',
+      'Song3.mp3',
+    ];
 
-    let playing = false;
-    const btn = document.getElementById('musicBtn');
+    let trackIdx  = 0;
+    let playing   = false;
+    let volume    = 0.18;
+    const btn     = document.getElementById('musicBtn');
+    let audio     = null;
 
-    function startMusic() {
-      audio.play().then(() => {
-        playing = true;
-        btn.textContent = '🔊';
-        btn.classList.add('playing');
-      }).catch(() => {});
+    function trackName(src) {
+      // Strip path and extension, replace underscores/dashes with spaces
+      return src.replace(/^.*[\\/]/, '').replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
     }
 
-    // Auto-start on first interaction (browsers block autoplay before gesture)
+    function showNowPlaying(name) {
+      const toast = document.getElementById('nowPlayingToast');
+      const title = document.getElementById('npTitle');
+      title.textContent = name;
+      // Reset then animate in
+      toast.classList.remove('show');
+      void toast.offsetWidth;
+      toast.classList.add('show');
+      clearTimeout(window.__npTimer);
+      window.__npTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    function loadTrack(idx, autoplay) {
+      if (audio) {
+        audio.pause();
+        audio.onended = null;
+      }
+      audio = new Audio(PLAYLIST[idx]);
+      audio.volume = volume;
+      audio.onended = () => {
+        trackIdx = (trackIdx + 1) % PLAYLIST.length;
+        loadTrack(trackIdx, true);
+      };
+      if (autoplay) {
+        audio.play().then(() => {
+          playing = true;
+          btn.textContent = '🔊';
+          btn.classList.add('playing');
+          showNowPlaying(trackName(PLAYLIST[idx]));
+        }).catch(() => {});
+      }
+    }
+
+    function startMusic() {
+      if (audio && audio.paused && audio.src) {
+        audio.play().then(() => {
+          playing = true;
+          btn.textContent = '🔊';
+          btn.classList.add('playing');
+          showNowPlaying(trackName(PLAYLIST[trackIdx]));
+        }).catch(() => {});
+      } else if (!audio) {
+        loadTrack(trackIdx, true);
+      }
+    }
+
+    // Init first track (don't autoplay yet — browser will block)
+    loadTrack(0, false);
+
+    // Auto-start on first interaction
     function onFirstInteraction() {
-      if (!playing) startMusic();
+      if (!playing) {
+        loadTrack(trackIdx, true);
+      }
       document.removeEventListener('click', onFirstInteraction);
       document.removeEventListener('keydown', onFirstInteraction);
     }
     document.addEventListener('click', onFirstInteraction);
     document.addEventListener('keydown', onFirstInteraction);
 
-    // Also try immediate autoplay (works in some browsers)
-    startMusic();
+    // Also try immediate autoplay
+    loadTrack(0, true);
 
     window.toggleMusic = function() {
       if (playing) {
@@ -3374,7 +3481,8 @@
     };
 
     window.setVolume = function(val) {
-      audio.volume = parseFloat(val);
+      volume = parseFloat(val);
+      if (audio) audio.volume = volume;
     };
   })();
 </script>
