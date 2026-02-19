@@ -542,7 +542,7 @@
   }
 
   .music-player:hover .music-slider-wrap {
-    max-width: 160px;
+    max-width: 220px;
     opacity: 1;
     padding-left: 1rem;
     padding-right: 0.75rem;
@@ -553,7 +553,7 @@
   .music-vol-slider {
     -webkit-appearance: none;
     appearance: none;
-    width: 110px;
+    width: 80px;
     height: 3px;
     background: var(--border);
     outline: none;
@@ -4095,16 +4095,19 @@
 <div class="music-slider-wrap">
 <span class="music-label">vol</span>
 <input class="music-vol-slider" id="volSlider" max="1" min="0" oninput="setVolume(this.value)" step="0.01" type="range" value="0.18"/>
+<button onclick="skipTrack()" title="Skip track" style="background:none;border:none;color:var(--muted);font-size:0.85rem;cursor:pointer;padding:0 0 0 0.4rem;line-height:1;transition:color 0.15s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--muted)'">⏭</button>
 </div>
 </div>
 </div>
 <script>
   (function() {
-    // ── ADD YOUR 3 SONGS HERE ──
     const PLAYLIST = [
       "Beedle's Shop - Wind Waker.mp3",
       'Shop - Downwell.mp3',
       'Tutorial - Dark Cloud 2.mp3',
+      'Flute Salad - Runescape.mp3',
+      'Autumn Voyage - Runescape.mp3',
+      'Rustboro City Remastered - Pokemon Emerald.mp3',
     ];
 
     let trackIdx  = Math.floor(Math.random() * PLAYLIST.length);
@@ -4190,6 +4193,11 @@
       } else {
         startMusic();
       }
+    };
+
+    window.skipTrack = function() {
+      trackIdx = (trackIdx + 1) % PLAYLIST.length;
+      loadTrack(trackIdx, playing || true);
     };
 
     window.setVolume = function(val) {
