@@ -2955,6 +2955,12 @@
     padding-left: 18px;
   }
   .dlg-choice:hover::before { color: var(--gold); }
+  .dlg-choice.locked {
+    color: #3a3a52;
+    cursor: default;
+    pointer-events: none;
+  }
+  .dlg-choice.locked::before { content: '✗'; color: #2a2a3a; }
 
   /* ══════════ HOTBAR ══════════ */
   #hotbar {
@@ -7023,7 +7029,7 @@ document.addEventListener('click', e => {
     '2,1': f('Babbling Brook',  'Clear water over smooth pebbles',    'linear-gradient(180deg,#061420 0%,#0a1e2e 60%,#0c2218 100%)', '#1a2e28', '#2a4e3a'),
     '3,1': f('Sunlit Clearing', 'A warm patch of open sky',           'linear-gradient(180deg,#101c08 0%,#162408 60%,#101c08 100%)', '#1e3010', '#365020'),
     '4,1': f('Ruins',           'Crumbling stone walls, long forgot', 'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201a14', '#382e20'),
-    '5,1': f('Mushroom Ring',   'Strange fungi form a perfect circle','linear-gradient(180deg,#120a18 0%,#1a1020 60%,#120a18 100%)', '#1e1028', '#341a3e'),
+    '5,1': { name:'Mushroom Ring', desc:'A hunched figure mutters over the fungi.', sky:'linear-gradient(180deg,#120a18 0%,#1a1020 60%,#120a18 100%)', ground:'#1e1028', groundBorder:'#341a3e', resources:[], npc:'wren' },
     '6,1': f('Overgrown Path',  'The trail is barely visible',        'linear-gradient(180deg,#0a1008 0%,#0e160a 60%,#0a1008 100%)', '#14200e', '#243a18'),
     '7,1': null,
 
@@ -7033,11 +7039,11 @@ document.addEventListener('click', e => {
     '3,2': f('Fern Hollow',     'Lush ferns, nothing to harvest',     'linear-gradient(180deg,#0c1c08 0%,#10220c 60%,#0c1c08 100%)', '#1a2e10', '#2e4e1a'),
     '4,2': r('Birch Glen',      'Mixed oak and willow',               'linear-gradient(180deg,#0c1a08 0%,#102208 60%,#0e1c08 100%)', '#1e3210', '#3a5a1a', [{kind:'tree',type:'oak',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}]),
     '5,2': f('Dead Grove',      'Bleached trunks, no life here',      'linear-gradient(180deg,#100e0c 0%,#16120e 60%,#100e0c 100%)', '#201a12', '#302820'),
-    '6,2': r('Swamp',           'Ancient willow groves',              'linear-gradient(180deg,#0a1208 0%,#0e1a0a 60%,#0a1210 100%)', '#102a10', '#1a4a20', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'willow',x:228}]),
+    '6,2': { name:'Swamp', desc:'Mist clings low. Someone is watching.', sky:'linear-gradient(180deg,#0a1208 0%,#0e1a0a 60%,#0a1210 100%)', ground:'#102a10', groundBorder:'#1a4a20', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'willow',x:228}], npc:'morrigan' },
     '7,2': f('Brackish Pool',   'Dark water, no fish',                'linear-gradient(180deg,#060e0c 0%,#0a1410 60%,#060e0c 100%)', '#0e2018', '#183028'),
 
     '0,3': f('Rocky Foothills', 'Loose scree, hard going',            'linear-gradient(180deg,#0e0c0a 0%,#16120e 60%,#0e0c0a 100%)', '#1e1810', '#302818'),
-    '1,3': f('Cave Mouth',      'A dark opening in the hillside',     'linear-gradient(180deg,#080808 0%,#0e0e0e 60%,#080808 100%)', '#141414', '#222222'),
+    '1,3': { name:'Cave Mouth', desc:'An old miner blocks the entrance, smoking a pipe.', sky:'linear-gradient(180deg,#080808 0%,#0e0e0e 60%,#080808 100%)', ground:'#141414', groundBorder:'#222222', resources:[], npc:'degan' },
     '2,3': r('Copper Pit',      'Shallow copper deposits',            'linear-gradient(180deg,#140e08 0%,#1a1408 60%,#141008 100%)', '#2a1a08', '#4a3010', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'copper',x:128},{kind:'ore',type:'iron',x:228}]),
     '3,3': f('Gravel Pit',      'Just rocks, nothing valuable',       'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201c14', '#342e20'),
     '4,3': r('Iron Ridge',      'Iron and copper veins',              'linear-gradient(180deg,#101010 0%,#161616 60%,#101212 100%)', '#202020', '#383838', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'iron',x:128},{kind:'ore',type:'iron',x:228}]),
@@ -7046,7 +7052,7 @@ document.addEventListener('click', e => {
     '7,3': { name:'Castle Gate', desc:'Massive iron gates. A guard blocks the way.', sky:'linear-gradient(180deg,#080810 0%,#0e0e1c 60%,#080810 100%)', ground:'#181820', groundBorder:'#303048', resources:[], locked:true, npc:'guard' },
 
     '0,4': null,
-    '1,4': f('Forgotten Shrine','Moss-covered stones and offerings',  'linear-gradient(180deg,#10060a 0%,#180a10 60%,#100608 100%)', '#20100a', '#381a14'),
+    '1,4': { name:'Forgotten Shrine', desc:'A robed figure tends a low flame here.', sky:'linear-gradient(180deg,#10060a 0%,#180a10 60%,#100608 100%)', ground:'#20100a', groundBorder:'#381a14', resources:[], npc:'orin' },
     '2,4': f('Lava Fields',     'Cooled black rock, still warm',      'linear-gradient(180deg,#140604 0%,#1c0804 60%,#140604 100%)', '#200808', '#380e0e'),
     '3,4': r('Gold Cavern',     'Gold veins run deep here',           'linear-gradient(180deg,#100a04 0%,#180e04 60%,#120c04 100%)', '#1e1204', '#3a2208', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:128},{kind:'ore',type:'gold',x:228}]),
     '4,4': f('Bone Yard',       'Scattered remains of past battles',  'linear-gradient(180deg,#0e0e0e 0%,#141412 60%,#0e0e0e 100%)', '#1c1c18', '#2c2c24'),
@@ -7380,7 +7386,11 @@ document.addEventListener('click', e => {
 
   // ══════════════════ DIALOGUE SYSTEM ══════════════════
 
+  // ── Quest flags (persisted to Firebase) ──
+  window.__questFlags = window.__questFlags || {};
+
   const NPCS = {
+    // ─────────────────────────────────────────────
     guard: {
       name: 'Captain Aldric',
       title: 'Royal Gate Guard',
@@ -7398,79 +7408,381 @@ document.addEventListener('click', e => {
         what_seal: {
           text: `"The King's Seal is a wax medallion stamped with the Veldmoor crest — a crowned serpent devouring its own tail.\n\nWithout it, these gates stay shut. Captain's orders, and the Captain's orders come from the King himself."`,
           choices: [
-            { label: 'How do I get one?',      next: 'how_seal'   },
-            { label: 'Who has the Seal?',       next: 'who_seal'   },
-            { label: '[Back]',                  next: 'root'       },
+            { label: 'How do I get one?',  next: 'how_seal' },
+            { label: 'Who has the Seal?',  next: 'who_seal' },
+            { label: '[Back]',             next: 'root'     },
           ]
         },
         how_seal: {
           text: `"There are two ways.\n\nFirst — prove yourself worthy. The Royal Archivist in the East Tower grants Seals to those who bring him rare materials. He's been mumbling about Runite lately.\n\nSecond — you could try your luck at the Black Market. But I didn't tell you that."`,
           choices: [
-            { label: 'What materials does the Archivist want?', next: 'archivist'  },
-            { label: 'Tell me more about the Black Market.',    next: 'blackmarket'},
-            { label: '[Back]',                                  next: 'root'       },
+            { label: 'What materials does the Archivist want?', next: 'archivist'   },
+            { label: 'Tell me more about the Black Market.',    next: 'blackmarket' },
+            { label: '[Back]',                                  next: 'root'        },
           ]
         },
         who_seal: {
           text: `"The Archivist holds the authority to issue Seals to worthy travellers.\n\nHis name is Erasmus. Old man. Smells of ink and old paper. He keeps to the East Tower — you'll find it past the Runite Mine, they say.\n\nBring him what he asks. He'll do the rest."`,
           choices: [
-            { label: 'What does Erasmus want?', next: 'archivist'  },
-            { label: '[Back]',                  next: 'root'       },
+            { label: 'What does Erasmus want?', next: 'archivist' },
+            { label: '[Back]',                  next: 'root'      },
           ]
         },
         archivist: {
           text: `"Last I heard, old Erasmus was ranting about a particular ore.\n\nRunite. Said it has properties that let him bind the Seal's enchantment permanently. Quite rare stuff.\n\nBring him Runite Ore and he'll stamp your Seal. That's the honourable path."`,
           choices: [
-            { label: 'Where is Runite found?',             next: 'runite_hint' },
-            { label: 'Tell me about the Black Market.',    next: 'blackmarket' },
-            { label: '[Back]',                             next: 'root'        },
+            { label: 'Where is Runite found?',          next: 'runite_hint' },
+            { label: 'Tell me about the Black Market.', next: 'blackmarket' },
+            { label: '[Back]',                          next: 'root'        },
           ]
         },
         runite_hint: {
           text: `*The guard lowers his voice slightly.*\n\n"Runite's deep underground. Very deep. The miners who find it don't come back often — and when they do, they don't talk much.\n\nI've heard rumours of a mine far to the south. Dangerous country. If you're brave enough to seek it out, you're brave enough to deserve the Seal."`,
           choices: [
-            { label: 'I\'ll find it.',  next: 'brave'  },
-            { label: '[Back]',          next: 'root'   },
+            { label: 'I\'ll find it.', next: 'brave' },
+            { label: '[Back]',         next: 'root'  },
           ]
         },
         blackmarket: {
           text: `*The guard glances sideways, then steps closer.*\n\n"...There's a trader. Goes by Morrigan. She operates somewhere in the wetlands — swamp country.\n\nShe deals in... acquired documents. Whether those Seals are genuine is a matter of debate. I personally know nothing about this.\n\n...You didn't hear that from me."`,
           choices: [
-            { label: 'Understood. Thanks.',  next: 'root'   },
-            { label: '[Back]',               next: 'root'   },
+            { label: 'Understood. Thanks.', next: 'root' },
+            { label: '[Back]',              next: 'root' },
           ]
         },
         plead: {
           text: `*The guard is unmoved.*\n\n"Everyone who walks up to these gates 'needs' to get through. Merchants, pilgrims, spies.\n\nMy answer is the same for all of them.\n\nBring the Seal. No exceptions."`,
           choices: [
             { label: 'Fine. How do I get the Seal?', next: 'how_seal' },
-            { label: '[Back]',                        next: 'root'    },
+            { label: '[Back]',                       next: 'root'     },
           ]
         },
         brave: {
           text: `*The guard nods slowly.*\n\n"Good. I respect that.\n\nDon't die out there. Dead adventurers can't open gates.\n\nWhen you have the Seal, come back. I'll be here."`,
           choices: [
-            { label: 'I\'ll return.',  next: null  },
-            { label: '[Back]',         next: 'root'},
+            { label: 'I\'ll return.', next: null   },
+            { label: '[Back]',        next: 'root' },
           ]
         },
       }
-    }
+    },
+
+    // ─────────────────────────────────────────────
+    morrigan: {
+      name: 'Morrigan',
+      title: 'Information Broker',
+      portrait: '🐦‍⬛',
+      tree: {
+        root: {
+          text: () => {
+            if (window.__questFlags.morriganPaid) {
+              return `*Morrigan materialises from the fog like she was always there.*\n\n"Back again. A deal's a deal — I keep my word.\n\nThe black market is in the Dead Grove. Flash three torches in sequence at the hollow oak. They'll let you in.\n\n...Don't mention my name."`;
+            }
+            return `*A figure detaches from the shadow of a willow. Hooded, still, watching you with amber eyes.*\n\n"You're lost. Or you're looking for something you can't get through proper channels.\n\n...Either way, you've found the right person. I'm Morrigan."`;
+          },
+          choices: () => {
+            if (window.__questFlags.morriganPaid) {
+              return [
+                { label: 'Tell me the location again.', next: 'repeat_info' },
+                { label: '[Leave]',                     next: null          },
+              ];
+            }
+            return [
+              { label: 'I\'m looking for the King\'s Seal.',  next: 'seal_ask'  },
+              { label: 'What do you deal in?',                next: 'what_deal' },
+              { label: '[Leave]',                             next: null        },
+            ];
+          },
+        },
+        what_deal: {
+          text: `"Information, mostly. Routes, names, locations. The kind of knowledge that moves people from where they are to where they want to be.\n\nOccasionally I arrange... introductions. To people who provide goods that aren't readily available through official sources.\n\nI don't touch the goods myself. Just the information."`,
+          choices: [
+            { label: 'I need a King\'s Seal.',  next: 'seal_ask' },
+            { label: '[Back]',                  next: 'root'     },
+          ]
+        },
+        seal_ask: {
+          text: `*Her head tilts slightly.*\n\n"The King's Seal. Yes, there's a place that sells them. No paperwork, no Runite ore, no Archivist with ink on his fingers.\n\nBut I don't give away information for free. Bring me ten oak logs and ten copper ore — supplies I need — and I'll tell you exactly where to go.\n\nDo we have a deal?"`,
+          choices: () => {
+            const inv = window.__inventory || {};
+            const logs = inv.oak_log    || 0;
+            const ore  = inv.copper_ore || 0;
+            const hasEnough = logs >= 10 && ore >= 10;
+            const choices = [];
+            if (hasEnough) {
+              choices.push({
+                label:  '[ Hand over 10 Oak Logs + 10 Copper Ore ]',
+                next:   'deal_done',
+                action: 'morrigan_pay',
+              });
+            } else {
+              const need = [];
+              if (logs < 10) need.push(`${10 - logs} more oak log${10 - logs > 1 ? 's' : ''}`);
+              if (ore  < 10) need.push(`${10 - ore} more copper ore`);
+              choices.push({
+                label:  `✗  Need ${need.join(' and ')}`,
+                next:   null,
+                locked: true,
+              });
+            }
+            choices.push({ label: 'Not yet. I\'ll gather them.', next: null });
+            return choices;
+          },
+        },
+        deal_done: {
+          text: `*She receives the logs and ore without ceremony, tucking them into a pack.*\n\n"Good. The black market operates in the Dead Grove — the bleached clearing west of the Deep Woods. Flash three torches in sequence at the hollow oak. They'll see you.\n\nThey sell authentic Seals. Expensive, but no questions asked.\n\n...We never spoke."`,
+          choices: [
+            { label: 'Understood.', next: null },
+          ]
+        },
+        repeat_info: {
+          text: `"Dead Grove. West of Deep Woods. Three torch flashes at the hollow oak.\n\nI won't keep repeating it."`,
+          choices: [
+            { label: 'Got it. Thanks.', next: null },
+            { label: '[Back]',          next: 'root' },
+          ]
+        },
+      }
+    },
+
+    // ─────────────────────────────────────────────
+    degan: {
+      name: 'Degan Ashpick',
+      title: 'Retired Mine Foreman',
+      portrait: '⛏️',
+      tree: {
+        root: {
+          text: `*A stocky man in filthy overalls sits on an upturned crate outside the cave, picking his teeth with a rusted nail.*\n\n"Hm. You don't look like a miner.\n\nI used to run the crew here — twenty years. These days I just watch the cave and make sure nobody does anything stupid.\n\nWhat do you want?"`,
+          choices: [
+            { label: 'What\'s in the cave?',           next: 'cave_info'  },
+            { label: 'Tips for a new miner?',          next: 'tips'       },
+            { label: 'Which ore is most valuable?',    next: 'value'      },
+            { label: '[Leave]',                        next: null         },
+          ]
+        },
+        cave_info: {
+          text: `"Copper, mostly. Shallow deposits. Good for beginners — doesn't fight back.\n\nGo deeper and you'll find iron. Deeper still, gold. And at the very bottom..." *He pauses, glancing at the cave mouth.* "...things I don't mine anymore."`,
+          choices: [
+            { label: 'What things?',  next: 'deep_cave' },
+            { label: '[Back]',        next: 'root'      },
+          ]
+        },
+        deep_cave: {
+          text: `*He lowers his voice.*\n\n"Runite. Blue-glowing rock. Beautiful, if you're the sort of person who finds dangerous things beautiful.\n\nLost three men to it over the years. Not to the rock itself. To what the rock... attracts.\n\nDon't ask me more than that."`,
+          choices: [
+            { label: 'I need Runite. How do I stay safe?', next: 'safe'  },
+            { label: 'I\'ll avoid it.',                    next: 'wise'  },
+            { label: '[Back]',                             next: 'root'  },
+          ]
+        },
+        safe: {
+          text: `"You can't, not completely. But — mine fast, don't linger. Never mine alone. And for the love of the old gods, don't camp down there.\n\nLevel eighty-five before you touch it. Below that the rock crumbles and you get nothing. Above it, you've got a fighting chance."`,
+          choices: [
+            { label: 'I\'ll be careful.', next: 'careful' },
+            { label: '[Back]',            next: 'root'    },
+          ]
+        },
+        careful: {
+          text: `*He gives a long, flat look.*\n\n"Everyone's careful. Right up until they're not.\n\nCome back if you make it."`,
+          choices: [{ label: '[Leave]', next: null }]
+        },
+        wise: {
+          text: `"Smart. There's other ore worth more than the trouble of dying for.\n\nGold's good money if you've got the level for it. Plenty of it down south."`,
+          choices: [{ label: '[Back]', next: 'root' }]
+        },
+        tips: {
+          text: `"Three rules.\n\nOne: don't mine ore above your level. It crumbles and you get nothing.\n\nTwo: let nodes recover. They need time to reform. Impatient miners go home empty-handed.\n\nThree: sell in bulk. Carrying one copper ore to market is a waste of boots."`,
+          choices: [
+            { label: 'Good advice. Thanks.', next: null   },
+            { label: '[Back]',               next: 'root' },
+          ]
+        },
+        value: {
+          text: `"By raw coin? Runite. But it'll kill you.\n\nFor reliable income: gold. Forty mining to reach it, worth every level.\n\nFor starting out: copper into iron. Build your level before you chase the big numbers."`,
+          choices: [
+            { label: 'That\'s helpful.', next: null   },
+            { label: '[Back]',           next: 'root' },
+          ]
+        },
+      }
+    },
+
+    // ─────────────────────────────────────────────
+    wren: {
+      name: 'Wren',
+      title: 'Fungal Scholar',
+      portrait: '🍄',
+      tree: {
+        root: {
+          text: `*A slight, wide-eyed person crouches in the centre of the mushroom ring, nose almost touching a bright orange cap.*\n\n"Oh! A visitor.\n\nSorry — don't step on the red ones, they're very sensitive. And avoid the blue-grey cluster to your left, those spore when startled.\n\nI'm Wren. I study the ring. What brings you to such an out-of-the-way spot?"`,
+          choices: [
+            { label: 'What is this ring?',            next: 'ring_info'  },
+            { label: 'Have you seen anyone strange?', next: 'strange'    },
+            { label: 'Any useful information here?',  next: 'useful'     },
+            { label: '[Leave carefully]',             next: null         },
+          ]
+        },
+        ring_info: {
+          text: `"Mycological formation, at least three centuries old. The fungi here communicate — chemically, through the root network underneath your feet.\n\nThey remember things. Not in words. In... growth patterns. A new branch where a tree fell. A cluster where something bled.\n\nThis particular ring formed after a battle. I haven't worked out which one yet."`,
+          choices: [
+            { label: 'Fascinating. What do they remember?', next: 'memory'  },
+            { label: '[Back]',                              next: 'root'    },
+          ]
+        },
+        memory: {
+          text: `"I can read some of it. Grief, mostly. Anger. A sense of something sealed away and not quite settled.\n\nThere's a recurring pattern that corresponds to — well, my best translation is 'false door' or maybe 'locked promise.'\n\nI don't know what it means yet. But I will."`,
+          choices: [
+            { label: 'Could it mean the Castle Gate?', next: 'gate_theory' },
+            { label: '[Back]',                         next: 'root'        },
+          ]
+        },
+        gate_theory: {
+          text: `*Wren looks up with sudden intensity.*\n\n"The Castle Gate? That's — yes, that would fit geographically. The ring's attention points east.\n\nIf the fungi remember that gate, it means something significant happened there. Or is still happening.\n\nBe careful if you're headed that way."`,
+          choices: [
+            { label: 'I need the King\'s Seal to pass.', next: 'seal_hint' },
+            { label: '[Back]',                           next: 'root'      },
+          ]
+        },
+        seal_hint: {
+          text: `"The Seal. Hmm.\n\nI've heard two routes mentioned by travellers passing through. An Archivist to the south who gives them legitimately. And — the mushrooms actually spike when I even think the phrase — a woman in the swamp who can... arrange things.\n\nI try not to judge. The fungi don't."`,
+          choices: [
+            { label: 'Who is the woman in the swamp?', next: 'morrigan_hint' },
+            { label: '[Back]',                         next: 'root'         },
+          ]
+        },
+        morrigan_hint: {
+          text: `"I don't know her name. But the swamp is south-west of here. There are willow groves — you'll feel watched before you see anyone.\n\nThat's usually her."`,
+          choices: [
+            { label: 'Thank you.', next: null   },
+            { label: '[Back]',     next: 'root' },
+          ]
+        },
+        strange: {
+          text: `"Strange? Oh, constantly.\n\nA cloaked figure moving through the swamp at night, last week. A miner who came back from the deep caves talking to himself — nothing unusual there, honestly.\n\nAnd once, a month ago, someone in full plate armour walking north alone, with no supplies. They didn't stop."`,
+          choices: [
+            { label: 'The swamp figure — who was it?', next: 'morrigan_hint' },
+            { label: '[Back]',                         next: 'root'          },
+          ]
+        },
+        useful: {
+          text: `"Depends what you consider useful.\n\nThe spores from the blue-grey cluster over there are an effective sleep agent if processed correctly — not that I'd recommend trying.\n\nAnd the orange cap I was just examining? Completely edible. Tastes of old wood, which I find comforting.\n\nAnd apparently there's a secret market somewhere nearby, but the mushrooms are cagey about exactly where."`,
+          choices: [
+            { label: 'A secret market?', next: 'market_hint' },
+            { label: '[Back]',           next: 'root'        },
+          ]
+        },
+        market_hint: {
+          text: `"The fungi registered something like 'exchange' and 'hidden' coming from the direction of the Dead Grove.\n\nI assume it's a market. I didn't investigate. I'm a scholar, not an adventurer."`,
+          choices: [
+            { label: 'Noted. Thanks.', next: null   },
+            { label: '[Back]',         next: 'root' },
+          ]
+        },
+      }
+    },
+
+    // ─────────────────────────────────────────────
+    orin: {
+      name: 'Brother Orin',
+      title: 'Shrine Keeper',
+      portrait: '🕯️',
+      tree: {
+        root: {
+          text: `*An elderly monk feeds dry grass to a small flame burning in a cracked stone bowl. He doesn't turn around when you approach.*\n\n"I heard your footsteps from the ridge. Sit if you like. The flame keeps better company than most people, but I won't turn you away.\n\nI am Brother Orin. I tend what remains of this place."`,
+          choices: [
+            { label: 'What is this shrine?',        next: 'shrine'   },
+            { label: 'I need guidance.',             next: 'guidance' },
+            { label: 'Do you know the region well?', next: 'region'  },
+            { label: '[Leave in peace]',             next: null      },
+          ]
+        },
+        shrine: {
+          text: `"A waypoint shrine. Old roads used to pass through here — before the war, before the new roads were built to avoid this hill.\n\nTravellers left offerings. Coins, food, small tools. Some left notes asking for safe passage.\n\nI collect the notes. There are thousands of them now. Most were never answered, as far as I can tell."`,
+          choices: [
+            { label: 'Were any answered?',  next: 'answered' },
+            { label: '[Back]',              next: 'root'     },
+          ]
+        },
+        answered: {
+          text: `*A long pause. He stokes the flame.*\n\n"One that I know of. A girl who asked to find her brother, who was lost in the deep mines.\n\nShe found him. He'd survived two years underground alone. I don't know how.\n\nI like to think the shrine had something to do with it. It probably didn't."`,
+          choices: [
+            { label: 'A comforting story.',  next: null   },
+            { label: '[Back]',               next: 'root' },
+          ]
+        },
+        guidance: {
+          text: `"Guidance. Everyone wants guidance.\n\nHere is what I know: the path forward is almost never the obvious one. The gate that looks locked usually has a key. The key is almost never where you expect.\n\nBeyond that..." *He gestures at the flame.* "...the flame doesn't speak. It just burns."`,
+          choices: [
+            { label: 'Is there another way to the castle?', next: 'alt_route' },
+            { label: '[Back]',                              next: 'root'      },
+          ]
+        },
+        alt_route: {
+          text: `"Many ways to one place. The official way requires a Seal — see the Archivist or earn it through the proper channels.\n\nThe unofficial way..." *He pauses.* "...I've heard of a woman in the swamp. Morrigan, I think. I don't ask questions about her methods. That is between her and whatever she prays to.\n\nBoth paths lead to the same gate. How you arrive is your own business."`,
+          choices: [
+            { label: 'Where is Morrigan?',    next: 'morrigan_loc' },
+            { label: 'Tell me about the Archivist.', next: 'archivist' },
+            { label: '[Back]',               next: 'root'         },
+          ]
+        },
+        morrigan_loc: {
+          text: `"The swamp. South, then south-west. The willow country — you'll know it by the mist and the feeling of being watched.\n\nIf she wants to be found, you'll find her."`,
+          choices: [
+            { label: 'Thank you.',  next: null   },
+            { label: '[Back]',      next: 'root' },
+          ]
+        },
+        archivist: {
+          text: `"Erasmus. He's been the Archivist longer than I've kept this shrine, and I've been here forty years.\n\nHe asks for Runite Ore — extremely rare. The mine is far south. Dangerous territory.\n\nBut the Seal he stamps is genuine. That counts for something."`,
+          choices: [
+            { label: 'Useful. Thank you.', next: null   },
+            { label: '[Back]',             next: 'root' },
+          ]
+        },
+        region: {
+          text: `"I've walked every path within two days of here.\n\nTo the north: flatlands and the forest. Good timber. To the east: the ore country, the mines, and eventually the Castle Gate.\n\nTo the south: deep woods, then the magic groves. And the swamp, of course — willow and fog and things best left alone.\n\nThis hill sits in the middle of all of it."`,
+          choices: [
+            { label: 'What\'s at the Castle Gate?', next: 'castle'  },
+            { label: '[Back]',                      next: 'root'    },
+          ]
+        },
+        castle: {
+          text: `"A wall. A gate. A guard named Aldric who has been standing there since before I can remember.\n\nHe's not a bad man. He just follows orders.\n\nThe order is: no Seal, no entry. He means it."`,
+          choices: [
+            { label: 'I need to get through.',  next: 'guidance' },
+            { label: '[Back]',                  next: 'root'     },
+          ]
+        },
+      }
+    },
   };
 
-  let activeNPC = null;
+  let activeNPC  = null;
   let activeNode = null;
 
   window.openDialogue = function(npcKey) {
     const npc = NPCS[npcKey];
     if (!npc) return;
-    activeNPC = npc;
+    activeNPC  = npc;
     activeNode = 'root';
     renderDialogue();
     document.getElementById('dialogueBox').classList.add('open');
   };
 
-  window.dialogueChoose = function(next) {
+  // Resolve action side-effects (inventory cost, quest flags, Firebase save)
+  function applyAction(action) {
+    if (action === 'morrigan_pay') {
+      window.__inventory.oak_log    = Math.max(0, (window.__inventory.oak_log    || 0) - 10);
+      window.__inventory.copper_ore = Math.max(0, (window.__inventory.copper_ore || 0) - 10);
+      window.__questFlags.morriganPaid = true;
+      updateInventoryUI();
+      if (window.__fbSaveInventory)   window.__fbSaveInventory();
+      if (window.__fbSaveQuestFlags)  window.__fbSaveQuestFlags();
+    }
+  }
+
+  window.dialogueChoose = function(next, action) {
+    if (action) applyAction(action);
     if (next === null) {
       document.getElementById('dialogueBox').classList.remove('open');
       activeNPC = null; activeNode = null;
@@ -7482,12 +7794,15 @@ document.addEventListener('click', e => {
 
   function renderDialogue() {
     const npc  = activeNPC;
-    const node = npc.tree[activeNode];
     const box  = document.getElementById('dialogueBox');
+    const node = npc.tree[activeNode];
 
-    // Typewriter effect for text
+    // Resolve dynamic text and choices
+    const text    = typeof node.text    === 'function' ? node.text()    : node.text;
+    const choices = typeof node.choices === 'function' ? node.choices() : node.choices;
+
+    // Typewriter effect
     const textEl = box.querySelector('#dlgText');
-    const text = node.text;
     textEl.textContent = '';
     let i = 0;
     clearInterval(textEl._tw);
@@ -7496,20 +7811,22 @@ document.addEventListener('click', e => {
       if (i >= text.length) clearInterval(textEl._tw);
     }, 18);
 
-    box.querySelector('#dlgName').textContent    = npc.name;
-    box.querySelector('#dlgTitle').textContent   = npc.title;
+    box.querySelector('#dlgName').textContent     = npc.name;
+    box.querySelector('#dlgTitle').textContent    = npc.title;
     box.querySelector('#dlgPortrait').textContent = npc.portrait;
 
     const choicesEl = box.querySelector('#dlgChoices');
     choicesEl.innerHTML = '';
-    node.choices.forEach((ch, idx) => {
+    choices.forEach(ch => {
       const btn = document.createElement('button');
-      btn.className = 'dlg-choice';
+      btn.className = ch.locked ? 'dlg-choice locked' : 'dlg-choice';
       btn.textContent = ch.label;
-      btn.onclick = () => {
-        clearInterval(textEl._tw);
-        window.dialogueChoose(ch.next);
-      };
+      if (!ch.locked) {
+        btn.onclick = () => {
+          clearInterval(textEl._tw);
+          window.dialogueChoose(ch.next, ch.action || null);
+        };
+      }
       choicesEl.appendChild(btn);
     });
   }
@@ -8029,6 +8346,15 @@ window.__fbSaveInventory = async function() {
   });
 };
 
+window.__fbSaveQuestFlags = async function() {
+  const user = window.__currentUser;
+  if (!user) return;
+  const uid = user.id;
+  await update(ref(db, `players/${uid}`), {
+    questFlags: window.__questFlags || {},
+  });
+};
+
 setInterval(() => {
   const uid = window.__currentUserId;
   if (uid && uid !== gardenWatchingUid) {
@@ -8040,6 +8366,7 @@ setInterval(() => {
       window.__applyGardenBoosts && window.__applyGardenBoosts(p.garden || {});
       window.__loadSkillsFromPlayer && window.__loadSkillsFromPlayer(p);
       window.__loadInventoryFromPlayer && window.__loadInventoryFromPlayer(p);
+      if (p.questFlags) Object.assign(window.__questFlags || (window.__questFlags = {}), p.questFlags);
       if (document.getElementById('gardenDrawer')?.classList.contains('open')) {
         window.renderGarden && window.renderGarden();
       }
