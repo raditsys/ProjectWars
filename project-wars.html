@@ -3346,6 +3346,45 @@
   .inv-sell-btn:hover:not(:disabled) { background: #22552a; }
   .inv-sell-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
+  /* Gear panel */
+  .gear-wrap { display: grid; grid-template-columns: 1fr 108px; gap: 10px; padding: 8px; }
+  .gear-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    min-width: 172px;
+  }
+  .gear-slot {
+    height: 40px;
+    border: 1px solid #2a2a2a;
+    background: #101010;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    cursor: pointer;
+    position: relative;
+  }
+  .gear-slot.empty { opacity: 0.55; cursor: default; }
+  .gear-slot.active { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(245,200,66,0.15); }
+  .gear-slot-count { position: absolute; right: 3px; bottom: 1px; font-size: 0.5rem; color: var(--gold); }
+  .gear-rig { border-left: 1px solid #222; padding-left: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .gear-rig-title { font-size: 0.52rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .gear-rig-slot {
+    border: 1px solid #2a2a2a;
+    background: #111;
+    min-height: 45px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 2px;
+  }
+  .gear-rig-slot .hand { font-size: 0.48rem; color: var(--muted); letter-spacing: 1px; }
+
   /* Skills inside hotbar panel */
   .skill-card {
     background: transparent;
@@ -3600,6 +3639,21 @@
             <div class="skill-xp-txt" id="mineXpTxt">0 xp</div>
           </div>
           <div class="skill-xp-bar"><div class="skill-xp-fill mine" id="mineXpBar" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Gear button -->
+  <div style="position:relative;">
+    <button class="hotbar-btn" id="hotbarGearBtn" onclick="hotbarToggle('gear')" title="Backpack & Equipment">🧰</button>
+    <div class="hotbar-panel" id="hotbarGearPanel">
+      <div class="hotbar-panel-title">🧰 Backpack + Equipment</div>
+      <div class="gear-wrap">
+        <div class="gear-grid" id="gearGrid"></div>
+        <div class="gear-rig">
+          <div class="gear-rig-title">Rig</div>
+          <div class="gear-rig-slot" id="gearLeftHand"><div class="hand">LEFT HAND</div><div>Empty</div></div>
+          <div class="gear-rig-slot" id="gearRightHand"><div class="hand">RIGHT HAND</div><div>Empty</div></div>
         </div>
       </div>
     </div>
@@ -7401,7 +7455,15 @@
 window.__inventory = {
   oak_log: 0, willow_log: 0, magic_log: 0,
   copper_ore: 0, iron_ore: 0, gold_ore: 0, runite_ore: 0,
+  bronze_axe: 1, bronze_pickaxe: 1,
 };
+window.__equipmentLoadout = { leftHand: '', rightHand: '' };
+
+const TOOL_ITEMS = {
+  bronze_axe: { icon:'🪓', name:'Bronze Axe', slot:'leftHand', bonusText:'+50% extra log chance' },
+  bronze_pickaxe: { icon:'⛏️', name:'Bronze Pickaxe', slot:'rightHand', bonusText:'+50% extra ore chance' },
+};
+const GEAR_GRID_LAYOUT = ['bronze_axe','bronze_pickaxe',null,null,null,null,null,null,null,null,null,null];
 
 const SELL_PRICES = {
   oak_log: 2, willow_log: 5, magic_log: 20,
@@ -7417,6 +7479,39 @@ const SELL_IDS = {
   copper_ore: 'sellCopperOre', iron_ore: 'sellIronOre', gold_ore: 'sellGoldOre', runite_ore: 'sellRuniteOre',
 };
 
+function updateEquipmentUI() {
+  const left = document.getElementById('gearLeftHand');
+  const right = document.getElementById('gearRightHand');
+  const leftItem = window.__equipmentLoadout.leftHand;
+  const rightItem = window.__equipmentLoadout.rightHand;
+  if (left) left.innerHTML = `<div class="hand">LEFT HAND</div><div>${leftItem && TOOL_ITEMS[leftItem] ? `${TOOL_ITEMS[leftItem].icon} ${TOOL_ITEMS[leftItem].name}` : 'Empty'}</div>`;
+  if (right) right.innerHTML = `<div class="hand">RIGHT HAND</div><div>${rightItem && TOOL_ITEMS[rightItem] ? `${TOOL_ITEMS[rightItem].icon} ${TOOL_ITEMS[rightItem].name}` : 'Empty'}</div>`;
+}
+
+function renderGearGrid() {
+  const grid = document.getElementById('gearGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  GEAR_GRID_LAYOUT.forEach(itemKey => {
+    const slot = document.createElement('div');
+    slot.className = 'gear-slot';
+    if (!itemKey) {
+      slot.classList.add('empty');
+      slot.textContent = '·';
+      grid.appendChild(slot);
+      return;
+    }
+    const item = TOOL_ITEMS[itemKey];
+    const count = window.__inventory[itemKey] || 0;
+    slot.innerHTML = `<div>${item.icon}</div><div class="gear-slot-count">x${count}</div>`;
+    if (!count) slot.classList.add('empty');
+    if ((window.__equipmentLoadout.leftHand === itemKey) || (window.__equipmentLoadout.rightHand === itemKey)) slot.classList.add('active');
+    slot.title = `${item.name} — ${item.bonusText}`;
+    slot.onclick = () => window.toggleEquipTool(itemKey);
+    grid.appendChild(slot);
+  });
+}
+
 function updateInventoryUI() {
   for (const [key, count] of Object.entries(window.__inventory)) {
     const countEl = document.getElementById(INV_IDS[key]);
@@ -7424,6 +7519,8 @@ function updateInventoryUI() {
     if (countEl) countEl.textContent = count;
     if (sellBtn) sellBtn.disabled = count < 1;
   }
+  renderGearGrid();
+  updateEquipmentUI();
 }
 
 function addInventoryItem(key, amount = 1) {
@@ -7431,6 +7528,26 @@ function addInventoryItem(key, amount = 1) {
   updateInventoryUI();
   if (window.__fbSaveInventory) window.__fbSaveInventory();
 }
+
+window.toggleEquipTool = function(itemKey) {
+  const item = TOOL_ITEMS[itemKey];
+  if (!item) return;
+  if ((window.__inventory[itemKey] || 0) < 1) return;
+  const slot = item.slot;
+  window.__equipmentLoadout[slot] = window.__equipmentLoadout[slot] === itemKey ? '' : itemKey;
+  updateInventoryUI();
+  if (window.__fbSaveInventory) window.__fbSaveInventory();
+};
+
+window.__getToolDoubleChance = function(kind) {
+  if (kind === 'log') {
+    return (window.__equipmentLoadout.leftHand === 'bronze_axe' || window.__equipmentLoadout.rightHand === 'bronze_axe') ? 0.5 : 0;
+  }
+  if (kind === 'ore') {
+    return (window.__equipmentLoadout.leftHand === 'bronze_pickaxe' || window.__equipmentLoadout.rightHand === 'bronze_pickaxe') ? 0.5 : 0;
+  }
+  return 0;
+};
 
 window.sellResource = async function(key) {
   const count = window.__inventory[key] || 0;
@@ -7464,20 +7581,27 @@ window.__inventorySelling = false;
 
 window.__loadInventoryFromPlayer = function(playerData) {
   if (window.__inventorySelling) return; // Don't overwrite while a sell is in flight
+  let changed = false;
   if (playerData && playerData.inventory) {
     for (const key of Object.keys(window.__inventory)) {
-      window.__inventory[key] = playerData.inventory[key] || 0;
+      if (key in playerData.inventory) window.__inventory[key] = playerData.inventory[key] || 0;
     }
-    updateInventoryUI();
   }
+  if (!window.__inventory.bronze_axe) { window.__inventory.bronze_axe = 1; changed = true; }
+  if (!window.__inventory.bronze_pickaxe) { window.__inventory.bronze_pickaxe = 1; changed = true; }
+  const eq = playerData?.equipment || {};
+  window.__equipmentLoadout.leftHand = eq.leftHand || '';
+  window.__equipmentLoadout.rightHand = eq.rightHand || '';
+  updateInventoryUI();
+  if (changed && window.__fbSaveInventory) window.__fbSaveInventory();
 };
 
 updateInventoryUI();
 
 // ── Hotbar toggle ──
 window.hotbarToggle = function(id) {
-  const panels  = { inv: 'hotbarInvPanel',  skill: 'hotbarSkillPanel' };
-  const buttons = { inv: 'hotbarInvBtn',    skill: 'hotbarSkillBtn'   };
+  const panels  = { inv: 'hotbarInvPanel', skill: 'hotbarSkillPanel', gear: 'hotbarGearPanel' };
+  const buttons = { inv: 'hotbarInvBtn',   skill: 'hotbarSkillBtn',   gear: 'hotbarGearBtn' };
   const panelEl = document.getElementById(panels[id]);
   const btnEl   = document.getElementById(buttons[id]);
   const isOpen  = panelEl.classList.contains('open');
@@ -7979,6 +8103,11 @@ document.addEventListener('click', e => {
       const cx2 = r.left+r.width/2, cy2 = r.top+r.height/2;
       if (window.__awardSkillXp) window.__awardSkillXp('wc', state.type.xp, cx2, cy2-20);
       addInventoryItem(state.type.invKey, 1);
+      const extraLogChance = window.__getToolDoubleChance ? window.__getToolDoubleChance('log') : 0;
+      if (Math.random() < extraLogChance) {
+        addInventoryItem(state.type.invKey, 1);
+        spawnResourceFloat(`🪓 BONUS +1 ${state.type.name} Log`, cx2, cy2-2, 'wc');
+      }
       if (Math.random() < state.type.coinChance) {
         if (window.__awardGrassCoin) window.__awardGrassCoin(state.type.coinAmt);
         spawnCoinFloat(`+${state.type.coinAmt} \uD83E\uDE99`, cx2, cy2-10);
@@ -8025,6 +8154,11 @@ document.addEventListener('click', e => {
       const cx2 = r.left+r.width/2, cy2 = r.top+r.height/2;
       if (window.__awardSkillXp) window.__awardSkillXp('mine', state.ore.xp, cx2, cy2-20);
       addInventoryItem(state.ore.invKey, 1);
+      const extraOreChance = window.__getToolDoubleChance ? window.__getToolDoubleChance('ore') : 0;
+      if (Math.random() < extraOreChance) {
+        addInventoryItem(state.ore.invKey, 1);
+        spawnResourceFloat(`⛏️ BONUS +1 ${state.ore.name} Ore`, cx2, cy2-2, 'mine');
+      }
       if (Math.random() < state.ore.coinChance) {
         if (window.__awardGrassCoin) window.__awardGrassCoin(state.ore.coinAmt);
         spawnCoinFloat(`+${state.ore.coinAmt} \uD83E\uDE99`, cx2, cy2-10);
@@ -9122,6 +9256,7 @@ window.__fbSaveInventory = async function() {
   const uid = user.id;
   await update(ref(db, `players/${uid}`), {
     inventory: window.__inventory || {},
+    equipment: window.__equipmentLoadout || {},
   });
 };
 
