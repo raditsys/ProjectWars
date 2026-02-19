@@ -3862,7 +3862,7 @@
 <!-- ── PLINKO PANEL ── -->
 <div class="game-panel" id="panelPK">
 <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
-  <canvas id="plinkoCanvas" width="520" height="620" style="background:#0a1f0a;border:1px solid #2a5a2a;display:block;max-width:100%;"></canvas>
+  <canvas id="plinkoCanvas" width="380" height="440" style="background:#0a1f0a;border:1px solid #2a5a2a;display:block;max-width:100%;"></canvas>
   <div class="roulette-result-num" id="plinkoResultNum" style="min-height:2.5rem;">—</div>
 </div>
 <!-- Bet amount -->
@@ -3880,7 +3880,8 @@
 </div>
 </div>
 <div class="result-banner" id="pkResultBanner"></div>
-<button class="r-spin-btn" id="pkDropBtn" onclick="pkDrop()">🎯 Aim Drop</button>
+<button class="r-spin-btn" id="pkDropBtn" onclick="pkDrop()">🔵 Drop Ball</button>
+<button class="r-spin-btn" id="pkTriangleBtn" onclick="pkToggleTriangle()" style="margin-top:0.5rem;">⏸ Pause Triangle</button>
 </div>
 
 <!-- ── PRECISION RISK PANEL ── -->
@@ -6230,7 +6231,7 @@
     let delta = 0, resultText = '', resultType = '';
 
     if (won) {
-      delta = rlBet * payout;
+      delta = rlBet * payout + rlBet;
       const profit = rlBet * payout;
       resultText = `✅ ${num} — YOU WIN +${profit} 🪙`;
       resultType = 'win';
@@ -6254,7 +6255,8 @@
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
 
-    // Keep last roulette bet selected between spins (Precision-style remember bet)
+    rlBet = 0;
+    document.getElementById('rlBetDisplay').innerHTML = `0<small>bet</small>`;
     rlSpinning = false;
     document.getElementById('rlSpinBtn').disabled = false;
   }
@@ -6263,10 +6265,10 @@
   setTimeout(() => rlBuildGrid(), 100);
 
   // ══════════════════ PLINKO ══════════════════
-  const PK_ROWS = 15;
-  const PK_COLS = 11;
-  const PK_MULTIPLIERS = [3.0, 1.8, 1.2, 0.8, 0.5, 0.0, 0.5, 0.8, 1.2, 1.8, 3.0];
-  const PK_COLORS      = ['#ff7a3d','#f5c842','#84cc16','#4ade80','#34d399','#ef4444','#34d399','#4ade80','#84cc16','#f5c842','#ff7a3d'];
+  const PK_ROWS = 12;
+  const PK_COLS = 9;
+  const PK_MULTIPLIERS = [2.0, 1.5, 1.0, 0.5, 0.0, 0.5, 1.0, 1.5, 2.0];
+  const PK_COLORS      = ['#cd7f42','#4ade80','#f87171','#f87171','#f87171','#f87171','#f87171','#4ade80','#cd7f42'];
 
   let pkBet = 0;
   let pkRunning = false;
@@ -6275,18 +6277,16 @@
   let pkBalls = [];
   let pkBuckets = [];
   let pkAnimFrame = null;
-  let pkAiming = false;
-  let pkAimPhase = 0;
-  let pkPlatformX = 260;
-  const PK_W = 520, PK_H = 620;
+  let pkTrianglePaused = false;
+  let pkTriangle = { x: 190, y: 160, size: 16 };
+  let pkTriangleBounds = null;
+  let pkTriangleLastJump = 0;
+  const PK_TRIANGLE_JUMP_MS = 320;
+  const PK_W = 380, PK_H = 440;
   const PK_PEG_R = 5;
   const PK_BALL_R = 7;
-  const PK_TOP_PAD = 44;
-  const PK_BOT_PAD = 84;
-  const PK_FUNNEL_TOP_Y = 10;
-  const PK_FUNNEL_BOTTOM_Y = PK_TOP_PAD - 10;
-  const PK_PLATFORM_Y = PK_FUNNEL_TOP_Y + 8;
-  const PK_PLATFORM_W = 82;
+  const PK_TOP_PAD = 38;
+  const PK_BOT_PAD = 54;
 
   function pkInitCanvas() {
     pkCanvas = document.getElementById('plinkoCanvas');
@@ -6294,9 +6294,12 @@
     pkCanvas.width = PK_W;
     pkCanvas.height = PK_H;
     pkCtx = pkCanvas.getContext('2d');
-    pkPlatformX = PK_W / 2;
     pkBuildLayout();
+    pkRandomizeTriangle(true);
     pkDraw();
+    if (pkAnimFrame) cancelAnimationFrame(pkAnimFrame);
+    pkLastTime = 0;
+    pkAnimFrame = requestAnimationFrame(pkStep);
   }
 
   function pkBuildLayout() {
@@ -6308,6 +6311,13 @@
     const colGap  = usableW / (PK_COLS - 1);  // gap between pegs
     const usableH = PK_H - PK_TOP_PAD - PK_BOT_PAD;
     const rowGap  = usableH / (PK_ROWS - 1);
+
+    pkTriangleBounds = {
+      minX: startX + colGap * 0.5,
+      maxX: startX + usableW - colGap * 0.5,
+      minY: PK_TOP_PAD + rowGap * 0.6,
+      maxY: PK_H - PK_BOT_PAD - rowGap * 1.2
+    };
 
     for (let row = 0; row < PK_ROWS; row++) {
       const y      = PK_TOP_PAD + row * rowGap;
@@ -6335,37 +6345,6 @@
     ctx.fillStyle = '#0a1f0a';
     ctx.fillRect(0, 0, PK_W, PK_H);
 
-    // Draw funnel guides and moving release platform
-    const funnelInset = PK_W * 0.2;
-    const funnelMouth = PK_W * 0.10;
-    ctx.strokeStyle = '#2a5a2a';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(funnelInset, PK_FUNNEL_TOP_Y);
-    ctx.lineTo(PK_W / 2 - funnelMouth, PK_FUNNEL_BOTTOM_Y);
-    ctx.moveTo(PK_W - funnelInset, PK_FUNNEL_TOP_Y);
-    ctx.lineTo(PK_W / 2 + funnelMouth, PK_FUNNEL_BOTTOM_Y);
-    ctx.stroke();
-
-    ctx.fillStyle = '#133013';
-    ctx.fillRect(pkPlatformX - PK_PLATFORM_W / 2, PK_PLATFORM_Y, PK_PLATFORM_W, 6);
-    ctx.strokeStyle = '#4ade80';
-    ctx.lineWidth = 1.4;
-    ctx.strokeRect(pkPlatformX - PK_PLATFORM_W / 2, PK_PLATFORM_Y, PK_PLATFORM_W, 6);
-
-    if (pkAiming) {
-      const grd = ctx.createRadialGradient(pkPlatformX - 2, PK_PLATFORM_Y - PK_BALL_R - 2, 1, pkPlatformX, PK_PLATFORM_Y - PK_BALL_R, PK_BALL_R);
-      grd.addColorStop(0, '#a0d8ff');
-      grd.addColorStop(1, '#2255cc');
-      ctx.beginPath();
-      ctx.arc(pkPlatformX, PK_PLATFORM_Y - PK_BALL_R, PK_BALL_R, 0, Math.PI * 2);
-      ctx.fillStyle = grd;
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
-
     // Draw pegs
     pkPegs.forEach(p => {
       ctx.beginPath();
@@ -6380,17 +6359,31 @@
     // Draw buckets
     pkBuckets.forEach((b) => {
       const bx = b.x - b.w / 2;
-      const bh = PK_BOT_PAD - 10;
+      const bh = PK_BOT_PAD - 8;
       ctx.fillStyle = b.color + '33';
       ctx.strokeStyle = b.color;
       ctx.lineWidth = 1.5;
       ctx.fillRect(bx, b.y, b.w, bh);
       ctx.strokeRect(bx, b.y, b.w, bh);
       ctx.fillStyle = b.color;
-      ctx.font = `bold ${b.mult >= 3 ? 14 : 12}px DM Mono, monospace`;
+      ctx.font = `bold ${b.mult >= 3 ? 10 : 9}px DM Mono, monospace`;
       ctx.textAlign = 'center';
       ctx.fillText(b.mult + 'x', b.x, b.y + bh * 0.62);
     });
+
+
+    // Draw moving triangle peg
+    const tx = pkTriangle.x, ty = pkTriangle.y, ts = pkTriangle.size;
+    ctx.beginPath();
+    ctx.moveTo(tx, ty - ts);
+    ctx.lineTo(tx - ts * 0.9, ty + ts * 0.8);
+    ctx.lineTo(tx + ts * 0.9, ty + ts * 0.8);
+    ctx.closePath();
+    ctx.fillStyle = pkTrianglePaused ? '#f5c842' : '#ff7a3d';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
 
     // Draw balls
     pkBalls.forEach(ball => {
@@ -6409,25 +6402,39 @@
 
   let pkLastTime = 0;
 
+
+  function pkRandomizeTriangle(force = false) {
+    if (!pkTriangleBounds) return;
+    if (!force && pkTrianglePaused) return;
+    const b = pkTriangleBounds;
+    pkTriangle.x = b.minX + Math.random() * (b.maxX - b.minX);
+    pkTriangle.y = b.minY + Math.random() * (b.maxY - b.minY);
+  }
+
+  window.pkToggleTriangle = function() {
+    if (pkRunning) return;
+    pkTrianglePaused = !pkTrianglePaused;
+    const btn = document.getElementById('pkTriangleBtn');
+    if (btn) btn.textContent = pkTrianglePaused ? '▶ Resume Triangle' : '⏸ Pause Triangle';
+    if (!pkTrianglePaused) pkRandomizeTriangle(true);
+    pkDraw();
+  };
+
   function pkStep(timestamp) {
     // Delta time: normalize to 60fps. Cap at 3 frames to avoid huge jumps on tab restore.
     const elapsed = pkLastTime ? Math.min(timestamp - pkLastTime, 50) : 16.667;
     pkLastTime = timestamp;
     const dt = elapsed / 16.667;
 
-    if (pkAiming) {
-      pkAimPhase += 0.03 * dt;
-      const swing = (PK_W * 0.24);
-      pkPlatformX = PK_W / 2 + Math.sin(pkAimPhase) * swing;
-      pkDraw();
-      pkAnimFrame = requestAnimationFrame(pkStep);
-      return;
-    }
-
     const gravity = 0.28;
     const friction = Math.pow(0.995, dt);
     const bounceFactor = 0.45;
     const bucketY = PK_H - PK_BOT_PAD + 4;
+
+    if (!pkTrianglePaused && (!pkTriangleLastJump || timestamp - pkTriangleLastJump >= PK_TRIANGLE_JUMP_MS)) {
+      pkTriangleLastJump = timestamp;
+      pkRandomizeTriangle(true);
+    }
 
     pkBalls.forEach(ball => {
       if (ball.done) return;
@@ -6459,6 +6466,23 @@
         }
       });
 
+      // Collide with triangle peg
+      const tdx = ball.x - pkTriangle.x;
+      const tdy = ball.y - pkTriangle.y;
+      const tDist = Math.sqrt(tdx * tdx + tdy * tdy);
+      const tMinDist = pkTriangle.size * 0.85 + PK_BALL_R;
+      if (tDist < tMinDist && tDist > 0.01) {
+        const nx = tdx / tDist, ny = tdy / tDist;
+        const overlap = tMinDist - tDist;
+        ball.x += nx * overlap;
+        ball.y += ny * overlap;
+        const dot = ball.vx * nx + ball.vy * ny;
+        ball.vx = (ball.vx - 2 * dot * nx) * bounceFactor;
+        ball.vy = (ball.vy - 2 * dot * ny) * bounceFactor;
+        ball.vx += (Math.random() - 0.5) * 1.4;
+        playTone(700 + Math.random() * 180, 'triangle', 0.025, 0.05);
+      }
+
       // Wall bounce
       if (ball.x < PK_BALL_R) { ball.x = PK_BALL_R; ball.vx = Math.abs(ball.vx) * bounceFactor; }
       if (ball.x > PK_W - PK_BALL_R) { ball.x = PK_W - PK_BALL_R; ball.vx = -Math.abs(ball.vx) * bounceFactor; }
@@ -6481,15 +6505,24 @@
 
     pkDraw();
 
-    // Keep animating until all balls done
-    if (pkBalls.some(b => !b.done)) {
+    // Keep animating continuously so triangle can keep moving between rounds
+    if (pkRunning && pkBalls.some(b => !b.done)) {
       pkAnimFrame = requestAnimationFrame(pkStep);
-    } else {
+      return;
+    }
+
+    if (pkRunning) {
       pkLastTime = 0;
       pkRunning = false;
+      pkBalls = [];
       document.getElementById('pkDropBtn').disabled = false;
-      document.getElementById('pkDropBtn').textContent = '🎯 Aim Drop';
+      pkTrianglePaused = false;
+      pkTriangleLastJump = 0;
+      const triBtn = document.getElementById('pkTriangleBtn');
+      if (triBtn) triBtn.textContent = '⏸ Pause Triangle';
     }
+
+    pkAnimFrame = requestAnimationFrame(pkStep);
   }
 
   async function pkOnLand(ball, bucket) {
@@ -6529,7 +6562,7 @@
   }
 
   window.pkAddBet = function(amount) {
-    if (pkRunning || pkAiming) return;
+    if (pkRunning) return;
     const p = getCurrentCasinoPlayer();
     if (!p) { shakeWallet(); return; }
     if (pkBet + amount > (p.coins || 0)) { shakeWallet(); return; }
@@ -6539,7 +6572,7 @@
   };
 
   window.pkClearBet = function() {
-    if (pkRunning || pkAiming) return;
+    if (pkRunning) return;
     pkBet = 0;
     document.getElementById('pkBetDisplay').innerHTML = '0<small>bet</small>';
   };
@@ -6554,41 +6587,23 @@
     if (!pkCanvas) pkInitCanvas();
     if (!pkCanvas) return;
 
-    // First click starts timing mode on moving platform
-    if (!pkAiming) {
-      pkAiming = true;
-      pkAimPhase = Math.random() * Math.PI * 2;
-      pkPlatformX = PK_W / 2;
-      document.getElementById('pkResultBanner').className = 'result-banner';
-      document.getElementById('plinkoResultNum').textContent = 'Time your release';
-      document.getElementById('plinkoResultNum').className = 'roulette-result-num';
-      document.getElementById('pkDropBtn').textContent = '🔵 Release Ball';
-      if (pkAnimFrame) cancelAnimationFrame(pkAnimFrame);
-      pkLastTime = 0;
-      pkAnimFrame = requestAnimationFrame(pkStep);
-      return;
-    }
-
-    // Second click releases from the moving platform into the funnel
-    pkAiming = false;
     pkRunning = true;
     document.getElementById('pkDropBtn').disabled = true;
-    document.getElementById('pkDropBtn').textContent = '🔵 Dropping...';
     document.getElementById('pkResultBanner').className = 'result-banner';
     document.getElementById('plinkoResultNum').textContent = '…';
     document.getElementById('plinkoResultNum').className = 'roulette-result-num';
 
-    // Deduct bet at release
+    // Deduct bet immediately
     const newCoins = Math.max(0, (p.coins || 0) - pkBet);
     await setCasinoCoins(p.id, newCoins);
 
-    const betSnapshot = pkBet;
-    const releaseX = Math.min(PK_W - PK_BALL_R, Math.max(PK_BALL_R, pkPlatformX));
+    // Drop ball from random position near top center
+    const betSnapshot = pkBet; // capture bet before async operations
     pkBalls = [{
-      x: releaseX,
-      y: PK_PLATFORM_Y + 10,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: 0.8,
+      x: PK_W / 2 + (Math.random() - 0.5) * 30,
+      y: PK_TOP_PAD - 20,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: 1,
       done: false,
       bucket: null,
       bet: betSnapshot
@@ -7008,7 +7023,7 @@
     setTimeout(() => playTone(180, 'sawtooth', 0.3, 0.15), 150);
     spawnCoinFloat(`-${lost} 🪙`);
     await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) - lost));
-    // Keep last blackjack bet selected between hands (Precision-style remember bet)
+    bjBet = 0;
     updateBetDisplay();
     setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
   };
@@ -7152,7 +7167,7 @@
     bjSplitIdx = 0;
     document.getElementById('splitHand2Wrap').style.display = 'none';
     document.getElementById('splitHand2Cards').innerHTML = '';
-    // Keep last blackjack bet selected between hands (Precision-style remember bet)
+    bjBet = 0;
     updateBetDisplay();
     setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
   }
@@ -7217,6 +7232,7 @@
       recordBiggestWin(p.name, p.id, delta);
     }
 
+    bjBet = 0;
     bjSplitHands = null;
     bjSplitIdx = 0;
     document.getElementById('splitHand2Wrap').style.display = 'none';
