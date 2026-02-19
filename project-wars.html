@@ -2639,7 +2639,7 @@
     position: fixed;
     left: 16px;
     bottom: 90px;
-    width: 300px;
+    width: 420px;
     z-index: 140;
     background: rgba(8,12,8,0.95);
     border: 1px solid #2a3a2a;
@@ -2652,20 +2652,20 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px 7px;
+    padding: 11px 16px 10px;
     border-bottom: 1px solid #1e2e1e;
     gap: 8px;
   }
   #envRoomName {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    letter-spacing: 4px;
+    font-size: 1.5rem;
+    letter-spacing: 5px;
     color: var(--gold);
     flex: 1;
   }
   #envCoords {
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     color: #555;
     letter-spacing: 1px;
     white-space: nowrap;
@@ -2673,7 +2673,7 @@
   #envScene {
     position: relative;
     width: 100%;
-    height: 180px;
+    height: 260px;
     overflow: hidden;
     background: linear-gradient(180deg, #0a1a0e 0%, #0d200d 60%, #111a0a 100%);
     transition: background 0.4s ease;
@@ -2681,15 +2681,15 @@
   #envGround {
     position: absolute;
     bottom: 0; left: 0;
-    width: 100%; height: 30px;
+    width: 100%; height: 40px;
     background: linear-gradient(180deg, #1a2e10 0%, #0e1a08 100%);
     border-top: 1px solid #2a4a1a;
     transition: background 0.4s ease, border-color 0.4s ease;
   }
   #envResources {
     position: absolute;
-    bottom: 28px; left: 0;
-    width: 100%; height: 152px;
+    bottom: 38px; left: 0;
+    width: 100%; height: 222px;
   }
   .env-resource {
     position: absolute;
@@ -2704,6 +2704,75 @@
   .env-resource.mining   { animation: oreShake 0.12s ease-in-out infinite; }
   .env-resource.falling  { animation: treeFall 0.55s ease-in forwards !important; pointer-events: none; }
   .env-resource.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
+
+  /* ══════════ MARKET SELL PANEL ══════════ */
+  .env-market-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 8px 10px 6px;
+    background: rgba(10,8,0,0.88);
+    border-top: 1px solid #4a3800;
+    backdrop-filter: blur(2px);
+  }
+  .env-market-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 4px;
+    color: #f5c842;
+    margin-bottom: 7px;
+    text-shadow: 0 0 8px rgba(245,200,66,0.4);
+  }
+  .env-market-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+  }
+  .env-market-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2px;
+    padding: 6px 4px 5px;
+    border: 1px solid #2a2000;
+    background: #0a0800;
+    cursor: pointer;
+    transition: border-color 0.1s, background 0.1s;
+    position: relative;
+    min-height: 68px;
+  }
+  .env-market-tile.has-stock {
+    border-color: #2a6a2a;
+    background: #091409;
+    cursor: pointer;
+  }
+  .env-market-tile.has-stock:hover {
+    border-color: #4ade80;
+    background: #0f2a0f;
+  }
+  .env-market-tile.empty {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .env-tile-icon { font-size: 1.3rem; line-height: 1; }
+  .env-tile-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1;
+  }
+  .env-market-tile.has-stock .env-tile-count { color: #f5c842; }
+  .env-tile-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.62rem;
+    color: #4ade80;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .env-market-tile.empty .env-tile-price { color: #333; }
   #envFooter {
     border-top: 1px solid #1e2e1e;
     display: flex;
@@ -2711,23 +2780,23 @@
   }
   #envRoomDesc {
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.78rem;
     color: var(--muted);
     letter-spacing: 1px;
-    padding: 6px 12px 5px;
+    padding: 8px 16px 6px;
     text-align: center;
-    min-height: 22px;
+    min-height: 28px;
   }
   #envControls {
     display: flex;
     justify-content: center;
-    padding: 6px 0 10px;
+    padding: 8px 0 12px;
   }
   #envNavGrid {
     display: grid;
-    grid-template-columns: 40px 48px 40px;
-    grid-template-rows: 36px 48px 36px;
-    gap: 3px;
+    grid-template-columns: 52px 64px 52px;
+    grid-template-rows: 44px 60px 44px;
+    gap: 4px;
     align-items: center;
     justify-items: center;
   }
@@ -2735,9 +2804,9 @@
     background: rgba(255,255,255,0.03);
     border: 1px solid #2a3a2a;
     color: var(--muted);
-    font-size: 0.85rem;
-    width: 36px;
-    height: 32px;
+    font-size: 1rem;
+    width: 46px;
+    height: 40px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -2748,8 +2817,8 @@
   .env-nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
   /* Mini-map in centre of nav grid */
   #envMinimap {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 60px;
     position: relative;
     display: flex;
     align-items: center;
@@ -2840,11 +2909,44 @@
     color: #4ade80;
     padding: 2px 6px;
     cursor: pointer;
-    transition: background 0.12s;
+    transition: background 0.12s, border-color 0.12s;
     white-space: nowrap;
   }
   .inv-sell-btn:hover:not(:disabled) { background: #22552a; }
   .inv-sell-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  /* When sell is locked because not at market */
+  .inv-sell-btn.market-locked {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    color: #555;
+    cursor: not-allowed;
+    opacity: 1;
+    font-size: 0.55rem;
+    letter-spacing: 0.5px;
+  }
+  .inv-market-hint {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.55rem;
+    color: #665500;
+    letter-spacing: 0.5px;
+    text-align: center;
+    padding: 5px 10px 3px;
+    border-top: 1px solid #1a1a1a;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    justify-content: center;
+  }
+  .inv-market-hint.at-market {
+    color: #4ade80;
+    border-color: #1a3a1a;
+  }
+  .inv-market-hint a {
+    color: #a07800;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .inv-market-hint.at-market a { color: #4ade80; }
 
   /* Skills inside hotbar panel */
   .skill-card {
@@ -3032,6 +3134,9 @@
         <span class="inv-label">Runite Ore</span>
         <span class="inv-count" id="invRuniteOre">0</span>
         <button class="inv-sell-btn" onclick="sellResource('runite_ore')" disabled id="sellRuniteOre">Sell 40🪙</button>
+      </div>
+      <div class="inv-market-hint" id="invMarketHint">
+        🏪 <span id="invMarketHintText">Go to <a onclick="goToMarket()">Market</a> to sell</span>
       </div>
     </div>
   </div>
@@ -6692,13 +6797,41 @@ const SELL_IDS = {
   copper_ore: 'sellCopperOre', iron_ore: 'sellIronOre', gold_ore: 'sellGoldOre', runite_ore: 'sellRuniteOre',
 };
 
+window.__atMarket = false;
+
 function updateInventoryUI() {
+  const atMarket = !!window.__atMarket;
+  const hint = document.getElementById('invMarketHint');
+  const hintText = document.getElementById('invMarketHintText');
+
+  if (hint) {
+    hint.className = 'inv-market-hint' + (atMarket ? ' at-market' : '');
+    if (hintText) {
+      hintText.innerHTML = atMarket
+        ? '✓ Selling enabled'
+        : 'Go to <a onclick="goToMarket()">Market</a> to sell';
+    }
+  }
+
   for (const [key, count] of Object.entries(window.__inventory)) {
     const countEl = document.getElementById(INV_IDS[key]);
     const sellBtn = document.getElementById(SELL_IDS[key]);
     if (countEl) countEl.textContent = count;
-    if (sellBtn) sellBtn.disabled = count < 1;
+    if (sellBtn) {
+      if (!atMarket) {
+        sellBtn.disabled = true;
+        sellBtn.classList.add('market-locked');
+        sellBtn.textContent = '🏪 Market only';
+      } else {
+        sellBtn.classList.remove('market-locked');
+        sellBtn.disabled = count < 1;
+        const prices = { oak_log:2, willow_log:5, magic_log:20, copper_ore:2, iron_ore:4, gold_ore:12, runite_ore:40 };
+        sellBtn.textContent = `Sell ${prices[key]}🪙`;
+      }
+    }
   }
+  // Keep the in-scene market panel in sync
+  if (window.__refreshMarketPanel) window.__refreshMarketPanel();
 }
 
 function addInventoryItem(key, amount = 1) {
@@ -6708,6 +6841,7 @@ function addInventoryItem(key, amount = 1) {
 }
 
 window.sellResource = async function(key) {
+  if (!window.__atMarket) return;
   const count = window.__inventory[key] || 0;
   if (count < 1) return;
   if (window.__inventorySelling) return;
@@ -6754,6 +6888,12 @@ window.__loadInventoryFromPlayer = function(playerData) {
 
 updateInventoryUI();
 
+window.goToMarket = function() {
+  if (window.envGoTo) window.envGoTo(3, 2);
+  document.querySelectorAll('.hotbar-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.hotbar-btn').forEach(b => b.classList.remove('active'));
+};
+
 // ── Hotbar toggle ──
 window.hotbarToggle = function(id) {
   const panels  = { inv: 'hotbarInvPanel',  skill: 'hotbarSkillPanel' };
@@ -6794,7 +6934,7 @@ document.addEventListener('click', e => {
     '0,2': null,
     '1,2': { name:'Enchanted Grove', desc:'Magic trees glow at night', sky:'linear-gradient(180deg,#10063a 0%,#180a50 60%,#0e0430 100%)', ground:'#1a0a40', groundBorder:'#3a1a70', resources:[{kind:'tree',type:'magic',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}] },
     '2,2': { name:'Runite Mine', desc:'Rare runite ore glimmers', sky:'linear-gradient(180deg,#060810 0%,#08100a 60%,#060a10 100%)', ground:'#0e1018', groundBorder:'#1a2030', resources:[{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'runite',x:228}] },
-    '3,2': null,
+    '3,2': { name:'Market', desc:'Sell your resources here', sky:'linear-gradient(180deg,#0a0800 0%,#140e00 60%,#0a0a00 100%)', ground:'#1a1400', groundBorder:'#4a3800', resources:[{kind:'market'}] },
   };
 
   const TREE_TYPES = {
@@ -6840,11 +6980,47 @@ document.addEventListener('click', e => {
     </svg>`;
   }
 
+  // ── Market sell panel ──
+  const MARKET_ITEMS = [
+    { key:'oak_log',     icon:'🪵', label:'Oak Log',     price:2  },
+    { key:'willow_log',  icon:'🌿', label:'Willow Log',  price:5  },
+    { key:'magic_log',   icon:'✨', label:'Magic Log',   price:20 },
+    { key:'copper_ore',  icon:'🟤', label:'Copper Ore',  price:2  },
+    { key:'iron_ore',    icon:'⚙️', label:'Iron Ore',    price:4  },
+    { key:'gold_ore',    icon:'🌕', label:'Gold Ore',    price:12 },
+    { key:'runite_ore',  icon:'💎', label:'Runite Ore',  price:40 },
+  ];
+
+  function buildMarketPanelHTML() {
+    const inv = window.__inventory || {};
+    const tiles = MARKET_ITEMS.map(item => {
+      const count = inv[item.key] || 0;
+      const canSell = count > 0;
+      const total = count * item.price;
+      return `<div class="env-market-tile ${canSell ? 'has-stock' : 'empty'}" data-key="${item.key}" title="${item.label}${canSell ? ` — sell all for ${total}🪙` : ` (${item.price}🪙 ea)`}">
+        <span class="env-tile-icon">${item.icon}</span>
+        <span class="env-tile-count">${count}</span>
+        <span class="env-tile-price">${canSell ? total + '🪙' : item.price + '🪙 ea'}</span>
+      </div>`;
+    }).join('');
+    return `<div class="env-market-title">🏪 Market</div><div class="env-market-grid">${tiles}</div>`;
+  }
+
+  function refreshMarketPanel() {
+    const panel = document.querySelector('.env-market-panel');
+    if (!panel) return;
+    panel.innerHTML = buildMarketPanelHTML();
+    panel.querySelectorAll('.env-market-tile.has-stock').forEach(btn => {
+      btn.addEventListener('click', () => window.sellResource(btn.dataset.key));
+    });
+  }
+  window.__refreshMarketPanel = refreshMarketPanel;
+
   // ── Mini-map ──
   function renderMinimap() {
     const canvas = document.getElementById('envMinimapCanvas');
     if (!canvas) return;
-    const CELL = 9, GAP = 2;
+    const CELL = 13, GAP = 2;
     const W = GRID_W * (CELL + GAP) - GAP;
     const H = GRID_H * (CELL + GAP) - GAP;
     canvas.width = W; canvas.height = H;
@@ -6856,7 +7032,8 @@ document.addEventListener('click', e => {
         const rm = room(c, r);
         if (!rm) { ctx.fillStyle = '#111'; ctx.fillRect(px, py, CELL, CELL); continue; }
         const isCurrent = c === cx && r === cy;
-        ctx.fillStyle = isCurrent ? '#f5c842' : '#2a4a2a';
+        const isMarket = rm.name === 'Market';
+        ctx.fillStyle = isCurrent ? '#f5c842' : isMarket ? '#3a2a00' : '#2a4a2a';
         ctx.fillRect(px, py, CELL, CELL);
         if (isCurrent) {
           ctx.fillStyle = '#1a1a1a';
@@ -6882,6 +7059,10 @@ document.addEventListener('click', e => {
     document.getElementById('envRoomName').textContent = rm.name;
     document.getElementById('envRoomDesc').textContent = rm.desc;
     document.getElementById('envCoords').textContent = `${cx},${cy}`;
+
+    // Update market-sell gate
+    window.__atMarket = (rm.name === 'Market');
+    updateInventoryUI();
 
     const scene = document.getElementById('envScene');
     const ground = document.getElementById('envGround');
@@ -6916,6 +7097,13 @@ document.addEventListener('click', e => {
         const state = { el, kind:'tree', type, depleted:false, active:false };
         resourceState.push(state);
         el.addEventListener('click', () => onTreeClick(state));
+      } else if (res.kind === 'market') {
+        el.className = 'env-market-panel';
+        el.style.left = '';
+        el.innerHTML = buildMarketPanelHTML();
+        el.querySelectorAll('.env-market-tile.has-stock').forEach(btn => {
+          btn.addEventListener('click', () => window.sellResource(btn.dataset.key));
+        });
       } else {
         const ore = { ...ORE_TYPES[res.type], id: res.type };
         el.innerHTML = makeRockSVG(ore);
@@ -7029,6 +7217,13 @@ document.addEventListener('click', e => {
     const nc = cx + dx, nr = cy + dy;
     if (!room(nc, nr)) return;
     cx = nc; cy = nr;
+    renderRoom(dx, dy);
+  };
+
+  window.envGoTo = function(tc, tr) {
+    if (!room(tc, tr)) return;
+    const dx = Math.sign(tc - cx), dy = Math.sign(tr - cy);
+    cx = tc; cy = tr;
     renderRoom(dx, dy);
   };
 
