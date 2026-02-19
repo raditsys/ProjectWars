@@ -2496,7 +2496,7 @@
   pointer-events: all;
   cursor: pointer;
   transform-origin: bottom center;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+  filter: none;
 }
 .grass-clump:hover { transform: scaleY(1.06); }
 
@@ -2549,7 +2549,7 @@
     pointer-events: all;
     cursor: pointer;
     transform-origin: bottom center;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    filter: none;
   }
   .flower-clump:hover { transform: scale(1.08); }
   .flower-clump.cutting { animation: clumpCut 0.32s ease forwards !important; pointer-events: none; }
@@ -3145,6 +3145,15 @@
     50%      { transform: translateY(-5px) rotate(2deg); }
   }
   #frogPet.hopping .pet-emoji { animation: frogHop 0.45s ease forwards; }
+
+  /* ── Performance / accessibility: reduce motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    .wavy-letter { animation: none !important; transform: none !important; }
+    .grass-blade { animation: none !important; }
+    .grass-coin { animation: none !important; opacity: 0; }
+    .coin-float, .skill-float { animation: none !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -3959,6 +3968,27 @@
 
   let autoLoginDone = false;
 
+  // ── Render scheduling (collapse rapid Firebase updates into 1 paint) ──
+  let __rafRenderId = null;
+  const __renderPending = { full: false, history: false };
+
+  function scheduleRender(kind) {
+    if (kind === 'full') __renderPending.full = true;
+    if (kind === 'history') __renderPending.history = true;
+    if (__rafRenderId) return;
+    __rafRenderId = requestAnimationFrame(() => {
+      __rafRenderId = null;
+      if (__renderPending.full) {
+        render();
+      } else if (__renderPending.history) {
+        renderHistory();
+      }
+      __renderPending.full = false;
+      __renderPending.history = false;
+    });
+  }
+
+
   onValue(ref(db, 'players'), snap => {
     players = snap.val() || {};
     syncEl.textContent = '⬤ live';
@@ -3981,9 +4011,7 @@
         return; // onLoggedIn calls render(), skip the render below
       }
     }
-    render();
-    if (document.getElementById('shopDrawer')?.classList.contains('open')) renderShopItems();
-    updateChestUI();
+    scheduleRender('full');
   }, () => {
     syncEl.textContent = '⬤ connection error';
     syncEl.className = 'sync-status err';
@@ -3991,7 +4019,7 @@
 
   onValue(ref(db, 'logs'), snap => {
     logs = snap.val() || {};
-    render();
+    scheduleRender('history');
   });
 
   let biggestWins = {};
@@ -4095,7 +4123,7 @@
     document.getElementById('loginPass').value = '';
     render();
     startTutorialIfNeeded();
-    updateChestUI();
+    if (window.__startGardenWatch) window.__startGardenWatch(currentUser.id);
   }
 
   // ══════════════════════════════════════════
@@ -4429,6 +4457,8 @@
     renderSelfPanels();
     renderHistory();
     refreshCasinoWallet();
+    updateChestUI();
+    if (document.getElementById('shopDrawer')?.classList.contains('open')) renderShopItems();
   }
 
   function renderWeek() {
@@ -6725,8 +6755,8 @@
   }
 
   function makeClumpEl(x) {
-    const width = randi(42, 86);
-    const bladeCount = randi(8, 18);
+    const width = randi(44, 78);
+    const bladeCount = randi(5, 10);
     const baseHeight = randi(26, 42);
 
     const clump = document.createElement('div');
@@ -6750,7 +6780,7 @@
 
       const g = greens[Math.floor(Math.random() * greens.length)];
       const swayBase = (Math.random() - 0.5) * 10;
-      const swayAmt  = (Math.random() > 0.5 ? 1 : -1) * (4 + Math.random() * 7);
+      const swayAmt  = (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 4);
       const delay    = (Math.random() * 2.8).toFixed(2);
       const dur      = (1.6 + Math.random() * 2.3).toFixed(2);
 
@@ -8355,24 +8385,30 @@ window.__fbSaveQuestFlags = async function() {
   });
 };
 
-setInterval(() => {
-  const uid = window.__currentUserId;
-  if (uid && uid !== gardenWatchingUid) {
-    gardenWatchingUid = uid;
-    onValue(ref(db, `players/${uid}`), snap => {
-      const p = snap.val() || {};
-      window.__playersCache = window.__playersCache || {};
-      window.__playersCache[uid] = p;
-      window.__applyGardenBoosts && window.__applyGardenBoosts(p.garden || {});
-      window.__loadSkillsFromPlayer && window.__loadSkillsFromPlayer(p);
-      window.__loadInventoryFromPlayer && window.__loadInventoryFromPlayer(p);
-      if (p.questFlags) Object.assign(window.__questFlags || (window.__questFlags = {}), p.questFlags);
-      if (document.getElementById('gardenDrawer')?.classList.contains('open')) {
-        window.renderGarden && window.renderGarden();
-      }
-    });
-  }
-}, 300);
+
+// Start/replace the per-user garden watcher (called from onLoggedIn)
+let __gardenUnsub = null;
+
+window.__startGardenWatch = function(uid) {
+  if (!uid) return;
+  if (uid === gardenWatchingUid) return;
+  gardenWatchingUid = uid;
+
+  try { if (__gardenUnsub) __gardenUnsub(); } catch(e) {}
+
+  __gardenUnsub = onValue(ref(db, `players/${uid}`), snap => {
+    const p = snap.val() || {};
+    window.__playersCache = window.__playersCache || {};
+    window.__playersCache[uid] = p;
+    window.__applyGardenBoosts && window.__applyGardenBoosts(p.garden || {});
+    window.__loadSkillsFromPlayer && window.__loadSkillsFromPlayer(p);
+    window.__loadInventoryFromPlayer && window.__loadInventoryFromPlayer(p);
+    if (p.questFlags) Object.assign(window.__questFlags || (window.__questFlags = {}), p.questFlags);
+    if (document.getElementById('gardenDrawer')?.classList.contains('open')) {
+      window.renderGarden && window.renderGarden();
+    }
+  });
+};
 </script>
 <script type="module">
 // Extend the Firebase module with grass coin award + hat shop
@@ -8547,20 +8583,30 @@ window.openShop = function() {
 
 // Watch for login — start Firebase listener when user logs in
 let watchingUid = null;
-setInterval(() => {
-  const uid = window.__currentUserId;
-  if (uid && uid !== watchingUid) {
-    watchingUid = uid;
-    watchPlayerHatPet(uid);
-  }
-  if (!uid && watchingUid) {
-    // logged out — reset display
-    watchingUid = null;
-    window.__playerHatPetData = null;
-    applyHatDisplay('');
-    applyPetDisplay('frog');
-  }
-}, 300);
+
+// Start/replace the per-user garden watcher (called from onLoggedIn)
+let __gardenUnsub = null;
+
+window.__startGardenWatch = function(uid) {
+  if (!uid) return;
+  if (uid === gardenWatchingUid) return;
+  gardenWatchingUid = uid;
+
+  try { if (__gardenUnsub) __gardenUnsub(); } catch(e) {}
+
+  __gardenUnsub = onValue(ref(db, `players/${uid}`), snap => {
+    const p = snap.val() || {};
+    window.__playersCache = window.__playersCache || {};
+    window.__playersCache[uid] = p;
+    window.__applyGardenBoosts && window.__applyGardenBoosts(p.garden || {});
+    window.__loadSkillsFromPlayer && window.__loadSkillsFromPlayer(p);
+    window.__loadInventoryFromPlayer && window.__loadInventoryFromPlayer(p);
+    if (p.questFlags) Object.assign(window.__questFlags || (window.__questFlags = {}), p.questFlags);
+    if (document.getElementById('gardenDrawer')?.classList.contains('open')) {
+      window.renderGarden && window.renderGarden();
+    }
+  });
+};
 
 </script>
 </body>
