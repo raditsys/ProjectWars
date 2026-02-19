@@ -2981,8 +2981,25 @@
     position: absolute;
     pointer-events: none;
   }
-  .env-resource.depleted { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; pointer-events: none; }
+  .env-resource.depleted { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; }
   .env-resource.chopping { animation: treeChop 0.18s ease-in-out infinite; }
+  .resource-status-tag {
+    position: absolute;
+    left: 50%;
+    bottom: -30px;
+    transform: translateX(-50%);
+    background: rgba(8,8,8,0.9);
+    border: 1px solid #444;
+    color: #d0d0d0;
+    font-size: 0.56rem;
+    padding: 0.18rem 0.32rem;
+    border-radius: 3px;
+    letter-spacing: 0.4px;
+    text-align: center;
+    white-space: nowrap;
+    pointer-events: none;
+    line-height: 1.2;
+  }
   .env-resource.mining   { animation: oreShake 0.12s ease-in-out infinite; }
   .env-resource.falling  { animation: treeFall 0.55s ease-in forwards !important; pointer-events: none; }
   .env-resource.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
@@ -4274,7 +4291,7 @@
 </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, remove, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAtMH_AvVGskpK2TxMlXjf0IXRb9HT-q_Y",
@@ -4288,6 +4305,15 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+  window.__claimWorldResource = async function(resourceKey, payload) {
+    const nodeRef = ref(db, `resources/${resourceKey}`);
+    const now = Date.now();
+    const tx = await runTransaction(nodeRef, current => {
+      if (current && Number(current.respawnAt || 0) > now) return;
+      return { ...payload, takenAt: now };
+    });
+    return !!tx.committed;
+  };
 
   // ── Constants ──
   const COINS_PER_HOUR = 100;
@@ -4295,6 +4321,7 @@
   // ── State ──
   let players = {};
   let logs = {};
+  let worldResources = {};
   let currentUser = null; // { id, name, ...playerData }
 
   const syncEl = document.getElementById('syncStatus');
@@ -4353,6 +4380,11 @@
   onValue(ref(db, 'logs'), snap => {
     logs = snap.val() || {};
     scheduleRender('history');
+  });
+
+  onValue(ref(db, 'resources'), snap => {
+    worldResources = snap.val() || {};
+    if (window.__onWorldResourcesUpdate) window.__onWorldResourcesUpdate(worldResources);
   });
 
   let biggestWins = {};
@@ -7689,6 +7721,38 @@ document.addEventListener('click', e => {
   let cx = 2, cy = 2;
   let clayer = 0;  // 0=surface, 1=underground
   let resourceState = [];
+  let worldResourceState = {};
+
+  function resourceNodeKey(layer, c, rr, idx) { return `${layer}_${c}_${rr}_${idx}`; }
+  function getWorldNode(nodeKey) {
+    const node = worldResourceState?.[nodeKey];
+    return node && Number(node.respawnAt || 0) > Date.now() ? node : null;
+  }
+  function refreshResourceNodeVisual(state) {
+    if (!state || !state.el) return;
+    const node = getWorldNode(state.nodeKey);
+    const existing = state.el.querySelector('.resource-status-tag');
+    if (existing) existing.remove();
+    state.depleted = !!node;
+    state.el.classList.toggle('depleted', !!node);
+    if (!node) return;
+    const secs = Math.max(0, Math.ceil((Number(node.respawnAt || 0) - Date.now()) / 1000));
+    const tag = document.createElement('div');
+    tag.className = 'resource-status-tag';
+    const by = node.takenBy || 'Unknown';
+    tag.textContent = `Taken by: ${by} • Back in ${secs}s`;
+    state.el.appendChild(tag);
+  }
+  function refreshResourceVisuals() {
+    resourceState.forEach(refreshResourceNodeVisual);
+  }
+  window.__onWorldResourcesUpdate = function(resources) {
+    worldResourceState = resources || {};
+    refreshResourceVisuals();
+  };
+  setInterval(() => {
+    if (resourceState.length) refreshResourceVisuals();
+  }, 1000);
 
   function key(c, rr) { return `${c},${rr}`; }
   function room(c, rr) {
@@ -7851,34 +7915,37 @@ document.addEventListener('click', e => {
     }
 
     // Interactive resources
-    rm.resources.forEach(res => {
+    rm.resources.forEach((res, idx) => {
       const el = document.createElement('div');
       el.className = 'env-resource';
       el.style.left = res.x + 'px';
+      const nodeKey = resourceNodeKey(clayer, cx, cy, idx);
       if (res.kind === 'tree') {
         const type = { ...TREE_TYPES[res.type], id: res.type };
         el.innerHTML = makeTreeSVG(type);
         el.title = `${type.name} Tree (WC ${type.reqLevel})`;
-        const state = { el, kind:'tree', type, depleted:false, active:false };
+        const state = { el, kind:'tree', type, depleted:false, active:false, nodeKey };
         resourceState.push(state);
         el.addEventListener('click', () => onTreeClick(state));
       } else {
         const ore = { ...ORE_TYPES[res.type], id: res.type };
         el.innerHTML = makeRockSVG(ore);
         el.title = `${ore.name} Ore (Mining ${ore.reqLevel})`;
-        const state = { el, kind:'ore', ore, depleted:false, active:false };
+        const state = { el, kind:'ore', ore, depleted:false, active:false, nodeKey };
         resourceState.push(state);
         el.addEventListener('click', () => onOreClick(state));
       }
       resContainer.appendChild(el);
     });
 
+    refreshResourceVisuals();
+
     updateNavButtons();
     renderMinimap();
   }
 
   function onTreeClick(state) {
-    if (state.active || state.depleted) return;
+    if (state.active || getWorldNode(state.nodeKey)) return;
     const wcLevel = window.__getSkillLevel ? window.__getSkillLevel('wc') : 1;
     if (wcLevel < state.type.reqLevel) {
       const r = state.el.getBoundingClientRect();
@@ -7890,11 +7957,22 @@ document.addEventListener('click', e => {
     const ring = makeProgressRing('#4ade80');
     state.el.appendChild(ring);
     animateRing(ring, state.type.chopMs);
-    setTimeout(() => {
+    setTimeout(async () => {
       state.active = false;
       state.el.classList.remove('chopping');
-      state.el.classList.add('falling');
       ring.remove();
+      const claim = window.__claimWorldResource
+        ? await window.__claimWorldResource(state.nodeKey, {
+            takenBy: window.__currentUser?.name || 'Unknown',
+            takenById: window.__currentUserId || '',
+            respawnAt: Date.now() + state.type.respawnMs
+          })
+        : true;
+      if (!claim) {
+        refreshResourceNodeVisual(state);
+        return;
+      }
+      state.el.classList.add('falling');
       const r = state.el.getBoundingClientRect();
       const cx2 = r.left+r.width/2, cy2 = r.top+r.height/2;
       if (window.__awardSkillXp) window.__awardSkillXp('wc', state.type.xp, cx2, cy2-20);
@@ -7906,16 +7984,14 @@ document.addEventListener('click', e => {
       spawnResourceFloat(`\uD83E\uDEB5 ${state.type.name} Log`, cx2, cy2+10, 'wc');
       setTimeout(() => {
         state.el.classList.remove('falling');
-        state.depleted = true;
-        state.el.classList.add('depleted');
         state.el.innerHTML = makeTreeSVG(state.type);
-        setTimeout(() => { state.depleted=false; state.el.classList.remove('depleted'); }, state.type.respawnMs);
+        refreshResourceNodeVisual(state);
       }, 560);
     }, state.type.chopMs);
   }
 
   function onOreClick(state) {
-    if (state.active || state.depleted) return;
+    if (state.active || getWorldNode(state.nodeKey)) return;
     const mineLevel = window.__getSkillLevel ? window.__getSkillLevel('mine') : 1;
     if (mineLevel < state.ore.reqLevel) {
       const r = state.el.getBoundingClientRect();
@@ -7927,11 +8003,22 @@ document.addEventListener('click', e => {
     const ring = makeProgressRing('#cd7f42');
     state.el.appendChild(ring);
     animateRing(ring, state.ore.mineMs);
-    setTimeout(() => {
+    setTimeout(async () => {
       state.active = false;
       state.el.classList.remove('mining');
-      state.el.classList.add('breaking');
       ring.remove();
+      const claim = window.__claimWorldResource
+        ? await window.__claimWorldResource(state.nodeKey, {
+            takenBy: window.__currentUser?.name || 'Unknown',
+            takenById: window.__currentUserId || '',
+            respawnAt: Date.now() + state.ore.respawnMs
+          })
+        : true;
+      if (!claim) {
+        refreshResourceNodeVisual(state);
+        return;
+      }
+      state.el.classList.add('breaking');
       const r = state.el.getBoundingClientRect();
       const cx2 = r.left+r.width/2, cy2 = r.top+r.height/2;
       if (window.__awardSkillXp) window.__awardSkillXp('mine', state.ore.xp, cx2, cy2-20);
@@ -7943,10 +8030,8 @@ document.addEventListener('click', e => {
       spawnResourceFloat(`\u26CF\uFE0F ${state.ore.name} Ore`, cx2, cy2+10, 'mine');
       setTimeout(() => {
         state.el.classList.remove('breaking');
-        state.depleted = true;
-        state.el.classList.add('depleted');
         state.el.innerHTML = makeRockSVG(state.ore);
-        setTimeout(() => { state.depleted=false; state.el.classList.remove('depleted'); }, state.ore.respawnMs);
+        refreshResourceNodeVisual(state);
       }, 420);
     }, state.ore.mineMs);
   }
