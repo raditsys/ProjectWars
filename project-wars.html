@@ -3452,8 +3452,8 @@
       }
     }
 
-    // Init first track (don't autoplay yet — browser will block)
-    loadTrack(0, false);
+    // Init random track (don't autoplay yet — browser will block)
+    loadTrack(trackIdx, false);
 
     // Auto-start on first interaction
     function onFirstInteraction() {
@@ -3467,7 +3467,7 @@
     document.addEventListener('keydown', onFirstInteraction);
 
     // Also try immediate autoplay
-    loadTrack(0, true);
+    loadTrack(trackIdx, true);
 
     window.toggleMusic = function() {
       if (playing) {
