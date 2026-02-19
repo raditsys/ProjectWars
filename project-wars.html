@@ -2639,9 +2639,9 @@
     position: fixed;
     left: 16px;
     bottom: 90px;
-    width: 200px;
+    width: 300px;
     z-index: 140;
-    background: rgba(8,12,8,0.93);
+    background: rgba(8,12,8,0.95);
     border: 1px solid #2a3a2a;
     backdrop-filter: blur(8px);
     display: flex;
@@ -2652,54 +2652,44 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 5px 6px;
+    padding: 8px 12px 7px;
     border-bottom: 1px solid #1e2e1e;
+    gap: 8px;
   }
   #envRoomName {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.75rem;
-    letter-spacing: 3px;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
     color: var(--gold);
-    text-align: center;
     flex: 1;
   }
-  .env-nav-btn {
-    background: none;
-    border: 1px solid #2a3a2a;
-    color: var(--muted);
+  #envCoords {
+    font-family: 'DM Mono', monospace;
     font-size: 0.65rem;
-    width: 22px;
-    height: 22px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: border-color 0.15s, color 0.15s;
-    flex-shrink: 0;
+    color: #555;
+    letter-spacing: 1px;
+    white-space: nowrap;
   }
-  .env-nav-btn:hover { border-color: var(--gold); color: var(--gold); }
   #envScene {
     position: relative;
     width: 100%;
-    height: 130px;
+    height: 180px;
     overflow: hidden;
     background: linear-gradient(180deg, #0a1a0e 0%, #0d200d 60%, #111a0a 100%);
+    transition: background 0.4s ease;
   }
   #envGround {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 22px;
+    bottom: 0; left: 0;
+    width: 100%; height: 30px;
     background: linear-gradient(180deg, #1a2e10 0%, #0e1a08 100%);
     border-top: 1px solid #2a4a1a;
+    transition: background 0.4s ease, border-color 0.4s ease;
   }
   #envResources {
     position: absolute;
-    bottom: 20px;
-    left: 0;
-    width: 100%;
-    height: 110px;
+    bottom: 28px; left: 0;
+    width: 100%; height: 152px;
   }
   .env-resource {
     position: absolute;
@@ -2714,21 +2704,65 @@
   .env-resource.mining   { animation: oreShake 0.12s ease-in-out infinite; }
   .env-resource.falling  { animation: treeFall 0.55s ease-in forwards !important; pointer-events: none; }
   .env-resource.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
+  #envFooter {
+    border-top: 1px solid #1e2e1e;
+    display: flex;
+    flex-direction: column;
+  }
   #envRoomDesc {
     font-family: 'DM Mono', monospace;
-    font-size: 0.5rem;
+    font-size: 0.65rem;
     color: var(--muted);
     letter-spacing: 1px;
-    padding: 4px 8px 5px;
+    padding: 6px 12px 5px;
     text-align: center;
-    border-top: 1px solid #1e2e1e;
-    min-height: 18px;
+    min-height: 22px;
   }
-  @keyframes envSlideIn {
-    from { opacity: 0; transform: translateX(var(--slide-from)); }
-    to   { opacity: 1; transform: translateX(0); }
+  #envControls {
+    display: flex;
+    justify-content: center;
+    padding: 6px 0 10px;
   }
-  .env-slide { animation: envSlideIn 0.22s ease; }
+  #envNavGrid {
+    display: grid;
+    grid-template-columns: 40px 48px 40px;
+    grid-template-rows: 36px 48px 36px;
+    gap: 3px;
+    align-items: center;
+    justify-items: center;
+  }
+  .env-nav-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #2a3a2a;
+    color: var(--muted);
+    font-size: 0.85rem;
+    width: 36px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .env-nav-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); background: rgba(245,200,66,0.06); }
+  .env-nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+  /* Mini-map in centre of nav grid */
+  #envMinimap {
+    width: 48px;
+    height: 48px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #envMinimapCanvas {
+    image-rendering: pixelated;
+  }
+  @keyframes envSlide {
+    from { opacity: 0; transform: translate(var(--sx,0), var(--sy,0)); }
+    to   { opacity: 1; transform: translate(0,0); }
+  }
+  .env-slide { animation: envSlide 0.2s ease; }
 
   /* ══════════ HOTBAR ══════════ */
   #hotbar {
@@ -2927,15 +2961,29 @@
 <!-- ENVIRONMENT PANEL -->
 <div id="envPanel">
   <div id="envHeader">
-    <button class="env-nav-btn" id="envPrev" onclick="envNavigate(-1)">◀</button>
     <div id="envRoomName">Forest</div>
-    <button class="env-nav-btn" id="envNext" onclick="envNavigate(1)">▶</button>
+    <div id="envCoords"></div>
   </div>
   <div id="envScene">
     <div id="envGround"></div>
     <div id="envResources"></div>
   </div>
-  <div id="envRoomDesc"></div>
+  <div id="envFooter">
+    <div id="envRoomDesc"></div>
+    <div id="envControls">
+      <div id="envNavGrid">
+        <div></div>
+        <button class="env-nav-btn" id="envBtnN" onclick="envNavigate(0,-1)" title="North">▲</button>
+        <div></div>
+        <button class="env-nav-btn" id="envBtnW" onclick="envNavigate(-1,0)" title="West">◀</button>
+        <div id="envMinimap"></div>
+        <button class="env-nav-btn" id="envBtnE" onclick="envNavigate(1,0)" title="East">▶</button>
+        <div></div>
+        <button class="env-nav-btn" id="envBtnS" onclick="envNavigate(0,1)" title="South">▼</button>
+        <div></div>
+      </div>
+    </div>
+  </div>
 </div>
 <div id="hotbar">
   <!-- Inventory button -->
@@ -6727,60 +6775,33 @@ document.addEventListener('click', e => {
 // ══════════════════ ENVIRONMENT SYSTEM ══════════════════
 (function() {
 
-  // ── Room definitions ──
-  const ROOMS = [
-    {
-      name: 'Forest',
-      desc: 'Oak and willow trees',
-      sky: 'linear-gradient(180deg, #0a1a0e 0%, #0d200d 60%, #111a0a 100%)',
-      ground: '#1a2e10',
-      resources: [
-        { kind:'tree', type:'oak',    x:18  },
-        { kind:'tree', type:'oak',    x:95  },
-        { kind:'tree', type:'willow', x:145 },
-      ],
-    },
-    {
-      name: 'Deep Woods',
-      desc: 'Willow and magic trees',
-      sky: 'linear-gradient(180deg, #0d0a1a 0%, #120d20 60%, #0a0a15 100%)',
-      ground: '#1a1030',
-      resources: [
-        { kind:'tree', type:'willow', x:12  },
-        { kind:'tree', type:'magic',  x:85  },
-        { kind:'tree', type:'willow', x:148 },
-      ],
-    },
-    {
-      name: 'Copper Mine',
-      desc: 'Copper and iron ore',
-      sky: 'linear-gradient(180deg, #100a08 0%, #1a1208 60%, #100e08 100%)',
-      ground: '#2a1a08',
-      resources: [
-        { kind:'ore', type:'copper', x:20  },
-        { kind:'ore', type:'iron',   x:90  },
-        { kind:'ore', type:'copper', x:150 },
-      ],
-    },
-    {
-      name: 'Deep Mine',
-      desc: 'Gold and runite ore',
-      sky: 'linear-gradient(180deg, #060810 0%, #08100a 60%, #060a10 100%)',
-      ground: '#0e1018',
-      resources: [
-        { kind:'ore', type:'gold',   x:15  },
-        { kind:'ore', type:'runite', x:88  },
-        { kind:'ore', type:'gold',   x:148 },
-      ],
-    },
-  ];
+  // ── 2D Grid Map: [col, row] coords ──
+  // Cols 0-3, Rows 0-2  (4 wide × 3 tall)
+  const GRID_W = 4, GRID_H = 3;
 
-  const TREE_TYPES = {
-    oak:    { name:'Oak',    invKey:'oak_log',    color:'#2d5a1a', trunkColor:'#5a3010', reqLevel:1,  xp:25,  chopMs:4000,  respawnMs:45000,  coinChance:0.08, coinAmt:1, scale:0.7 },
-    willow: { name:'Willow', invKey:'willow_log', color:'#1a5a3a', trunkColor:'#3a2a10', reqLevel:30, xp:68,  chopMs:7000,  respawnMs:90000,  coinChance:0.15, coinAmt:2, scale:0.9 },
-    magic:  { name:'Magic',  invKey:'magic_log',  color:'#4a1a5a', trunkColor:'#6a00aa', reqLevel:75, xp:250, chopMs:15000, respawnMs:240000, coinChance:0.30, coinAmt:5, scale:1.1 },
+  // null = no room there (blocked/wall)
+  const MAP = {
+    '0,0': { name:'Lakeside',    desc:'Willow trees by the water', sky:'linear-gradient(180deg,#061420 0%,#0a1e2a 60%,#0d2210 100%)', ground:'#1a3020', groundBorder:'#2a5a30', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}] },
+    '1,0': { name:'Forest',      desc:'Oak trees, easy woodcutting', sky:'linear-gradient(180deg,#0a1a0e 0%,#0d200d 60%,#111a0a 100%)', ground:'#1a2e10', groundBorder:'#2a4a1a', resources:[{kind:'tree',type:'oak',x:10},{kind:'tree',type:'oak',x:118},{kind:'tree',type:'oak',x:228}] },
+    '2,0': { name:'Birch Glen',  desc:'Mixed oak and willow', sky:'linear-gradient(180deg,#0c1a08 0%,#102208 60%,#0e1c08 100%)', ground:'#1e3210', groundBorder:'#3a5a1a', resources:[{kind:'tree',type:'oak',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}] },
+    '3,0': { name:'Swamp',       desc:'Ancient willow groves', sky:'linear-gradient(180deg,#0a1208 0%,#0e1a0a 60%,#0a1210 100%)', ground:'#102a10', groundBorder:'#1a4a20', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'willow',x:228}] },
+
+    '0,1': { name:'Copper Pit',  desc:'Shallow copper deposits', sky:'linear-gradient(180deg,#140e08 0%,#1a1408 60%,#141008 100%)', ground:'#2a1a08', groundBorder:'#4a3010', resources:[{kind:'ore',type:'copper',x:20},{kind:'ore',type:'copper',x:128},{kind:'ore',type:'iron',x:228}] },
+    '1,1': { name:'Iron Ridge',  desc:'Iron and copper veins', sky:'linear-gradient(180deg,#101010 0%,#161616 60%,#101212 100%)', ground:'#202020', groundBorder:'#383838', resources:[{kind:'ore',type:'copper',x:20},{kind:'ore',type:'iron',x:128},{kind:'ore',type:'iron',x:228}] },
+    '2,1': { name:'Deep Woods',  desc:'Willow and magic trees', sky:'linear-gradient(180deg,#0d0a1a 0%,#120d20 60%,#0a0a15 100%)', ground:'#1a1030', groundBorder:'#2a1a4a', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}] },
+    '3,1': { name:'Gold Cavern', desc:'Gold veins run deep here', sky:'linear-gradient(180deg,#100a04 0%,#180e04 60%,#120c04 100%)', ground:'#1e1204', groundBorder:'#3a2208', resources:[{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:128},{kind:'ore',type:'gold',x:228}] },
+
+    '0,2': null,
+    '1,2': { name:'Enchanted Grove', desc:'Magic trees glow at night', sky:'linear-gradient(180deg,#10063a 0%,#180a50 60%,#0e0430 100%)', ground:'#1a0a40', groundBorder:'#3a1a70', resources:[{kind:'tree',type:'magic',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}] },
+    '2,2': { name:'Runite Mine', desc:'Rare runite ore glimmers', sky:'linear-gradient(180deg,#060810 0%,#08100a 60%,#060a10 100%)', ground:'#0e1018', groundBorder:'#1a2030', resources:[{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'runite',x:228}] },
+    '3,2': null,
   };
 
+  const TREE_TYPES = {
+    oak:    { name:'Oak',    invKey:'oak_log',    color:'#2d5a1a', trunkColor:'#5a3010', reqLevel:1,  xp:25,  chopMs:4000,  respawnMs:45000,  coinChance:0.08, coinAmt:1, scale:1.0 },
+    willow: { name:'Willow', invKey:'willow_log', color:'#1a5a3a', trunkColor:'#3a2a10', reqLevel:30, xp:68,  chopMs:7000,  respawnMs:90000,  coinChance:0.15, coinAmt:2, scale:1.25 },
+    magic:  { name:'Magic',  invKey:'magic_log',  color:'#4a1a5a', trunkColor:'#6a00aa', reqLevel:75, xp:250, chopMs:15000, respawnMs:240000, coinChance:0.30, coinAmt:5, scale:1.5 },
+  };
   const ORE_TYPES = {
     copper: { name:'Copper', invKey:'copper_ore', color:'#b87333', shine:'#e8a070', reqLevel:1,  xp:18,  mineMs:3500,  respawnMs:35000,  coinChance:0.06, coinAmt:1 },
     iron:   { name:'Iron',   invKey:'iron_ore',   color:'#7a7a7a', shine:'#aaaaaa', reqLevel:15, xp:35,  mineMs:5500,  respawnMs:60000,  coinChance:0.10, coinAmt:1 },
@@ -6788,10 +6809,13 @@ document.addEventListener('click', e => {
     runite: { name:'Runite', invKey:'runite_ore', color:'#3a6a8a', shine:'#6ab0d0', reqLevel:85, xp:125, mineMs:18000, respawnMs:600000, coinChance:0.40, coinAmt:8 },
   };
 
-  let currentRoom = 0;
-  // Track state per resource slot: { el, depleted, active }
+  let cx = 1, cy = 0; // current col, row — start in Forest
   let resourceState = [];
 
+  function key(c, r) { return `${c},${r}`; }
+  function room(c, r) { return MAP[key(c, r)] || null; }
+
+  // ── SVG makers ──
   function makeTreeSVG(type) {
     const s = type.scale;
     const w = Math.round(56*s), h = Math.round(100*s);
@@ -6805,7 +6829,6 @@ document.addEventListener('click', e => {
       ${type.id === 'magic' ? `<ellipse cx="${w/2}" cy="${h-th-ch*0.5}" rx="${cw*0.3}" ry="${ch*0.22}" fill="#cc66ff" opacity="0.35"/>` : ''}
     </svg>`;
   }
-
   function makeRockSVG(ore) {
     const w = 48, h = 40;
     return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
@@ -6817,21 +6840,62 @@ document.addEventListener('click', e => {
     </svg>`;
   }
 
-  function renderRoom(dir) {
-    const room = ROOMS[currentRoom];
+  // ── Mini-map ──
+  function renderMinimap() {
+    const canvas = document.getElementById('envMinimapCanvas');
+    if (!canvas) return;
+    const CELL = 9, GAP = 2;
+    const W = GRID_W * (CELL + GAP) - GAP;
+    const H = GRID_H * (CELL + GAP) - GAP;
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+    for (let r = 0; r < GRID_H; r++) {
+      for (let c = 0; c < GRID_W; c++) {
+        const px = c * (CELL + GAP), py = r * (CELL + GAP);
+        const rm = room(c, r);
+        if (!rm) { ctx.fillStyle = '#111'; ctx.fillRect(px, py, CELL, CELL); continue; }
+        const isCurrent = c === cx && r === cy;
+        ctx.fillStyle = isCurrent ? '#f5c842' : '#2a4a2a';
+        ctx.fillRect(px, py, CELL, CELL);
+        if (isCurrent) {
+          ctx.fillStyle = '#1a1a1a';
+          ctx.fillRect(px+2, py+2, 1, 1);
+        }
+      }
+    }
+  }
+
+  // ── Nav button states ──
+  function updateNavButtons() {
+    document.getElementById('envBtnN').disabled = !room(cx, cy-1);
+    document.getElementById('envBtnS').disabled = !room(cx, cy+1);
+    document.getElementById('envBtnW').disabled = !room(cx-1, cy);
+    document.getElementById('envBtnE').disabled = !room(cx+1, cy);
+  }
+
+  // ── Render room ──
+  function renderRoom(dx, dy) {
+    const rm = room(cx, cy);
+    if (!rm) return;
+
+    document.getElementById('envRoomName').textContent = rm.name;
+    document.getElementById('envRoomDesc').textContent = rm.desc;
+    document.getElementById('envCoords').textContent = `${cx},${cy}`;
+
     const scene = document.getElementById('envScene');
-    const resContainer = document.getElementById('envResources');
     const ground = document.getElementById('envGround');
+    scene.style.background = rm.sky;
+    ground.style.background = `linear-gradient(180deg, ${rm.ground} 0%, rgba(0,0,0,0.6) 100%)`;
+    ground.style.borderTopColor = rm.groundBorder;
 
-    // Update labels
-    document.getElementById('envRoomName').textContent = room.name;
-    document.getElementById('envRoomDesc').textContent = room.desc;
-    scene.style.background = room.sky;
-    ground.style.background = `linear-gradient(180deg, ${room.ground} 0%, #0e1a08 100%)`;
+    const resContainer = document.getElementById('envResources');
 
-    // Slide animation
-    if (dir !== 0) {
-      resContainer.style.setProperty('--slide-from', dir > 0 ? '40px' : '-40px');
+    // Slide direction
+    if (dx !== 0 || dy !== 0) {
+      const sx = dx * 35, sy = dy * 25;
+      resContainer.style.setProperty('--sx', sx + 'px');
+      resContainer.style.setProperty('--sy', sy + 'px');
       resContainer.classList.remove('env-slide');
       void resContainer.offsetWidth;
       resContainer.classList.add('env-slide');
@@ -6840,7 +6904,7 @@ document.addEventListener('click', e => {
     resContainer.innerHTML = '';
     resourceState = [];
 
-    room.resources.forEach((res, i) => {
+    rm.resources.forEach(res => {
       const el = document.createElement('div');
       el.className = 'env-resource';
       el.style.left = res.x + 'px';
@@ -6848,28 +6912,32 @@ document.addEventListener('click', e => {
       if (res.kind === 'tree') {
         const type = { ...TREE_TYPES[res.type], id: res.type };
         el.innerHTML = makeTreeSVG(type);
-        el.title = `${type.name} Tree (WC ${type.reqLevel}) — click to chop`;
-        const state = { el, kind:'tree', type, depleted:false, active:false, timer:null };
+        el.title = `${type.name} Tree (WC ${type.reqLevel})`;
+        const state = { el, kind:'tree', type, depleted:false, active:false };
         resourceState.push(state);
         el.addEventListener('click', () => onTreeClick(state));
       } else {
         const ore = { ...ORE_TYPES[res.type], id: res.type };
         el.innerHTML = makeRockSVG(ore);
-        el.title = `${ore.name} Ore (Mining ${ore.reqLevel}) — click to mine`;
-        const state = { el, kind:'ore', ore, depleted:false, active:false, timer:null };
+        el.title = `${ore.name} Ore (Mining ${ore.reqLevel})`;
+        const state = { el, kind:'ore', ore, depleted:false, active:false };
         resourceState.push(state);
         el.addEventListener('click', () => onOreClick(state));
       }
-
       resContainer.appendChild(el);
     });
+
+    updateNavButtons();
+    renderMinimap();
   }
 
+  // ── Resource interactions ──
   function onTreeClick(state) {
     if (state.active || state.depleted) return;
     const wcLevel = window.__getSkillLevel ? window.__getSkillLevel('wc') : 1;
     if (wcLevel < state.type.reqLevel) {
-      spawnSkillFloat(state.el.getBoundingClientRect().left + 30, state.el.getBoundingClientRect().top, `🔒 WC ${state.type.reqLevel}`, 'wc');
+      const r = state.el.getBoundingClientRect();
+      spawnSkillFloat(r.left + 30, r.top, `🔒 WC ${state.type.reqLevel}`, 'wc');
       return;
     }
     state.active = true;
@@ -6877,29 +6945,26 @@ document.addEventListener('click', e => {
     const ring = makeProgressRing('#4ade80');
     state.el.appendChild(ring);
     animateRing(ring, state.type.chopMs);
-    state.timer = setTimeout(() => {
+    setTimeout(() => {
       state.active = false;
       state.el.classList.remove('chopping');
       state.el.classList.add('falling');
       ring.remove();
-      const rect = state.el.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-      if (window.__awardSkillXp) window.__awardSkillXp('wc', state.type.xp, cx, cy - 20);
+      const r = state.el.getBoundingClientRect();
+      const cx2 = r.left + r.width/2, cy2 = r.top + r.height/2;
+      if (window.__awardSkillXp) window.__awardSkillXp('wc', state.type.xp, cx2, cy2-20);
       addInventoryItem(state.type.invKey, 1);
       if (Math.random() < state.type.coinChance) {
         if (window.__awardGrassCoin) window.__awardGrassCoin(state.type.coinAmt);
-        spawnCoinFloat(`+${state.type.coinAmt} 🪙`, cx, cy - 10);
+        spawnCoinFloat(`+${state.type.coinAmt} 🪙`, cx2, cy2-10);
       }
-      spawnResourceFloat(`🪵 ${state.type.name} Log`, cx, cy + 10, 'wc');
+      spawnResourceFloat(`🪵 ${state.type.name} Log`, cx2, cy2+10, 'wc');
       setTimeout(() => {
         state.el.classList.remove('falling');
         state.depleted = true;
         state.el.classList.add('depleted');
         state.el.innerHTML = makeTreeSVG(state.type);
-        setTimeout(() => {
-          state.depleted = false;
-          state.el.classList.remove('depleted');
-        }, state.type.respawnMs);
+        setTimeout(() => { state.depleted = false; state.el.classList.remove('depleted'); }, state.type.respawnMs);
       }, 560);
     }, state.type.chopMs);
   }
@@ -6908,7 +6973,8 @@ document.addEventListener('click', e => {
     if (state.active || state.depleted) return;
     const mineLevel = window.__getSkillLevel ? window.__getSkillLevel('mine') : 1;
     if (mineLevel < state.ore.reqLevel) {
-      spawnSkillFloat(state.el.getBoundingClientRect().left + 24, state.el.getBoundingClientRect().top, `🔒 Mining ${state.ore.reqLevel}`, 'mine');
+      const r = state.el.getBoundingClientRect();
+      spawnSkillFloat(r.left + 24, r.top, `🔒 Mining ${state.ore.reqLevel}`, 'mine');
       return;
     }
     state.active = true;
@@ -6916,29 +6982,26 @@ document.addEventListener('click', e => {
     const ring = makeProgressRing('#cd7f42');
     state.el.appendChild(ring);
     animateRing(ring, state.ore.mineMs);
-    state.timer = setTimeout(() => {
+    setTimeout(() => {
       state.active = false;
       state.el.classList.remove('mining');
       state.el.classList.add('breaking');
       ring.remove();
-      const rect = state.el.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-      if (window.__awardSkillXp) window.__awardSkillXp('mine', state.ore.xp, cx, cy - 20);
+      const r = state.el.getBoundingClientRect();
+      const cx2 = r.left + r.width/2, cy2 = r.top + r.height/2;
+      if (window.__awardSkillXp) window.__awardSkillXp('mine', state.ore.xp, cx2, cy2-20);
       addInventoryItem(state.ore.invKey, 1);
       if (Math.random() < state.ore.coinChance) {
         if (window.__awardGrassCoin) window.__awardGrassCoin(state.ore.coinAmt);
-        spawnCoinFloat(`+${state.ore.coinAmt} 🪙`, cx, cy - 10);
+        spawnCoinFloat(`+${state.ore.coinAmt} 🪙`, cx2, cy2-10);
       }
-      spawnResourceFloat(`⛏️ ${state.ore.name} Ore`, cx, cy + 10, 'mine');
+      spawnResourceFloat(`⛏️ ${state.ore.name} Ore`, cx2, cy2+10, 'mine');
       setTimeout(() => {
         state.el.classList.remove('breaking');
         state.depleted = true;
         state.el.classList.add('depleted');
         state.el.innerHTML = makeRockSVG(state.ore);
-        setTimeout(() => {
-          state.depleted = false;
-          state.el.classList.remove('depleted');
-        }, state.ore.respawnMs);
+        setTimeout(() => { state.depleted = false; state.el.classList.remove('depleted'); }, state.ore.respawnMs);
       }, 420);
     }, state.ore.mineMs);
   }
@@ -6947,29 +7010,36 @@ document.addEventListener('click', e => {
     const el = document.createElement('div');
     el.className = 'grass-coin';
     el.textContent = text;
-    el.style.left = x + 'px';
-    el.style.top  = y + 'px';
+    el.style.left = x + 'px'; el.style.top = y + 'px';
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 1000);
   }
-
   function spawnResourceFloat(text, x, y, cls) {
     const f = document.createElement('div');
     f.className = `skill-float ${cls}`;
     f.style.fontSize = '0.75rem';
     f.textContent = text;
-    f.style.left = x + 'px';
-    f.style.top  = y + 'px';
+    f.style.left = x + 'px'; f.style.top = y + 'px';
     document.body.appendChild(f);
     setTimeout(() => f.remove(), 1400);
   }
 
-  window.envNavigate = function(dir) {
-    currentRoom = (currentRoom + dir + ROOMS.length) % ROOMS.length;
-    renderRoom(dir);
+  // ── Navigation ──
+  window.envNavigate = function(dx, dy) {
+    const nc = cx + dx, nr = cy + dy;
+    if (!room(nc, nr)) return;
+    cx = nc; cy = nr;
+    renderRoom(dx, dy);
   };
 
-  renderRoom(0);
+  // Init minimap canvas
+  const minimapDiv = document.getElementById('envMinimap');
+  const canvas = document.createElement('canvas');
+  canvas.id = 'envMinimapCanvas';
+  canvas.title = 'World map';
+  minimapDiv.appendChild(canvas);
+
+  renderRoom(0, 0);
 
 })();
 
