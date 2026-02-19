@@ -2634,7 +2634,102 @@
   }
   .ore-obj.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
 
-  /* ══════════ SKILL HUD ══════════ */
+  /* ══════════ ENVIRONMENT PANEL ══════════ */
+  #envPanel {
+    position: fixed;
+    left: 16px;
+    bottom: 90px;
+    width: 200px;
+    z-index: 140;
+    background: rgba(8,12,8,0.93);
+    border: 1px solid #2a3a2a;
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+  }
+  #envHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 6px;
+    border-bottom: 1px solid #1e2e1e;
+  }
+  #envRoomName {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-align: center;
+    flex: 1;
+  }
+  .env-nav-btn {
+    background: none;
+    border: 1px solid #2a3a2a;
+    color: var(--muted);
+    font-size: 0.65rem;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .env-nav-btn:hover { border-color: var(--gold); color: var(--gold); }
+  #envScene {
+    position: relative;
+    width: 100%;
+    height: 130px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #0a1a0e 0%, #0d200d 60%, #111a0a 100%);
+  }
+  #envGround {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 22px;
+    background: linear-gradient(180deg, #1a2e10 0%, #0e1a08 100%);
+    border-top: 1px solid #2a4a1a;
+  }
+  #envResources {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    height: 110px;
+  }
+  .env-resource {
+    position: absolute;
+    bottom: 0;
+    cursor: pointer;
+    transition: transform 0.12s;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+  }
+  .env-resource:hover:not(.depleted) { transform: scale(1.08); }
+  .env-resource.depleted { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; pointer-events: none; }
+  .env-resource.chopping { animation: treeChop 0.18s ease-in-out infinite; }
+  .env-resource.mining   { animation: oreShake 0.12s ease-in-out infinite; }
+  .env-resource.falling  { animation: treeFall 0.55s ease-in forwards !important; pointer-events: none; }
+  .env-resource.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
+  #envRoomDesc {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.5rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    padding: 4px 8px 5px;
+    text-align: center;
+    border-top: 1px solid #1e2e1e;
+    min-height: 18px;
+  }
+  @keyframes envSlideIn {
+    from { opacity: 0; transform: translateX(var(--slide-from)); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .env-slide { animation: envSlideIn 0.22s ease; }
+
   /* ══════════ HOTBAR ══════════ */
   #hotbar {
     position: fixed;
@@ -2829,7 +2924,19 @@
 <div id="grassLayer"></div>
 <div id="resourceLayer"></div>
 <div id="gardenGnome" style="display:none;">🧙</div>
-<!-- HOTBAR -->
+<!-- ENVIRONMENT PANEL -->
+<div id="envPanel">
+  <div id="envHeader">
+    <button class="env-nav-btn" id="envPrev" onclick="envNavigate(-1)">◀</button>
+    <div id="envRoomName">Forest</div>
+    <button class="env-nav-btn" id="envNext" onclick="envNavigate(1)">▶</button>
+  </div>
+  <div id="envScene">
+    <div id="envGround"></div>
+    <div id="envResources"></div>
+  </div>
+  <div id="envRoomDesc"></div>
+</div>
 <div id="hotbar">
   <!-- Inventory button -->
   <div style="position:relative;">
@@ -6617,256 +6724,253 @@ document.addEventListener('click', e => {
   }
 });
 
-// ══════════════════ TREE SYSTEM ══════════════════
+// ══════════════════ ENVIRONMENT SYSTEM ══════════════════
 (function() {
-  const layer = document.getElementById('resourceLayer');
-  if (!layer) return;
 
-  const TREES = [
-    { id: 'oak',    name: 'Oak',    invKey: 'oak_log',    color: '#2d5a1a', trunkColor: '#5a3010', reqLevel: 1,  xp: 25,  chopMs: 4000,  respawnMs: 45000,  coinChance: 0.08, coinAmt: 1, scale: 1.0 },
-    { id: 'willow', name: 'Willow', invKey: 'willow_log', color: '#1a5a3a', trunkColor: '#3a2a10', reqLevel: 30, xp: 68,  chopMs: 7000,  respawnMs: 90000,  coinChance: 0.15, coinAmt: 2, scale: 1.3 },
-    { id: 'magic',  name: 'Magic',  invKey: 'magic_log',  color: '#4a1a5a', trunkColor: '#6a00aa', reqLevel: 75, xp: 250, chopMs: 15000, respawnMs: 240000, coinChance: 0.30, coinAmt: 5, scale: 1.6 },
+  // ── Room definitions ──
+  const ROOMS = [
+    {
+      name: 'Forest',
+      desc: 'Oak and willow trees',
+      sky: 'linear-gradient(180deg, #0a1a0e 0%, #0d200d 60%, #111a0a 100%)',
+      ground: '#1a2e10',
+      resources: [
+        { kind:'tree', type:'oak',    x:18  },
+        { kind:'tree', type:'oak',    x:95  },
+        { kind:'tree', type:'willow', x:145 },
+      ],
+    },
+    {
+      name: 'Deep Woods',
+      desc: 'Willow and magic trees',
+      sky: 'linear-gradient(180deg, #0d0a1a 0%, #120d20 60%, #0a0a15 100%)',
+      ground: '#1a1030',
+      resources: [
+        { kind:'tree', type:'willow', x:12  },
+        { kind:'tree', type:'magic',  x:85  },
+        { kind:'tree', type:'willow', x:148 },
+      ],
+    },
+    {
+      name: 'Copper Mine',
+      desc: 'Copper and iron ore',
+      sky: 'linear-gradient(180deg, #100a08 0%, #1a1208 60%, #100e08 100%)',
+      ground: '#2a1a08',
+      resources: [
+        { kind:'ore', type:'copper', x:20  },
+        { kind:'ore', type:'iron',   x:90  },
+        { kind:'ore', type:'copper', x:150 },
+      ],
+    },
+    {
+      name: 'Deep Mine',
+      desc: 'Gold and runite ore',
+      sky: 'linear-gradient(180deg, #060810 0%, #08100a 60%, #060a10 100%)',
+      ground: '#0e1018',
+      resources: [
+        { kind:'ore', type:'gold',   x:15  },
+        { kind:'ore', type:'runite', x:88  },
+        { kind:'ore', type:'gold',   x:148 },
+      ],
+    },
   ];
 
-  const MAX_TREES = 3;
-  const SPAWN_INTERVAL_MS = 45000;
-  const trees = [];
+  const TREE_TYPES = {
+    oak:    { name:'Oak',    invKey:'oak_log',    color:'#2d5a1a', trunkColor:'#5a3010', reqLevel:1,  xp:25,  chopMs:4000,  respawnMs:45000,  coinChance:0.08, coinAmt:1, scale:0.7 },
+    willow: { name:'Willow', invKey:'willow_log', color:'#1a5a3a', trunkColor:'#3a2a10', reqLevel:30, xp:68,  chopMs:7000,  respawnMs:90000,  coinChance:0.15, coinAmt:2, scale:0.9 },
+    magic:  { name:'Magic',  invKey:'magic_log',  color:'#4a1a5a', trunkColor:'#6a00aa', reqLevel:75, xp:250, chopMs:15000, respawnMs:240000, coinChance:0.30, coinAmt:5, scale:1.1 },
+  };
 
-  function rand(a, b) { return a + Math.random() * (b - a); }
+  const ORE_TYPES = {
+    copper: { name:'Copper', invKey:'copper_ore', color:'#b87333', shine:'#e8a070', reqLevel:1,  xp:18,  mineMs:3500,  respawnMs:35000,  coinChance:0.06, coinAmt:1 },
+    iron:   { name:'Iron',   invKey:'iron_ore',   color:'#7a7a7a', shine:'#aaaaaa', reqLevel:15, xp:35,  mineMs:5500,  respawnMs:60000,  coinChance:0.10, coinAmt:1 },
+    gold:   { name:'Gold',   invKey:'gold_ore',   color:'#d4af37', shine:'#ffe066', reqLevel:40, xp:65,  mineMs:9000,  respawnMs:120000, coinChance:0.22, coinAmt:3 },
+    runite: { name:'Runite', invKey:'runite_ore', color:'#3a6a8a', shine:'#6ab0d0', reqLevel:85, xp:125, mineMs:18000, respawnMs:600000, coinChance:0.40, coinAmt:8 },
+  };
+
+  let currentRoom = 0;
+  // Track state per resource slot: { el, depleted, active }
+  let resourceState = [];
 
   function makeTreeSVG(type) {
     const s = type.scale;
-    const w = Math.round(56 * s), h = Math.round(100 * s);
-    const tw = Math.round(10 * s), th = Math.round(32 * s);
-    const cw = Math.round(50 * s), ch = Math.round(62 * s);
-    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="display:block;">
-      <rect x="${(w-tw)/2}" y="${h-th}" width="${tw}" height="${th}" rx="3" fill="${type.trunkColor}"/>
+    const w = Math.round(56*s), h = Math.round(100*s);
+    const tw = Math.round(10*s), th = Math.round(32*s);
+    const cw = Math.round(50*s), ch = Math.round(62*s);
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <rect x="${(w-tw)/2}" y="${h-th}" width="${tw}" height="${th}" rx="2" fill="${type.trunkColor}"/>
       <ellipse cx="${w/2}" cy="${h-th-ch*0.45}" rx="${cw/2}" ry="${ch/2}" fill="${type.color}" opacity="0.97"/>
       <ellipse cx="${w/2-cw*0.15}" cy="${h-th-ch*0.6}" rx="${cw*0.42}" ry="${ch*0.38}" fill="${type.color}" opacity="0.75"/>
       <ellipse cx="${w/2+cw*0.14}" cy="${h-th-ch*0.58}" rx="${cw*0.4}" ry="${ch*0.36}" fill="${type.color}" opacity="0.72"/>
-      <ellipse cx="${w/2}" cy="${h-th-ch*0.68}" rx="${cw*0.32}" ry="${ch*0.28}" fill="${type.color}" opacity="0.6"/>
-      ${type.id === 'magic' ? `<ellipse cx="${w/2}" cy="${h-th-ch*0.5}" rx="${cw*0.55/2}" ry="${ch*0.38/2}" fill="#cc66ff" opacity="0.30"/>` : ''}
+      ${type.id === 'magic' ? `<ellipse cx="${w/2}" cy="${h-th-ch*0.5}" rx="${cw*0.3}" ry="${ch*0.22}" fill="#cc66ff" opacity="0.35"/>` : ''}
     </svg>`;
   }
-
-  function spawnTree() {
-    if (trees.length >= MAX_TREES) return;
-    const roll = Math.random();
-    const type = roll < 0.60 ? TREES[0] : roll < 0.88 ? TREES[1] : TREES[2];
-    const x = rand(10, window.innerWidth - 90);
-
-    const el = document.createElement('div');
-    el.className = 'tree-obj';
-    el.style.left = x + 'px';
-    el.innerHTML = makeTreeSVG(type);
-    el.title = `${type.name} Tree (WC Lvl ${type.reqLevel}) — click to chop`;
-
-    const treeObj = { el, type, chopping: false, chopTimer: null };
-    trees.push(treeObj);
-    layer.appendChild(el);
-    el.addEventListener('click', () => onTreeClick(treeObj));
-  }
-
-  function onTreeClick(treeObj) {
-    if (treeObj.chopping) return;
-    const { el, type } = treeObj;
-    if (el.classList.contains('depleted')) return;
-
-    const wcLevel = window.__getSkillLevel ? window.__getSkillLevel('wc') : 1;
-    if (wcLevel < type.reqLevel) {
-      const rect = el.getBoundingClientRect();
-      spawnSkillFloat(rect.left + rect.width / 2, rect.top - 10, `🔒 Need WC ${type.reqLevel}`, 'wc');
-      return;
-    }
-
-    treeObj.chopping = true;
-    el.classList.add('chopping');
-
-    const ring = makeProgressRing('#4ade80');
-    el.appendChild(ring);
-    animateRing(ring, type.chopMs);
-
-    treeObj.chopTimer = setTimeout(() => finishChop(treeObj, ring), type.chopMs);
-  }
-
-  function finishChop(treeObj, ring) {
-    const { el, type } = treeObj;
-    treeObj.chopping = false;
-    el.classList.remove('chopping');
-    el.classList.add('falling');
-    ring && ring.remove();
-
-    const rect = el.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
-    if (window.__awardSkillXp) window.__awardSkillXp('wc', type.xp, cx, cy - 20);
-
-    // Add log to inventory
-    addInventoryItem(type.invKey, 1);
-
-    // Small coin chance bonus
-    if (Math.random() < type.coinChance) {
-      const coin = document.createElement('div');
-      coin.className = 'grass-coin';
-      coin.textContent = type.coinAmt === 1 ? '🪙' : `+${type.coinAmt} 🪙`;
-      coin.style.left = cx + 'px';
-      coin.style.top  = (cy - 10) + 'px';
-      if (type.coinAmt > 1) coin.style.fontSize = '1.1rem';
-      document.body.appendChild(coin);
-      setTimeout(() => coin.remove(), 1000);
-      if (window.__awardGrassCoin) window.__awardGrassCoin(type.coinAmt);
-    }
-
-    // Resource float
-    const f = document.createElement('div');
-    f.className = 'skill-float wc';
-    f.style.fontSize = '0.75rem';
-    f.textContent = `🪵 ${type.name} Log`;
-    f.style.left = cx + 'px';
-    f.style.top  = (cy + 10) + 'px';
-    document.body.appendChild(f);
-    setTimeout(() => f.remove(), 1400);
-
-    setTimeout(() => {
-      el.classList.remove('falling');
-      el.classList.add('depleted');
-      el.innerHTML = makeTreeSVG(type);
-      setTimeout(() => {
-        el.classList.remove('depleted');
-      }, type.respawnMs);
-    }, 560);
-  }
-
-  for (let i = 0; i < 2; i++) setTimeout(spawnTree, i * 2000);
-  setInterval(() => {
-    if (trees.length < MAX_TREES && Math.random() < 0.5) spawnTree();
-  }, SPAWN_INTERVAL_MS);
-})();
-
-// ══════════════════ ORE SYSTEM ══════════════════
-(function() {
-  const layer = document.getElementById('resourceLayer');
-  if (!layer) return;
-
-  const ORES = [
-    { id: 'copper', name: 'Copper', invKey: 'copper_ore', color: '#b87333', shine: '#e8a070', reqLevel: 1,  xp: 18,  mineMs: 3500,  respawnMs: 35000,  coinChance: 0.06, coinAmt: 1 },
-    { id: 'iron',   name: 'Iron',   invKey: 'iron_ore',   color: '#7a7a7a', shine: '#aaaaaa', reqLevel: 15, xp: 35,  mineMs: 5500,  respawnMs: 60000,  coinChance: 0.10, coinAmt: 1 },
-    { id: 'gold',   name: 'Gold',   invKey: 'gold_ore',   color: '#d4af37', shine: '#ffe066', reqLevel: 40, xp: 65,  mineMs: 9000,  respawnMs: 120000, coinChance: 0.22, coinAmt: 3 },
-    { id: 'runite', name: 'Runite', invKey: 'runite_ore', color: '#3a6a8a', shine: '#6ab0d0', reqLevel: 85, xp: 125, mineMs: 18000, respawnMs: 600000, coinChance: 0.40, coinAmt: 8 },
-  ];
-
-  const MAX_ORES = 3;
-  const SPAWN_INTERVAL_MS = 38000;
-  const ores = [];
-
-  function rand(a, b) { return a + Math.random() * (b - a); }
 
   function makeRockSVG(ore) {
-    const w = 58, h = 48;
-    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="display:block;">
-      <polygon points="10,${h} 4,${h*0.55} 14,${h*0.18} 30,${h*0.06} 46,${h*0.16} 55,${h*0.5} 48,${h}" fill="${ore.color}"/>
-      <polygon points="15,${h*0.38} 30,${h*0.1} 42,${h*0.36}" fill="${ore.shine}" opacity="0.5"/>
-      <polygon points="5,${h*0.78} 17,${h*0.52} 28,${h*0.72}" fill="#000" opacity="0.14"/>
-      <polygon points="32,${h*0.3} 42,${h*0.5} 26,${h*0.52}" fill="#000" opacity="0.10"/>
-      ${ore.id === 'runite' ? `<polygon points="28,${h*0.20} 37,${h*0.33} 21,${h*0.36}" fill="#88ddff" opacity="0.55"/>` : ''}
-      ${ore.id === 'gold'   ? `<polygon points="20,${h*0.23} 34,${h*0.20} 38,${h*0.38} 17,${h*0.40}" fill="#fff8c0" opacity="0.45"/>` : ''}
+    const w = 48, h = 40;
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="8,${h} 3,${h*0.55} 12,${h*0.18} 24,${h*0.06} 38,${h*0.16} 46,${h*0.5} 40,${h}" fill="${ore.color}"/>
+      <polygon points="12,${h*0.38} 24,${h*0.1} 34,${h*0.36}" fill="${ore.shine}" opacity="0.5"/>
+      <polygon points="4,${h*0.78} 14,${h*0.52} 23,${h*0.72}" fill="#000" opacity="0.14"/>
+      ${ore.id === 'runite' ? `<polygon points="22,${h*0.20} 30,${h*0.33} 17,${h*0.36}" fill="#88ddff" opacity="0.55"/>` : ''}
+      ${ore.id === 'gold'   ? `<polygon points="16,${h*0.23} 28,${h*0.20} 31,${h*0.38} 14,${h*0.40}" fill="#fff8c0" opacity="0.45"/>` : ''}
     </svg>`;
   }
 
-  function spawnOre() {
-    if (ores.length >= MAX_ORES) return;
-    const roll = Math.random();
-    const ore = roll < 0.45 ? ORES[0] : roll < 0.75 ? ORES[1] : roll < 0.93 ? ORES[2] : ORES[3];
-    const x = rand(10, window.innerWidth - 80);
+  function renderRoom(dir) {
+    const room = ROOMS[currentRoom];
+    const scene = document.getElementById('envScene');
+    const resContainer = document.getElementById('envResources');
+    const ground = document.getElementById('envGround');
 
-    const el = document.createElement('div');
-    el.className = 'ore-obj';
-    el.style.left = x + 'px';
-    el.innerHTML = makeRockSVG(ore);
-    el.title = `${ore.name} Ore (Mining Lvl ${ore.reqLevel}) — click to mine`;
+    // Update labels
+    document.getElementById('envRoomName').textContent = room.name;
+    document.getElementById('envRoomDesc').textContent = room.desc;
+    scene.style.background = room.sky;
+    ground.style.background = `linear-gradient(180deg, ${room.ground} 0%, #0e1a08 100%)`;
 
-    const oreObj = { el, ore, mining: false, mineTimer: null };
-    ores.push(oreObj);
-    layer.appendChild(el);
-    el.addEventListener('click', () => onOreClick(oreObj));
+    // Slide animation
+    if (dir !== 0) {
+      resContainer.style.setProperty('--slide-from', dir > 0 ? '40px' : '-40px');
+      resContainer.classList.remove('env-slide');
+      void resContainer.offsetWidth;
+      resContainer.classList.add('env-slide');
+    }
+
+    resContainer.innerHTML = '';
+    resourceState = [];
+
+    room.resources.forEach((res, i) => {
+      const el = document.createElement('div');
+      el.className = 'env-resource';
+      el.style.left = res.x + 'px';
+
+      if (res.kind === 'tree') {
+        const type = { ...TREE_TYPES[res.type], id: res.type };
+        el.innerHTML = makeTreeSVG(type);
+        el.title = `${type.name} Tree (WC ${type.reqLevel}) — click to chop`;
+        const state = { el, kind:'tree', type, depleted:false, active:false, timer:null };
+        resourceState.push(state);
+        el.addEventListener('click', () => onTreeClick(state));
+      } else {
+        const ore = { ...ORE_TYPES[res.type], id: res.type };
+        el.innerHTML = makeRockSVG(ore);
+        el.title = `${ore.name} Ore (Mining ${ore.reqLevel}) — click to mine`;
+        const state = { el, kind:'ore', ore, depleted:false, active:false, timer:null };
+        resourceState.push(state);
+        el.addEventListener('click', () => onOreClick(state));
+      }
+
+      resContainer.appendChild(el);
+    });
   }
 
-  function onOreClick(oreObj) {
-    if (oreObj.mining) return;
-    const { el, ore } = oreObj;
-    if (el.classList.contains('depleted')) return;
-
-    const mineLevel = window.__getSkillLevel ? window.__getSkillLevel('mine') : 1;
-    if (mineLevel < ore.reqLevel) {
-      const rect = el.getBoundingClientRect();
-      spawnSkillFloat(rect.left + rect.width / 2, rect.top - 10, `🔒 Need Mining ${ore.reqLevel}`, 'mine');
+  function onTreeClick(state) {
+    if (state.active || state.depleted) return;
+    const wcLevel = window.__getSkillLevel ? window.__getSkillLevel('wc') : 1;
+    if (wcLevel < state.type.reqLevel) {
+      spawnSkillFloat(state.el.getBoundingClientRect().left + 30, state.el.getBoundingClientRect().top, `🔒 WC ${state.type.reqLevel}`, 'wc');
       return;
     }
-
-    oreObj.mining = true;
-    el.classList.add('mining');
-
-    const ring = makeProgressRing('#cd7f42');
-    el.appendChild(ring);
-    animateRing(ring, ore.mineMs);
-
-    oreObj.mineTimer = setTimeout(() => finishMine(oreObj, ring), ore.mineMs);
+    state.active = true;
+    state.el.classList.add('chopping');
+    const ring = makeProgressRing('#4ade80');
+    state.el.appendChild(ring);
+    animateRing(ring, state.type.chopMs);
+    state.timer = setTimeout(() => {
+      state.active = false;
+      state.el.classList.remove('chopping');
+      state.el.classList.add('falling');
+      ring.remove();
+      const rect = state.el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+      if (window.__awardSkillXp) window.__awardSkillXp('wc', state.type.xp, cx, cy - 20);
+      addInventoryItem(state.type.invKey, 1);
+      if (Math.random() < state.type.coinChance) {
+        if (window.__awardGrassCoin) window.__awardGrassCoin(state.type.coinAmt);
+        spawnCoinFloat(`+${state.type.coinAmt} 🪙`, cx, cy - 10);
+      }
+      spawnResourceFloat(`🪵 ${state.type.name} Log`, cx, cy + 10, 'wc');
+      setTimeout(() => {
+        state.el.classList.remove('falling');
+        state.depleted = true;
+        state.el.classList.add('depleted');
+        state.el.innerHTML = makeTreeSVG(state.type);
+        setTimeout(() => {
+          state.depleted = false;
+          state.el.classList.remove('depleted');
+        }, state.type.respawnMs);
+      }, 560);
+    }, state.type.chopMs);
   }
 
-  function finishMine(oreObj, ring) {
-    const { el, ore } = oreObj;
-    oreObj.mining = false;
-    el.classList.remove('mining');
-    el.classList.add('breaking');
-    ring && ring.remove();
-
-    const rect = el.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
-    if (window.__awardSkillXp) window.__awardSkillXp('mine', ore.xp, cx, cy - 20);
-
-    // Add ore to inventory
-    addInventoryItem(ore.invKey, 1);
-
-    // Small coin bonus
-    if (Math.random() < ore.coinChance) {
-      const coin = document.createElement('div');
-      coin.className = 'grass-coin';
-      coin.textContent = ore.coinAmt === 1 ? '🪙' : `+${ore.coinAmt} 🪙`;
-      coin.style.left = cx + 'px';
-      coin.style.top  = (cy - 10) + 'px';
-      if (ore.coinAmt > 1) coin.style.fontSize = '1.1rem';
-      document.body.appendChild(coin);
-      setTimeout(() => coin.remove(), 1000);
-      if (window.__awardGrassCoin) window.__awardGrassCoin(ore.coinAmt);
+  function onOreClick(state) {
+    if (state.active || state.depleted) return;
+    const mineLevel = window.__getSkillLevel ? window.__getSkillLevel('mine') : 1;
+    if (mineLevel < state.ore.reqLevel) {
+      spawnSkillFloat(state.el.getBoundingClientRect().left + 24, state.el.getBoundingClientRect().top, `🔒 Mining ${state.ore.reqLevel}`, 'mine');
+      return;
     }
+    state.active = true;
+    state.el.classList.add('mining');
+    const ring = makeProgressRing('#cd7f42');
+    state.el.appendChild(ring);
+    animateRing(ring, state.ore.mineMs);
+    state.timer = setTimeout(() => {
+      state.active = false;
+      state.el.classList.remove('mining');
+      state.el.classList.add('breaking');
+      ring.remove();
+      const rect = state.el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+      if (window.__awardSkillXp) window.__awardSkillXp('mine', state.ore.xp, cx, cy - 20);
+      addInventoryItem(state.ore.invKey, 1);
+      if (Math.random() < state.ore.coinChance) {
+        if (window.__awardGrassCoin) window.__awardGrassCoin(state.ore.coinAmt);
+        spawnCoinFloat(`+${state.ore.coinAmt} 🪙`, cx, cy - 10);
+      }
+      spawnResourceFloat(`⛏️ ${state.ore.name} Ore`, cx, cy + 10, 'mine');
+      setTimeout(() => {
+        state.el.classList.remove('breaking');
+        state.depleted = true;
+        state.el.classList.add('depleted');
+        state.el.innerHTML = makeRockSVG(state.ore);
+        setTimeout(() => {
+          state.depleted = false;
+          state.el.classList.remove('depleted');
+        }, state.ore.respawnMs);
+      }, 420);
+    }, state.ore.mineMs);
+  }
 
-    // Resource float
+  function spawnCoinFloat(text, x, y) {
+    const el = document.createElement('div');
+    el.className = 'grass-coin';
+    el.textContent = text;
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  }
+
+  function spawnResourceFloat(text, x, y, cls) {
     const f = document.createElement('div');
-    f.className = 'skill-float mine';
+    f.className = `skill-float ${cls}`;
     f.style.fontSize = '0.75rem';
-    f.textContent = `⛏️ ${ore.name} Ore`;
-    f.style.left = cx + 'px';
-    f.style.top  = (cy + 10) + 'px';
+    f.textContent = text;
+    f.style.left = x + 'px';
+    f.style.top  = y + 'px';
     document.body.appendChild(f);
     setTimeout(() => f.remove(), 1400);
-
-    setTimeout(() => {
-      el.classList.remove('breaking');
-      el.classList.add('depleted');
-      el.innerHTML = makeRockSVG(ore);
-      setTimeout(() => {
-        el.classList.remove('depleted');
-      }, ore.respawnMs);
-    }, 420);
   }
 
-  for (let i = 0; i < 2; i++) setTimeout(spawnOre, 3000 + i * 2500);
-  setInterval(() => {
-    if (ores.length < MAX_ORES && Math.random() < 0.5) spawnOre();
-  }, SPAWN_INTERVAL_MS);
+  window.envNavigate = function(dir) {
+    currentRoom = (currentRoom + dir + ROOMS.length) % ROOMS.length;
+    renderRoom(dir);
+  };
+
+  renderRoom(0);
+
 })();
 
 // ══════════════════ SHARED RESOURCE HELPERS ══════════════════
