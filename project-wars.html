@@ -7481,7 +7481,7 @@ const TOOL_ITEMS = {
   iron_axe: { icon:'🪓', name:'Iron Axe', slot:'leftHand', gather:'log', bonusChance:0.75, bonusText:'+75% extra log chance' },
   iron_pickaxe: { icon:'⛏️', name:'Iron Pickaxe', slot:'rightHand', gather:'ore', bonusChance:0.75, bonusText:'+75% extra ore chance' },
 };
-const GEAR_GRID_LAYOUT = ['bronze_axe','bronze_pickaxe','iron_axe','iron_pickaxe',null,null,null,null,null,null,null,null];
+const GEAR_GRID_LAYOUT_BASE = ['bronze_axe','bronze_pickaxe',null,null,null,null,null,null,null,null,null,null];
 
 const SELL_PRICES = {
   oak_log: 2, willow_log: 5, magic_log: 20,
@@ -7510,7 +7510,11 @@ function renderGearGrid() {
   const grid = document.getElementById('gearGrid');
   if (!grid) return;
   grid.innerHTML = '';
-  GEAR_GRID_LAYOUT.forEach(itemKey => {
+  const qf = window.__questFlags || {};
+  const layout = [...GEAR_GRID_LAYOUT_BASE];
+  if (qf.foundIronAxe) layout[2] = 'iron_axe';
+  if (qf.foundIronPickaxe) layout[3] = 'iron_pickaxe';
+  layout.forEach(itemKey => {
     const slot = document.createElement('div');
     slot.className = 'gear-slot';
     if (!itemKey) {
@@ -7615,6 +7619,23 @@ window.__loadInventoryFromPlayer = function(playerData) {
 
 updateInventoryUI();
 
+function spawnDiscoveryBurst(x, y, emoji='✨') {
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.textContent = emoji;
+    p.style.cssText = `position:fixed;left:${x}px;top:${y}px;pointer-events:none;z-index:9500;font-size:${0.7 + Math.random()*0.8}rem;`;
+    document.body.appendChild(p);
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 28 + Math.random() * 60;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist - 24;
+    p.animate([
+      { transform: 'translate(-50%,-50%) scale(0.7)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1.15)`, opacity: 0 }
+    ], { duration: 800 + Math.random()*350, easing: 'cubic-bezier(0,0.9,0.57,1)', fill: 'forwards' }).onfinish = () => p.remove();
+  }
+}
+
 window.__rollDigTile = function(clientX, clientY) {
   if (!window.__currentUser) return;
   const scene = document.getElementById('envScene');
@@ -7634,18 +7655,24 @@ window.__rollDigTile = function(clientX, clientY) {
   if (!window.__questFlags.foundIronAxe && Math.random() < 0.012) {
     window.__questFlags.foundIronAxe = true;
     addInventoryItem('iron_axe', 1);
-    spawnResourceFloat('🪓 You dug up an Iron Axe!', clientX, clientY - 8, 'wc');
+    spawnResourceFloat('🪓 RARE FIND: Iron Axe!', clientX, clientY - 8, 'levelup');
+    spawnResourceFloat('Equipped tools panel updated!', clientX, clientY + 14, 'wc');
+    spawnDiscoveryBurst(clientX, clientY, '🪓');
     foundSomething = true;
   }
   if (!window.__questFlags.foundIronPickaxe && Math.random() < 0.012) {
     window.__questFlags.foundIronPickaxe = true;
     addInventoryItem('iron_pickaxe', 1);
-    spawnResourceFloat('⛏️ You dug up an Iron Pickaxe!', clientX, clientY - 8, 'mine');
+    spawnResourceFloat('⛏️ RARE FIND: Iron Pickaxe!', clientX, clientY - 8, 'levelup');
+    spawnResourceFloat('Equipped tools panel updated!', clientX, clientY + 14, 'mine');
+    spawnDiscoveryBurst(clientX, clientY, '⛏️');
     foundSomething = true;
   }
   if (!window.__questFlags.foundShopGnome && Math.random() < 0.008) {
     window.__questFlags.foundShopGnome = true;
-    spawnResourceFloat('🧙 Gnome found! Red & Green Gnome unlocked in shop.', clientX, clientY - 8, 'levelup');
+    spawnResourceFloat('🧙 SECRET FOUND: Gnome!', clientX, clientY - 8, 'levelup');
+    spawnResourceFloat('Red & Green Gnomes unlocked in shop!', clientX, clientY + 14, 'levelup');
+    spawnDiscoveryBurst(clientX, clientY, '🧙');
     foundSomething = true;
     if (window.__renderPetSection && document.getElementById('shopDrawer')?.classList.contains('open')) window.__renderPetSection();
   }
