@@ -2602,7 +2602,7 @@
   .garden-buy-btn.maxed-btn { background: #3a2a00; color: var(--gold); border-color: var(--gold); cursor: default; }
 
   /* ── GARDEN GNOME ── */
-  #gardenGnome {
+  .garden-gnome {
     position: fixed;
     bottom: 22px;
     left: 200px;
@@ -2613,7 +2613,7 @@
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
     transition: transform 0.1s;
   }
-  #gardenGnome.gnome-flip { transform: scaleX(-1); }
+  .garden-gnome.gnome-flip { transform: scaleX(-1); }
   .gnome-coin {
     position: fixed;
     font-size: 1.1rem;
@@ -3385,19 +3385,45 @@
   }
   .gear-rig-slot .hand { font-size: 0.48rem; color: var(--muted); letter-spacing: 1px; }
 
-  .dig-tile-float {
+  .dig-shovel {
     position: absolute;
-    width: 24px;
-    height: 24px;
-    border: 1px dashed rgba(245,200,66,0.35);
-    background: rgba(245,200,66,0.06);
+    transform: translate(-50%, -100%) rotate(-18deg);
+    transform-origin: 50% 100%;
+    font-size: 1.15rem;
     pointer-events: none;
-    transform: translate(-50%, -50%);
-    animation: digTilePulse 0.4s ease-out forwards;
+    z-index: 60;
+    animation: digShovelPoke 0.48s ease forwards;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));
   }
-  @keyframes digTilePulse {
-    0% { opacity: 0.9; transform: translate(-50%, -50%) scale(0.6); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
+  @keyframes digShovelPoke {
+    0%   { opacity: 0; transform: translate(-50%, -120%) rotate(-24deg) scale(0.9); }
+    35%  { opacity: 1; transform: translate(-50%, -55%) rotate(-4deg) scale(1.05); }
+    100% { opacity: 0; transform: translate(-50%, -118%) rotate(8deg) scale(0.9); }
+  }
+  .dig-dirt {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #7a5032;
+    pointer-events: none;
+    z-index: 55;
+  }
+  .dig-text {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-shadow: 0 0 8px rgba(245,200,66,0.5);
+    pointer-events: none;
+    z-index: 70;
+    animation: digTextPop 0.8s ease forwards;
+  }
+  @keyframes digTextPop {
+    0% { opacity: 0; transform: translate(-50%, -10%) scale(0.6); }
+    25% { opacity: 1; transform: translate(-50%, -55%) scale(1.05); }
+    100% { opacity: 0; transform: translate(-50%, -105%) scale(0.9); }
   }
 
   /* Skills inside hotbar panel */
@@ -3520,7 +3546,9 @@
 <!-- GRASS LAYER -->
 <div id="grassLayer"></div>
 <div id="resourceLayer"></div>
-<div id="gardenGnome" style="display:none;">🧙</div>
+<div id="gardenGnome" class="garden-gnome" style="display:none;">🧙</div>
+<div id="gardenGnomeRed" class="garden-gnome" style="display:none;">🧙‍♂️</div>
+<div id="gardenGnomeGreen" class="garden-gnome" style="display:none;">🧙‍♀️</div>
 <!-- ADVENTURE BUTTON -->
 <button id="adventureBtn" onclick="toggleAdventurePanel()">
   <span class="adv-icon">⚔️</span> Adventure
@@ -7643,40 +7671,89 @@ window.__rollDigTile = function(clientX, clientY) {
   const rect = scene.getBoundingClientRect();
   if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return;
 
-  const probe = document.createElement('div');
-  probe.className = 'dig-tile-float';
-  probe.style.left = (clientX - rect.left) + 'px';
-  probe.style.top = (clientY - rect.top) + 'px';
-  scene.appendChild(probe);
-  setTimeout(() => probe.remove(), 420);
+  const lx = clientX - rect.left;
+  const ly = clientY - rect.top;
+
+  const shovel = document.createElement('div');
+  shovel.className = 'dig-shovel';
+  shovel.textContent = '🛠️';
+  shovel.style.left = lx + 'px';
+  shovel.style.top = ly + 'px';
+  scene.appendChild(shovel);
+  setTimeout(() => shovel.remove(), 520);
+
+  const digTxt = document.createElement('div');
+  digTxt.className = 'dig-text';
+  digTxt.textContent = 'DIG!';
+  digTxt.style.left = lx + 'px';
+  digTxt.style.top = (ly - 10) + 'px';
+  scene.appendChild(digTxt);
+  setTimeout(() => digTxt.remove(), 820);
+
+  for (let i = 0; i < 12; i++) {
+    const dirt = document.createElement('div');
+    dirt.className = 'dig-dirt';
+    dirt.style.left = lx + 'px';
+    dirt.style.top = ly + 'px';
+    scene.appendChild(dirt);
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 16 + Math.random() * 26;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    dirt.animate([
+      { transform: 'translate(-50%,-50%) scale(1)', opacity: 0.9 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(0.6)`, opacity: 0 }
+    ], { duration: 420 + Math.random() * 220, easing: 'ease-out', fill: 'forwards' }).onfinish = () => dirt.remove();
+  }
 
   window.__questFlags = window.__questFlags || {};
   let foundSomething = false;
+
   if (!window.__questFlags.foundIronAxe && Math.random() < 0.012) {
     window.__questFlags.foundIronAxe = true;
     addInventoryItem('iron_axe', 1);
-    spawnResourceFloat('🪓 RARE FIND: Iron Axe!', clientX, clientY - 8, 'levelup');
-    spawnResourceFloat('Equipped tools panel updated!', clientX, clientY + 14, 'wc');
+    spawnResourceFloat('🪓 RARE FIND: IRON AXE!', clientX, clientY - 10, 'levelup');
+    spawnResourceFloat('Added to backpack equipment.', clientX, clientY + 14, 'wc');
     spawnDiscoveryBurst(clientX, clientY, '🪓');
     foundSomething = true;
   }
+
   if (!window.__questFlags.foundIronPickaxe && Math.random() < 0.012) {
     window.__questFlags.foundIronPickaxe = true;
     addInventoryItem('iron_pickaxe', 1);
-    spawnResourceFloat('⛏️ RARE FIND: Iron Pickaxe!', clientX, clientY - 8, 'levelup');
-    spawnResourceFloat('Equipped tools panel updated!', clientX, clientY + 14, 'mine');
+    spawnResourceFloat('⛏️ RARE FIND: IRON PICKAXE!', clientX, clientY - 10, 'levelup');
+    spawnResourceFloat('Added to backpack equipment.', clientX, clientY + 14, 'mine');
     spawnDiscoveryBurst(clientX, clientY, '⛏️');
     foundSomething = true;
   }
-  if (!window.__questFlags.foundShopGnome && Math.random() < 0.008) {
-    window.__questFlags.foundShopGnome = true;
-    spawnResourceFloat('🧙 SECRET FOUND: Gnome!', clientX, clientY - 8, 'levelup');
-    spawnResourceFloat('Red & Green Gnomes unlocked in shop!', clientX, clientY + 14, 'levelup');
+
+  if (!window.__questFlags.foundRedGardenGnome && Math.random() < 0.008) {
+    window.__questFlags.foundRedGardenGnome = true;
+    spawnResourceFloat('🧙 SECRET FOUND: RED GARDEN GNOME!', clientX, clientY - 10, 'levelup');
+    spawnResourceFloat('Red gnome now appears in your garden.', clientX, clientY + 14, 'levelup');
     spawnDiscoveryBurst(clientX, clientY, '🧙');
     foundSomething = true;
-    if (window.__renderPetSection && document.getElementById('shopDrawer')?.classList.contains('open')) window.__renderPetSection();
   }
-  if (foundSomething && window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
+
+  if (!window.__questFlags.foundGreenGardenGnome && Math.random() < 0.008) {
+    window.__questFlags.foundGreenGardenGnome = true;
+    spawnResourceFloat('🧙 SECRET FOUND: GREEN GARDEN GNOME!', clientX, clientY - 10, 'levelup');
+    spawnResourceFloat('Green gnome now appears in your garden.', clientX, clientY + 14, 'levelup');
+    spawnDiscoveryBurst(clientX, clientY, '🧙');
+    foundSomething = true;
+  }
+
+  if (foundSomething) {
+    const toast = document.createElement('div');
+    toast.className = 'quest-reward-toast';
+    toast.textContent = '✨ Discovery Unlocked!';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2200);
+    if (window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
+    const gardenData = window.__playersCache?.[window.__currentUser.id]?.garden || {};
+    if (window.__applyGardenBoosts) window.__applyGardenBoosts(gardenData);
+  }
+};
 };
 
 // ── Hotbar toggle ──
@@ -8881,61 +8958,64 @@ function spawnSkillFloat(x, y, text, cls) {
   setTimeout(() => el.remove(), cls.includes('levelup') ? 2200 : 1400);
 }
 (function() {
-  const gnomeEl = document.getElementById('gardenGnome');
-  if (!gnomeEl) return;
+  const base = document.getElementById('gardenGnome');
+  const red  = document.getElementById('gardenGnomeRed');
+  const green= document.getElementById('gardenGnomeGreen');
+  const gnomeEls = [base, red, green].filter(Boolean);
+  if (!gnomeEls.length) return;
 
   let gnomeActive = false;
-  let gnomePosX = 160;
-  let gnomeVelX = 0.8;
-  let gnomeMoveInterval = null;
-  let gnomeCoinInterval = null;
+  let timers = [];
 
-  function gnomeSpawnCoin() {
-    if (!gnomeActive) return;
-    const rect = gnomeEl.getBoundingClientRect();
+  function clearGnomes() {
+    timers.forEach(t => clearInterval(t) || clearTimeout(t));
+    timers = [];
+    gnomeEls.forEach(el => { el.style.display = 'none'; el.classList.remove('gnome-flip'); });
+    gnomeActive = false;
+  }
+
+  function spawnCoinFrom(el, amount = 2) {
+    const rect = el.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top;
-
     const coinEl = document.createElement('div');
     coinEl.className = 'gnome-coin';
-    coinEl.textContent = '+2 🪙';
+    coinEl.textContent = `+${amount} 🪙`;
     coinEl.style.left = cx + 'px';
     coinEl.style.top  = cy + 'px';
     document.body.appendChild(coinEl);
     setTimeout(() => coinEl.remove(), 1200);
-
-    if (window.__awardGrassCoin) window.__awardGrassCoin(2);
+    if (window.__awardGrassCoin) window.__awardGrassCoin(amount);
   }
 
-  function gnomeStart() {
-    if (gnomeActive) return;
-    gnomeActive = true;
-    gnomeEl.style.display = '';
-    gnomePosX = Math.random() * (window.innerWidth * 0.5) + 100;
-    gnomeEl.style.left = gnomePosX + 'px';
+  function runGnome(el, speed = 0.8) {
+    let posX = Math.random() * (window.innerWidth * 0.5) + 100;
+    let velX = Math.abs(speed) * (Math.random() < 0.5 ? -1 : 1);
+    el.style.display = '';
+    el.style.left = posX + 'px';
 
-    // Move gnome slowly across screen
-    gnomeMoveInterval = setInterval(() => {
-      gnomePosX += gnomeVelX;
-      if (gnomePosX > window.innerWidth - 60) { gnomePosX = window.innerWidth - 60; gnomeVelX = -Math.abs(gnomeVelX); gnomeEl.classList.add('gnome-flip'); }
-      if (gnomePosX < 10) { gnomePosX = 10; gnomeVelX = Math.abs(gnomeVelX); gnomeEl.classList.remove('gnome-flip'); }
-      gnomeEl.style.left = gnomePosX + 'px';
+    const move = setInterval(() => {
+      posX += velX;
+      if (posX > window.innerWidth - 60) { posX = window.innerWidth - 60; velX = -Math.abs(velX); el.classList.add('gnome-flip'); }
+      if (posX < 10) { posX = 10; velX = Math.abs(velX); el.classList.remove('gnome-flip'); }
+      el.style.left = posX + 'px';
     }, 40);
+    timers.push(move);
 
-    // Award a coin every 20–35 seconds
-    function scheduleNextCoin() {
-      const delay = 20000 + Math.random() * 15000;
-      gnomeCoinInterval = setTimeout(() => {
-        gnomeSpawnCoin();
-        scheduleNextCoin();
-      }, delay);
-    }
-    scheduleNextCoin();
+    const scheduleCoin = () => {
+      const delay = 17000 + Math.random() * 14000;
+      const t = setTimeout(() => { if (gnomeActive) spawnCoinFrom(el, 2); if (gnomeActive) scheduleCoin(); }, delay);
+      timers.push(t);
+    };
+    scheduleCoin();
   }
 
-  // Expose so applyGardenBoosts can trigger it
-  window.__spawnGnome = function() {
-    gnomeStart();
+  window.__spawnGnomeSet = function(opts = {}) {
+    clearGnomes();
+    gnomeActive = true;
+    runGnome(base, 0.8);
+    if (opts.red) runGnome(red, 1.0);
+    if (opts.green) runGnome(green, 1.2);
   };
 })();
 
@@ -9041,8 +9121,7 @@ const PETS = [
   { id: 'monkey', name: 'Monkey', emoji: '🐒',  price: 240, desc: 'Chaotic lil guy' },
   { id: 'rat',    name: 'Rat',    emoji: '🐀',  price: 160, desc: 'Sneaky & fast' },
   { id: 'cat',    name: 'Cat',    emoji: '🐱',  price: 200, desc: 'Does what it wants' },
-  { id: 'red_gnome',   name: 'Red Gnome',   emoji: '🧙‍♂️', price: 320, desc: 'Unlocked by finding a hidden gnome.', unlockFlag: 'foundShopGnome' },
-  { id: 'green_gnome', name: 'Green Gnome', emoji: '🧙‍♀️', price: 320, desc: 'Unlocked by finding a hidden gnome.', unlockFlag: 'foundShopGnome' },
+
 ];
 
 window.applyPetDisplay = function applyPetDisplay(petId) {
@@ -9082,7 +9161,7 @@ window.__renderPetSection = function() {
   section.innerHTML = `
     <div class="shop-section-title" style="margin-bottom:0.75rem;">🐾 Pets</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
-    ${PETS.filter(pet => !pet.unlockFlag || window.__questFlags?.[pet.unlockFlag]).map(pet => {
+    ${PETS.map(pet => {
       const isOwned = owned.includes(pet.id) || pet.free;
       const isOn    = equipped === pet.id;
       return `<div style="background:#0a0118;border:1px solid ${isOn ? '#f5c842' : '#3d00b3'};padding:0.85rem;display:flex;flex-direction:column;gap:0.4rem;transition:border-color 0.2s;">
@@ -9291,7 +9370,10 @@ window.__applyGardenBoosts = function(gardenLevels) {
 
   // Spawn gnome if unlocked and not already on screen
   if (gnomeLvl >= 1) {
-    window.__spawnGnome && window.__spawnGnome();
+    window.__spawnGnomeSet && window.__spawnGnomeSet({
+      red: !!window.__questFlags?.foundRedGardenGnome,
+      green: !!window.__questFlags?.foundGreenGardenGnome,
+    });
   }
 };
 </script>
