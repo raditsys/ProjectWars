@@ -3880,7 +3880,7 @@
 </div>
 </div>
 <div class="result-banner" id="pkResultBanner"></div>
-<button class="r-spin-btn" id="pkDropBtn" onclick="pkDrop()">🔵 Drop Ball</button>
+<button class="r-spin-btn" id="pkDropBtn" onclick="pkDrop()">🎯 Aim Drop</button>
 </div>
 
 <!-- ── PRECISION RISK PANEL ── -->
@@ -6265,8 +6265,8 @@
   // ══════════════════ PLINKO ══════════════════
   const PK_ROWS = 15;
   const PK_COLS = 11;
-  const PK_MULTIPLIERS = [12.0, 6.0, 3.0, 1.8, 1.2, 0.8, 1.2, 1.8, 3.0, 6.0, 12.0];
-  const PK_COLORS      = ['#ff4d4d','#ff7a3d','#f5c842','#4ade80','#4ade80','#6ee7b7','#4ade80','#4ade80','#f5c842','#ff7a3d','#ff4d4d'];
+  const PK_MULTIPLIERS = [3.0, 1.8, 1.2, 0.8, 0.5, 0.0, 0.5, 0.8, 1.2, 1.8, 3.0];
+  const PK_COLORS      = ['#ff7a3d','#f5c842','#84cc16','#4ade80','#34d399','#ef4444','#34d399','#4ade80','#84cc16','#f5c842','#ff7a3d'];
 
   let pkBet = 0;
   let pkRunning = false;
@@ -6275,11 +6275,18 @@
   let pkBalls = [];
   let pkBuckets = [];
   let pkAnimFrame = null;
+  let pkAiming = false;
+  let pkAimPhase = 0;
+  let pkPlatformX = 260;
   const PK_W = 520, PK_H = 620;
   const PK_PEG_R = 5;
   const PK_BALL_R = 7;
   const PK_TOP_PAD = 44;
   const PK_BOT_PAD = 84;
+  const PK_FUNNEL_TOP_Y = 10;
+  const PK_FUNNEL_BOTTOM_Y = PK_TOP_PAD - 10;
+  const PK_PLATFORM_Y = PK_FUNNEL_TOP_Y + 8;
+  const PK_PLATFORM_W = 82;
 
   function pkInitCanvas() {
     pkCanvas = document.getElementById('plinkoCanvas');
@@ -6287,6 +6294,7 @@
     pkCanvas.width = PK_W;
     pkCanvas.height = PK_H;
     pkCtx = pkCanvas.getContext('2d');
+    pkPlatformX = PK_W / 2;
     pkBuildLayout();
     pkDraw();
   }
@@ -6326,6 +6334,37 @@
     // Background
     ctx.fillStyle = '#0a1f0a';
     ctx.fillRect(0, 0, PK_W, PK_H);
+
+    // Draw funnel guides and moving release platform
+    const funnelInset = PK_W * 0.2;
+    const funnelMouth = PK_W * 0.10;
+    ctx.strokeStyle = '#2a5a2a';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(funnelInset, PK_FUNNEL_TOP_Y);
+    ctx.lineTo(PK_W / 2 - funnelMouth, PK_FUNNEL_BOTTOM_Y);
+    ctx.moveTo(PK_W - funnelInset, PK_FUNNEL_TOP_Y);
+    ctx.lineTo(PK_W / 2 + funnelMouth, PK_FUNNEL_BOTTOM_Y);
+    ctx.stroke();
+
+    ctx.fillStyle = '#133013';
+    ctx.fillRect(pkPlatformX - PK_PLATFORM_W / 2, PK_PLATFORM_Y, PK_PLATFORM_W, 6);
+    ctx.strokeStyle = '#4ade80';
+    ctx.lineWidth = 1.4;
+    ctx.strokeRect(pkPlatformX - PK_PLATFORM_W / 2, PK_PLATFORM_Y, PK_PLATFORM_W, 6);
+
+    if (pkAiming) {
+      const grd = ctx.createRadialGradient(pkPlatformX - 2, PK_PLATFORM_Y - PK_BALL_R - 2, 1, pkPlatformX, PK_PLATFORM_Y - PK_BALL_R, PK_BALL_R);
+      grd.addColorStop(0, '#a0d8ff');
+      grd.addColorStop(1, '#2255cc');
+      ctx.beginPath();
+      ctx.arc(pkPlatformX, PK_PLATFORM_Y - PK_BALL_R, PK_BALL_R, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
 
     // Draw pegs
     pkPegs.forEach(p => {
@@ -6375,6 +6414,15 @@
     const elapsed = pkLastTime ? Math.min(timestamp - pkLastTime, 50) : 16.667;
     pkLastTime = timestamp;
     const dt = elapsed / 16.667;
+
+    if (pkAiming) {
+      pkAimPhase += 0.03 * dt;
+      const swing = (PK_W * 0.24);
+      pkPlatformX = PK_W / 2 + Math.sin(pkAimPhase) * swing;
+      pkDraw();
+      pkAnimFrame = requestAnimationFrame(pkStep);
+      return;
+    }
 
     const gravity = 0.28;
     const friction = Math.pow(0.995, dt);
@@ -6440,6 +6488,7 @@
       pkLastTime = 0;
       pkRunning = false;
       document.getElementById('pkDropBtn').disabled = false;
+      document.getElementById('pkDropBtn').textContent = '🎯 Aim Drop';
     }
   }
 
@@ -6480,7 +6529,7 @@
   }
 
   window.pkAddBet = function(amount) {
-    if (pkRunning) return;
+    if (pkRunning || pkAiming) return;
     const p = getCurrentCasinoPlayer();
     if (!p) { shakeWallet(); return; }
     if (pkBet + amount > (p.coins || 0)) { shakeWallet(); return; }
@@ -6490,7 +6539,7 @@
   };
 
   window.pkClearBet = function() {
-    if (pkRunning) return;
+    if (pkRunning || pkAiming) return;
     pkBet = 0;
     document.getElementById('pkBetDisplay').innerHTML = '0<small>bet</small>';
   };
@@ -6505,23 +6554,41 @@
     if (!pkCanvas) pkInitCanvas();
     if (!pkCanvas) return;
 
+    // First click starts timing mode on moving platform
+    if (!pkAiming) {
+      pkAiming = true;
+      pkAimPhase = Math.random() * Math.PI * 2;
+      pkPlatformX = PK_W / 2;
+      document.getElementById('pkResultBanner').className = 'result-banner';
+      document.getElementById('plinkoResultNum').textContent = 'Time your release';
+      document.getElementById('plinkoResultNum').className = 'roulette-result-num';
+      document.getElementById('pkDropBtn').textContent = '🔵 Release Ball';
+      if (pkAnimFrame) cancelAnimationFrame(pkAnimFrame);
+      pkLastTime = 0;
+      pkAnimFrame = requestAnimationFrame(pkStep);
+      return;
+    }
+
+    // Second click releases from the moving platform into the funnel
+    pkAiming = false;
     pkRunning = true;
     document.getElementById('pkDropBtn').disabled = true;
+    document.getElementById('pkDropBtn').textContent = '🔵 Dropping...';
     document.getElementById('pkResultBanner').className = 'result-banner';
     document.getElementById('plinkoResultNum').textContent = '…';
     document.getElementById('plinkoResultNum').className = 'roulette-result-num';
 
-    // Deduct bet immediately
+    // Deduct bet at release
     const newCoins = Math.max(0, (p.coins || 0) - pkBet);
     await setCasinoCoins(p.id, newCoins);
 
-    // Drop ball from random position near top center
-    const betSnapshot = pkBet; // capture bet before async operations
+    const betSnapshot = pkBet;
+    const releaseX = Math.min(PK_W - PK_BALL_R, Math.max(PK_BALL_R, pkPlatformX));
     pkBalls = [{
-      x: PK_W / 2 + (Math.random() - 0.5) * 45,
-      y: PK_TOP_PAD - 20,
-      vx: (Math.random() - 0.5) * 1.5,
-      vy: 1,
+      x: releaseX,
+      y: PK_PLATFORM_Y + 10,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: 0.8,
       done: false,
       bucket: null,
       bet: betSnapshot
