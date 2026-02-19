@@ -6414,12 +6414,15 @@ function addInventoryItem(key, amount = 1) {
 window.sellResource = async function(key) {
   const count = window.__inventory[key] || 0;
   if (count < 1) return;
+  // Disable button immediately to prevent double-sell while Firebase save is in flight
+  const btn = document.getElementById(SELL_IDS[key]);
+  if (btn) btn.disabled = true;
   const price = SELL_PRICES[key] || 0;
   const total = count * price;
   window.__inventory[key] = 0;
   updateInventoryUI();
   if (window.__awardGrassCoin) await window.__awardGrassCoin(total);
-  if (window.__fbSaveInventory) window.__fbSaveInventory();
+  if (window.__fbSaveInventory) await window.__fbSaveInventory();
   // Float
   const el = document.createElement('div');
   el.className = 'coin-float';
@@ -6433,7 +6436,12 @@ window.sellResource = async function(key) {
 window.__loadInventoryFromPlayer = function(playerData) {
   if (playerData && playerData.inventory) {
     for (const key of Object.keys(window.__inventory)) {
-      window.__inventory[key] = playerData.inventory[key] || 0;
+      const fbVal = playerData.inventory[key] || 0;
+      // Only update if Firebase value is higher — prevents stale reads
+      // re-inflating items that were just sold and saved
+      if (fbVal > window.__inventory[key]) {
+        window.__inventory[key] = fbVal;
+      }
     }
     updateInventoryUI();
   }
