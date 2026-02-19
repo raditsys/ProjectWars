@@ -6254,8 +6254,7 @@
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
 
-    rlBet = 0;
-    document.getElementById('rlBetDisplay').innerHTML = `0<small>bet</small>`;
+    // Keep last roulette bet selected between spins (Precision-style remember bet)
     rlSpinning = false;
     document.getElementById('rlSpinBtn').disabled = false;
   }
@@ -6941,7 +6940,7 @@
     setTimeout(() => playTone(180, 'sawtooth', 0.3, 0.15), 150);
     spawnCoinFloat(`-${lost} 🪙`);
     await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) - lost));
-    bjBet = 0;
+    // Keep last blackjack bet selected between hands (Precision-style remember bet)
     updateBetDisplay();
     setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
   };
@@ -7085,7 +7084,7 @@
     bjSplitIdx = 0;
     document.getElementById('splitHand2Wrap').style.display = 'none';
     document.getElementById('splitHand2Cards').innerHTML = '';
-    bjBet = 0;
+    // Keep last blackjack bet selected between hands (Precision-style remember bet)
     updateBetDisplay();
     setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
   }
@@ -7150,7 +7149,6 @@
       recordBiggestWin(p.name, p.id, delta);
     }
 
-    bjBet = 0;
     bjSplitHands = null;
     bjSplitIdx = 0;
     document.getElementById('splitHand2Wrap').style.display = 'none';
