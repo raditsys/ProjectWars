@@ -1466,6 +1466,58 @@
   .pr-result.jackpot { color: #ff3333; text-shadow: 0 0 16px rgba(255,50,50,0.8); }
   .pr-result.miss    { color: #f87171; }
 
+  .pr-progression {
+    margin-top: 0.65rem;
+    border: 1px solid #2a5a2a;
+    background: rgba(0, 0, 0, 0.24);
+    padding: 0.55rem 0.65rem;
+  }
+  .pr-progression-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.7rem;
+    margin-bottom: 0.35rem;
+  }
+  .pr-rank {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    color: #f472b6;
+    text-shadow: 0 0 10px rgba(244, 114, 182, 0.45);
+  }
+  .pr-cap {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    color: #ffe082;
+    text-shadow: 0 0 10px rgba(245, 200, 66, 0.55);
+    animation: maxBetGlow 1.8s ease-in-out infinite;
+  }
+  .pr-xp-bar {
+    width: 100%;
+    height: 8px;
+    background: #112611;
+    border: 1px solid #2a5a2a;
+    overflow: hidden;
+  }
+  .pr-xp-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #f472b6, #facc15);
+    transition: width 0.25s ease;
+  }
+  .pr-progress-sub {
+    margin-top: 0.3rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.65rem;
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+    color: #ffc7e5;
+    text-transform: uppercase;
+  }
+
   /* Music intensity pulse on arena bg */
   .pr-arena.intense-1 { border-color: #2a5a2a; }
   .pr-arena.intense-2 { border-color: #4a8a1a; box-shadow: inset 0 0 30px rgba(74,138,26,0.1); }
@@ -4118,8 +4170,21 @@
       <button class="chip chip-25"  onclick="prAddBet(25)">25</button>
       <button class="chip chip-50"  onclick="prAddBet(50)">50</button>
       <button class="chip chip-100" onclick="prAddBet(100)">100</button>
-      <div class="bet-display" id="prBetDisplay">0<small>bet</small></div>
+      <div class="bet-display" id="prBetDisplay"><span class="bet-display-main">0</span><span class="bet-display-max">/25 MAX</span><small>bet / max</small></div>
       <button class="clear-bet-btn" onclick="prClearBet()">Clear</button>
+      <div class="bj-bet-limit-hint" id="prBetLimitHint">Level 1 cap active • max bet 25</div>
+    </div>
+  </div>
+
+  <div class="pr-progression" id="prProgressWrap">
+    <div class="pr-progression-top">
+      <div class="pr-rank" id="prRankLabel">Focus Rookie Lv.1</div>
+      <div class="pr-cap" id="prCapLabel">Level 1 cap: max bet 25</div>
+    </div>
+    <div class="pr-xp-bar"><div class="pr-xp-fill" id="prXpFill"></div></div>
+    <div class="pr-progress-sub">
+      <span id="prXpLabel">0 / 8 xp</span>
+      <span id="prHeatLabel">Pressure bonus: +0%</span>
     </div>
   </div>
 
@@ -6156,6 +6221,9 @@
     pkUpdateBetDisplay();
     rlLoadProgress(currentUser.id);
     rlRenderProgress();
+    prLoadProgress(currentUser.id);
+    prRenderProgress();
+    prUpdateBetDisplay();
     refreshCasinoWallet();
   };
 
@@ -7142,6 +7210,109 @@
   let prMusicCtx   = null;
   let prSpaceDown  = false;
   let prContinueBoost = 1.0;
+  let prProgress   = { level: 1, xp: 0, rounds: 0, heat: 0 };
+
+  const PR_TITLES = ['Focus Rookie', 'Needle Scout', 'Precision Adept', 'Risk Oracle', 'Zen Sharpshooter'];
+
+  function prProgressKey(playerId) {
+    return `pw_pr_progress_${playerId}`;
+  }
+
+  function prXpToNext(level) {
+    return 8 + (level - 1) * 6;
+  }
+
+  function prMaxBetForLevel(level) {
+    return Math.min(300, 25 + (level - 1) * 12);
+  }
+
+  function prHeatBonusPct() {
+    return Math.min(25, prProgress.heat * 5);
+  }
+
+  function prLoadProgress(playerId) {
+    if (!playerId) return;
+    const raw = localStorage.getItem(prProgressKey(playerId));
+    if (!raw) {
+      prProgress = { level: 1, xp: 0, rounds: 0, heat: 0 };
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      prProgress = {
+        level: Math.max(1, parsed.level || 1),
+        xp: Math.max(0, parsed.xp || 0),
+        rounds: Math.max(0, parsed.rounds || 0),
+        heat: Math.max(0, parsed.heat || 0),
+      };
+    } catch {
+      prProgress = { level: 1, xp: 0, rounds: 0, heat: 0 };
+    }
+  }
+
+  function prSaveProgress(playerId) {
+    if (!playerId) return;
+    localStorage.setItem(prProgressKey(playerId), JSON.stringify(prProgress));
+  }
+
+  function prRenderProgress() {
+    const level = prProgress.level;
+    const next = prXpToNext(level);
+    const title = PR_TITLES[Math.min(PR_TITLES.length - 1, Math.floor((level - 1) / 2))];
+    const maxBet = prMaxBetForLevel(level);
+    document.getElementById('prRankLabel').textContent = `${title} Lv.${level}`;
+    document.getElementById('prCapLabel').textContent = `Level ${level} cap: max bet ${maxBet}`;
+    document.getElementById('prXpLabel').textContent = `${prProgress.xp} / ${next} xp`;
+    document.getElementById('prHeatLabel').textContent = `Pressure bonus: +${prHeatBonusPct()}%`;
+    document.getElementById('prXpFill').style.width = `${Math.min(100, (prProgress.xp / next) * 100)}%`;
+    prUpdateBetLimitHint();
+  }
+
+  function prUpdateBetLimitHint() {
+    const maxBet = prMaxBetForLevel(prProgress.level);
+    const el = document.getElementById('prBetLimitHint');
+    if (!el) return;
+    el.textContent = `Level ${prProgress.level} cap active • max bet ${maxBet}`;
+  }
+
+  function prUpdateBetDisplay() {
+    const maxBet = prMaxBetForLevel(prProgress.level);
+    document.getElementById('prBetDisplay').innerHTML = `<span class="bet-display-main">${prBet}</span><span class="bet-display-max">/${maxBet} MAX</span><small>bet / max</small>`;
+    prUpdateCashoutDisplay();
+    prUpdateBetLimitHint();
+  }
+
+  function prAwardProgress(playerId, outcome) {
+    let gain = 1;
+    if (outcome === 'cashout') gain = 3;
+    if (outcome === 'survive') gain = 2;
+
+    prProgress.rounds += 1;
+    prProgress.xp += gain;
+
+    let leveled = false;
+    while (prProgress.xp >= prXpToNext(prProgress.level)) {
+      prProgress.xp -= prXpToNext(prProgress.level);
+      prProgress.level += 1;
+      leveled = true;
+    }
+
+    if (outcome === 'cashout') prProgress.heat = Math.min(5, prProgress.heat + 2);
+    else if (outcome === 'survive') prProgress.heat = Math.min(5, prProgress.heat + 1);
+    else if (outcome === 'loss') prProgress.heat = 0;
+
+    prSaveProgress(playerId);
+    prRenderProgress();
+
+    if (leveled) {
+      const result = document.getElementById('prResult');
+      if (result && prPhase !== 'running') {
+        result.textContent = `⬆ PRECISION LV.${prProgress.level}`;
+        result.className = 'pr-result win';
+      }
+      setTimeout(() => launchParticles('bj'), 60);
+    }
+  }
 
   // Build zone DOM once
   function prBuildZones() {
@@ -7324,6 +7495,7 @@
       document.getElementById('prStreakDisplay').className = 'pr-streak-display';
       prUpdateCashoutDisplay();
       prUpdateArenaClass();
+      prAwardProgress(p.id, 'loss');
       // Auto-restart after brief pause
       prPhase = 'result';
       prShowCashOut(false);
@@ -7408,7 +7580,9 @@
     if (!p) return;
     prStopMusic();
     const payout = Math.floor(prBet * prAccumMult);
-    const profit = payout - prBet;
+    let profit = payout - prBet;
+    const bonus = profit > 0 ? Math.floor(profit * (prHeatBonusPct() / 100)) : 0;
+    profit += bonus;
     await setCasinoCoins(p.id, (p.coins||0) + profit);
     if (profit > 0) {
       soundWin();
@@ -7417,7 +7591,7 @@
       recordBiggestWin(p.name, p.id, profit);
     }
     const result = document.getElementById('prResult');
-    result.textContent = `CASHED OUT +${profit} 🪙`;
+    result.textContent = `CASHED OUT +${profit} 🪙${bonus ? ` (BONUS +${bonus})` : ''}`;
     result.className = 'pr-result win';
     prStreak = 0;
     prRoundNum = 0;
@@ -7427,6 +7601,7 @@
     document.getElementById('prStreakDisplay').className = 'pr-streak-display';
     prUpdateCashoutDisplay();
     prUpdateArenaClass();
+    prAwardProgress(p.id, 'cashout');
     prPhase = 'idle';
     document.getElementById('prHint').innerHTML = 'Press <kbd>SPACE</kbd> or tap to lock in';
   };
@@ -7435,6 +7610,8 @@
     const p = getCurrentCasinoPlayer();
     if (!p) return;
     if (prBet < 10) { shakeWallet(); return; }
+    const maxBet = prMaxBetForLevel(prProgress.level);
+    if (prBet > maxBet) { shakeWallet(); return; }
     if (prBet > (p.coins||0)) { shakeWallet(); return; }
     if (prPhase === 'running') return;
 
@@ -7506,22 +7683,30 @@
     const p = getCurrentCasinoPlayer();
     if (!p) return;
     if (prPhase === 'running') return;
+    const maxBet = prMaxBetForLevel(prProgress.level);
+    if (prBet + amt > maxBet) {
+      shakeWallet();
+      const result = document.getElementById('prResult');
+      result.textContent = `LEVEL ${prProgress.level} CAP: MAX BET ${maxBet}`;
+      result.className = 'pr-result miss';
+      return;
+    }
     if (prBet + amt > (p.coins||0)) { shakeWallet(); return; }
     prBet += amt;
-    document.getElementById('prBetDisplay').innerHTML = `${prBet}<small>bet</small>`;
-    prUpdateCashoutDisplay();
+    prUpdateBetDisplay();
     soundChip();
   };
 
   window.prClearBet = function() {
     if (prPhase === 'running') return;
     prBet = 0;
-    document.getElementById('prBetDisplay').innerHTML = `0<small>bet</small>`;
-    prUpdateCashoutDisplay();
+    prUpdateBetDisplay();
   };
 
   // Init on load
   prBuildZones();
+  prRenderProgress();
+  prUpdateBetDisplay();
 
 
   // Surrender — return half bet, end hand
