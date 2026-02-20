@@ -1074,6 +1074,58 @@
   .game-panel { display: none; flex-direction: column; gap: 1.25rem; }
   .game-panel.active { display: flex; }
 
+  /* ── Stock Simulator ── */
+  .sm-header-card {
+    border: 1px solid #2a5a2a;
+    background: #081808;
+    padding: 0.7rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+  .sm-stat { border: 1px solid #1a3a1a; padding: 0.5rem; background: #060f06; }
+  .sm-stat .lbl { font-size: 0.55rem; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+  .sm-stat .val { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 1px; color: var(--gold); }
+  .sm-news {
+    border: 1px solid #2a5a2a;
+    background: #050d05;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    color: #9bd39b;
+    min-height: 2.2rem;
+  }
+  .sm-market-list { display: flex; flex-direction: column; gap: 0.45rem; }
+  .sm-stock-row {
+    border: 1px solid #204620;
+    background: #0a1f0a;
+    padding: 0.55rem;
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr 0.75fr auto;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .sm-ticker { font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; color: #d2ffd2; font-size: 0.9rem; }
+  .sm-sub { font-size: 0.58rem; color: var(--muted); letter-spacing: 1px; }
+  .sm-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 1px; }
+  .sm-price.up { color: var(--green); }
+  .sm-price.down { color: var(--red); }
+  .sm-hold { font-size: 0.62rem; color: #b8d8b8; text-align: right; }
+  .sm-actions { display: flex; gap: 0.25rem; flex-wrap: wrap; justify-content: flex-end; }
+  .sm-btn {
+    border: 1px solid #2a5a2a;
+    background: #0f2c0f;
+    color: #cde9cd;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+    font-size: 0.68rem;
+    padding: 0.25rem 0.45rem;
+    cursor: pointer;
+  }
+  .sm-btn.sell { border-color: #7a2a2a; color: #ff9a9a; background: #2a1111; }
+  .sm-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+  .sm-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
   /* ── Roulette ── */
   /* Roulette number grid */
   .rl-grid-wrap {
@@ -3983,6 +4035,7 @@
   <button class="game-tab" id="tabRL" onclick="switchGame('rl')">🎡 Roulette</button>
   <button class="game-tab" id="tabPK" onclick="switchGame('pk')">🔵 Plinko</button>
   <button class="game-tab" id="tabPR" onclick="switchGame('pr')">🎯 Precision</button>
+  <button class="game-tab" id="tabSM" onclick="switchGame('sm')">📈 Stock Sim</button>
 </div>
 
 <!-- ── BLACKJACK PANEL ── -->
@@ -4193,6 +4246,21 @@
     <button class="r-spin-btn" id="prCashBtn" onclick="prCashOut()" style="flex:1;background:#1a3a1a;border-color:var(--green);color:var(--green);display:none;">💰 Cash Out</button>
   </div>
 
+</div>
+
+<!-- ── STOCK MARKET SIM PANEL ── -->
+<div class="game-panel" id="panelSM">
+  <div class="sm-header-card">
+    <div class="sm-stat"><div class="lbl">Trader Rank</div><div class="val" id="smRankLabel">Street Intern Lv.1</div></div>
+    <div class="sm-stat"><div class="lbl">XP Progress</div><div class="val" id="smXpLabel">0 / 10 xp</div></div>
+    <div class="sm-stat"><div class="lbl">Market Day</div><div class="val" id="smDayLabel">Day 1</div></div>
+    <div class="sm-stat"><div class="lbl">Portfolio Value</div><div class="val" id="smPortfolioLabel">0 🪙</div></div>
+  </div>
+  <div class="sm-news" id="smNews">Welcome to Night Exchange. Start small and build your legend.</div>
+  <div class="sm-market-list" id="smMarketList"></div>
+  <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+    <button class="r-spin-btn" onclick="smAdvanceDay()" id="smAdvanceBtn" style="flex:1;">⏭ Advance Market Day</button>
+  </div>
 </div>
 
 </div>
@@ -6250,6 +6318,8 @@
     prLoadProgress(currentUser.id);
     prRenderProgress();
     prUpdateBetDisplay();
+    smLoadProgress(currentUser.id);
+    smRender();
     refreshCasinoWallet();
   };
 
@@ -6438,13 +6508,185 @@
     document.getElementById('panelRL').classList.toggle('active', game === 'rl');
     document.getElementById('panelPK').classList.toggle('active', game === 'pk');
     document.getElementById('panelPR').classList.toggle('active', game === 'pr');
+    document.getElementById('panelSM').classList.toggle('active', game === 'sm');
     document.getElementById('tabBJ').classList.toggle('active', game === 'bj');
     document.getElementById('tabRL').classList.toggle('active', game === 'rl');
     document.getElementById('tabPK').classList.toggle('active', game === 'pk');
     document.getElementById('tabPR').classList.toggle('active', game === 'pr');
+    document.getElementById('tabSM').classList.toggle('active', game === 'sm');
     if (game === 'rl') { rlBuildGrid(); }
     if (game === 'pk') { pkInitCanvas(); }
+    if (game === 'sm') { smRender(); }
     if (game !== 'pr') { prStop(); }
+  };
+
+
+  // ══════════════════ STOCK MARKET SIM ══════════════════
+
+  const SM_STOCKS_BASE = [
+    { id: 'AUR', name: 'Aurora AI', base: 42, drift: 0.02, vol: 0.07 },
+    { id: 'MCH', name: 'Mecha Forge', base: 68, drift: 0.01, vol: 0.05 },
+    { id: 'BLM', name: 'Bloom Byte', base: 24, drift: 0.025, vol: 0.09 },
+    { id: 'NXT', name: 'Neon Transit', base: 90, drift: 0.008, vol: 0.04 },
+    { id: 'KRA', name: 'Kraken Cola', base: 55, drift: 0.015, vol: 0.06 },
+  ];
+  const SM_TITLES = ['Street Intern', 'Chart Goblin', 'Momentum Rider', 'Bull Whisperer', 'Wall Street Wizard'];
+  const SM_NEWS = [
+    'Rumor: a celebrity frog was seen buying tech calls.',
+    'Analysts disagree violently on whether snacks are recession-proof.',
+    'Late night patch notes caused algorithmic confusion.',
+    'Mystery whale enters market. Nobody knows if it is literal.',
+    'Coffee futures explode after all-nighter coding sprint.',
+  ];
+
+  let smState = {
+    day: 1, level: 1, xp: 0,
+    holdings: {},
+    prices: {},
+    lastMoves: {},
+    news: 'Welcome to Night Exchange. Start small and build your legend.'
+  };
+
+  function smProgressKey(playerId) { return `pw_sm_progress_${playerId}`; }
+  function smXpToNext(level) { return 10 + (level - 1) * 8; }
+  function smTradeCap(level) { return Math.min(7, 2 + Math.floor((level - 1) / 2)); }
+
+  function smDefaultState() {
+    const prices = {};
+    const lastMoves = {};
+    const holdings = {};
+    for (const s of SM_STOCKS_BASE) { prices[s.id] = s.base; lastMoves[s.id] = 0; holdings[s.id] = 0; }
+    return { day: 1, level: 1, xp: 0, holdings, prices, lastMoves, news: 'Welcome to Night Exchange. Start small and build your legend.' };
+  }
+
+  function smLoadProgress(playerId) {
+    if (!playerId) return;
+    const raw = localStorage.getItem(smProgressKey(playerId));
+    if (!raw) { smState = smDefaultState(); return; }
+    try {
+      const parsed = JSON.parse(raw);
+      smState = smDefaultState();
+      smState.day = Math.max(1, parsed.day || 1);
+      smState.level = Math.max(1, parsed.level || 1);
+      smState.xp = Math.max(0, parsed.xp || 0);
+      smState.news = parsed.news || smState.news;
+      for (const s of SM_STOCKS_BASE) {
+        smState.prices[s.id] = Math.max(1, Number(parsed.prices?.[s.id] || smState.prices[s.id]));
+        smState.holdings[s.id] = Math.max(0, Math.floor(Number(parsed.holdings?.[s.id] || 0)));
+        smState.lastMoves[s.id] = Number(parsed.lastMoves?.[s.id] || 0);
+      }
+    } catch { smState = smDefaultState(); }
+  }
+
+  function smSaveProgress(playerId) {
+    if (!playerId) return;
+    localStorage.setItem(smProgressKey(playerId), JSON.stringify(smState));
+  }
+
+  function smPortfolioValue() {
+    return SM_STOCKS_BASE.reduce((sum, s) => sum + smState.holdings[s.id] * smState.prices[s.id], 0);
+  }
+
+  function smAwardXp(gain) {
+    smState.xp += gain;
+    while (smState.xp >= smXpToNext(smState.level)) {
+      smState.xp -= smXpToNext(smState.level);
+      smState.level += 1;
+      smState.news = `LEVEL UP! You're now ${SM_TITLES[Math.min(SM_TITLES.length - 1, smState.level - 1)]} Lv.${smState.level}.`;
+    }
+  }
+
+  function smRender() {
+    const list = document.getElementById('smMarketList');
+    if (!list) return;
+    const title = SM_TITLES[Math.min(SM_TITLES.length - 1, smState.level - 1)];
+    document.getElementById('smRankLabel').textContent = `${title} Lv.${smState.level}`;
+    document.getElementById('smXpLabel').textContent = `${smState.xp} / ${smXpToNext(smState.level)} xp`;
+    document.getElementById('smDayLabel').textContent = `Day ${smState.day}`;
+    document.getElementById('smPortfolioLabel').textContent = `${Math.round(smPortfolioValue()).toLocaleString()} 🪙`;
+    document.getElementById('smNews').textContent = smState.news;
+
+    list.innerHTML = SM_STOCKS_BASE.map(s => {
+      const price = smState.prices[s.id];
+      const prevMove = smState.lastMoves[s.id] || 0;
+      const trend = prevMove > 0 ? 'up' : prevMove < 0 ? 'down' : '';
+      const hold = smState.holdings[s.id] || 0;
+      const forecast = smState.level >= 3 ? (prevMove >= 0 ? '↗ likely momentum' : '↘ likely pullback') : 'Unlock Lv.3 for forecast';
+      return `
+        <div class="sm-stock-row">
+          <div>
+            <div class="sm-ticker">${s.id} · ${s.name}</div>
+            <div class="sm-sub">${forecast}</div>
+          </div>
+          <div class="sm-price ${trend}">${Math.round(price)} 🪙</div>
+          <div class="sm-hold">Holding: ${hold}<br>Value: ${Math.round(hold * price).toLocaleString()}</div>
+          <div class="sm-actions">
+            <button class="sm-btn" onclick="smTrade('${s.id}', 1)">Buy 1</button>
+            <button class="sm-btn" onclick="smTrade('${s.id}', 5)">Buy 5</button>
+            <button class="sm-btn sell" onclick="smTrade('${s.id}', -1)">Sell 1</button>
+            <button class="sm-btn sell" onclick="smTrade('${s.id}', -5)">Sell 5</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  window.smTrade = async function(stockId, qty) {
+    const p = getCurrentCasinoPlayer();
+    if (!p) { shakeWallet(); return; }
+    const stock = SM_STOCKS_BASE.find(s => s.id === stockId);
+    if (!stock) return;
+    const price = smState.prices[stockId];
+    const absQty = Math.abs(qty);
+    if (absQty > smTradeCap(smState.level)) {
+      smState.news = `Need higher rank. Lv.${smState.level} max trade size is ${smTradeCap(smState.level)} shares.`;
+      smRender();
+      return;
+    }
+
+    if (qty > 0) {
+      const cost = Math.round(price * qty);
+      if ((p.coins || 0) < cost) { shakeWallet(); return; }
+      await setCasinoCoins(p.id, (p.coins || 0) - cost);
+      smState.holdings[stockId] += qty;
+      smState.news = `Bought ${qty} ${stockId} @ ${Math.round(price)}. Diamond hands?`;
+      smAwardXp(1);
+    } else {
+      if ((smState.holdings[stockId] || 0) < absQty) { shakeWallet(); return; }
+      const payout = Math.round(price * absQty);
+      await setCasinoCoins(p.id, (p.coins || 0) + payout);
+      smState.holdings[stockId] -= absQty;
+      smState.news = `Sold ${absQty} ${stockId} for ${payout} 🪙. Nice exit.`;
+      smAwardXp(2);
+    }
+
+    smSaveProgress(p.id);
+    refreshCasinoWallet();
+    smRender();
+  };
+
+  window.smAdvanceDay = function() {
+    const p = getCurrentCasinoPlayer();
+    if (!p) { shakeWallet(); return; }
+    smState.day += 1;
+    const eventBoost = (Math.random() < 0.2) ? (Math.random() < 0.5 ? -0.12 : 0.14) : 0;
+    const eventStock = SM_STOCKS_BASE[Math.floor(Math.random() * SM_STOCKS_BASE.length)];
+
+    for (const s of SM_STOCKS_BASE) {
+      const noise = (Math.random() * 2 - 1) * s.vol;
+      const directional = s.drift + noise + (s.id === eventStock.id ? eventBoost : 0);
+      const oldPrice = smState.prices[s.id];
+      const newPrice = Math.max(2, oldPrice * (1 + directional));
+      smState.prices[s.id] = newPrice;
+      smState.lastMoves[s.id] = directional;
+    }
+
+    smState.news = eventBoost !== 0
+      ? `Day ${smState.day}: ${eventStock.name} ${eventBoost > 0 ? 'rallies hard 🚀' : 'faceplants 💥'} after breaking news.`
+      : `Day ${smState.day}: ${SM_NEWS[Math.floor(Math.random() * SM_NEWS.length)]}`;
+
+    smAwardXp(2);
+    smSaveProgress(p.id);
+    smRender();
   };
 
   // ══════════════════ ROULETTE ══════════════════
