@@ -3864,6 +3864,7 @@
 <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
   <canvas id="plinkoCanvas" width="380" height="440" style="background:#0a1f0a;border:1px solid #2a5a2a;display:block;max-width:100%;"></canvas>
   <div class="roulette-result-num" id="plinkoResultNum" style="min-height:2.5rem;">—</div>
+  <div id="plinkoProgress" style="font-size:0.74rem;color:#93c5fd;letter-spacing:0.02em;text-align:center;opacity:0.9;">Progression: Stage 0/10 · 0% risk</div>
 </div>
 <!-- Bet amount -->
 <div>
@@ -6265,8 +6266,8 @@
   // ══════════════════ PLINKO ══════════════════
   const PK_ROWS = 12;
   const PK_COLS = 9;
-  const PK_MULTIPLIERS = [2.0, 1.5, 1.0, 0.5, 0.0, 0.5, 1.0, 1.5, 2.0];
-  const PK_COLORS      = ['#cd7f42','#4ade80','#f87171','#f87171','#f87171','#f87171','#f87171','#4ade80','#cd7f42'];
+  const PK_EASY_MULTIPLIERS = [3.0, 2.0, 1.5, 1.0, 0.8, 1.0, 1.5, 2.0, 3.0];
+  const PK_HARD_MULTIPLIERS = [6.0, 3.0, 1.2, 0.4, 0.2, 0.4, 1.2, 3.0, 6.0];
 
   let pkBet = 0;
   let pkRunning = false;
@@ -6275,6 +6276,7 @@
   let pkBalls = [];
   let pkBuckets = [];
   let pkAnimFrame = null;
+  let pkProgress = 0;
   const PK_W = 380, PK_H = 440;
   const PK_PEG_R = 5;
   const PK_BALL_R = 7;
@@ -6288,6 +6290,33 @@
     pkCtx = pkCanvas.getContext('2d');
     pkBuildLayout();
     pkDraw();
+    pkUpdateProgressLabel();
+  }
+
+  function pkCurrentProgress() {
+    return Math.max(0, Math.min(1, pkProgress));
+  }
+
+  function pkBlendMultiplier(index, progress) {
+    const easy = PK_EASY_MULTIPLIERS[index] ?? 1;
+    const hard = PK_HARD_MULTIPLIERS[index] ?? easy;
+    return easy + (hard - easy) * progress;
+  }
+
+  function pkColorForMultiplier(mult) {
+    if (mult >= 4.5) return '#facc15';
+    if (mult >= 2.0) return '#fb923c';
+    if (mult >= 1.0) return '#4ade80';
+    if (mult >= 0.5) return '#f87171';
+    return '#ef4444';
+  }
+
+  function pkUpdateProgressLabel(extraText = '') {
+    const el = document.getElementById('plinkoProgress');
+    if (!el) return;
+    const stage = Math.floor(pkCurrentProgress() * 10);
+    const pct = Math.round(pkCurrentProgress() * 100);
+    el.textContent = `Progression: Stage ${stage}/10 · ${pct}% risk${extraText ? ` · ${extraText}` : ''}`;
   }
 
   function pkBuildLayout() {
@@ -6311,9 +6340,11 @@
     }
 
     const bucketY = PK_H - PK_BOT_PAD + 4;
-    for (let i = 0; i < PK_MULTIPLIERS.length; i++) {
+    const progress = pkCurrentProgress();
+    for (let i = 0; i < PK_EASY_MULTIPLIERS.length; i++) {
       const x = startX + i * colGap;
-      pkBuckets.push({ x, y: bucketY, mult: PK_MULTIPLIERS[i], color: PK_COLORS[i], w: colGap });
+      const mult = Number(pkBlendMultiplier(i, progress).toFixed(2));
+      pkBuckets.push({ x, y: bucketY, mult, color: pkColorForMultiplier(mult), w: colGap });
     }
   }
 
@@ -6354,6 +6385,14 @@
 
     // Draw balls
     pkBalls.forEach(ball => {
+      const trail = ball.trail || [];
+      trail.forEach((pt, idx) => {
+        const alpha = (idx + 1) / (trail.length + 1);
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, Math.max(2, PK_BALL_R * 0.48 * alpha), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(96, 165, 250, ${alpha * 0.25})`;
+        ctx.fill();
+      });
       const grd = ctx.createRadialGradient(ball.x - 2, ball.y - 2, 1, ball.x, ball.y, PK_BALL_R);
       grd.addColorStop(0, '#a0d8ff');
       grd.addColorStop(1, '#2255cc');
@@ -6375,9 +6414,10 @@
     pkLastTime = timestamp;
     const dt = elapsed / 16.667;
 
-    const gravity = 0.28;
-    const friction = Math.pow(0.995, dt);
-    const bounceFactor = 0.45;
+    const progress = pkCurrentProgress();
+    const gravity = 0.22 + progress * 0.16;
+    const friction = Math.pow(0.996 - progress * 0.0015, dt);
+    const bounceFactor = 0.42 + progress * 0.08;
     const bucketY = PK_H - PK_BOT_PAD + 4;
 
     pkBalls.forEach(ball => {
@@ -6386,6 +6426,9 @@
       ball.vx *= friction;
       ball.x += ball.vx * dt;
       ball.y += ball.vy * dt;
+      if (!ball.trail) ball.trail = [];
+      ball.trail.push({ x: ball.x, y: ball.y });
+      if (ball.trail.length > 8) ball.trail.shift();
 
       // Collide with pegs
       pkPegs.forEach(peg => {
@@ -6404,7 +6447,7 @@
           ball.vx = (ball.vx - 2 * dot * nx) * bounceFactor;
           ball.vy = (ball.vy - 2 * dot * ny) * bounceFactor;
           // Add slight random horizontal nudge
-          ball.vx += (Math.random() - 0.5) * 1.2;
+          ball.vx += (Math.random() - 0.5) * (1.0 + progress * 1.1);
           // Play tick sound
           playTone(600 + Math.random() * 200, 'sine', 0.02, 0.04);
         }
@@ -6447,11 +6490,13 @@
     if (!p) return;
     const bet = ball.bet || pkBet;
     const mult = bucket.mult;
-    const payout = Math.floor(bet * mult);
+    const luckyBonus = Math.random() < (0.08 + pkCurrentProgress() * 0.1) ? 0.5 : 0;
+    const finalMult = Number((mult + luckyBonus).toFixed(2));
+    const payout = Math.floor(bet * finalMult);
     const profit = payout - bet;
 
     const resultEl = document.getElementById('plinkoResultNum');
-    resultEl.textContent = mult + 'x  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙';
+    resultEl.textContent = finalMult + 'x' + (luckyBonus ? ' ✨' : '') + '  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙';
     resultEl.className = 'roulette-result-num ' + (profit > 0 ? 'green' : profit === 0 ? '' : 'red');
 
     const banner = document.getElementById('pkResultBanner');
@@ -6461,6 +6506,7 @@
       soundWin();
       setTimeout(() => launchParticles('win'), 80);
       setTimeout(() => spawnCoinFloat('+' + profit + ' 🪙'), 300);
+      if (luckyBonus) setTimeout(() => spawnCoinFloat('LUCKY +0.5x ✨'), 520);
       recordBiggestWin(p.name, p.id, profit);
     } else if (profit === 0) {
       banner.textContent = '🤝 Break even';
@@ -6476,6 +6522,11 @@
     const snap = await new Promise(res => onValue(ref(db, `players/${p.id}/coins`), res, { onlyOnce: true }));
     const currentCoins = snap.val() || 0;
     await setCasinoCoins(p.id, currentCoins + payout);
+
+    const lossPenalty = profit < 0 ? 0.03 : 0;
+    pkProgress = Math.max(0, Math.min(1, pkProgress + 0.06 - lossPenalty));
+    pkBuildLayout();
+    pkUpdateProgressLabel(luckyBonus ? 'Lucky bonus hit!' : '');
   }
 
   window.pkAddBet = function(amount) {
@@ -6492,6 +6543,7 @@
     if (pkRunning) return;
     pkBet = 0;
     document.getElementById('pkBetDisplay').innerHTML = '0<small>bet</small>';
+    pkUpdateProgressLabel();
   };
 
   window.pkDrop = async function() {
@@ -6506,6 +6558,8 @@
 
     pkRunning = true;
     document.getElementById('pkDropBtn').disabled = true;
+    pkBuildLayout();
+    pkUpdateProgressLabel('Board shifts slowly each round');
     document.getElementById('pkResultBanner').className = 'result-banner';
     document.getElementById('plinkoResultNum').textContent = '…';
     document.getElementById('plinkoResultNum').className = 'roulette-result-num';
@@ -6523,7 +6577,8 @@
       vy: 1,
       done: false,
       bucket: null,
-      bet: betSnapshot
+      bet: betSnapshot,
+      trail: []
     }];
 
     if (pkAnimFrame) cancelAnimationFrame(pkAnimFrame);
