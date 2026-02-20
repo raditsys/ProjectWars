@@ -4642,6 +4642,8 @@
   // ── State ──
   let players = {};
   let logs = {};
+  let recentLogs = [];
+  let streakByPlayer = {};
   let worldResources = {};
   let currentUser = null; // { id, name, ...playerData }
 
@@ -4700,8 +4702,36 @@
 
   onValue(ref(db, 'logs'), snap => {
     logs = snap.val() || {};
+    recomputeLogCaches();
     scheduleRender('history');
   });
+
+  function recomputeLogCaches() {
+    const logValues = Object.values(logs);
+    recentLogs = logValues
+      .slice()
+      .sort((a, b) => new Date(b.ts) - new Date(a.ts))
+      .slice(0, 20);
+
+    const playerDays = {};
+    for (const l of logValues) {
+      if (!l?.player || !l?.ts) continue;
+      (playerDays[l.player] ||= new Set()).add(new Date(l.ts).toDateString());
+    }
+
+    const nextStreaks = {};
+    for (const [playerName, daySet] of Object.entries(playerDays)) {
+      let streak = 0;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        if (daySet.has(d.toDateString())) streak++;
+        else break;
+      }
+      nextStreaks[playerName] = streak;
+    }
+    streakByPlayer = nextStreaks;
+  }
 
   onValue(ref(db, 'resources'), snap => {
     worldResources = snap.val() || {};
@@ -5106,15 +5136,7 @@
   }
 
   function getStreak(name) {
-    const days = new Set(
-      Object.values(logs).filter(l => l.player === name).map(l => new Date(l.ts).toDateString())
-    );
-    let streak = 0;
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(); d.setDate(d.getDate() - i);
-      if (days.has(d.toDateString())) streak++; else break;
-    }
-    return streak;
+    return streakByPlayer[name] || 0;
   }
 
   function isSundayEST() {
@@ -5278,12 +5300,11 @@
 
   function renderHistory() {
     const el = document.getElementById('history');
-    const arr = Object.values(logs).sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 20);
-    if (!arr.length) {
+    if (!recentLogs.length) {
       el.innerHTML = '<div style="color:var(--muted);font-size:0.75rem;padding:1rem 0;">No activity logged yet.</div>';
       return;
     }
-    el.innerHTML = arr.map(l => `
+    el.innerHTML = recentLogs.map(l => `
       <div class="log-item">
         <div>
           <div class="log-who">${escHtml(l.player)} · <span style="color:var(--muted)">${escHtml(l.project || '')}</span></div>
