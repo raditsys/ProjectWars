@@ -8467,7 +8467,7 @@ document.addEventListener('click', e => {
     btn.style.display = open ? 'none' : '';
   };
 
-  const GRID_W = 8, GRID_H = 6;
+  const GRID_W = 8, GRID_H = 7;
 
   function f(name, desc, sky, ground, groundBorder) {
     return { name, desc, sky, ground, groundBorder, resources:[] };
@@ -8530,6 +8530,15 @@ document.addEventListener('click', e => {
     '5,5': f('Abyss Edge',      'Looking down into nothing',          'linear-gradient(180deg,#040408 0%,#06060e 60%,#040408 100%)', '#08080e', '#10101a'),
     '6,5': null,
     '7,5': null,
+
+    '0,6': null,
+    '1,6': null,
+    '2,6': null,
+    '3,6': { name:'Toll Gate', desc:'Two armoured guards flank a heavy wooden gate. A weathered sign reads: "Desert Pass — Toll 5g".', sky:'linear-gradient(180deg,#1a1408 0%,#2a1e0c 60%,#1a1408 100%)', ground:'#2e2210', groundBorder:'#4a3a1a', resources:[], npc:'tollgate', tollGate:true },
+    '4,6': null,
+    '5,6': null,
+    '6,6': null,
+    '7,6': null,
   };
 
   const TREE_TYPES = {
@@ -8609,6 +8618,52 @@ document.addEventListener('click', e => {
       <!-- Shield glint -->
       <ellipse cx="128" cy="122" rx="4" ry="6" fill="#44446a" opacity="0.8"/>
     `)}</div>`,
+    'Toll Gate': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:155px">${makeSVG(300,155,`
+      <!-- Walls -->
+      <rect x="0" y="40" width="85" height="115" fill="#3a2a10"/>
+      <rect x="215" y="40" width="85" height="115" fill="#3a2a10"/>
+      <!-- Battlements -->
+      ${[0,17,34,51,68].map(x=>`<rect x="${x}" y="26" width="11" height="16" fill="#3a2a10"/>`).join('')}
+      ${[215,232,249,266,283].map(x=>`<rect x="${x}" y="26" width="11" height="16" fill="#3a2a10"/>`).join('')}
+      <!-- Stone lines -->
+      ${[60,80,100,120,140].map(y=>`<line x1="0" y1="${y}" x2="85" y2="${y}" stroke="#2a1a08" stroke-width="1" opacity="0.5"/>`).join('')}
+      ${[60,80,100,120,140].map(y=>`<line x1="215" y1="${y}" x2="300" y2="${y}" stroke="#2a1a08" stroke-width="1" opacity="0.5"/>`).join('')}
+      <!-- Gate arch -->
+      <path d="M83,155 L83,80 Q150,38 217,80 L217,155 Z" fill="#1a1208"/>
+      <path d="M90,155 L90,84 Q150,46 210,84 L210,155 Z" fill="#0e0a04"/>
+      <!-- Gate bars -->
+      ${[100,116,132,148,164,180,196].map(x=>`<rect x="${x}" y="50" width="4" height="105" fill="#4a3a18" rx="1"/>`).join('')}
+      <rect x="95" y="75" width="110" height="5" fill="#4a3a18" rx="1"/>
+      <rect x="95" y="105" width="110" height="5" fill="#4a3a18" rx="1"/>
+      <rect x="95" y="135" width="110" height="5" fill="#4a3a18" rx="1"/>
+      <!-- Torches -->
+      <rect x="76" y="55" width="6" height="14" fill="#5a3a10" rx="1"/>
+      <ellipse cx="79" cy="53" rx="5" ry="7" fill="#ff8800" opacity="0.85"/>
+      <ellipse cx="79" cy="50" rx="3" ry="5" fill="#ffcc44" opacity="0.7"/>
+      <rect x="218" y="55" width="6" height="14" fill="#5a3a10" rx="1"/>
+      <ellipse cx="221" cy="53" rx="5" ry="7" fill="#ff8800" opacity="0.85"/>
+      <ellipse cx="221" cy="50" rx="3" ry="5" fill="#ffcc44" opacity="0.7"/>
+      <!-- Left guard -->
+      <rect x="105" y="100" width="18" height="32" fill="#4a3020" rx="1"/>
+      <circle cx="114" cy="94" r="8" fill="#c8a87a"/>
+      <rect x="102" y="86" width="18" height="10" fill="#4a3020" rx="2"/>
+      <polygon points="102,86 120,86 123,78 99,78" fill="#4a3020"/>
+      <rect x="100" y="78" width="24" height="4" fill="#6a5030" rx="1"/>
+      <rect x="124" y="62" width="3" height="72" fill="#5a4a30" rx="1"/>
+      <polygon points="124,62 127,62 125.5,50" fill="#aaaacc"/>
+      <!-- Right guard -->
+      <rect x="177" y="100" width="18" height="32" fill="#4a3020" rx="1"/>
+      <circle cx="186" cy="94" r="8" fill="#c8a87a"/>
+      <rect x="174" y="86" width="18" height="10" fill="#4a3020" rx="2"/>
+      <polygon points="174,86 192,86 195,78 171,78" fill="#4a3020"/>
+      <rect x="170" y="78" width="24" height="4" fill="#6a5030" rx="1"/>
+      <rect x="168" y="62" width="3" height="72" fill="#5a4a30" rx="1"/>
+      <polygon points="168,62 171,62 169.5,50" fill="#aaaacc"/>
+      <!-- Toll sign -->
+      <rect x="126" y="42" width="48" height="22" rx="3" fill="#5a4020"/>
+      <rect x="128" y="44" width="44" height="18" rx="2" fill="#3a2810"/>
+      <text x="150" y="57" text-anchor="middle" font-size="9" fill="#d4af37" font-family="monospace">TOLL 5g</text>
+    `)}</div>`,
   };
 
   // ── Underground map (layer 1) — 8×4 grid ──
@@ -8685,6 +8740,141 @@ document.addEventListener('click', e => {
     },
   };
 
+  // ── Desert map (layer 2) — 8×6 grid ──
+  const DESERT_W = 8, DESERT_H = 6;
+  const MAP_DESERT = {
+    '0,0': null,
+    '1,0': null,
+    '2,0': f('Dune Pass',        'Sand drifts between tall red rocks',   'linear-gradient(180deg,#2a1e08 0%,#3a2a10 60%,#2a1e08 100%)', '#4a3818', '#6a5028'),
+    '3,0': { name:'Desert Gate',  desc:'The toll gate stands behind you. The desert stretches ahead.', sky:'linear-gradient(180deg,#2a1e08 0%,#3a2a10 60%,#2a1e08 100%)', ground:'#3a2a10', groundBorder:'#5a4020', resources:[], tunnel:'up' },
+    '4,0': f('Cracked Flats',    'Sun-baked earth, split into tiles',    'linear-gradient(180deg,#2e2008 0%,#3e2e10 60%,#2e2008 100%)', '#4a3a18', '#6a5228'),
+    '5,0': null,
+    '6,0': null,
+    '7,0': null,
+
+    '0,1': null,
+    '1,1': f('Sandstone Arch',   'A natural arch frames the path',       'linear-gradient(180deg,#2a1808 0%,#3a2808 60%,#2a1808 100%)', '#4a3418', '#6a4c28'),
+    '2,1': r('Dusty Quarry',     'Sandstone conceals copper and iron',   'linear-gradient(180deg,#2e1e08 0%,#3e2e0c 60%,#2e1e08 100%)', '#4a3a14', '#6a5224', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'iron',x:128},{kind:'ore',type:'copper',x:228}]),
+    '3,1': f('Desert Road',      'An ancient paved road, half-buried',   'linear-gradient(180deg,#2a1e0a 0%,#3a2a0e 60%,#2a1e0a 100%)', '#3e2e10', '#5a4420'),
+    '4,1': f('Scorpion Hollow',  'Claw marks in the sand',               'linear-gradient(180deg,#281a08 0%,#382808 60%,#281a08 100%)', '#3a2810', '#584020'),
+    '5,1': r('Sun-bleached Mine', 'Gold glints in exposed rock',         'linear-gradient(180deg,#2e2008 0%,#402e0c 60%,#2e2008 100%)', '#4a3a14', '#6a5428', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:128},{kind:'ore',type:'gold',x:228}]),
+    '6,1': null,
+    '7,1': null,
+
+    '0,2': null,
+    '1,2': f('Wind-carved Mesa', 'Flat-topped rock above the sand',      'linear-gradient(180deg,#2c1c08 0%,#3c2c0c 60%,#2c1c08 100%)', '#4a3618', '#6a5028'),
+    '2,2': r('Cactus Grove',     'Hardy cacti and scattered ore',        'linear-gradient(180deg,#221a06 0%,#342808 60%,#221a06 100%)', '#3a2e10', '#5a4820', [{kind:'tree',type:'oak',x:10},{kind:'tree',type:'oak',x:118},{kind:'ore',type:'copper',x:228}]),
+    '3,2': f('Oasis',            'Cool water and date palms',            'linear-gradient(180deg,#0e1a10 0%,#1a2818 60%,#0e1a10 100%)', '#1e3418', '#2e5028'),
+    '4,2': f('Mirage Flats',     'Heat shimmers distort the horizon',    'linear-gradient(180deg,#302208 0%,#40300c 60%,#302208 100%)', '#4e3c18', '#6e5828'),
+    '5,2': f('Buried Statue',    'An enormous stone hand reaches from the sand', 'linear-gradient(180deg,#2a1e0a 0%,#3a2a0e 60%,#2a1e0a 100%)', '#3e2e12', '#5a4422'),
+    '6,2': null,
+    '7,2': null,
+
+    '0,3': null,
+    '1,3': null,
+    '2,3': f('Sand Dunes',       'Shifting dunes, difficult footing',    'linear-gradient(180deg,#302208 0%,#42320c 60%,#302208 100%)', '#50401a', '#705a2a'),
+    '3,3': r('Desert Temple',    'Ancient pillars guard rare ore',       'linear-gradient(180deg,#1e1608 0%,#2e220c 60%,#1e1608 100%)', '#362810', '#503c1a', [{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'gold',x:228}]),
+    '4,3': f('Dry Riverbed',     'A river once flowed here',             'linear-gradient(180deg,#261c08 0%,#362808 60%,#261c08 100%)', '#3e2e10', '#584420'),
+    '5,3': null,
+    '6,3': null,
+    '7,3': null,
+
+    '0,4': null,
+    '1,4': null,
+    '2,4': null,
+    '3,4': r('Sunstone Vein',    'A deep vein of gold and runite',       'linear-gradient(180deg,#1c1406 0%,#2c200a 60%,#1c1406 100%)', '#342408', '#4e3814', [{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'runite',x:228}]),
+    '4,4': null,
+    '5,4': null,
+    '6,4': null,
+    '7,4': null,
+
+    '0,5': null,
+    '1,5': null,
+    '2,5': null,
+    '3,5': null,
+    '4,5': null,
+    '5,5': null,
+    '6,5': null,
+    '7,5': null,
+  };
+
+  const DECOR_DESERT = {
+    'Desert Gate': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:140px">${makeSVG(300,140,`
+      <rect x="0" y="50" width="80" height="90" fill="#3a2a10"/>
+      <rect x="220" y="50" width="80" height="90" fill="#3a2a10"/>
+      ${[0,16,32,48,64].map(x=>`<rect x="${x}" y="36" width="10" height="16" fill="#3a2a10"/>`).join('')}
+      ${[220,236,252,268,284].map(x=>`<rect x="${x}" y="36" width="10" height="16" fill="#3a2a10"/>`).join('')}
+      <rect x="78" y="60" width="144" height="80" fill="#1a1208"/>
+      <path d="M78,140 L78,85 Q150,45 222,85 L222,140 Z" fill="#0e0a04"/>
+      ${[95,115,135,155,175,195].map(x=>`<rect x="${x}" y="60" width="5" height="80" fill="#2a1a08" rx="1"/>`).join('')}
+      <rect x="90" y="80" width="120" height="5" fill="#2a1a08" rx="1"/>
+      <rect x="90" y="105" width="120" height="5" fill="#2a1a08" rx="1"/>
+      <rect x="72" y="62" width="6" height="12" fill="#5a3a10" rx="1"/>
+      <ellipse cx="75" cy="60" rx="5" ry="6" fill="#ff8800" opacity="0.8"/>
+      <rect x="222" y="62" width="6" height="12" fill="#5a3a10" rx="1"/>
+      <ellipse cx="225" cy="60" rx="5" ry="6" fill="#ff8800" opacity="0.8"/>
+      <rect x="108" y="95" width="18" height="32" fill="#2a2030" rx="1"/>
+      <circle cx="117" cy="90" r="8" fill="#c8a87a"/>
+      <rect x="104" y="84" width="18" height="10" fill="#4a3020" rx="2"/>
+      <rect x="128" y="68" width="3" height="72" fill="#5a4a30" rx="1"/>
+      <polygon points="128,68 131,68 129.5,56" fill="#aaaacc"/>
+      <rect x="168" y="95" width="18" height="32" fill="#2a2030" rx="1"/>
+      <circle cx="177" cy="90" r="8" fill="#c8a87a"/>
+      <rect x="164" y="84" width="18" height="10" fill="#4a3020" rx="2"/>
+      <rect x="160" y="68" width="3" height="72" fill="#5a4a30" rx="1"/>
+      <polygon points="160,68 163,68 161.5,56" fill="#aaaacc"/>
+    `)}</div>`,
+    'Dune Pass': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:70px">${makeSVG(300,70,`
+      <ellipse cx="60" cy="65" rx="70" ry="25" fill="#4a3818" opacity="0.7"/>
+      <ellipse cx="180" cy="68" rx="90" ry="22" fill="#50401a" opacity="0.6"/>
+      <ellipse cx="270" cy="62" rx="50" ry="20" fill="#4a3818" opacity="0.65"/>
+      <polygon points="20,40 35,8 50,40" fill="#6a4020" opacity="0.8"/>
+      <polygon points="250,35 270,5 290,35" fill="#704828" opacity="0.75"/>
+    `)}</div>`,
+    'Cracked Flats': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:40px">${makeSVG(300,40,`
+      ${[[20,10,80,35],[110,5,60,38],[190,8,70,32],[270,12,25,28]].map(([x,y,w2,h2])=>`<rect x="${x}" y="${y}" width="${w2}" height="${h2}" fill="none" stroke="#1a1408" stroke-width="1" opacity="0.6"/>`).join('')}
+    `)}</div>`,
+    'Sandstone Arch': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:120px">${makeSVG(300,120,`
+      <rect x="60" y="30" width="25" height="90" fill="#6a4828"/>
+      <rect x="215" y="30" width="25" height="90" fill="#6a4828"/>
+      <path d="M58,30 Q150,-20 242,30" fill="none" stroke="#6a4828" stroke-width="20"/>
+    `)}</div>`,
+    'Oasis': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:80px">${makeSVG(300,80,`
+      <ellipse cx="150" cy="70" rx="100" ry="18" fill="#1a4a5a" opacity="0.7"/>
+      <ellipse cx="150" cy="68" rx="80" ry="12" fill="#2a6a7a" opacity="0.5"/>
+      <rect x="80" y="10" width="4" height="60" rx="1" fill="#3a6a20"/>
+      ${[-15,-8,0,8,15].map(a=>`<ellipse cx="${82+a*1.5}" cy="${12}" rx="12" ry="6" fill="#2a8a30" opacity="0.7" transform="rotate(${a*3},${82+a*1.5},12)"/>`).join('')}
+      <rect x="200" y="18" width="4" height="52" rx="1" fill="#3a6a20"/>
+      ${[-12,-5,0,5,12].map(a=>`<ellipse cx="${202+a*1.4}" cy="${20}" rx="10" ry="5" fill="#2a8a30" opacity="0.7" transform="rotate(${a*3},${202+a*1.4},20)"/>`).join('')}
+    `)}</div>`,
+    'Cactus Grove': () => [[30,60],[120,50],[210,65],[270,55]].map(([x,h])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(30,h+5,`<rect x="12" y="5" width="6" height="${h}" rx="3" fill="#2a6a20"/><rect x="0" y="${h*0.3}" width="12" height="5" rx="2" fill="#2a6a20"/><rect x="0" y="${h*0.3}" width="5" height="16" rx="2" fill="#2a6a20"/><rect x="18" y="${h*0.5}" width="12" height="5" rx="2" fill="#2a6a20"/><rect x="25" y="${h*0.5-12}" width="5" height="17" rx="2" fill="#2a6a20"/>`)}</div>`).join(''),
+    'Sand Dunes': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:60px">${makeSVG(300,60,`
+      <ellipse cx="80" cy="55" rx="90" ry="25" fill="#50401a" opacity="0.6"/>
+      <ellipse cx="220" cy="52" rx="80" ry="22" fill="#4a3818" opacity="0.55"/>
+      <ellipse cx="150" cy="58" rx="60" ry="15" fill="#584828" opacity="0.5"/>
+    `)}</div>`,
+    'Desert Temple': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:110px">${makeSVG(300,110,`
+      <rect x="50" y="20" width="200" height="90" fill="#3a2a14" opacity="0.6"/>
+      ${[70,110,180,220].map(x=>`<rect x="${x}" y="20" width="10" height="90" fill="#4a3a1a"/>`).join('')}
+      <rect x="40" y="10" width="220" height="14" fill="#4a3a1a"/>
+      <polygon points="100,0 150,-15 200,0 200,12 100,12" fill="#50401a"/>
+      <rect x="125" y="50" width="50" height="60" fill="#1a1208"/>
+    `)}</div>`,
+    'Buried Statue': () => `<div class="env-decor" style="left:80px;bottom:0;width:140px;height:120px">${makeSVG(140,120,`
+      <ellipse cx="70" cy="115" rx="65" ry="15" fill="#4a3818" opacity="0.5"/>
+      <rect x="30" y="20" width="80" height="100" fill="#5a4a30" opacity="0.7" rx="3"/>
+      <rect x="20" y="40" width="30" height="80" fill="#5a4a30" opacity="0.6" rx="2"/>
+      <rect x="90" y="50" width="30" height="70" fill="#5a4a30" opacity="0.6" rx="2"/>
+      <rect x="45" y="0" width="50" height="50" rx="4" fill="#6a5a38" opacity="0.7"/>
+      <circle cx="60" cy="20" r="4" fill="#3a2a18" opacity="0.6"/>
+      <circle cx="80" cy="20" r="4" fill="#3a2a18" opacity="0.6"/>
+    `)}</div>`,
+    'Mirage Flats': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:50px">${makeSVG(300,50,`
+      <rect x="0" y="30" width="300" height="20" fill="#4a3a18" opacity="0.3"/>
+      ${[40,100,160,220,280].map(x=>`<ellipse cx="${x}" cy="35" rx="20" ry="8" fill="#6a8aaa" opacity="0.15"/>`).join('')}
+    `)}</div>`,
+  };
+
   let cx = 2, cy = 2;
   let clayer = 0;  // 0=surface, 1=underground
   let resourceState = [];
@@ -8723,9 +8913,10 @@ document.addEventListener('click', e => {
 
   function key(c, rr) { return `${c},${rr}`; }
   function room(c, rr) {
-    const H = clayer === 0 ? GRID_H : 4;
-    if (c < 0 || c >= GRID_W || rr < 0 || rr >= H) return null;
-    const m = clayer === 0 ? MAP : MAP_UNDER;
+    const H = clayer === 0 ? GRID_H : clayer === 1 ? 4 : DESERT_H;
+    const W = clayer === 2 ? DESERT_W : GRID_W;
+    if (c < 0 || c >= W || rr < 0 || rr >= H) return null;
+    const m = clayer === 0 ? MAP : clayer === 1 ? MAP_UNDER : MAP_DESERT;
     return m[key(c, rr)] || null;
   }
 
@@ -8757,34 +8948,37 @@ document.addEventListener('click', e => {
     const canvas = document.getElementById('envMinimapCanvas');
     if (!canvas) return;
     const CELL = 13, GAP = 2;
-    const ROWS = clayer === 0 ? GRID_H : 4;
-    canvas.width  = GRID_W * (CELL + GAP) - GAP;
-    canvas.height = ROWS   * (CELL + GAP) - GAP;
+    const ROWS = clayer === 0 ? GRID_H : clayer === 1 ? 4 : DESERT_H;
+    const COLS = clayer === 2 ? DESERT_W : GRID_W;
+    canvas.width  = COLS * (CELL + GAP) - GAP;
+    canvas.height = ROWS * (CELL + GAP) - GAP;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let rr = 0; rr < ROWS; rr++) {
-      for (let c = 0; c < GRID_W; c++) {
+      for (let c = 0; c < COLS; c++) {
         const px = c*(CELL+GAP), py = rr*(CELL+GAP);
         const rm = room(c, rr);
-        if (!rm) { ctx.fillStyle = clayer===0 ? '#0e0e0e' : '#06040a'; ctx.fillRect(px,py,CELL,CELL); continue; }
+        const emptyCol = clayer===0 ? '#0e0e0e' : clayer===1 ? '#06040a' : '#1a1408';
+        if (!rm) { ctx.fillStyle = emptyCol; ctx.fillRect(px,py,CELL,CELL); continue; }
         let col;
         if (c===cx && rr===cy)              col = '#f5c842';
         else if (rm.locked)                 col = '#444455';
-        else if (rm.tunnel)                 col = '#3a2050';
+        else if (rm.tollGate)               col = '#4a3a1a';
+        else if (rm.tunnel)                 col = clayer===2 ? '#4a3a1a' : '#3a2050';
         else if (rm.npc && clayer===1)      col = '#3a1a10';
-        else if (rm.resources?.length)      col = clayer===0 ? '#1a4a1a' : '#1a3040';
-        else                                col = clayer===0 ? '#1e2e1e' : '#14101e';
+        else if (rm.resources?.length)      col = clayer===0 ? '#1a4a1a' : clayer===1 ? '#1a3040' : '#4a3a14';
+        else                                col = clayer===0 ? '#1e2e1e' : clayer===1 ? '#14101e' : '#3a2e18';
         ctx.fillStyle = col;
         ctx.fillRect(px, py, CELL, CELL);
         if (rm.locked) { ctx.fillStyle='#666688'; ctx.fillRect(px+Math.floor(CELL/2)-1,py+Math.floor(CELL/2)-1,2,2); }
-        if (rm.tunnel) { ctx.fillStyle='#8844ff'; ctx.fillRect(px+CELL-4,py,4,4); }
+        if (rm.tunnel) { ctx.fillStyle = clayer===2 ? '#d4af37' : '#8844ff'; ctx.fillRect(px+CELL-4,py,4,4); }
       }
     }
     // Layer label strip
-    const label = clayer === 0 ? 'SURFACE' : 'UNDERGROUND';
-    ctx.fillStyle = clayer === 0 ? '#1a3a1a' : '#1a1030';
+    const label = clayer === 0 ? 'SURFACE' : clayer === 1 ? 'UNDERGROUND' : 'DESERT';
+    ctx.fillStyle = clayer === 0 ? '#1a3a1a' : clayer === 1 ? '#1a1030' : '#2a1e08';
     ctx.fillRect(0, canvas.height-10, canvas.width, 10);
-    ctx.fillStyle = clayer === 0 ? '#4a8a4a' : '#8844ff';
+    ctx.fillStyle = clayer === 0 ? '#4a8a4a' : clayer === 1 ? '#8844ff' : '#d4af37';
     ctx.font = '6px monospace';
     ctx.fillText(label, 2, canvas.height-2);
   }
@@ -8827,7 +9021,7 @@ document.addEventListener('click', e => {
     resourceState = [];
 
     // Decorative fluff (layer-aware)
-    const decorFn = clayer === 1 ? (DECOR_UNDER[rm.name] || DECOR[rm.name]) : DECOR[rm.name];
+    const decorFn = clayer === 2 ? (DECOR_DESERT[rm.name] || DECOR[rm.name]) : clayer === 1 ? (DECOR_UNDER[rm.name] || DECOR[rm.name]) : DECOR[rm.name];
     if (decorFn) resContainer.innerHTML = decorFn();
 
     // Dead Grove: glowing chest to descend (appears after Morrigan paid)
@@ -8846,6 +9040,24 @@ document.addEventListener('click', e => {
       );
       chestDiv.onclick = () => envDescend();
       resContainer.appendChild(chestDiv);
+    }
+
+    // Desert Gate: portal to return to surface toll gate
+    if (clayer === 2 && rm.tunnel === 'up') {
+      const exitDiv = document.createElement('div');
+      exitDiv.className = 'env-chest';
+      exitDiv.style.filter = 'drop-shadow(0 0 10px rgba(212,175,55,0.7))';
+      exitDiv.title = 'Return through the toll gate to the surface';
+      exitDiv.innerHTML = makeSVG(56,56,
+        '<rect x="10" y="6" width="36" height="44" rx="3" fill="#3a2a10"/>' +
+        '<path d="M10,50 L10,22 Q28,2 46,22 L46,50 Z" fill="#1a1208"/>' +
+        '<rect x="12" y="10" width="32" height="6" rx="2" fill="#4a3a18"/>' +
+        '<circle cx="28" cy="32" r="5" fill="#d4af37"/>' +
+        '<circle cx="28" cy="32" r="2.5" fill="#f5c842"/>' +
+        '<ellipse cx="28" cy="14" rx="16" ry="4" fill="#d4af37" opacity="0.25"/>'
+      );
+      exitDiv.onclick = () => envExitDesert();
+      resContainer.appendChild(exitDiv);
     }
 
     // Tunnel Entrance: rope-chest to ascend back to surface
@@ -8873,12 +9085,35 @@ document.addEventListener('click', e => {
 
     // NPC talk button + auto-open on entry
     if (rm.npc) {
-      const talkBtn = document.createElement('button');
-      talkBtn.className = 'npc-talk-btn';
-      talkBtn.textContent = '💬 Talk';
-      talkBtn.onclick = () => openDialogue(rm.npc);
-      resContainer.appendChild(talkBtn);
-      setTimeout(() => openDialogue(rm.npc), 450);
+      // Toll gate: after first payment, silently deduct 5g and enter desert
+      if (rm.tollGate && window.__questFlags?.tollPaidOnce) {
+        const talkBtn = document.createElement('button');
+        talkBtn.className = 'npc-talk-btn';
+        talkBtn.textContent = '💬 Talk';
+        talkBtn.onclick = () => openDialogue(rm.npc);
+        resContainer.appendChild(talkBtn);
+        setTimeout(async () => {
+          const coins = window.__getCoins ? await window.__getCoins() : 0;
+          if (coins >= 5) {
+            if (window.__spendCoins) await window.__spendCoins(5);
+            const toast = document.createElement('div');
+            toast.className = 'quest-reward-toast';
+            toast.textContent = '🛡️ Toll paid — 5g';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+            setTimeout(() => envEnterDesert(), 400);
+          } else {
+            openDialogue(rm.npc);
+          }
+        }, 450);
+      } else {
+        const talkBtn = document.createElement('button');
+        talkBtn.className = 'npc-talk-btn';
+        talkBtn.textContent = '💬 Talk';
+        talkBtn.onclick = () => openDialogue(rm.npc);
+        resContainer.appendChild(talkBtn);
+        setTimeout(() => openDialogue(rm.npc), 450);
+      }
     }
 
     // Interactive resources
@@ -9047,9 +9282,26 @@ document.addEventListener('click', e => {
   window.envAscend = function() {
     const rm = room(cx, cy);
     if (!rm || rm.tunnel !== 'up') return;
+    if (clayer === 2) { envExitDesert(); return; }
     layerFlash(() => {
       clayer = 0;
       cx = 5; cy = 2;  // back to Dead Grove
+      renderRoom(0, 0);
+    });
+  };
+
+  window.envEnterDesert = function() {
+    layerFlash(() => {
+      clayer = 2;
+      cx = 3; cy = 0;  // Desert Gate
+      renderRoom(0, 0);
+    });
+  };
+
+  window.envExitDesert = function() {
+    layerFlash(() => {
+      clayer = 0;
+      cx = 3; cy = 6;  // back to Toll Gate
       renderRoom(0, 0);
     });
   };
@@ -9491,6 +9743,77 @@ document.addEventListener('click', e => {
     },
   };
 
+    // ─────────────────────────────────────────────
+    tollgate: {
+      name: 'Gate Warden Harsk',
+      title: 'Desert Toll Collector',
+      portrait: '🛡️',
+      tree: {
+        root: {
+          text: () => {
+            if (window.__questFlags?.tollPaidOnce) {
+              return `*The wardens wave you through.*\n\n"Five gold. You know the drill."`;
+            }
+            return `*Two heavily armoured guards step forward in unison. One raises a gauntleted hand.*\n\n"Halt, traveller. This is the Desert Pass — only road south into the Ashwind Expanse.\n\nThe road is maintained by toll. Five gold, and you pass. No exceptions, no credit, no sob stories.\n\nPay, or turn back."`;
+          },
+          choices: () => {
+            const coins = window.__cachedCoins || 0;
+            const choices = [];
+            if (coins >= 5) {
+              choices.push({ label: '[ Pay 5 gold ]', next: 'paid', action: 'toll_pay' });
+            } else {
+              choices.push({ label: `✗  Not enough gold (have ${coins})`, next: null, locked: true });
+            }
+            if (!window.__questFlags?.tollPaidOnce) {
+              choices.push({ label: 'Why is there a toll?', next: 'why_toll' });
+              choices.push({ label: 'Is there another way south?', next: 'other_way' });
+            }
+            choices.push({ label: '[Turn back]', next: null });
+            return choices;
+          },
+        },
+        why_toll: {
+          text: `"The desert road stretches forty leagues. Bandits, sand vipers, sinkholes — we keep it passable. That costs money.\n\nFive gold is nothing compared to what you'd lose trying to cross without the road.\n\nPay, or don't. Your choice."`,
+          choices: () => {
+            const coins = window.__cachedCoins || 0;
+            const choices = [];
+            if (coins >= 5) {
+              choices.push({ label: '[ Pay 5 gold ]', next: 'paid', action: 'toll_pay' });
+            } else {
+              choices.push({ label: `✗  Not enough gold (have ${coins})`, next: null, locked: true });
+            }
+            choices.push({ label: '[Back]', next: 'root' });
+            return choices;
+          },
+        },
+        other_way: {
+          text: `*The guard snorts.*\n\n"Through the dunes without a road? You'd be dead in half a day. Scorpions the size of dogs, quicksand that swallows horses whole.\n\nThe toll gate is the only safe passage. Five gold. That's the deal."`,
+          choices: () => {
+            const coins = window.__cachedCoins || 0;
+            const choices = [];
+            if (coins >= 5) {
+              choices.push({ label: '[ Pay 5 gold ]', next: 'paid', action: 'toll_pay' });
+            } else {
+              choices.push({ label: `✗  Not enough gold (have ${coins})`, next: null, locked: true });
+            }
+            choices.push({ label: '[Back]', next: 'root' });
+            return choices;
+          },
+        },
+        paid: {
+          text: () => {
+            if (window.__questFlags?.tollPaidOnce) {
+              return `*The gate creaks open. The wardens nod.*\n\n"Through you go."`;
+            }
+            return `*The guard pockets the coin and signals. The heavy gate groans open, revealing a sun-blasted road stretching into endless dunes.*\n\n"The Desert Pass is yours. Stay on the road if you value your life.\n\nWelcome to the Ashwind Expanse."`;
+          },
+          choices: [
+            { label: '[ Enter the desert ]', next: null, action: 'enter_desert' },
+          ],
+        },
+      }
+    },
+
   let activeNPC  = null;
   let activeNode = null;
 
@@ -9529,6 +9852,14 @@ document.addEventListener('click', e => {
       toast.textContent = "👑 Received: King's Seal";
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3500);
+    }
+    if (action === 'toll_pay') {
+      if (window.__spendCoins) window.__spendCoins(5);
+      window.__questFlags.tollPaidOnce = true;
+      if (window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
+    }
+    if (action === 'enter_desert') {
+      setTimeout(() => envEnterDesert(), 200);
     }
   }
 
