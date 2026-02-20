@@ -4803,6 +4803,36 @@
 
   // ── Login System ──
 
+  const SIGN_IN_APOLOGY = `We're truly sorry about the recent database wipe. We know that lost progress feels awful, and we appreciate you sticking with us while we rebuild.`;
+  const LEVEL_30_XP = 13352;
+
+  function getHalfShopUnlocks() {
+    const half = Math.ceil((SHOP_ITEMS?.length || 0) / 2);
+    return Object.fromEntries((SHOP_ITEMS || []).slice(0, half).map(item => [item.id, true]));
+  }
+
+  function getHalfTitleUnlocks() {
+    const half = Math.ceil((PLAYER_TITLES?.length || 0) / 2);
+    return (PLAYER_TITLES || []).slice(0, half).map(t => t.id);
+  }
+
+  function seedGamblingUnlocks(playerId) {
+    if (!playerId) return;
+    const starter = {
+      level: 12,
+      xp: 0,
+      heat: 0,
+      hands: 0,
+      spins: 0,
+      drops: 0,
+      rounds: 0,
+    };
+    localStorage.setItem(`pw_bj_progress_${playerId}`, JSON.stringify({ level: starter.level, xp: starter.xp, hands: starter.hands, heat: starter.heat }));
+    localStorage.setItem(`pw_rl_progress_${playerId}`, JSON.stringify({ level: starter.level, xp: starter.xp, spins: starter.spins, heat: starter.heat }));
+    localStorage.setItem(`pw_pk_progress_${playerId}`, JSON.stringify({ level: starter.level, xp: starter.xp, drops: starter.drops, heat: starter.heat }));
+    localStorage.setItem(`pw_pr_progress_${playerId}`, JSON.stringify({ level: starter.level, xp: starter.xp, rounds: starter.rounds, heat: starter.heat }));
+  }
+
   window.switchLoginTab = function(tab) {
     document.getElementById('loginForm').style.display    = tab === 'login'    ? 'flex' : 'none';
     document.getElementById('registerForm').style.display = tab === 'register' ? 'flex' : 'none';
@@ -4848,8 +4878,29 @@
     btn.disabled = true;
     msg.textContent = 'Creating account...'; msg.className = 'login-msg';
     try {
-      const newRef = await push(ref(db, 'players'), { name, password: pass, projects: {}, coins: 0 });
-      currentUser = { id: newRef.key, name, password: pass, projects: {}, coins: 0 };
+      const starterPlayer = {
+        name,
+        password: pass,
+        projects: {},
+        coins: 3000,
+        skills: { wc: LEVEL_30_XP, mine: LEVEL_30_XP },
+        garden: { seeds: 6, trowel: 4, flowerSeeds: 4, gnome: 2 },
+        ownedFx: getHalfShopUnlocks(),
+        ownedTitles: getHalfTitleUnlocks(),
+        equippedTitle: '',
+        ownedPets: ['frog', 'monkey'],
+        equippedPet: 'frog',
+        ownedHats: ['hat_tophat'],
+        equippedHat: '',
+        questFlags: {
+          morriganPaid: true,
+          sealPurchased: true,
+          tollPaidOnce: true,
+        },
+      };
+      const newRef = await push(ref(db, 'players'), starterPlayer);
+      seedGamblingUnlocks(newRef.key);
+      currentUser = { id: newRef.key, ...starterPlayer };
       window.__currentUser = currentUser;
       window.__currentUserId = currentUser.id;
       localStorage.setItem('pwUserId', newRef.key);
@@ -4869,6 +4920,7 @@
     document.getElementById('loginName').value = '';
     document.getElementById('loginPass').value = '';
     render();
+    setTimeout(() => alert(SIGN_IN_APOLOGY), 120);
     startTutorialIfNeeded();
     if (window.__startGardenWatch) window.__startGardenWatch(currentUser.id);
   }
