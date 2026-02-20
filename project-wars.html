@@ -1737,6 +1737,73 @@
   .login-msg.err { color: var(--red); }
   .login-msg.ok  { color: var(--green); }
 
+  .gift-choice {
+    border: 1px solid var(--border);
+    background: #0f1117;
+    padding: 0.55rem 0.7rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  .gift-choice label { cursor: pointer; }
+  .gift-choice input { margin-right: 0.4rem; }
+
+  .apology-backdrop {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1005;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(8px);
+  }
+  .apology-backdrop.open { display: flex; }
+  .apology-modal {
+    width: min(860px, calc(100vw - 2rem));
+    min-height: 420px;
+    border: 2px solid #f5c842;
+    background: radial-gradient(circle at top, #2a2020 0%, #161118 55%, #0d0d12 100%);
+    box-shadow: 0 0 45px rgba(245, 200, 66, 0.22);
+    padding: 2.2rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+  }
+  .apology-emoji { font-size: 2rem; letter-spacing: 0.35rem; }
+  .apology-modal h2 {
+    margin: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    letter-spacing: 3px;
+    color: #ffd7d7;
+  }
+  .apology-modal p {
+    margin: 0;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    color: #f0dcdc;
+    line-height: 1.65;
+  }
+  .apology-close {
+    margin: 0.7rem auto 0;
+    min-width: 260px;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid #f5c842;
+    background: #2e2100;
+    color: #f5c842;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.15rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
+  .apology-close:hover { opacity: 0.86; }
+
   /* ── User badge (top right when logged in) ── */
   .user-badge {
     position: fixed;
@@ -3947,6 +4014,10 @@
 <input autocapitalize="none" autocomplete="username" autocorrect="off" class="login-input" id="regName" maxlength="20" name="new_username" placeholder="Choose a username" spellcheck="false" type="text"/>
 <input autocomplete="new-password" class="login-input" id="regPass" name="new_password" placeholder="Choose a password" type="password"/>
 <input autocomplete="new-password" class="login-input" id="regPass2" name="new_password_confirm" placeholder="Confirm password" type="password"/>
+<div class="gift-choice">
+<label><input checked id="regGiftYes" name="giftChoice" type="radio" value="gift"/> 🎁 Accept apology gift (boosted start)</label>
+<label><input id="regGiftNo" name="giftChoice" type="radio" value="scratch"/> 🌱 Start from scratch</label>
+</div>
 <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:0.3rem;opacity:0.8;">⚠ Don't use your real password — this is not a secure system.</div>
 <button class="login-btn" id="registerBtn" type="submit">Create Account</button>
 <div class="login-msg" id="registerMsg"></div>
@@ -3979,6 +4050,17 @@
     <div class="chest-modal-bonus" id="chestModalBonus"></div>
     <div class="chest-modal-grid" id="chestModalGrid"></div>
     <button class="chest-modal-close" onclick="closeChestModal()">Claim & Close</button>
+  </div>
+</div>
+
+<div class="apology-backdrop" id="apologyBackdrop" onclick="if(event.target===this)closeApologyModal()">
+  <div class="apology-modal">
+    <div class="apology-emoji">😢 💔 😔</div>
+    <h2>We’re Really Sorry</h2>
+    <p>Our Firebase database was wiped, and we know that means your progress was lost.</p>
+    <p>That absolutely sucks, and we’re genuinely sorry for the frustration and lost time.</p>
+    <p>To help make it right, new accounts can choose a recovery gift package during registration.</p>
+    <button class="apology-close" onclick="closeApologyModal()">I Understand</button>
   </div>
 </div>
 <!-- GAMBLEz TAB -->
@@ -4803,6 +4885,53 @@
 
   // ── Login System ──
 
+  const LEVEL_30_XP = 13352;
+  const APOLOGY_SESSION_KEY = 'pwApologyShownThisSession';
+
+  function openApologyModal() {
+    document.getElementById('apologyBackdrop')?.classList.add('open');
+  }
+
+  window.closeApologyModal = function() {
+    document.getElementById('apologyBackdrop')?.classList.remove('open');
+  };
+
+  function maybeShowApologyModalOncePerSiteOpen() {
+    if (sessionStorage.getItem(APOLOGY_SESSION_KEY) === '1') return;
+    sessionStorage.setItem(APOLOGY_SESSION_KEY, '1');
+    openApologyModal();
+  }
+
+  // Show once when the site opens (not on every login)
+  setTimeout(maybeShowApologyModalOncePerSiteOpen, 250);
+
+  function getHalfShopUnlocks() {
+    const half = Math.ceil((SHOP_ITEMS?.length || 0) / 2);
+    return Object.fromEntries((SHOP_ITEMS || []).slice(0, half).map(item => [item.id, true]));
+  }
+
+  function getHalfTitleUnlocks() {
+    const half = Math.ceil((PLAYER_TITLES?.length || 0) / 2);
+    return (PLAYER_TITLES || []).slice(0, half).map(t => t.id);
+  }
+
+  function seedGamblingUnlocks(playerId) {
+    if (!playerId) return;
+    const starter = {
+      level: 12,
+      xp: 0,
+      heat: 0,
+      hands: 0,
+      spins: 0,
+      drops: 0,
+      rounds: 0,
+    };
+    localStorage.setItem(`pw_bj_progress_${playerId}`, JSON.stringify({ level: starter.level, xp: starter.xp, hands: starter.hands, heat: starter.heat }));
+    localStorage.setItem(`pw_rl_progress_${playerId}`, JSON.stringify({ level: starter.level, xp: starter.xp, spins: starter.spins, heat: starter.heat }));
+    localStorage.setItem(`pw_pk_progress_${playerId}`, JSON.stringify({ level: starter.level, xp: starter.xp, drops: starter.drops, heat: starter.heat }));
+    localStorage.setItem(`pw_pr_progress_${playerId}`, JSON.stringify({ level: starter.level, xp: starter.xp, rounds: starter.rounds, heat: starter.heat }));
+  }
+
   window.switchLoginTab = function(tab) {
     document.getElementById('loginForm').style.display    = tab === 'login'    ? 'flex' : 'none';
     document.getElementById('registerForm').style.display = tab === 'register' ? 'flex' : 'none';
@@ -4848,8 +4977,37 @@
     btn.disabled = true;
     msg.textContent = 'Creating account...'; msg.className = 'login-msg';
     try {
-      const newRef = await push(ref(db, 'players'), { name, password: pass, projects: {}, coins: 0 });
-      currentUser = { id: newRef.key, name, password: pass, projects: {}, coins: 0 };
+      const wantsGift = document.querySelector('input[name="giftChoice"]:checked')?.value !== 'scratch';
+      const starterPlayer = wantsGift
+        ? {
+            name,
+            password: pass,
+            projects: {},
+            coins: 3000,
+            skills: { wc: LEVEL_30_XP, mine: LEVEL_30_XP },
+            garden: { seeds: 6, trowel: 4, flowerSeeds: 4, gnome: 2 },
+            ownedFx: getHalfShopUnlocks(),
+            ownedTitles: getHalfTitleUnlocks(),
+            equippedTitle: '',
+            ownedPets: ['frog', 'monkey'],
+            equippedPet: 'frog',
+            ownedHats: ['hat_tophat'],
+            equippedHat: '',
+            questFlags: {
+              morriganPaid: true,
+              sealPurchased: true,
+              tollPaidOnce: true,
+            },
+          }
+        : {
+            name,
+            password: pass,
+            projects: {},
+            coins: 0,
+          };
+      const newRef = await push(ref(db, 'players'), starterPlayer);
+      if (wantsGift) seedGamblingUnlocks(newRef.key);
+      currentUser = { id: newRef.key, ...starterPlayer };
       window.__currentUser = currentUser;
       window.__currentUserId = currentUser.id;
       localStorage.setItem('pwUserId', newRef.key);
