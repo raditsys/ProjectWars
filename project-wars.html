@@ -8455,59 +8455,59 @@ document.addEventListener('click', e => {
   }
 
   const MAP = {
-    '0,0': f('Cliff Edge',      'A sheer drop into the mist',         'linear-gradient(180deg,#060c14 0%,#0a1220 70%,#0c1420 100%)', '#1a2a38', '#2a4a5a'),
-    '1,0': f('Stone Pass',      'Ancient carved stone markers',       'linear-gradient(180deg,#0e0e0e 0%,#161616 60%,#121212 100%)', '#282828', '#404040'),
-    '2,0': f('Frozen Peak',     'Snow-dusted rocks and silence',      'linear-gradient(180deg,#0c1020 0%,#101828 60%,#0c1020 100%)', '#202838', '#3a4a5a'),
-    '3,0': f('Howling Ridge',   'Wind tears through the pines',       'linear-gradient(180deg,#0a0e08 0%,#0e1408 60%,#0a0e08 100%)', '#141e0a', '#243010'),
-    '4,0': f('Fog Valley',      'Thick mist clings to the ground',    'linear-gradient(180deg,#101418 0%,#181e24 60%,#101418 100%)', '#1c2428', '#2c3840'),
-    '5,0': f('Dark Pines',      'Tall evergreens block the light',    'linear-gradient(180deg,#060a06 0%,#0a100a 60%,#060a06 100%)', '#0e160e', '#182818'),
-    '6,0': null,
-    '7,0': null,
+    '0,0': r('Cliff Edge',          'A sheer drop into the mist and crashing surf below.',   'linear-gradient(180deg,#060c14 0%,#0a1220 70%,#0c1420 100%)', '#1a2a38', '#2a4a5a', [{kind:'tree',type:'oak',x:22},{kind:'tree',type:'willow',x:200}]),
+    '1,0': r('Stone Pass',          'Ancient carved stone markers line an old trade route.', 'linear-gradient(180deg,#0e0e0e 0%,#161616 60%,#121212 100%)', '#282828', '#404040', [{kind:'ore',type:'copper',x:40},{kind:'ore',type:'iron',x:260}]),
+    '2,0': r('Frozen Peak',         'Snow-dusted rocks and thin alpine air.',                'linear-gradient(180deg,#0c1020 0%,#101828 60%,#0c1020 100%)', '#202838', '#3a4a5a', [{kind:'ore',type:'iron',x:50},{kind:'ore',type:'gold',x:250}]),
+    '3,0': r('Howling Ridge',       'Wind tears through the pines like distant voices.',      'linear-gradient(180deg,#0a0e08 0%,#0e1408 60%,#0a0e08 100%)', '#141e0a', '#243010', [{kind:'tree',type:'oak',x:24},{kind:'tree',type:'willow',x:130},{kind:'tree',type:'oak',x:250}]),
+    '4,0': r('Fog Valley',          'Thick mist clings to old standing stones.',              'linear-gradient(180deg,#101418 0%,#181e24 60%,#101418 100%)', '#1c2428', '#2c3840', [{kind:'tree',type:'willow',x:24},{kind:'ore',type:'copper',x:250}]),
+    '5,0': r('Dark Pines',          'Tall evergreens block most of the light.',               'linear-gradient(180deg,#060a06 0%,#0a100a 60%,#060a06 100%)', '#0e160e', '#182818', [{kind:'tree',type:'oak',x:22},{kind:'tree',type:'willow',x:130},{kind:'tree',type:'oak',x:250}]),
+    '6,0': { name:'Watchtower Ruin', desc:'Broken stairs spiral around a collapsed watchtower.', sky:'linear-gradient(180deg,#0a0e14 0%,#101824 70%,#0a0e14 100%)', ground:'#142030', groundBorder:'#26384a', resources:[{kind:'ore',type:'iron',x:42},{kind:'ore',type:'gold',x:250}], npc:'lyra' },
+    '7,0': r('Northwall Trail',     'A military road once used to supply the old fort.',      'linear-gradient(180deg,#0a1016 0%,#101a24 60%,#0c1018 100%)', '#16202a', '#2a3a48', [{kind:'ore',type:'iron',x:60},{kind:'tree',type:'oak',x:240}]),
 
-    '0,1': f('Mossy Bank',      'Soft green moss over old stone',     'linear-gradient(180deg,#081408 0%,#0c1c0c 60%,#081408 100%)', '#162412', '#2a3e1a'),
-    '1,1': f('Flower Meadow',   'Wildflowers sway in the breeze',     'linear-gradient(180deg,#0c1c08 0%,#10240c 60%,#0c1c08 100%)', '#1e3010', '#3a5020'),
-    '2,1': f('Babbling Brook',  'Clear water over smooth pebbles',    'linear-gradient(180deg,#061420 0%,#0a1e2e 60%,#0c2218 100%)', '#1a2e28', '#2a4e3a'),
-    '3,1': f('Sunlit Clearing', 'A warm patch of open sky',           'linear-gradient(180deg,#101c08 0%,#162408 60%,#101c08 100%)', '#1e3010', '#365020'),
-    '4,1': f('Ruins',           'Crumbling stone walls, long forgot', 'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201a14', '#382e20'),
-    '5,1': { name:'Mushroom Ring', desc:'A hunched figure mutters over the fungi.', sky:'linear-gradient(180deg,#120a18 0%,#1a1020 60%,#120a18 100%)', ground:'#1e1028', groundBorder:'#341a3e', resources:[], npc:'wren' },
-    '6,1': f('Overgrown Path',  'The trail is barely visible',        'linear-gradient(180deg,#0a1008 0%,#0e160a 60%,#0a1008 100%)', '#14200e', '#243a18'),
-    '7,1': null,
+    '0,1': r('Mossy Bank',          'Soft green moss blankets old stone and roots.',          'linear-gradient(180deg,#081408 0%,#0c1c0c 60%,#081408 100%)', '#162412', '#2a3e1a', [{kind:'tree',type:'oak',x:24},{kind:'tree',type:'oak',x:200}]),
+    '1,1': r('Flower Meadow',       'Wildflowers sway in the breeze and hide tiny paths.',    'linear-gradient(180deg,#0c1c08 0%,#10240c 60%,#0c1c08 100%)', '#1e3010', '#3a5020', [{kind:'tree',type:'oak',x:18},{kind:'tree',type:'willow',x:210}]),
+    '2,1': r('Babbling Brook',      'Clear water over smooth pebbles and moss.',              'linear-gradient(180deg,#061420 0%,#0a1e2e 60%,#0c2218 100%)', '#1a2e28', '#2a4e3a', [{kind:'tree',type:'willow',x:18},{kind:'tree',type:'willow',x:220}]),
+    '3,1': { name:'Sunlit Clearing', desc:'A warm patch of open sky where scouts rest.', sky:'linear-gradient(180deg,#101c08 0%,#162408 60%,#101c08 100%)', ground:'#1e3010', groundBorder:'#365020', resources:[{kind:'tree',type:'oak',x:20},{kind:'tree',type:'oak',x:240}], npc:'bram' },
+    '4,1': r('Ruins',               'Crumbling stone walls with half-buried sigils.',         'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201a14', '#382e20', [{kind:'ore',type:'copper',x:38},{kind:'ore',type:'iron',x:238}]),
+    '5,1': { name:'Mushroom Ring', desc:'A hunched figure mutters over the fungi.', sky:'linear-gradient(180deg,#120a18 0%,#1a1020 60%,#120a18 100%)', ground:'#1e1028', groundBorder:'#341a3e', resources:[{kind:'tree',type:'willow',x:26},{kind:'tree',type:'oak',x:228}], npc:'wren' },
+    '6,1': r('Overgrown Path',      'The trail is barely visible under dense growth.',        'linear-gradient(180deg,#0a1008 0%,#0e160a 60%,#0a1008 100%)', '#14200e', '#243a18', [{kind:'tree',type:'willow',x:24},{kind:'tree',type:'willow',x:130},{kind:'tree',type:'oak',x:238}]),
+    '7,1': r('Border Camp',         'Abandoned tents and cracked supply crates remain.',      'linear-gradient(180deg,#0a0e0a 0%,#11180e 60%,#0a0f0a 100%)', '#182214', '#2c3e1e', [{kind:'tree',type:'oak',x:20},{kind:'ore',type:'copper',x:250}]),
 
-    '0,2': r('Lakeside',        'Willow trees by the water',          'linear-gradient(180deg,#061420 0%,#0a1e2a 60%,#0d2210 100%)', '#1a3020', '#2a5a30', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}]),
-    '1,2': f('Twisted Oaks',    'Gnarled old trees, no timber left',  'linear-gradient(180deg,#0c1808 0%,#101e0c 60%,#0c1808 100%)', '#1a2c10', '#2e4c1a'),
-    '2,2': r('Forest',          'Oak trees, easy woodcutting',        'linear-gradient(180deg,#0a1a0e 0%,#0d200d 60%,#111a0a 100%)', '#1a2e10', '#2a4a1a', [{kind:'tree',type:'oak',x:10},{kind:'tree',type:'oak',x:118},{kind:'tree',type:'oak',x:228}]),
-    '3,2': f('Fern Hollow',     'Lush ferns, nothing to harvest',     'linear-gradient(180deg,#0c1c08 0%,#10220c 60%,#0c1c08 100%)', '#1a2e10', '#2e4e1a'),
-    '4,2': r('Birch Glen',      'Mixed oak and willow',               'linear-gradient(180deg,#0c1a08 0%,#102208 60%,#0e1c08 100%)', '#1e3210', '#3a5a1a', [{kind:'tree',type:'oak',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}]),
-    '5,2': f('Dead Grove',      'Bleached trunks, no life here',      'linear-gradient(180deg,#100e0c 0%,#16120e 60%,#100e0c 100%)', '#201a12', '#302820'),
+    '0,2': r('Lakeside',            'Willow trees bow toward black still water.',             'linear-gradient(180deg,#061420 0%,#0a1e2a 60%,#0d2210 100%)', '#1a3020', '#2a5a30', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}]),
+    '1,2': r('Twisted Oaks',        'Gnarled trees with deep knot-hollows.',                  'linear-gradient(180deg,#0c1808 0%,#101e0c 60%,#0c1808 100%)', '#1a2c10', '#2e4c1a', [{kind:'tree',type:'oak',x:10},{kind:'tree',type:'oak',x:128},{kind:'tree',type:'willow',x:228}]),
+    '2,2': r('Forest',              'Oak trees and clear lanes for easy woodcutting.',        'linear-gradient(180deg,#0a1a0e 0%,#0d200d 60%,#111a0a 100%)', '#1a2e10', '#2a4a1a', [{kind:'tree',type:'oak',x:10},{kind:'tree',type:'oak',x:118},{kind:'tree',type:'oak',x:228}]),
+    '3,2': r('Fern Hollow',         'Lush ferns around a shallow mineral seam.',              'linear-gradient(180deg,#0c1c08 0%,#10220c 60%,#0c1c08 100%)', '#1a2e10', '#2e4e1a', [{kind:'ore',type:'copper',x:38},{kind:'tree',type:'oak',x:240}]),
+    '4,2': r('Birch Glen',          'Mixed oak and willow stand around pale bark trunks.',    'linear-gradient(180deg,#0c1a08 0%,#102208 60%,#0e1c08 100%)', '#1e3210', '#3a5a1a', [{kind:'tree',type:'oak',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}]),
+    '5,2': f('Dead Grove',          'Bleached trunks and a hollow oak hide a secret.',        'linear-gradient(180deg,#100e0c 0%,#16120e 60%,#100e0c 100%)', '#201a12', '#302820'),
     '6,2': { name:'Swamp', desc:'Mist clings low. Someone is watching.', sky:'linear-gradient(180deg,#0a1208 0%,#0e1a0a 60%,#0a1210 100%)', ground:'#102a10', groundBorder:'#1a4a20', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'willow',x:228}], npc:'morrigan' },
-    '7,2': f('Brackish Pool',   'Dark water, no fish',                'linear-gradient(180deg,#060e0c 0%,#0a1410 60%,#060e0c 100%)', '#0e2018', '#183028'),
+    '7,2': r('Brackish Pool',       'Dark water and mineral-rich mud.',                        'linear-gradient(180deg,#060e0c 0%,#0a1410 60%,#060e0c 100%)', '#0e2018', '#183028', [{kind:'tree',type:'willow',x:20},{kind:'ore',type:'iron',x:250}]),
 
-    '0,3': f('Rocky Foothills', 'Loose scree, hard going',            'linear-gradient(180deg,#0e0c0a 0%,#16120e 60%,#0e0c0a 100%)', '#1e1810', '#302818'),
-    '1,3': { name:'Cave Mouth', desc:'An old miner blocks the entrance, smoking a pipe.', sky:'linear-gradient(180deg,#080808 0%,#0e0e0e 60%,#080808 100%)', ground:'#141414', groundBorder:'#222222', resources:[], npc:'degan' },
-    '2,3': r('Copper Pit',      'Shallow copper deposits',            'linear-gradient(180deg,#140e08 0%,#1a1408 60%,#141008 100%)', '#2a1a08', '#4a3010', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'copper',x:128},{kind:'ore',type:'iron',x:228}]),
-    '3,3': f('Gravel Pit',      'Just rocks, nothing valuable',       'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201c14', '#342e20'),
-    '4,3': r('Iron Ridge',      'Iron and copper veins',              'linear-gradient(180deg,#101010 0%,#161616 60%,#101212 100%)', '#202020', '#383838', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'iron',x:128},{kind:'ore',type:'iron',x:228}]),
-    '5,3': f('Sinkhole',        'The ground feels unstable here',     'linear-gradient(180deg,#0c0a08 0%,#12100c 60%,#0c0a08 100%)', '#181410', '#282018'),
-    '6,3': r('Deep Woods',      'Willow and magic trees',             'linear-gradient(180deg,#0d0a1a 0%,#120d20 60%,#0a0a15 100%)', '#1a1030', '#2a1a4a', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}]),
+    '0,3': r('Rocky Foothills',     'Loose scree and exposed ore shelves.',                   'linear-gradient(180deg,#0e0c0a 0%,#16120e 60%,#0e0c0a 100%)', '#1e1810', '#302818', [{kind:'ore',type:'copper',x:24},{kind:'ore',type:'iron',x:228}]),
+    '1,3': { name:'Cave Mouth', desc:'An old miner blocks the entrance, smoking a pipe.', sky:'linear-gradient(180deg,#080808 0%,#0e0e0e 60%,#080808 100%)', ground:'#141414', groundBorder:'#222222', resources:[{kind:'ore',type:'copper',x:36}], npc:'degan' },
+    '2,3': r('Copper Pit',          'Shallow copper deposits with some iron streaks.',        'linear-gradient(180deg,#140e08 0%,#1a1408 60%,#141008 100%)', '#2a1a08', '#4a3010', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'copper',x:128},{kind:'ore',type:'iron',x:228}]),
+    '3,3': r('Gravel Pit',          'Wind-blasted gravel and sparse ore pockets.',            'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201c14', '#342e20', [{kind:'ore',type:'copper',x:24},{kind:'ore',type:'iron',x:220}]),
+    '4,3': r('Iron Ridge',          'Iron and copper veins cross the cliff face.',            'linear-gradient(180deg,#101010 0%,#161616 60%,#101212 100%)', '#202020', '#383838', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'iron',x:128},{kind:'ore',type:'iron',x:228}]),
+    '5,3': r('Sinkhole',            'The ground is unstable but rich in minerals.',           'linear-gradient(180deg,#0c0a08 0%,#12100c 60%,#0c0a08 100%)', '#181410', '#282018', [{kind:'ore',type:'iron',x:36},{kind:'ore',type:'gold',x:238}]),
+    '6,3': r('Deep Woods',          'Willow and magic trees crowd the horizon.',              'linear-gradient(180deg,#0d0a1a 0%,#120d20 60%,#0a0a15 100%)', '#1a1030', '#2a1a4a', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}]),
     '7,3': { name:'Castle Gate', desc:'Massive iron gates. A guard blocks the way.', sky:'linear-gradient(180deg,#080810 0%,#0e0e1c 60%,#080810 100%)', ground:'#181820', groundBorder:'#303048', resources:[], locked:true, npc:'guard' },
 
-    '0,4': null,
-    '1,4': { name:'Forgotten Shrine', desc:'A robed figure tends a low flame here.', sky:'linear-gradient(180deg,#10060a 0%,#180a10 60%,#100608 100%)', ground:'#20100a', groundBorder:'#381a14', resources:[], npc:'orin' },
-    '2,4': f('Lava Fields',     'Cooled black rock, still warm',      'linear-gradient(180deg,#140604 0%,#1c0804 60%,#140604 100%)', '#200808', '#380e0e'),
-    '3,4': r('Gold Cavern',     'Gold veins run deep here',           'linear-gradient(180deg,#100a04 0%,#180e04 60%,#120c04 100%)', '#1e1204', '#3a2208', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:128},{kind:'ore',type:'gold',x:228}]),
-    '4,4': f('Bone Yard',       'Scattered remains of past battles',  'linear-gradient(180deg,#0e0e0e 0%,#141412 60%,#0e0e0e 100%)', '#1c1c18', '#2c2c24'),
-    '5,4': r('Enchanted Grove', 'Magic trees glow at night',          'linear-gradient(180deg,#10063a 0%,#180a50 60%,#0e0430 100%)', '#1a0a40', '#3a1a70', [{kind:'tree',type:'magic',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}]),
-    '6,4': f('Void Hollow',     'The air feels wrong here',           'linear-gradient(180deg,#06060e 0%,#0a0a18 60%,#06060e 100%)', '#0e0e20', '#181830'),
-    '7,4': null,
+    '0,4': r('Timberline',          'Fresh-cut stumps show active lumber traffic.',           'linear-gradient(180deg,#0e1208 0%,#142010 60%,#0d140a 100%)', '#1b2a12', '#2c4620', [{kind:'tree',type:'oak',x:22},{kind:'tree',type:'oak',x:124},{kind:'tree',type:'willow',x:238}]),
+    '1,4': { name:'Forgotten Shrine', desc:'A robed figure tends a low flame here.', sky:'linear-gradient(180deg,#10060a 0%,#180a10 60%,#100608 100%)', ground:'#20100a', groundBorder:'#381a14', resources:[{kind:'tree',type:'willow',x:36}], npc:'orin' },
+    '2,4': r('Lava Fields',         'Cooled black rock still warm underfoot.',                'linear-gradient(180deg,#140604 0%,#1c0804 60%,#140604 100%)', '#200808', '#380e0e', [{kind:'ore',type:'gold',x:34},{kind:'ore',type:'iron',x:240}]),
+    '3,4': r('Gold Cavern',         'Gold veins run deep here.',                              'linear-gradient(180deg,#100a04 0%,#180e04 60%,#120c04 100%)', '#1e1204', '#3a2208', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:128},{kind:'ore',type:'gold',x:228}]),
+    '4,4': r('Bone Yard',           'Scattered remains and old battlefield spoil.',           'linear-gradient(180deg,#0e0e0e 0%,#141412 60%,#0e0e0e 100%)', '#1c1c18', '#2c2c24', [{kind:'ore',type:'iron',x:40},{kind:'ore',type:'gold',x:250}]),
+    '5,4': r('Enchanted Grove',     'Magic trees glow around standing stones.',               'linear-gradient(180deg,#10063a 0%,#180a50 60%,#0e0430 100%)', '#1a0a40', '#3a1a70', [{kind:'tree',type:'magic',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}]),
+    '6,4': r('Void Hollow',         'The air feels wrong and metallic here.',                 'linear-gradient(180deg,#06060e 0%,#0a0a18 60%,#06060e 100%)', '#0e0e20', '#181830', [{kind:'ore',type:'runite',x:120},{kind:'ore',type:'gold',x:250}]),
+    '7,4': { name:'East Tower', desc:'Lamps burn late where the Royal Archivist works.', sky:'linear-gradient(180deg,#0a0f18 0%,#10182a 60%,#0c1220 100%)', ground:'#172032', groundBorder:'#2a3d5a', resources:[{kind:'ore',type:'gold',x:34}], npc:'erasmus' },
 
-    '0,5': null,
-    '1,5': null,
-    '2,5': f('Sunken Temple',   'Half-submerged ancient ruins',       'linear-gradient(180deg,#06100c 0%,#0a1814 60%,#06100c 100%)', '#101e18', '#1c3228'),
-    '3,5': f('Magma Chamber',   'Intense heat, nothing survives',     'linear-gradient(180deg,#160604 0%,#200804 60%,#160604 100%)', '#260c06', '#3e1408'),
-    '4,5': r('Runite Mine',     'Rare runite ore glimmers',           'linear-gradient(180deg,#060810 0%,#08100a 60%,#060a10 100%)', '#0e1018', '#1a2030', [{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'runite',x:228}]),
-    '5,5': f('Abyss Edge',      'Looking down into nothing',          'linear-gradient(180deg,#040408 0%,#06060e 60%,#040408 100%)', '#08080e', '#10101a'),
-    '6,5': null,
-    '7,5': null,
+    '0,5': r('Salt Flats',          'Bright mineral crusts crack under every step.',          'linear-gradient(180deg,#10161a 0%,#17222a 60%,#121a22 100%)', '#1a242c', '#2e404e', [{kind:'ore',type:'copper',x:22},{kind:'ore',type:'iron',x:236}]),
+    '1,5': r('Ancient Causeway',    'Broken road stones lead toward buried archways.',        'linear-gradient(180deg,#0a1210 0%,#10201a 60%,#0a120e 100%)', '#122219', '#234030', [{kind:'tree',type:'oak',x:24},{kind:'ore',type:'iron',x:246}]),
+    '2,5': r('Sunken Temple',       'Half-submerged ruins with intact mineral caches.',       'linear-gradient(180deg,#06100c 0%,#0a1814 60%,#06100c 100%)', '#101e18', '#1c3228', [{kind:'ore',type:'gold',x:34},{kind:'tree',type:'willow',x:250}]),
+    '3,5': r('Magma Chamber',       'Intense heat, cracked basalt, and exposed ore.',         'linear-gradient(180deg,#160604 0%,#200804 60%,#160604 100%)', '#260c06', '#3e1408', [{kind:'ore',type:'gold',x:34},{kind:'ore',type:'runite',x:238}]),
+    '4,5': r('Runite Mine',         'Rare runite ore glimmers in the dark.',                  'linear-gradient(180deg,#060810 0%,#08100a 60%,#060a10 100%)', '#0e1018', '#1a2030', [{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'runite',x:228}]),
+    '5,5': r('Abyss Edge',          'A cliff overlooking impossible darkness.',                'linear-gradient(180deg,#040408 0%,#06060e 60%,#040408 100%)', '#08080e', '#10101a', [{kind:'ore',type:'runite',x:120},{kind:'tree',type:'magic',x:238}]),
+    '6,5': r('Starfall Crater',     'A crater hums where a meteorite once struck.',           'linear-gradient(180deg,#060612 0%,#0a0e1c 60%,#060612 100%)', '#0d1020', '#1a2040', [{kind:'ore',type:'runite',x:38},{kind:'ore',type:'runite',x:240}]),
+    '7,5': r('Royal Outlands',      'Patrol roads and hunting grounds beyond the tower.',     'linear-gradient(180deg,#0a1218 0%,#101c28 60%,#0a1218 100%)', '#16222c', '#2a3e4e', [{kind:'tree',type:'oak',x:20},{kind:'ore',type:'gold',x:250}]),
   };
 
   const TREE_TYPES = {
@@ -8591,38 +8591,38 @@ document.addEventListener('click', e => {
 
   // ── Underground map (layer 1) — 8×4 grid ──
   const MAP_UNDER = {
-    '0,0': null,
-    '1,0': null,
-    '2,0': { name:'Tunnel Entrance', desc:'A rope ladder hangs above. Damp earth walls. You can climb back up.', sky:'linear-gradient(180deg,#060408 0%,#0a060e 100%)', ground:'#120e18', groundBorder:'#2a1a38', resources:[], tunnel:'up' },
-    '3,0': { name:'Dark Passage',    desc:'Low ceiling, dripping water. Something scurries ahead.',  sky:'linear-gradient(180deg,#040406 0%,#080608 100%)', ground:'#0e0c10', groundBorder:'#201828', resources:[] },
-    '4,0': { name:'Bone Chamber',    desc:'Old bones. Old warning.',              sky:'linear-gradient(180deg,#060408 0%,#0c080c 100%)', ground:'#140e12', groundBorder:'#281820', resources:[] },
-    '5,0': null,
+    '0,0': { name:'Collapsed Bunker', desc:'A military cache buried by cave-ins.', sky:'linear-gradient(180deg,#05060c 0%,#0b0e16 100%)', ground:'#121420', groundBorder:'#222a38', resources:[{kind:'ore',type:'iron',x:42},{kind:'ore',type:'gold',x:246}] },
+    '1,0': { name:'Drip Gallery', desc:'Water carves channels through glittering shale.', sky:'linear-gradient(180deg,#06060a 0%,#0a0c14 100%)', ground:'#121018', groundBorder:'#261e30', resources:[{kind:'ore',type:'copper',x:34},{kind:'ore',type:'iron',x:228}] },
+    '2,0': { name:'Tunnel Entrance', desc:'A rope ladder hangs above. Damp earth walls. You can climb back up.', sky:'linear-gradient(180deg,#060408 0%,#0a060e 100%)', ground:'#120e18', groundBorder:'#2a1a38', resources:[{kind:'ore',type:'copper',x:44}], tunnel:'up' },
+    '3,0': { name:'Dark Passage', desc:'Low ceiling, dripping water. Something scurries ahead.', sky:'linear-gradient(180deg,#040406 0%,#080608 100%)', ground:'#0e0c10', groundBorder:'#201828', resources:[{kind:'ore',type:'iron',x:128}] },
+    '4,0': { name:'Bone Chamber', desc:'Old bones. Old warning.', sky:'linear-gradient(180deg,#060408 0%,#0c080c 100%)', ground:'#140e12', groundBorder:'#281820', resources:[{kind:'ore',type:'gold',x:220}] },
+    '5,0': { name:'Sluice Works', desc:'Broken sluice gates and rusted chains.', sky:'linear-gradient(180deg,#06080a 0%,#0c0e12 100%)', ground:'#141820', groundBorder:'#223040', resources:[{kind:'ore',type:'iron',x:44},{kind:'ore',type:'gold',x:242}] },
     '6,0': null,
     '7,0': null,
 
-    '0,1': null,
-    '1,1': { name:'Flooded Shaft',   desc:'Black water fills the passage. Cold.', sky:'linear-gradient(180deg,#040810 0%,#060c14 100%)', ground:'#0c1018', groundBorder:'#182030', resources:[] },
-    '2,1': { name:'Fungal Cavern',   desc:'Glowing mushrooms. Eerily beautiful.',  sky:'linear-gradient(180deg,#08040e 0%,#100818 100%)', ground:'#160c1e', groundBorder:'#2e1840', resources:[{kind:'ore',type:'copper',x:30},{kind:'ore',type:'iron',x:200}] },
-    '3,1': { name:'Collapsed Vein',  desc:'Cave-in barely passable. Iron glints in the rubble.',       sky:'linear-gradient(180deg,#060606 0%,#0c0a0a 100%)', ground:'#100e0c', groundBorder:'#201c18', resources:[{kind:'ore',type:'iron',x:80},{kind:'ore',type:'gold',x:310}] },
-    '4,1': { name:'Echo Shaft',      desc:'Sound travels strangely down here.',    sky:'linear-gradient(180deg,#040408 0%,#08060c 100%)', ground:'#0e0c12', groundBorder:'#1c1828', resources:[] },
-    '5,1': { name:'Runed Alcove',    desc:'Strange symbols carved into the rock.',sky:'linear-gradient(180deg,#060408 0%,#0c0614 100%)', ground:'#120a1a', groundBorder:'#241440', resources:[] },
-    '6,1': null,
+    '0,1': { name:'Flood Trench', desc:'Water laps at ankle depth across old rails.', sky:'linear-gradient(180deg,#040810 0%,#06101a 100%)', ground:'#0c121c', groundBorder:'#182a38', resources:[{kind:'ore',type:'copper',x:26},{kind:'ore',type:'iron',x:232}] },
+    '1,1': { name:'Flooded Shaft', desc:'Black water fills the passage. Cold.', sky:'linear-gradient(180deg,#040810 0%,#060c14 100%)', ground:'#0c1018', groundBorder:'#182030', resources:[{kind:'ore',type:'iron',x:126}] },
+    '2,1': { name:'Fungal Cavern', desc:'Glowing mushrooms. Eerily beautiful.', sky:'linear-gradient(180deg,#08040e 0%,#100818 100%)', ground:'#160c1e', groundBorder:'#2e1840', resources:[{kind:'ore',type:'copper',x:30},{kind:'ore',type:'iron',x:200}] },
+    '3,1': { name:'Collapsed Vein', desc:'Cave-in barely passable. Iron glints in the rubble.', sky:'linear-gradient(180deg,#060606 0%,#0c0a0a 100%)', ground:'#100e0c', groundBorder:'#201c18', resources:[{kind:'ore',type:'iron',x:80},{kind:'ore',type:'gold',x:310}] },
+    '4,1': { name:'Echo Shaft', desc:'Sound travels strangely down here.', sky:'linear-gradient(180deg,#040408 0%,#08060c 100%)', ground:'#0e0c12', groundBorder:'#1c1828', resources:[{kind:'ore',type:'gold',x:126}] },
+    '5,1': { name:'Runed Alcove', desc:'Strange symbols carved into the rock.', sky:'linear-gradient(180deg,#060408 0%,#0c0614 100%)', ground:'#120a1a', groundBorder:'#241440', resources:[{kind:'ore',type:'runite',x:126}] },
+    '6,1': { name:'Ancient Lift', desc:'A dead ore-lift cage hangs over a drop.', sky:'linear-gradient(180deg,#06060c 0%,#0c0c16 100%)', ground:'#120f1b', groundBorder:'#281f3a', resources:[{kind:'ore',type:'gold',x:44},{kind:'ore',type:'runite',x:236}] },
     '7,1': null,
 
-    '0,2': null,
-    '1,2': { name:'Old Storehouse',  desc:'Crates of forgotten supplies.',        sky:'linear-gradient(180deg,#080608 0%,#0e0a0e 100%)', ground:'#14101a', groundBorder:'#281e30', resources:[] },
-    '2,2': { name:'Sewer Junction',  desc:'Four tunnels meet here. A smell.',     sky:'linear-gradient(180deg,#040808 0%,#08100a 100%)', ground:'#0c1008', groundBorder:'#182018', resources:[] },
-    '3,2': { name:'Crystal Seam',    desc:'Raw crystals glow faintly blue.',      sky:'linear-gradient(180deg,#04060e 0%,#060810 100%)', ground:'#0a0c14', groundBorder:'#141c28', resources:[{kind:'ore',type:'runite',x:60},{kind:'ore',type:'gold',x:300}] },
-    '4,2': { name:'Black Market',    desc:'Lanterns. Voices. Trade happening in the dark.',   sky:'linear-gradient(180deg,#0a0608 0%,#12080a 100%)', ground:'#1a100e', groundBorder:'#382018', resources:[], npc:'blackmarket' },
-    '5,2': { name:'Guard Post',      desc:'An empty chair. A warm fire. Someone was just here.',         sky:'linear-gradient(180deg,#080808 0%,#0e0a08 100%)', ground:'#12100c', groundBorder:'#22201a', resources:[] },
-    '6,2': null,
+    '0,2': { name:'Ore Laundry', desc:'Stone basins where miners once washed gravel.', sky:'linear-gradient(180deg,#05080a 0%,#0a1012 100%)', ground:'#11181a', groundBorder:'#1f2e30', resources:[{kind:'ore',type:'copper',x:26},{kind:'ore',type:'gold',x:240}] },
+    '1,2': { name:'Old Storehouse', desc:'Crates of forgotten supplies.', sky:'linear-gradient(180deg,#080608 0%,#0e0a0e 100%)', ground:'#14101a', groundBorder:'#281e30', resources:[{kind:'ore',type:'iron',x:122}] },
+    '2,2': { name:'Sewer Junction', desc:'Four tunnels meet here. A smell.', sky:'linear-gradient(180deg,#040808 0%,#08100a 100%)', ground:'#0c1008', groundBorder:'#182018', resources:[{kind:'ore',type:'copper',x:38},{kind:'ore',type:'iron',x:248}] },
+    '3,2': { name:'Crystal Seam', desc:'Raw crystals glow faintly blue.', sky:'linear-gradient(180deg,#04060e 0%,#060810 100%)', ground:'#0a0c14', groundBorder:'#141c28', resources:[{kind:'ore',type:'runite',x:60},{kind:'ore',type:'gold',x:300}] },
+    '4,2': { name:'Black Market', desc:'Lanterns. Voices. Trade happening in the dark.', sky:'linear-gradient(180deg,#0a0608 0%,#12080a 100%)', ground:'#1a100e', groundBorder:'#382018', resources:[], npc:'blackmarket' },
+    '5,2': { name:'Guard Post', desc:'An empty chair, warm fire, and maps spread on the table.', sky:'linear-gradient(180deg,#080808 0%,#0e0a08 100%)', ground:'#12100c', groundBorder:'#22201a', resources:[{kind:'ore',type:'gold',x:224}], npc:'tamsin' },
+    '6,2': { name:'Deep Survey', desc:'Survey stakes mark rich but dangerous seams.', sky:'linear-gradient(180deg,#06060e 0%,#0c0d18 100%)', ground:'#121426', groundBorder:'#242c48', resources:[{kind:'ore',type:'runite',x:48},{kind:'ore',type:'runite',x:236}] },
     '7,2': null,
 
     '0,3': null,
     '1,3': null,
-    '2,3': null,
-    '3,3': { name:'Deep Shaft',      desc:'The darkness goes further down.',      sky:'linear-gradient(180deg,#020204 0%,#040406 100%)', ground:'#080808', groundBorder:'#141414', resources:[] },
-    '4,3': null,
+    '2,3': { name:'Sunless Forge', desc:'A forge pit cold for years still smells of coal.', sky:'linear-gradient(180deg,#040406 0%,#08080c 100%)', ground:'#0f1014', groundBorder:'#222630', resources:[{kind:'ore',type:'iron',x:34},{kind:'ore',type:'gold',x:230}] },
+    '3,3': { name:'Deep Shaft', desc:'The darkness goes further down.', sky:'linear-gradient(180deg,#020204 0%,#040406 100%)', ground:'#080808', groundBorder:'#141414', resources:[{kind:'ore',type:'runite',x:126}] },
+    '4,3': { name:'Aether Pocket', desc:'Charged air crackles between crystalline veins.', sky:'linear-gradient(180deg,#040612 0%,#060a18 100%)', ground:'#0c1020', groundBorder:'#1a2450', resources:[{kind:'ore',type:'runite',x:34},{kind:'ore',type:'runite',x:238}] },
     '5,3': null,
     '6,3': null,
     '7,3': null,
@@ -9415,6 +9415,231 @@ document.addEventListener('click', e => {
       }
     },
 
+
+    // ─────────────────────────────────────────────
+    lyra: {
+      name: 'Lyra Quill',
+      title: 'Frontier Cartographer',
+      portrait: '🧭',
+      tree: {
+        root: {
+          text: () => window.__questFlags?.lyraSupplied
+            ? `*Lyra taps charcoal against a weathered map board.*
+
+"Your supplies held up perfectly. The ridge routes are finally charted.
+
+If you see new paths, tell me. I pay for useful information."`
+            : `*A woman in a patched blue cloak kneels by a map spread over broken stones.*
+
+"Traveler! Good timing. I'm Lyra, Royal Survey Corps... unofficially, these days.
+
+I'm mapping the Watchtower routes, but my satchel is running empty."`,
+          choices: () => {
+            if (window.__questFlags?.lyraSupplied) {
+              return [
+                { label: 'Any route advice?', next: 'route_advice' },
+                { label: '[Leave]', next: null },
+              ];
+            }
+            return [
+              { label: 'What do you need?', next: 'request' },
+              { label: 'Any route advice?', next: 'route_advice' },
+              { label: '[Leave]', next: null },
+            ];
+          }
+        },
+        request: {
+          text: `"Five Oak Logs for marker posts, five Copper Ore for signal braziers. Bring those and I'll share everything I've mapped."`,
+          choices: () => {
+            const inv = window.__inventory || {};
+            const ok = (inv.oak_log || 0) >= 5 && (inv.copper_ore || 0) >= 5;
+            return [
+              ok ? { label:'[ Deliver 5 Oak Logs + 5 Copper Ore ]', next:'done', action:'lyra_supply' } : { label:'✗ Need 5 Oak Logs and 5 Copper Ore', next:null, locked:true },
+              { label:'I'll be back.', next:null },
+              { label:'[Back]', next:'root' },
+            ];
+          }
+        },
+        done: {
+          text: `*Lyra secures the supplies and marks several paths on your map margin.*
+
+"Perfect. That's enough for two expedition loops.
+
+Take this field bonus. Also: the underground lift at Ancient Lift often leads to Runite pockets."`,
+          choices: [{ label:'Thanks, Lyra.', next:null }]
+        },
+        route_advice: {
+          text: `"Fast wood route: Forest → Birch Glen → Deep Woods.
+Fast ore route: Copper Pit → Iron Ridge → Runite Mine.
+
+If you can survive underground, Deep Survey and Aether Pocket are the richest seams in the region."`,
+          choices: [{ label:'Useful. Thanks.', next:null }, { label:'[Back]', next:'root' }]
+        }
+      }
+    },
+
+    // ─────────────────────────────────────────────
+    bram: {
+      name: 'Bram Holt',
+      title: 'Ranger Quartermaster',
+      portrait: '🏹',
+      tree: {
+        root: {
+          text: () => window.__questFlags?.bramSupplied
+            ? `*Bram checks the fletching on a bundle of arrows.*
+
+"Bridge is repaired. Patrols are moving again. You did solid work."`
+            : `*A broad-shouldered ranger in green leathers waves from a supply tarp.*
+
+"Name's Bram. I'm rebuilding this camp's bridge before the next storm hits.
+
+Could use a hand if you're willing."`,
+          choices: () => {
+            if (window.__questFlags?.bramSupplied) {
+              return [
+                { label:'Tell me about the southern wilds.', next:'wilds' },
+                { label:'[Leave]', next:null },
+              ];
+            }
+            return [
+              { label:'What do you need for the bridge?', next:'need' },
+              { label:'Tell me about the southern wilds.', next:'wilds' },
+              { label:'[Leave]', next:null },
+            ];
+          }
+        },
+        need: {
+          text: `"Six Willow Logs for flex-beams, two Iron Ore for anchor pins. Bring that and I'll pay from patrol reserves."`,
+          choices: () => {
+            const inv = window.__inventory || {};
+            const ok = (inv.willow_log || 0) >= 6 && (inv.iron_ore || 0) >= 2;
+            return [
+              ok ? { label:'[ Deliver 6 Willow Logs + 2 Iron Ore ]', next:'complete', action:'bram_supply' } : { label:'✗ Need 6 Willow Logs and 2 Iron Ore', next:null, locked:true },
+              { label:'Not yet.', next:null },
+              { label:'[Back]', next:'root' },
+            ];
+          }
+        },
+        complete: {
+          text: `*Bram grins as the camp carpenters haul your materials away.*
+
+"That'll hold. Here's 280 coins from the ranger chest.
+
+If you're chasing Seals, ask the Archivist in the East Tower — he's strict, but fair."`,
+          choices: [{ label:'Appreciate it.', next:null }]
+        },
+        wilds: {
+          text: `"South gets rough fast: magic groves, runite vents, sinkholes. Keep food, keep rope, keep moving.
+
+And never camp in the Dead Grove. That place watches back."`,
+          choices: [{ label:'Got it.', next:null }, { label:'[Back]', next:'root' }]
+        }
+      }
+    },
+
+    // ─────────────────────────────────────────────
+    erasmus: {
+      name: 'Archivist Erasmus',
+      title: 'Royal Seal Keeper',
+      portrait: '📜',
+      tree: {
+        root: {
+          text: () => window.__questFlags?.sealPurchased
+            ? `*Erasmus adjusts his spectacles and stamps another parchment.*
+
+"Your seal remains valid. Keep it dry, avoid fire, and do not fold it."`
+            : `*Stacks of ledgers surround a severe old man in ink-stained robes.*
+
+"State your petition quickly. I issue travel Seals for qualified applicants only."`,
+          choices: () => {
+            if (window.__questFlags?.sealPurchased) return [{ label:'Understood.', next:null }];
+            return [
+              { label:'I need a King's Seal.', next:'requirements' },
+              { label:'Why these requirements?', next:'why' },
+              { label:'[Leave]', next:null },
+            ];
+          }
+        },
+        requirements: {
+          text: `"Official requirement: three Runite Ore and five Gold Ore. Runite stabilizes the enchantment matrix; gold carries the wax sigil.
+
+Bring the materials and I will issue your Seal lawfully."`,
+          choices: () => {
+            const inv = window.__inventory || {};
+            const ok = (inv.runite_ore || 0) >= 3 && (inv.gold_ore || 0) >= 5;
+            return [
+              ok ? { label:'[ Submit 3 Runite Ore + 5 Gold Ore ]', next:'seal', action:'erasmus_seal' } : { label:'✗ Need 3 Runite Ore and 5 Gold Ore', next:null, locked:true },
+              { label:'I'll gather them.', next:null },
+              { label:'[Back]', next:'root' },
+            ];
+          }
+        },
+        seal: {
+          text: `*Erasmus presses molten wax, stamps a crest, and hands you a still-warm medallion.*
+
+"Official King's Seal of Veldmoor. Present it at the Castle Gate."`,
+          choices: [{ label:'Thank you, Archivist.', next:null }]
+        },
+        why: {
+          text: `"Because counterfeit seals collapsed the eastern provinces twenty years ago. Standards exist for a reason."`,
+          choices: [{ label:'Fair enough.', next:'root' }, { label:'[Leave]', next:null }]
+        }
+      }
+    },
+
+    // ─────────────────────────────────────────────
+    tamsin: {
+      name: 'Tamsin Vale',
+      title: 'Deep Delver Broker',
+      portrait: '🪓',
+      tree: {
+        root: {
+          text: () => window.__questFlags?.tamsinSupplied
+            ? `*Tamsin folds up a survey chart and nods approvingly.*
+
+"With your ore, my crew reopened two lower shafts. Rich runite down there."`
+            : `*A scarred miner lays claim markers beside the guard post fire.*
+
+"You look capable. I'm Tamsin. I buy ore for deep survey crews — and I pay above market."`,
+          choices: () => {
+            if (window.__questFlags?.tamsinSupplied) {
+              return [
+                { label:'Where should I mine next?', next:'next' },
+                { label:'[Leave]', next:null },
+              ];
+            }
+            return [
+              { label:'What are you buying?', next:'buying' },
+              { label:'Where should I mine next?', next:'next' },
+              { label:'[Leave]', next:null },
+            ];
+          }
+        },
+        buying: {
+          text: `"Five Iron Ore and two Gold Ore. Enough to reinforce braces and tune drill heads. Bring that, I pay 420 coins."`,
+          choices: () => {
+            const inv = window.__inventory || {};
+            const ok = (inv.iron_ore || 0) >= 5 && (inv.gold_ore || 0) >= 2;
+            return [
+              ok ? { label:'[ Sell 5 Iron Ore + 2 Gold Ore ]', next:'done', action:'tamsin_supply' } : { label:'✗ Need 5 Iron Ore and 2 Gold Ore', next:null, locked:true },
+              { label:'I'll return.', next:null },
+              { label:'[Back]', next:'root' },
+            ];
+          }
+        },
+        done: {
+          text: `*Tamsin counts out a heavy pouch and marks your name in a ledger.*
+
+"Pleasure doing business. Deep Survey and Aether Pocket respawn slowly, but they hit hard when they're up."`,
+          choices: [{ label:'I'll keep mining.', next:null }]
+        },
+        next: {
+          text: `"Run this loop: Collapsed Vein → Crystal Seam → Deep Survey → Aether Pocket. By the time you're done, the first nodes should be back."`,
+          choices: [{ label:'Solid route.', next:null }, { label:'[Back]', next:'root' }]
+        }
+      }
+    },
+
     // ─────────────────────────────────────────────
     blackmarket: {
       name: 'Silas',
@@ -9507,6 +9732,46 @@ document.addEventListener('click', e => {
       toast.textContent = "👑 Received: King's Seal";
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3500);
+    }
+    if (action === 'lyra_supply') {
+      window.__inventory.oak_log = Math.max(0, (window.__inventory.oak_log || 0) - 5);
+      window.__inventory.copper_ore = Math.max(0, (window.__inventory.copper_ore || 0) - 5);
+      window.__questFlags.lyraSupplied = true;
+      updateInventoryUI();
+      if (window.__awardGrassCoin) window.__awardGrassCoin(120);
+      if (window.__fbSaveInventory) window.__fbSaveInventory();
+      if (window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
+    }
+    if (action === 'bram_supply') {
+      window.__inventory.willow_log = Math.max(0, (window.__inventory.willow_log || 0) - 6);
+      window.__inventory.iron_ore = Math.max(0, (window.__inventory.iron_ore || 0) - 2);
+      window.__questFlags.bramSupplied = true;
+      updateInventoryUI();
+      if (window.__awardGrassCoin) window.__awardGrassCoin(280);
+      if (window.__fbSaveInventory) window.__fbSaveInventory();
+      if (window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
+    }
+    if (action === 'erasmus_seal') {
+      window.__inventory.runite_ore = Math.max(0, (window.__inventory.runite_ore || 0) - 3);
+      window.__inventory.gold_ore = Math.max(0, (window.__inventory.gold_ore || 0) - 5);
+      window.__questFlags.sealPurchased = true;
+      updateInventoryUI();
+      if (window.__fbSaveInventory) window.__fbSaveInventory();
+      if (window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
+      const toast = document.createElement('div');
+      toast.className = 'quest-reward-toast';
+      toast.textContent = "👑 Received: King's Seal";
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+    if (action === 'tamsin_supply') {
+      window.__inventory.iron_ore = Math.max(0, (window.__inventory.iron_ore || 0) - 5);
+      window.__inventory.gold_ore = Math.max(0, (window.__inventory.gold_ore || 0) - 2);
+      window.__questFlags.tamsinSupplied = true;
+      updateInventoryUI();
+      if (window.__awardGrassCoin) window.__awardGrassCoin(420);
+      if (window.__fbSaveInventory) window.__fbSaveInventory();
+      if (window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
     }
   }
 
