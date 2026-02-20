@@ -2234,6 +2234,108 @@
 
   .bar-wrap { position: relative; padding: 0 1.25rem 1rem; }
 
+  /* ── STOCK MARKET DRAWER ── */
+  .stock-tab {
+    position: fixed;
+    right: 0;
+    top: calc(50% + 20px);
+    transform: translateY(-50%);
+    z-index: 205;
+    writing-mode: vertical-rl;
+    background: linear-gradient(180deg, #0f3c7a, #0aa3ff);
+    color: #e8f7ff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.05rem;
+    letter-spacing: 3px;
+    padding: 1.4rem 0.62rem;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    transition: filter 0.2s;
+    box-shadow: -4px 0 20px rgba(10,163,255,0.5);
+  }
+  .stock-tab:hover { filter: brightness(1.12); }
+
+  .stock-drawer {
+    position: fixed;
+    top: 0;
+    right: -560px;
+    width: 540px;
+    max-width: 95vw;
+    height: 100vh;
+    background: radial-gradient(circle at top right, #113b68 0%, #061424 70%);
+    border-left: 2px solid #1d6fb2;
+    z-index: 305;
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .stock-drawer.open { right: 0; }
+  .stock-header {
+    padding: 1rem 1.4rem;
+    border-bottom: 1px solid #1d6fb2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0,0,0,0.3);
+  }
+  .stock-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.7rem;
+    letter-spacing: 3px;
+    background: linear-gradient(135deg, #6ee7ff, #fff, #22d3ee);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stock-close {
+    background: none;
+    border: 1px solid #1d6fb2;
+    color: #6fb6e3;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 1px;
+    padding: 0.35rem 0.75rem;
+    cursor: pointer;
+  }
+  .stock-close:hover { color: #c9ecff; border-color: #6fb6e3; }
+  .stock-body { flex: 1; overflow-y: auto; padding: 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+  .stock-meta { border: 1px solid #1d6fb2; padding: 0.7rem; background: rgba(5,20,36,0.75); font-size: 0.66rem; color: #7ab3d8; letter-spacing: 1px; text-transform: uppercase; }
+  .stock-row { display: grid; grid-template-columns: 1fr auto auto; gap: 0.45rem; align-items: center; border: 1px solid #1b3248; padding: 0.6rem 0.55rem; background: rgba(0,0,0,0.24); }
+  .stock-row:hover { border-color: #2d77af; }
+  .stock-symbol { font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; letter-spacing: 1px; color: #d9f3ff; }
+  .stock-price { font-size: 0.76rem; color: #e6f7ff; }
+  .stock-change { font-size: 0.64rem; border: 1px solid; padding: 0.14rem 0.35rem; min-width: 62px; text-align: center; }
+  .stock-change.up { color: #4ade80; border-color: #166534; background: rgba(34,197,94,0.13); }
+  .stock-change.down { color: #f87171; border-color: #7f1d1d; background: rgba(248,113,113,0.14); }
+  .stock-trade { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+  .stock-field {
+    background: rgba(5,20,36,0.75);
+    border: 1px solid #1d6fb2;
+    padding: 0.6rem;
+  }
+  .stock-field label { display:block; font-size: 0.56rem; color:#66b4e5; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.35rem; }
+  .stock-field select,
+  .stock-field input {
+    width:100%; background:#03101d; border:1px solid #285b88; color:#d8f3ff; font-family:'DM Mono', monospace; font-size:0.76rem; padding:0.4rem;
+  }
+  .stock-actions { display:grid; grid-template-columns: 1fr 1fr; gap:0.55rem; }
+  .stock-btn { border:1px solid #2d77af; background:#092742; color:#d8f3ff; font-family:'Bebas Neue', sans-serif; letter-spacing:1px; font-size:0.86rem; padding:0.6rem; cursor:pointer; }
+  .stock-btn:hover { filter: brightness(1.12); }
+  .stock-btn.short { border-color:#7a3a3a; background:#351717; color:#ffc9c9; }
+  .stock-btn.cover { border-color:#3f6f46; background:#0f3117; color:#bbf7d0; }
+  .stock-positions, .stock-social { border:1px solid #1d6fb2; background:rgba(5,20,36,0.65); padding:0.7rem; }
+  .stock-title { font-family:'Bebas Neue', sans-serif; font-size:1rem; letter-spacing:2px; color:#7dd3fc; margin-bottom:0.5rem; }
+  .stock-pos-row, .stock-social-row { display:grid; grid-template-columns: 1fr auto auto; gap:0.45rem; font-size:0.67rem; padding:0.35rem 0; border-bottom:1px solid #12304a; }
+  .stock-pos-row:last-child, .stock-social-row:last-child { border-bottom:none; }
+  .stock-social-row { grid-template-columns: 1fr 1fr auto; }
+  .stock-msg { min-height: 0.9rem; font-size:0.65rem; letter-spacing:1px; }
+  .stock-msg.ok { color:#4ade80; }
+  .stock-msg.err { color:#f87171; }
+
   /* ── SHOP DRAWER ── */
   .shop-tab {
     position: fixed;
@@ -3987,7 +4089,7 @@
   GAMBLE
 </button>
 <!-- CASINO DRAWER OVERLAY -->
-<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop(); if(window.closeGarden) window.closeGarden(); if(window.closeChangelog) window.closeChangelog();"></div>
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop(); if(window.closeGarden) window.closeGarden(); if(window.closeChangelog) window.closeChangelog(); if(window.closeStockMarket) window.closeStockMarket();"></div>
 <!-- CASINO DRAWER -->
 <div class="casino-drawer" id="casinoDrawer">
 <div class="drawer-header">
@@ -4225,6 +4327,10 @@
 
 </div>
 </div>
+<button class="stock-tab" id="stockTab" onclick="openStockMarket()">
+<span id="stockTabArrow">◀</span>
+  STOCKS
+</button>
 <button class="shop-tab" id="shopTab" onclick="openShop()">
 <span id="shopTabArrow">◀</span>
   SHOP
@@ -4251,6 +4357,43 @@
 </div>
 </div>
 </div>
+</div>
+
+<!-- STOCK DRAWER -->
+<div class="stock-drawer" id="stockDrawer">
+  <div class="stock-header">
+    <h2>📈 Meme Exchange</h2>
+    <button class="stock-close" onclick="closeStockMarket()">✕ Close</button>
+  </div>
+  <div class="stock-body">
+    <div class="stock-meta" id="stockMeta">Market syncing...</div>
+    <div id="stockTickerList"></div>
+    <div class="stock-trade">
+      <div class="stock-field">
+        <label>Ticker</label>
+        <select id="stockTickerSelect"></select>
+      </div>
+      <div class="stock-field">
+        <label>Quantity</label>
+        <input id="stockQtyInput" min="1" step="1" type="number" value="1"/>
+      </div>
+    </div>
+    <div class="stock-actions">
+      <button class="stock-btn" onclick="tradeStock('buy')">Buy</button>
+      <button class="stock-btn" onclick="tradeStock('sell')">Sell</button>
+      <button class="stock-btn short" onclick="tradeStock('short')">Short</button>
+      <button class="stock-btn cover" onclick="tradeStock('cover')">Cover</button>
+    </div>
+    <div class="stock-msg" id="stockTradeMsg"></div>
+    <div class="stock-positions">
+      <div class="stock-title">🧾 Your Positions</div>
+      <div id="stockPositions">Log in to trade.</div>
+    </div>
+    <div class="stock-social">
+      <div class="stock-title">👀 What everyone is holding</div>
+      <div id="stockSocial">No positions yet.</div>
+    </div>
+  </div>
 </div>
 <!-- GARDEN DRAWER -->
 <div class="garden-drawer" id="gardenDrawer">
@@ -4675,6 +4818,8 @@
   let currentUser = null; // { id, name, ...playerData }
   let recentLogsCache = [];
   let streakCache = {};
+  let stockTickers = {};
+  let stockPortfolios = {};
 
   const syncEl = document.getElementById('syncStatus');
 
@@ -5129,7 +5274,7 @@
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('loginBg').style.display = '';
     document.getElementById('userBadge').style.display = 'none';
-    closeCasino(); closeShop();
+    closeCasino(); closeShop(); if (window.closeStockMarket) window.closeStockMarket();
   };
 
   // ── Dev Mode ──
@@ -5582,6 +5727,215 @@
   renderWeek();
   setInterval(renderWeek, 60000);
 
+
+  // ══════════════════════════════════════════
+  // ── STOCK MARKET ──
+  // ══════════════════════════════════════════
+
+  const STOCK_TICKERS = [
+    { id: 'MOON', name: '🚀 MoonWare', base: 110 },
+    { id: 'BEAN', name: '☕ BeanSoft', base: 82 },
+    { id: 'DOGE', name: '🐶 Doge Dynamics', base: 64 },
+    { id: 'PIXL', name: '🎮 Pixel Forge', base: 140 },
+    { id: 'BOLT', name: '⚡ Bolt Logistics', base: 95 },
+    { id: 'MEME', name: '😂 Meme Industries', base: 50 },
+  ];
+  const STOCK_TICK_MS = 60_000;
+
+  function getTickerMeta(ticker) {
+    return STOCK_TICKERS.find(t => t.id === ticker) || { id: ticker, name: ticker, base: 100 };
+  }
+
+  function formatStockTradeMsg(text, ok = true) {
+    const el = document.getElementById('stockTradeMsg');
+    if (!el) return;
+    el.textContent = text;
+    el.className = `stock-msg ${ok ? 'ok' : 'err'}`;
+  }
+
+  function ensureStockMarketSeed() {
+    runTransaction(ref(db, 'stockMarket/tickers'), cur => {
+      if (cur && Object.keys(cur).length) return;
+      const seeded = {};
+      STOCK_TICKERS.forEach(t => {
+        seeded[t.id] = { symbol: t.id, price: t.base, changePct: 0, updatedAt: Date.now() };
+      });
+      return seeded;
+    });
+  }
+
+  async function maybeRunStockTick() {
+    const now = Date.now();
+    const claim = await runTransaction(ref(db, 'stockMarket/meta'), cur => {
+      cur = cur || {};
+      if (Number(cur.nextTickAt || 0) > now) return;
+      return { ...cur, nextTickAt: now + STOCK_TICK_MS, lastTickAt: now, by: currentUser?.id || 'anon' };
+    });
+    if (!claim.committed) return;
+
+    await runTransaction(ref(db, 'stockMarket/tickers'), cur => {
+      const source = (cur && Object.keys(cur).length) ? cur : Object.fromEntries(STOCK_TICKERS.map(t => [t.id, { symbol: t.id, price: t.base, changePct: 0, updatedAt: now }]));
+      const out = {};
+      Object.entries(source).forEach(([sym, row]) => {
+        const price = Number(row.price || getTickerMeta(sym).base || 100);
+        const drift = (Math.random() - 0.5) * 0.08;
+        const momentum = Number(row.changePct || 0) * 0.25;
+        const pct = Math.max(-0.22, Math.min(0.22, drift + momentum));
+        const next = Math.max(4, +(price * (1 + pct)).toFixed(2));
+        out[sym] = { ...row, symbol: sym, price: next, changePct: +pct.toFixed(4), updatedAt: now };
+      });
+      return out;
+    });
+  }
+
+  function renderStockMarket() {
+    const listEl = document.getElementById('stockTickerList');
+    const selectEl = document.getElementById('stockTickerSelect');
+    const metaEl = document.getElementById('stockMeta');
+    if (!listEl || !selectEl || !metaEl) return;
+
+    const rows = Object.values(stockTickers || {});
+    if (!rows.length) {
+      listEl.innerHTML = '<div class="stock-meta">Seeding market...</div>';
+      selectEl.innerHTML = '';
+      metaEl.textContent = 'Booting exchange...';
+      return;
+    }
+
+    rows.sort((a,b) => a.symbol.localeCompare(b.symbol));
+    const last = Math.max(...rows.map(r => Number(r.updatedAt || 0)), 0);
+    metaEl.textContent = `Global market live • next candle ~${Math.max(0, Math.ceil((STOCK_TICK_MS - (Date.now() - last))/1000))}s`;
+
+    listEl.innerHTML = rows.map(r => {
+      const up = Number(r.changePct || 0) >= 0;
+      const chTxt = `${up ? '+' : ''}${(Number(r.changePct || 0) * 100).toFixed(2)}%`;
+      const name = getTickerMeta(r.symbol).name;
+      return `<div class="stock-row"><div><div class="stock-symbol">${r.symbol} <span style="font-size:0.6rem;color:#7aa8c8;">${name}</span></div></div><div class="stock-price">$${Number(r.price || 0).toFixed(2)}</div><div class="stock-change ${up ? 'up' : 'down'}">${chTxt}</div></div>`;
+    }).join('');
+
+    const prev = selectEl.value;
+    selectEl.innerHTML = rows.map(r => `<option value="${r.symbol}">${r.symbol} • $${Number(r.price||0).toFixed(2)}</option>`).join('');
+    if (prev && rows.some(r => r.symbol === prev)) selectEl.value = prev;
+
+    renderStockPositions();
+    renderStockSocial();
+  }
+
+  function renderStockPositions() {
+    const el = document.getElementById('stockPositions');
+    if (!el) return;
+    if (!currentUser) { el.textContent = 'Log in to trade.'; return; }
+    const port = stockPortfolios[currentUser.id] || {};
+    const pos = port.positions || {};
+    const rows = [];
+    Object.entries(pos).forEach(([sym, p]) => {
+      const px = Number(stockTickers[sym]?.price || 0);
+      const longQty = Number(p.longQty || 0);
+      const shortQty = Number(p.shortQty || 0);
+      if (longQty > 0) {
+        const pnl = (px - Number(p.longAvg || px)) * longQty;
+        rows.push(`<div class="stock-pos-row"><span>${sym} long x${longQty}</span><span>@ ${Number(p.longAvg||0).toFixed(2)}</span><span style="color:${pnl>=0?'#4ade80':'#f87171'};">${pnl>=0?'+':''}${pnl.toFixed(1)}</span></div>`);
+      }
+      if (shortQty > 0) {
+        const pnl = (Number(p.shortAvg || px) - px) * shortQty;
+        rows.push(`<div class="stock-pos-row"><span>${sym} short x${shortQty}</span><span>@ ${Number(p.shortAvg||0).toFixed(2)}</span><span style="color:${pnl>=0?'#4ade80':'#f87171'};">${pnl>=0?'+':''}${pnl.toFixed(1)}</span></div>`);
+      }
+    });
+    el.innerHTML = rows.length ? rows.join('') : '<div style="font-size:0.65rem;color:#79a5c5;">No open positions.</div>';
+  }
+
+  function renderStockSocial() {
+    const el = document.getElementById('stockSocial');
+    if (!el) return;
+    const rows = [];
+    Object.entries(stockPortfolios || {}).forEach(([uid, port]) => {
+      const player = players[uid];
+      if (!player) return;
+      Object.entries(port.positions || {}).forEach(([sym, p]) => {
+        const lq = Number(p.longQty || 0), sq = Number(p.shortQty || 0);
+        if (lq > 0) rows.push(`<div class="stock-social-row"><span>${player.name}</span><span>${sym} LONG x${lq}</span><span style="color:#4ade80;">Bull</span></div>`);
+        if (sq > 0) rows.push(`<div class="stock-social-row"><span>${player.name}</span><span>${sym} SHORT x${sq}</span><span style="color:#f87171;">Bear</span></div>`);
+      });
+    });
+    el.innerHTML = rows.length ? rows.slice(0, 60).join('') : '<div style="font-size:0.65rem;color:#79a5c5;">No public positions yet.</div>';
+  }
+
+  window.tradeStock = async function(kind) {
+    if (!currentUser) { formatStockTradeMsg('Login first.', false); return; }
+    const symbol = document.getElementById('stockTickerSelect')?.value;
+    const qty = Math.max(1, parseInt(document.getElementById('stockQtyInput')?.value || '1', 10));
+    const px = Number(stockTickers[symbol]?.price || 0);
+    if (!symbol || !px) { formatStockTradeMsg('Ticker not ready.', false); return; }
+
+    const uid = currentUser.id;
+    const portRef = ref(db, `stockMarket/portfolios/${uid}/positions/${symbol}`);
+    const coinRef = ref(db, `players/${uid}/coins`);
+    const snapCoins = await new Promise(res => onValue(coinRef, res, { onlyOnce: true }));
+    let coins = Number(snapCoins.val() || 0);
+
+    const posSnap = await new Promise(res => onValue(portRef, res, { onlyOnce: true }));
+    const pos = posSnap.val() || { longQty: 0, longAvg: 0, shortQty: 0, shortAvg: 0 };
+
+    const cost = +(px * qty).toFixed(2);
+    if (kind === 'buy') {
+      if (coins < cost) return formatStockTradeMsg('Not enough coins to buy.', false);
+      const nextQty = Number(pos.longQty || 0) + qty;
+      const nextAvg = ((Number(pos.longQty || 0) * Number(pos.longAvg || 0)) + cost) / nextQty;
+      await update(portRef, { longQty: nextQty, longAvg: +nextAvg.toFixed(4) });
+      await update(ref(db, `players/${uid}`), { coins: Math.floor(coins - cost) });
+      formatStockTradeMsg(`Bought ${qty} ${symbol} @ ${px.toFixed(2)}`);
+    } else if (kind === 'sell') {
+      if (Number(pos.longQty || 0) < qty) return formatStockTradeMsg('Not enough long shares to sell.', false);
+      await update(portRef, { longQty: Number(pos.longQty || 0) - qty });
+      await update(ref(db, `players/${uid}`), { coins: Math.floor(coins + cost) });
+      formatStockTradeMsg(`Sold ${qty} ${symbol} @ ${px.toFixed(2)}`);
+    } else if (kind === 'short') {
+      const nextQty = Number(pos.shortQty || 0) + qty;
+      const nextAvg = ((Number(pos.shortQty || 0) * Number(pos.shortAvg || 0)) + cost) / nextQty;
+      await update(portRef, { shortQty: nextQty, shortAvg: +nextAvg.toFixed(4) });
+      await update(ref(db, `players/${uid}`), { coins: Math.floor(coins + cost) });
+      formatStockTradeMsg(`Shorted ${qty} ${symbol} @ ${px.toFixed(2)}`);
+    } else if (kind === 'cover') {
+      if (Number(pos.shortQty || 0) < qty) return formatStockTradeMsg('Not enough short shares to cover.', false);
+      if (coins < cost) return formatStockTradeMsg('Not enough coins to cover.', false);
+      await update(portRef, { shortQty: Number(pos.shortQty || 0) - qty });
+      await update(ref(db, `players/${uid}`), { coins: Math.floor(coins - cost) });
+      formatStockTradeMsg(`Covered ${qty} ${symbol} @ ${px.toFixed(2)}`);
+    }
+  };
+
+  window.openStockMarket = function() {
+    if (!currentUser) { doLogout(); return; }
+    closeCasino();
+    closeShop();
+    if (window.closeGarden) window.closeGarden();
+    if (window.closeChangelog) window.closeChangelog();
+    document.getElementById('stockDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('stockTabArrow').textContent = '▶';
+    renderStockMarket();
+  };
+
+  window.closeStockMarket = function() {
+    document.getElementById('stockDrawer').classList.remove('open');
+    document.getElementById('stockTabArrow').textContent = '◀';
+    const anyOpen = document.querySelector('.casino-drawer.open, .shop-drawer.open, .garden-drawer.open, .changelog-drawer.open, .stock-drawer.open');
+    if (!anyOpen) document.getElementById('drawerOverlay').classList.remove('open');
+  };
+
+  ensureStockMarketSeed();
+  onValue(ref(db, 'stockMarket/tickers'), snap => {
+    stockTickers = snap.val() || {};
+    renderStockMarket();
+  });
+  onValue(ref(db, 'stockMarket/portfolios'), snap => {
+    stockPortfolios = snap.val() || {};
+    renderStockPositions();
+    renderStockSocial();
+  });
+  setInterval(() => { maybeRunStockTick(); }, 15000);
+  setTimeout(() => { maybeRunStockTick(); }, 3000);
+
   // ══════════════════════════════════════════
   // ── SHOP ──
   // ══════════════════════════════════════════
@@ -5702,6 +6056,7 @@
   window.openShop = function() {
     if (!currentUser) { doLogout(); return; }
     closeCasino();
+    if (window.closeStockMarket) window.closeStockMarket();
     if (window.closeGarden) window.closeGarden();
     document.getElementById('shopDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
@@ -6263,6 +6618,7 @@
   window.openCasino = function() {
     if (!currentUser) { doLogout(); return; }
     closeShop();
+    if (window.closeStockMarket) window.closeStockMarket();
     if (window.closeGarden) window.closeGarden();
     document.getElementById('casinoDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
@@ -10322,6 +10678,7 @@ function gardenUpgradeCost(upgrade, currentLevel) {
 window.openGarden = function() {
   closeShop && closeShop();
   closeCasino && closeCasino();
+  window.closeStockMarket && window.closeStockMarket();
   document.getElementById('gardenDrawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
   document.getElementById('gardenTabArrow').textContent = '▶';
@@ -10847,6 +11204,7 @@ window.openChangelog = function() {
   if (window.closeCasino) closeCasino();
   if (window.closeShop)   closeShop();
   if (window.closeGarden) closeGarden();
+  if (window.closeStockMarket) closeStockMarket();
   document.getElementById('changelogDrawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
   document.getElementById('changelogTabArrow').textContent = '▶';
