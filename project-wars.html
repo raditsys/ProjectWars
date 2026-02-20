@@ -3221,10 +3221,100 @@
   .env-resource.mining   { animation: oreShake 0.12s ease-in-out infinite; }
   .env-resource.falling  { animation: treeFall 0.55s ease-in forwards !important; pointer-events: none; }
   .env-resource.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
+  .env-enemy {
+    position: absolute;
+    bottom: 6px;
+    filter: drop-shadow(0 6px 8px rgba(0,0,0,0.65));
+    cursor: pointer;
+    z-index: 9;
+    transition: transform 0.14s ease, filter 0.14s ease;
+  }
+  .env-enemy:hover:not(.engaged) {
+    transform: translateY(-3px) scale(1.03);
+    filter: drop-shadow(0 0 10px rgba(248,113,113,0.6));
+  }
+  .env-enemy.engaged {
+    animation: enemyPulse 0.8s ease-in-out infinite;
+    cursor: default;
+  }
+  .enemy-tag {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(100% + 4px);
+    background: rgba(8,8,8,0.88);
+    border: 1px solid #5a2020;
+    color: #ffb4b4;
+    font-size: 0.56rem;
+    letter-spacing: 0.5px;
+    padding: 0.14rem 0.34rem;
+    white-space: nowrap;
+  }
+  @keyframes enemyPulse {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
   #envFooter {
     border-top: 1px solid #1e2e1e;
     display: flex;
     flex-direction: column;
+  }
+  #envCombatHud {
+    border-bottom: 1px solid #1e2e1e;
+    padding: 6px 10px;
+    background: rgba(8,10,8,0.88);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+  .env-combat-title {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1.5px;
+    color: #fca5a5;
+    font-size: 0.88rem;
+  }
+  .env-combat-sub {
+    font-size: 0.56rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-top: 1px;
+  }
+  .env-combat-bar {
+    width: 100%;
+    height: 5px;
+    background: #221414;
+    border: 1px solid #3e2323;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .env-combat-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #f87171, #fca5a5);
+    transition: width 0.2s ease;
+  }
+  .env-combat-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .env-combat-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 1px;
+    border: 1px solid #4a2020;
+    background: #1a0c0c;
+    color: #fca5a5;
+    padding: 5px 8px;
+    cursor: pointer;
+  }
+  .env-combat-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .env-combat-log {
+    grid-column: 1 / -1;
+    font-size: 0.56rem;
+    color: #d1d5db;
+    letter-spacing: 0.6px;
+    min-height: 14px;
   }
   #envRoomDesc {
     font-family: 'DM Mono', monospace;
@@ -3738,6 +3828,18 @@
     <div id="envResources"></div>
   </div>
   <div id="envFooter">
+    <div id="envCombatHud">
+      <div>
+        <div class="env-combat-title" id="envCombatTitle">No threat detected</div>
+        <div class="env-combat-sub" id="envCombatMeta">Combat Lv.1 • 0 xp</div>
+        <div class="env-combat-bar"><div class="env-combat-fill" id="envCombatFill"></div></div>
+      </div>
+      <div class="env-combat-actions">
+        <button class="env-combat-btn" id="envFightBtn" onclick="envAttack('quick')" disabled>⚔ Quick Slash</button>
+        <button class="env-combat-btn" id="envPowerBtn" onclick="envAttack('power')" disabled>💥 Power</button>
+      </div>
+      <div class="env-combat-log" id="envCombatLog">Travel to dangerous rooms to trigger encounters.</div>
+    </div>
     <div id="envRoomDesc"></div>
     <div id="envFooterRow">
       <div id="envMapPane">
@@ -8277,6 +8379,15 @@ window.__inventory = {
   bronze_axe: 1, bronze_pickaxe: 1,
 };
 window.__equipmentLoadout = { leftHand: '', rightHand: '' };
+window.__combatProfile = window.__combatProfile || { xp: 0, hp: 26, wins: 0, streak: 0 };
+window.__loadCombatFromPlayer = function(playerData) {
+  const c = (playerData && playerData.combat) || {};
+  window.__combatProfile.xp = c.xp || 0;
+  window.__combatProfile.hp = c.hp || 26;
+  window.__combatProfile.wins = c.wins || 0;
+  window.__combatProfile.streak = c.streak || 0;
+  if (window.envRefreshRoom) window.envRefreshRoom();
+};
 
 const TOOL_ITEMS = {
   bronze_axe: { icon:'🪓', name:'Bronze Axe', slot:'leftHand', bonusText:'+50% extra log chance' },
@@ -8668,6 +8779,105 @@ document.addEventListener('click', e => {
   let resourceState = [];
   let worldResourceState = {};
 
+  const ENCOUNTERS = {
+    Wolf:   { icon:'🐺', hp: 22, atk: [3, 7], xp: 8,  coins: [4, 10], req: 1, loot: { oak_log: [0,1] } },
+    Bandit: { icon:'🗡️', hp: 32, atk: [5, 9], xp: 12, coins: [8, 14], req: 2, loot: { copper_ore: [0,1] } },
+    Wraith: { icon:'👻', hp: 40, atk: [7, 12], xp: 18, coins: [10, 18], req: 4, loot: { iron_ore: [0,1] } },
+    Troll:  { icon:'🪨', hp: 55, atk: [8, 14], xp: 24, coins: [15, 26], req: 6, loot: { gold_ore: [0,1] } },
+    Sentinel:{ icon:'🛡️', hp: 72, atk: [10, 16], xp: 34, coins: [22, 35], req: 8, loot: { runite_ore: [0,1] } },
+  };
+
+  const ROOM_ENCOUNTERS = {
+    'Dark Pines': 'Wolf', 'Dead Grove': 'Wraith', 'Swamp': 'Bandit', 'Deep Woods': 'Troll',
+    'Lava Fields': 'Troll', 'Dark Passage': 'Bandit', 'Bone Chamber': 'Wraith', 'Echo Shaft': 'Sentinel',
+    'Sewer Junction': 'Bandit', 'Crystal Seam': 'Sentinel', 'Deep Shaft': 'Sentinel'
+  };
+
+  window.__combatProfile = window.__combatProfile || { xp: 0, hp: 26, wins: 0, streak: 0 };
+  let activeEncounter = null;
+
+  function combatLevel() { return Math.max(1, Math.floor(Math.sqrt((window.__combatProfile.xp || 0) / 22)) + 1); }
+  function combatMaxHp() { return 24 + (combatLevel() * 3); }
+  function combatXpForNext() { const lv = combatLevel(); return lv * lv * 22; }
+  function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  function saveCombat() { if (window.__fbSaveCombat) window.__fbSaveCombat(); }
+
+  function renderCombatHud(msg) {
+    const lv = combatLevel();
+    const xp = window.__combatProfile.xp || 0;
+    const maxHp = combatMaxHp();
+    if (!window.__combatProfile.hp || window.__combatProfile.hp > maxHp) window.__combatProfile.hp = maxHp;
+    document.getElementById('envCombatMeta').textContent = `Combat Lv.${lv} • ${xp} xp • HP ${window.__combatProfile.hp}/${maxHp}`;
+    const next = combatXpForNext();
+    const prev = (lv - 1) * (lv - 1) * 22;
+    const pct = Math.max(0, Math.min(100, Math.round(((xp - prev) / Math.max(1, next - prev)) * 100)));
+    document.getElementById('envCombatFill').style.width = pct + '%';
+
+    const fightBtn = document.getElementById('envFightBtn');
+    const powerBtn = document.getElementById('envPowerBtn');
+    const title = document.getElementById('envCombatTitle');
+    const log = document.getElementById('envCombatLog');
+    if (!activeEncounter) {
+      title.textContent = 'No active combat';
+      fightBtn.disabled = true;
+      powerBtn.disabled = true;
+    } else {
+      title.textContent = `${activeEncounter.icon} ${activeEncounter.name} • ${activeEncounter.hp}/${activeEncounter.maxHp} hp`;
+      fightBtn.disabled = false;
+      powerBtn.disabled = lv < activeEncounter.req || window.__combatProfile.hp <= 0;
+    }
+    if (msg) log.textContent = msg;
+  }
+
+  function awardEncounterRewards(enc) {
+    window.__combatProfile.xp = (window.__combatProfile.xp || 0) + enc.xp;
+    window.__combatProfile.wins = (window.__combatProfile.wins || 0) + 1;
+    window.__combatProfile.streak = (window.__combatProfile.streak || 0) + 1;
+    const coins = randInt(enc.coins[0], enc.coins[1]);
+    if (window.__awardGrassCoin) window.__awardGrassCoin(coins);
+    Object.entries(enc.loot || {}).forEach(([key, range]) => {
+      const amt = randInt(range[0], range[1]);
+      if (amt > 0) addInventoryItem(key, amt);
+    });
+    const beforeLevel = Math.max(1, Math.floor(Math.sqrt((window.__combatProfile.xp - enc.xp) / 22)) + 1);
+    const leveled = combatLevel() > beforeLevel;
+    renderCombatHud(`Victory! +${enc.xp} xp, +${coins} 🪙${leveled ? ' • LEVEL UP!' : ''}`);
+    saveCombat();
+  }
+
+  function defeatEncounter(enc) {
+    window.__combatProfile.streak = 0;
+    window.__combatProfile.hp = Math.max(1, Math.floor(combatMaxHp() * 0.35));
+    activeEncounter = null;
+    renderCombatHud(`${enc.name} drove you back. You recover at ${window.__combatProfile.hp} hp.`);
+    saveCombat();
+  }
+
+  window.envAttack = function(kind) {
+    if (!activeEncounter) return;
+    const lv = combatLevel();
+    const atkBase = 4 + lv * 2;
+    const dmg = kind === 'power' ? randInt(atkBase + 2, atkBase + 8) : randInt(atkBase, atkBase + 5);
+    activeEncounter.hp = Math.max(0, activeEncounter.hp - dmg);
+    if (activeEncounter.hp <= 0) {
+      const won = activeEncounter;
+      activeEncounter = null;
+      awardEncounterRewards(won);
+      renderRoom(0, 0);
+      return;
+    }
+    const enemyHit = randInt(activeEncounter.atk[0], activeEncounter.atk[1]);
+    window.__combatProfile.hp = Math.max(0, window.__combatProfile.hp - enemyHit);
+    if (window.__combatProfile.hp <= 0) {
+      defeatEncounter(activeEncounter);
+      renderRoom(0, 0);
+      return;
+    }
+    renderCombatHud(`You hit ${activeEncounter.name} for ${dmg}. It strikes back for ${enemyHit}.`);
+    saveCombat();
+  };
+
   function resourceNodeKey(layer, c, rr, idx) { return `${layer}_${c}_${rr}_${idx}`; }
   function getWorldNode(nodeKey) {
     const node = worldResourceState?.[nodeKey];
@@ -8847,6 +9057,33 @@ document.addEventListener('click', e => {
       );
       ascDiv.onclick = () => envAscend();
       resContainer.appendChild(ascDiv);
+    }
+
+    // Room encounter representation
+    const encounterName = ROOM_ENCOUNTERS[rm.name];
+    const encounterTpl = encounterName ? ENCOUNTERS[encounterName] : null;
+    if (encounterTpl) {
+      const eDiv = document.createElement('div');
+      eDiv.className = 'env-enemy' + (activeEncounter ? ' engaged' : '');
+      eDiv.style.left = (rm.resources?.length ? 304 : 190) + 'px';
+      const isActiveHere = activeEncounter && activeEncounter.roomKey === `${clayer}:${cx},${cy}`;
+      const e = isActiveHere ? activeEncounter : { ...encounterTpl, name: encounterName, maxHp: encounterTpl.hp, hp: encounterTpl.hp, roomKey: `${clayer}:${cx},${cy}` };
+      eDiv.innerHTML = `<div style="font-size:2.1rem;line-height:1">${e.icon}</div><div class="enemy-tag">${e.name} ${isActiveHere ? `• ${e.hp}/${e.maxHp}` : ''}</div>`;
+      eDiv.onclick = () => {
+        if (!activeEncounter) {
+          activeEncounter = e;
+          renderCombatHud(`Encounter started: ${e.name}. Choose your attack.`);
+          renderRoom(0, 0);
+        }
+      };
+      resContainer.appendChild(eDiv);
+      if (!activeEncounter) {
+        renderCombatHud(`Threat spotted: ${encounterName}. Click it in the scene to engage.`);
+      } else if (isActiveHere) {
+        renderCombatHud(`In combat with ${activeEncounter.name}.`);
+      }
+    } else if (!activeEncounter) {
+      renderCombatHud('This area is calm. Seek danger for better rewards.');
     }
 
     // NPC talk button + auto-open on entry
@@ -9034,6 +9271,10 @@ document.addEventListener('click', e => {
 
   window.envNavigate = function(dx, dy) {
     const nc=cx+dx, nr=cy+dy;
+    if (activeEncounter) {
+      renderCombatHud(`Finish the fight with ${activeEncounter.name} before moving.`);
+      return;
+    }
     if (!room(nc,nr)) return;
     const curRm = room(cx, cy);
     if (curRm && curRm.locked) {
@@ -10088,6 +10329,15 @@ window.__fbSaveQuestFlags = async function() {
   });
 };
 
+window.__fbSaveCombat = async function() {
+  const user = window.__currentUser;
+  if (!user) return;
+  const uid = user.id;
+  await update(ref(db, `players/${uid}`), {
+    combat: window.__combatProfile || {},
+  });
+};
+
 
 // Start/replace the per-user garden watcher (called from onLoggedIn)
 let __gardenUnsub = null;
@@ -10106,6 +10356,7 @@ window.__startGardenWatch = function(uid) {
     window.__applyGardenBoosts && window.__applyGardenBoosts(p.garden || {});
     window.__loadSkillsFromPlayer && window.__loadSkillsFromPlayer(p);
     window.__loadInventoryFromPlayer && window.__loadInventoryFromPlayer(p);
+    window.__loadCombatFromPlayer && window.__loadCombatFromPlayer(p);
     // Quest flags — full replace then refresh adventure panel
     if (p.questFlags) {
       window.__questFlags = window.__questFlags || {};
