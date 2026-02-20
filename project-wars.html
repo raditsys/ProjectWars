@@ -876,12 +876,36 @@
 
   .bet-display {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
+    font-size: 1.7rem;
     color: var(--gold);
-    min-width: 80px;
+    min-width: 180px;
+    text-align: center;
+    line-height: 1;
+  }
+  .bet-display-main { color: var(--gold); }
+  .bet-display-max {
+    font-size: 1rem;
+    margin-left: 0.25rem;
+    color: #ffe082;
+    text-shadow: 0 0 10px rgba(245, 200, 66, 0.55);
+    animation: maxBetGlow 1.4s ease-in-out infinite;
+  }
+  .bet-display small { display: block; font-family: 'DM Mono', monospace; font-size: 0.6rem; color: #7fb37f; letter-spacing: 1px; text-transform: uppercase; margin-top: 0.15rem; }
+
+  .bj-bet-limit-hint {
+    width: 100%;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #9fd19f;
+    margin-top: -0.1rem;
     text-align: center;
   }
-  .bet-display small { display: block; font-family: 'DM Mono', monospace; font-size: 0.55rem; color: #4a8a4a; letter-spacing: 1px; text-transform: uppercase; }
+
+  @keyframes maxBetGlow {
+    0%, 100% { opacity: 0.8; text-shadow: 0 0 8px rgba(245, 200, 66, 0.45); }
+    50% { opacity: 1; text-shadow: 0 0 16px rgba(245, 200, 66, 0.85); }
+  }
 
   .clear-bet-btn {
     background: none;
@@ -898,6 +922,94 @@
 
   /* Action buttons */
   .bj-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+
+  .bj-progression {
+    margin-top: 0.75rem;
+    border: 1px solid #2a5a2a;
+    background: rgba(0, 0, 0, 0.28);
+    padding: 0.6rem 0.7rem;
+  }
+  .bj-progression-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  .bj-rank { font-family: 'Bebas Neue', sans-serif; color: var(--gold); letter-spacing: 2px; font-size: 0.95rem; }
+  .bj-cap {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    color: #ffe082;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(245, 200, 66, 0.55);
+    animation: maxBetGlow 1.8s ease-in-out infinite;
+  }
+  .bj-xp-bar { width: 100%; height: 8px; background: #112611; border: 1px solid #2a5a2a; overflow: hidden; }
+  .bj-xp-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4ade80, #f5c842); transition: width 0.25s ease; }
+  .bj-progression-sub {
+    margin-top: 0.35rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.55rem;
+    color: #7fb37f;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .pk-progression {
+    margin-top: 0.65rem;
+    border: 1px solid #2a5a2a;
+    background: rgba(0, 0, 0, 0.24);
+    padding: 0.55rem 0.65rem;
+  }
+  .pk-progression-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.7rem;
+    margin-bottom: 0.35rem;
+  }
+  .pk-rank {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    color: #7fd8ff;
+    text-shadow: 0 0 10px rgba(127, 216, 255, 0.45);
+  }
+  .pk-cap {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    color: #ffe082;
+    text-shadow: 0 0 10px rgba(245, 200, 66, 0.55);
+    animation: maxBetGlow 1.8s ease-in-out infinite;
+  }
+  .pk-xp-bar {
+    width: 100%;
+    height: 8px;
+    background: #112611;
+    border: 1px solid #2a5a2a;
+    overflow: hidden;
+  }
+  .pk-xp-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #38bdf8, #4ade80);
+    transition: width 0.25s ease;
+  }
+  .pk-progress-sub {
+    margin-top: 0.3rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.65rem;
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+    color: #9fd19f;
+    text-transform: uppercase;
+  }
 
   .bj-btn {
     flex: 1;
@@ -3792,8 +3904,9 @@
 <button class="chip chip-25" id="chip25" onclick="addBet(25)">25</button>
 <button class="chip chip-50" id="chip50" onclick="addBet(50)">50</button>
 <button class="chip chip-100" id="chip100" onclick="addBet(100)">100</button>
-<div class="bet-display" id="betDisplay">0<small>bet</small></div>
+<div class="bet-display" id="betDisplay"><span class="bet-display-main">0</span><span class="bet-display-max">/25 MAX</span><small>bet / max</small></div>
 <button class="clear-bet-btn" onclick="clearBet()">Clear</button>
+<div class="bj-bet-limit-hint" id="bjBetLimitHint">Bet cap from your level: 25</div>
 </div>
 </div>
 <!-- Action buttons -->
@@ -3804,6 +3917,17 @@
 <button class="bj-btn dbl" disabled="" id="btnDouble" onclick="bjDouble()">Double</button>
 <button class="bj-btn surrender" disabled="" id="btnSurrender" onclick="bjSurrender()">Surrender</button>
 <button class="bj-btn split" disabled="" id="btnSplit" onclick="bjSplit()">Split</button>
+</div>
+<div class="bj-progression" id="bjProgressWrap">
+  <div class="bj-progression-top">
+    <div class="bj-rank" id="bjRankLabel">Card Shark Lv.1</div>
+    <div class="bj-cap" id="bjCapLabel">Max bet: 25</div>
+  </div>
+  <div class="bj-xp-bar"><div class="bj-xp-fill" id="bjXpFill"></div></div>
+  <div class="bj-progression-sub">
+    <span id="bjXpLabel">0 / 8 xp</span>
+    <span id="bjHeatLabel">Heat bonus: +0%</span>
+  </div>
 </div>
 <!-- Split second hand (hidden until split) -->
 <div id="splitHand2Wrap" style="display:none;">
@@ -3875,9 +3999,21 @@
 <button class="chip chip-25" onclick="pkAddBet(25)">25</button>
 <button class="chip chip-50" onclick="pkAddBet(50)">50</button>
 <button class="chip chip-100" onclick="pkAddBet(100)">100</button>
-<div class="bet-display" id="pkBetDisplay">0<small>bet</small></div>
+<div class="bet-display" id="pkBetDisplay"><span class="bet-display-main">0</span><span class="bet-display-max">/25 MAX</span><small>bet / max</small></div>
 <button class="clear-bet-btn" onclick="pkClearBet()">Clear</button>
+<div class="bj-bet-limit-hint" id="pkBetLimitHint">Level 1 cap active • max bet 25</div>
 </div>
+</div>
+<div class="pk-progression" id="pkProgressWrap">
+  <div class="pk-progression-top">
+    <div class="pk-rank" id="pkRankLabel">Peg Rookie Lv.1</div>
+    <div class="pk-cap" id="pkCapLabel">Level 1 cap: max bet 25</div>
+  </div>
+  <div class="pk-xp-bar"><div class="pk-xp-fill" id="pkXpFill"></div></div>
+  <div class="pk-progress-sub">
+    <span id="pkXpLabel">0 / 10 xp</span>
+    <span id="pkHeatLabel">Bounce bonus: +0%</span>
+  </div>
 </div>
 <div class="result-banner" id="pkResultBanner"></div>
 <button class="r-spin-btn" id="pkDropBtn" onclick="pkDrop()">🔵 Drop Ball</button>
@@ -5790,6 +5926,99 @@
   let bjSplitHands = null; // null or [{cards,bet}, {cards,bet}] when split active
   let bjSplitIdx   = 0;    // which split hand is active
 
+  let bjProgress = { level: 1, xp: 0, hands: 0, heat: 0 };
+
+  const BJ_TITLES = ['Card Shark', 'Pit Grinder', 'Table Ranger', 'High Roller', 'Velvet Legend'];
+
+  function bjProgressKey(playerId) {
+    return `pw_bj_progress_${playerId}`;
+  }
+
+  function bjXpToNext(level) {
+    return 8 + (level - 1) * 6;
+  }
+
+  function bjMaxBetForLevel(level) {
+    return Math.min(300, 25 + (level - 1) * 12);
+  }
+
+  function bjHeatBonusPct() {
+    return Math.min(20, bjProgress.heat * 4);
+  }
+
+  function bjLoadProgress(playerId) {
+    if (!playerId) return;
+    const raw = localStorage.getItem(bjProgressKey(playerId));
+    if (!raw) {
+      bjProgress = { level: 1, xp: 0, hands: 0, heat: 0 };
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      bjProgress = {
+        level: Math.max(1, parsed.level || 1),
+        xp: Math.max(0, parsed.xp || 0),
+        hands: Math.max(0, parsed.hands || 0),
+        heat: Math.max(0, parsed.heat || 0),
+      };
+    } catch {
+      bjProgress = { level: 1, xp: 0, hands: 0, heat: 0 };
+    }
+  }
+
+  function bjSaveProgress(playerId) {
+    if (!playerId) return;
+    localStorage.setItem(bjProgressKey(playerId), JSON.stringify(bjProgress));
+  }
+
+  function bjRenderProgress() {
+    const level = bjProgress.level;
+    const next = bjXpToNext(level);
+    const title = BJ_TITLES[Math.min(BJ_TITLES.length - 1, Math.floor((level - 1) / 2))];
+    const maxBet = bjMaxBetForLevel(level);
+    document.getElementById('bjRankLabel').textContent = `${title} Lv.${level}`;
+    document.getElementById('bjCapLabel').textContent = `Level ${level} cap: max bet ${maxBet}`;
+    document.getElementById('bjXpLabel').textContent = `${bjProgress.xp} / ${next} xp`;
+    document.getElementById('bjHeatLabel').textContent = `Heat streak ${bjProgress.heat}/5: +${bjHeatBonusPct()}% win bonus`;
+    document.getElementById('bjXpFill').style.width = `${Math.min(100, (bjProgress.xp / next) * 100)}%`;
+    updateBJBetLimitHint();
+  }
+
+  function updateBJBetLimitHint() {
+    const maxBet = bjMaxBetForLevel(bjProgress.level);
+    const el = document.getElementById('bjBetLimitHint');
+    if (!el) return;
+    el.textContent = `Level ${bjProgress.level} cap active • max bet ${maxBet}`;
+  }
+
+  function bjAwardProgress(playerId, outcome) {
+    let gain = 1;
+    if (outcome === 'win') gain = 2;
+    if (outcome === 'bj') gain = 3;
+
+    bjProgress.hands += 1;
+    bjProgress.xp += gain;
+
+    let leveled = false;
+    while (bjProgress.xp >= bjXpToNext(bjProgress.level)) {
+      bjProgress.xp -= bjXpToNext(bjProgress.level);
+      bjProgress.level += 1;
+      leveled = true;
+    }
+
+    if (outcome === 'win' || outcome === 'bj') bjProgress.heat = Math.min(5, bjProgress.heat + 1);
+    if (outcome === 'lose' || outcome === 'surrender') bjProgress.heat = 0;
+    if (outcome === 'push') bjProgress.heat = Math.max(0, bjProgress.heat - 1);
+
+    bjSaveProgress(playerId);
+    bjRenderProgress();
+
+    if (leveled) {
+      showResult(`⬆ LEVEL UP! TABLE LV.${bjProgress.level}`, 'bj');
+      setTimeout(() => launchParticles('bj'), 60);
+    }
+  }
+
   function canSplit() {
     if (bjPlayer.length !== 2 || bjSplitHands) return false;
     const tenCards = new Set(['10','J','Q','K']);
@@ -5855,6 +6084,12 @@
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '▶';
     document.getElementById('casinoPlayerDisplay').textContent = currentUser.name;
+    bjLoadProgress(currentUser.id);
+    bjRenderProgress();
+    updateBetDisplay();
+    pkLoadProgress(currentUser.id);
+    pkRenderProgress();
+    pkUpdateBetDisplay();
     refreshCasinoWallet();
   };
 
@@ -5893,6 +6128,12 @@
     if (bjPhase !== 'bet') return;
     const p = getCurrentCasinoPlayer();
     if (!p) { shakeWallet(); return; }
+    const maxBet = bjMaxBetForLevel(bjProgress.level);
+    if (bjBet + amount > maxBet) {
+      shakeWallet();
+      showResult(`LEVEL ${bjProgress.level} CAP: MAX BET ${maxBet}`, 'push');
+      return;
+    }
     if (bjBet + amount > (p.coins || 0)) { shakeWallet(); return; }
     bjBet += amount;
     soundChip();
@@ -5906,7 +6147,9 @@
   };
 
   function updateBetDisplay() {
-    document.getElementById('betDisplay').innerHTML = `${bjBet}<small>bet</small>`;
+    const maxBet = bjMaxBetForLevel(bjProgress.level);
+    document.getElementById('betDisplay').innerHTML = `<span class="bet-display-main">${bjBet}</span><span class="bet-display-max">/${maxBet} MAX</span><small>bet / max</small>`;
+    updateBJBetLimitHint();
   }
 
   function shakeWallet() {
@@ -6275,8 +6518,113 @@
   let pkBalls = [];
   let pkBuckets = [];
   let pkAnimFrame = null;
+  let pkProgress = { level: 1, xp: 0, drops: 0, heat: 0 };
   const PK_W = 380, PK_H = 440;
   const PK_PEG_R = 5;
+
+  const PK_TITLES = ['Peg Rookie', 'Board Hopper', 'Bucket Hunter', 'Drop Master', 'Plinko Legend'];
+
+  function pkProgressKey(playerId) {
+    return `pw_pk_progress_${playerId}`;
+  }
+
+  function pkXpToNext(level) {
+    return 10 + (level - 1) * 8;
+  }
+
+  function pkMaxBetForLevel(level) {
+    return Math.min(300, 25 + (level - 1) * 10);
+  }
+
+  function pkHeatBonusPct() {
+    return Math.min(24, pkProgress.heat * 4);
+  }
+
+  function pkLoadProgress(playerId) {
+    if (!playerId) return;
+    const raw = localStorage.getItem(pkProgressKey(playerId));
+    if (!raw) {
+      pkProgress = { level: 1, xp: 0, drops: 0, heat: 0 };
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      pkProgress = {
+        level: Math.max(1, parsed.level || 1),
+        xp: Math.max(0, parsed.xp || 0),
+        drops: Math.max(0, parsed.drops || 0),
+        heat: Math.max(0, parsed.heat || 0),
+      };
+    } catch {
+      pkProgress = { level: 1, xp: 0, drops: 0, heat: 0 };
+    }
+  }
+
+  function pkSaveProgress(playerId) {
+    if (!playerId) return;
+    localStorage.setItem(pkProgressKey(playerId), JSON.stringify(pkProgress));
+  }
+
+  function pkRenderProgress() {
+    const level = pkProgress.level;
+    const next = pkXpToNext(level);
+    const title = PK_TITLES[Math.min(PK_TITLES.length - 1, Math.floor((level - 1) / 2))];
+    const maxBet = pkMaxBetForLevel(level);
+    document.getElementById('pkRankLabel').textContent = `${title} Lv.${level}`;
+    document.getElementById('pkCapLabel').textContent = `Level ${level} cap: max bet ${maxBet}`;
+    document.getElementById('pkXpLabel').textContent = `${pkProgress.xp} / ${next} xp`;
+    document.getElementById('pkHeatLabel').textContent = `Bounce bonus: +${pkHeatBonusPct()}%`;
+    document.getElementById('pkXpFill').style.width = `${Math.min(100, (pkProgress.xp / next) * 100)}%`;
+    pkUpdateBetLimitHint();
+  }
+
+  function pkUpdateBetLimitHint() {
+    const maxBet = pkMaxBetForLevel(pkProgress.level);
+    const el = document.getElementById('pkBetLimitHint');
+    if (!el) return;
+    el.textContent = `Level ${pkProgress.level} cap active • max bet ${maxBet}`;
+  }
+
+  function pkUpdateBetDisplay() {
+    const maxBet = pkMaxBetForLevel(pkProgress.level);
+    const el = document.getElementById('pkBetDisplay');
+    if (!el) return;
+    el.innerHTML = `<span class="bet-display-main">${pkBet}</span><span class="bet-display-max">/${maxBet} MAX</span><small>bet / max</small>`;
+    pkUpdateBetLimitHint();
+  }
+
+  function pkAwardProgress(playerId, outcome) {
+    let gain = 1;
+    if (outcome === 'win') gain = 2;
+    if (outcome === 'bigwin') gain = 3;
+
+    pkProgress.drops += 1;
+    pkProgress.xp += gain;
+
+    let leveled = false;
+    while (pkProgress.xp >= pkXpToNext(pkProgress.level)) {
+      pkProgress.xp -= pkXpToNext(pkProgress.level);
+      pkProgress.level += 1;
+      leveled = true;
+    }
+
+    if (outcome === 'win' || outcome === 'bigwin') pkProgress.heat = Math.min(6, pkProgress.heat + 1);
+    if (outcome === 'lose') pkProgress.heat = 0;
+    if (outcome === 'push') pkProgress.heat = Math.max(0, pkProgress.heat - 1);
+
+    pkSaveProgress(playerId);
+    pkRenderProgress();
+
+    if (leveled) {
+      const banner = document.getElementById('pkResultBanner');
+      if (banner) {
+        banner.textContent = `⬆ PLINKO LV.${pkProgress.level}`;
+        banner.className = 'result-banner show bj';
+        setTimeout(() => banner.classList.remove('show'), 2200);
+      }
+      setTimeout(() => launchParticles('bj'), 60);
+    }
+  }
   const PK_BALL_R = 7;
   const PK_TOP_PAD = 38;
   const PK_BOT_PAD = 54;
@@ -6447,16 +6795,20 @@
     if (!p) return;
     const bet = ball.bet || pkBet;
     const mult = bucket.mult;
-    const payout = Math.floor(bet * mult);
-    const profit = payout - bet;
+    let payout = Math.floor(bet * mult);
+    let profit = payout - bet;
+    const bounceBonus = profit > 0 ? Math.floor(profit * (pkHeatBonusPct() / 100)) : 0;
+    payout += bounceBonus;
+    profit += bounceBonus;
 
     const resultEl = document.getElementById('plinkoResultNum');
-    resultEl.textContent = mult + 'x  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙';
+    const bonusNote = bounceBonus > 0 ? ` (+${bounceBonus} bonus)` : '';
+    resultEl.textContent = mult + 'x  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙' + bonusNote;
     resultEl.className = 'roulette-result-num ' + (profit > 0 ? 'green' : profit === 0 ? '' : 'red');
 
     const banner = document.getElementById('pkResultBanner');
     if (profit > 0) {
-      banner.textContent = '✅ +' + profit + ' 🪙';
+      banner.textContent = '✅ +' + profit + ' 🪙' + (bounceBonus > 0 ? `  (BONUS +${bounceBonus})` : '');
       banner.className = 'result-banner show win';
       soundWin();
       setTimeout(() => launchParticles('win'), 80);
@@ -6476,22 +6828,34 @@
     const snap = await new Promise(res => onValue(ref(db, `players/${p.id}/coins`), res, { onlyOnce: true }));
     const currentCoins = snap.val() || 0;
     await setCasinoCoins(p.id, currentCoins + payout);
+
+    const outcome = profit > bet ? 'bigwin' : profit > 0 ? 'win' : profit === 0 ? 'push' : 'lose';
+    pkAwardProgress(p.id, outcome);
   }
 
   window.pkAddBet = function(amount) {
     if (pkRunning) return;
     const p = getCurrentCasinoPlayer();
     if (!p) { shakeWallet(); return; }
+    const maxBet = pkMaxBetForLevel(pkProgress.level);
+    if (pkBet + amount > maxBet) {
+      shakeWallet();
+      const banner = document.getElementById('pkResultBanner');
+      banner.textContent = `LEVEL ${pkProgress.level} CAP: MAX BET ${maxBet}`;
+      banner.className = 'result-banner show push';
+      setTimeout(() => banner.classList.remove('show'), 2200);
+      return;
+    }
     if (pkBet + amount > (p.coins || 0)) { shakeWallet(); return; }
     pkBet += amount;
     soundChip();
-    document.getElementById('pkBetDisplay').innerHTML = pkBet + '<small>bet</small>';
+    pkUpdateBetDisplay();
   };
 
   window.pkClearBet = function() {
     if (pkRunning) return;
     pkBet = 0;
-    document.getElementById('pkBetDisplay').innerHTML = '0<small>bet</small>';
+    pkUpdateBetDisplay();
   };
 
   window.pkDrop = async function() {
@@ -6961,6 +7325,7 @@
     setTimeout(() => playTone(180, 'sawtooth', 0.3, 0.15), 150);
     spawnCoinFloat(`-${lost} 🪙`);
     await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) - lost));
+    bjAwardProgress(p.id, 'surrender');
     // Keep last blackjack bet selected between hands (Precision-style remember bet)
     updateBetDisplay();
     setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
@@ -7086,9 +7451,12 @@
     });
 
     results.forEach(r => totalDelta += r.delta);
+    const heatBonus = totalDelta > 0 ? Math.floor(totalDelta * (bjHeatBonusPct() / 100)) : 0;
+    totalDelta += heatBonus;
     const summary = results.map((r, i) => `H${i+1}: ${r.text}`).join(' · ');
     const sign = totalDelta >= 0 ? '+' : '';
-    showResult(`${summary}  (${sign}${totalDelta} 🪙)`, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
+    const heatNote = heatBonus > 0 ? ` · HEAT +${heatBonus}` : '';
+    showResult(`${summary}${heatNote}  (${sign}${totalDelta} 🪙)`, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
     totalDelta > 0 ? soundWin() : totalDelta < 0 ? soundLose() : soundPush();
     if (totalDelta > 0) {
       setTimeout(() => launchParticles('win'), 80);
@@ -7099,6 +7467,7 @@
     }
 
     await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) + totalDelta));
+    bjAwardProgress(p.id, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
 
     // Clean up split UI
     bjSplitHands = null;
@@ -7160,10 +7529,17 @@
       soundPush();
     }
 
+    const heatBonus = delta > 0 ? Math.floor(delta * (bjHeatBonusPct() / 100)) : 0;
+    if (heatBonus > 0) {
+      delta += heatBonus;
+      resultText += ` · HEAT +${heatBonus} 🪙`;
+    }
+
     showResult(resultText, resultType);
 
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
+    bjAwardProgress(p.id, resultType === 'win' || resultType === 'bj' ? resultType : resultType === 'lose' ? 'lose' : 'push');
 
     if (delta > 0) {
       setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 400);
