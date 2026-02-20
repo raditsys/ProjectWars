@@ -8877,6 +8877,7 @@ document.addEventListener('click', e => {
 
   let cx = 2, cy = 2;
   let clayer = 0;  // 0=surface, 1=underground
+  let suppressTollAutoEnter = false;
   let resourceState = [];
   let worldResourceState = {};
 
@@ -9092,20 +9093,24 @@ document.addEventListener('click', e => {
         talkBtn.textContent = '💬 Talk';
         talkBtn.onclick = () => openDialogue(rm.npc);
         resContainer.appendChild(talkBtn);
-        setTimeout(async () => {
-          const coins = window.__getCoins ? await window.__getCoins() : 0;
-          if (coins >= 5) {
-            if (window.__spendCoins) await window.__spendCoins(5);
-            const toast = document.createElement('div');
-            toast.className = 'quest-reward-toast';
-            toast.textContent = '🛡️ Toll paid — 5g';
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
-            setTimeout(() => envEnterDesert(), 400);
-          } else {
-            openDialogue(rm.npc);
-          }
-        }, 450);
+        if (suppressTollAutoEnter) {
+          suppressTollAutoEnter = false;
+        } else {
+          setTimeout(async () => {
+            const coins = window.__getCoins ? await window.__getCoins() : 0;
+            if (coins >= 5) {
+              if (window.__spendCoins) await window.__spendCoins(5);
+              const toast = document.createElement('div');
+              toast.className = 'quest-reward-toast';
+              toast.textContent = '🛡️ Toll paid — 5g';
+              document.body.appendChild(toast);
+              setTimeout(() => toast.remove(), 2000);
+              setTimeout(() => envEnterDesert(), 400);
+            } else {
+              openDialogue(rm.npc);
+            }
+          }, 450);
+        }
       } else {
         const talkBtn = document.createElement('button');
         talkBtn.className = 'npc-talk-btn';
@@ -9302,6 +9307,7 @@ document.addEventListener('click', e => {
     layerFlash(() => {
       clayer = 0;
       cx = 3; cy = 6;  // back to Toll Gate
+      suppressTollAutoEnter = true;
       renderRoom(0, 0);
     });
   };
