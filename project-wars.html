@@ -9993,7 +9993,9 @@ function spawnSkillFloat(x, y, text, cls) {
   let gnomeVelX = 0.8;
   let gnomeMoveRaf = null;
   let gnomeLastTs = 0;
+  let gnomeAccumMs = 0;
   let gnomeCoinInterval = null;
+  const GNOME_FRAME_MS = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 33;
 
   function gnomeSpawnCoin() {
     if (!gnomeActive) return;
@@ -10018,11 +10020,19 @@ function spawnSkillFloat(x, y, text, cls) {
     if (!gnomeActive || document.hidden) {
       gnomeMoveRaf = null;
       gnomeLastTs = 0;
+      gnomeAccumMs = 0;
       return;
     }
     if (!gnomeLastTs) gnomeLastTs = ts;
-    const dt = Math.min(64, ts - gnomeLastTs);
+    const frameDt = Math.min(64, ts - gnomeLastTs);
     gnomeLastTs = ts;
+    gnomeAccumMs += frameDt;
+    if (gnomeAccumMs < GNOME_FRAME_MS) {
+      gnomeMoveRaf = requestAnimationFrame(gnomeStep);
+      return;
+    }
+    const dt = gnomeAccumMs;
+    gnomeAccumMs = 0;
 
     gnomePosX += gnomeVelX * (dt / 40);
     if (gnomePosX > window.innerWidth - 60) {
@@ -10042,6 +10052,7 @@ function spawnSkillFloat(x, y, text, cls) {
   function startGnomeMotion() {
     if (!gnomeActive || gnomeMoveRaf || document.hidden) return;
     gnomeLastTs = 0;
+    gnomeAccumMs = 0;
     gnomeMoveRaf = requestAnimationFrame(gnomeStep);
   }
 
@@ -10093,6 +10104,8 @@ function spawnSkillFloat(x, y, text, cls) {
   let frogRaf = null;
   let frogLastTs = 0;
   let hopElapsedMs = 0;
+  let frogAccumMs = 0;
+  const FROG_FRAME_MS = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 33;
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
   function ribbit() {
@@ -10142,11 +10155,19 @@ function spawnSkillFloat(x, y, text, cls) {
     if (document.hidden) {
       frogRaf = null;
       frogLastTs = 0;
+      frogAccumMs = 0;
       return;
     }
     if (!frogLastTs) frogLastTs = ts;
-    const dt = Math.min(64, ts - frogLastTs);
+    const frameDt = Math.min(64, ts - frogLastTs);
     frogLastTs = ts;
+    frogAccumMs += frameDt;
+    if (frogAccumMs < FROG_FRAME_MS) {
+      frogRaf = requestAnimationFrame(frogStep);
+      return;
+    }
+    const dt = frogAccumMs;
+    frogAccumMs = 0;
 
     posX += velX * (dt / 30);
     if (posX < 10) { posX = 10; velX = Math.abs(velX); }
@@ -10167,6 +10188,7 @@ function spawnSkillFloat(x, y, text, cls) {
   function startFrogLoop() {
     if (frogRaf || document.hidden) return;
     frogLastTs = 0;
+    frogAccumMs = 0;
     frogRaf = requestAnimationFrame(frogStep);
   }
 
