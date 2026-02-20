@@ -4644,6 +4644,8 @@
   let logs = {};
   let worldResources = {};
   let currentUser = null; // { id, name, ...playerData }
+  let recentLogsCache = [];
+  let streakCache = {};
 
   const syncEl = document.getElementById('syncStatus');
 
@@ -4700,8 +4702,38 @@
 
   onValue(ref(db, 'logs'), snap => {
     logs = snap.val() || {};
+    rebuildLogCaches();
     scheduleRender('history');
   });
+
+  function rebuildLogCaches() {
+    const logValues = Object.values(logs);
+    recentLogsCache = logValues
+      .map(l => ({ ...l, __tsMs: new Date(l.ts).getTime() || 0 }))
+      .sort((a, b) => b.__tsMs - a.__tsMs)
+      .slice(0, 20);
+
+    const daySetsByPlayer = new Map();
+    for (const log of logValues) {
+      if (!log?.player) continue;
+      const day = new Date(log.ts).toDateString();
+      if (!daySetsByPlayer.has(log.player)) daySetsByPlayer.set(log.player, new Set());
+      daySetsByPlayer.get(log.player).add(day);
+    }
+
+    const nextStreaks = {};
+    for (const [playerName, daySet] of daySetsByPlayer.entries()) {
+      let streak = 0;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        if (daySet.has(d.toDateString())) streak++;
+        else break;
+      }
+      nextStreaks[playerName] = streak;
+    }
+    streakCache = nextStreaks;
+  }
 
   onValue(ref(db, 'resources'), snap => {
     worldResources = snap.val() || {};
@@ -5106,15 +5138,7 @@
   }
 
   function getStreak(name) {
-    const days = new Set(
-      Object.values(logs).filter(l => l.player === name).map(l => new Date(l.ts).toDateString())
-    );
-    let streak = 0;
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(); d.setDate(d.getDate() - i);
-      if (days.has(d.toDateString())) streak++; else break;
-    }
-    return streak;
+    return streakCache[name] || 0;
   }
 
   function isSundayEST() {
@@ -5169,6 +5193,9 @@
     }
     arr.sort((a, b) => b.total - a.total);
     const max = arr[0].total || 1;
+    const sunday = isSundayEST();
+    const shopById = new Map((window.__shopItems || []).map(item => [item.id, item]));
+    const titlesById = new Map((window.__playerTitles || []).map(title => [title.id, title]));
 
     lb.innerHTML = arr.map((p, i) => {
       const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
@@ -5189,7 +5216,7 @@
             </span>`).join('')
         : `<span style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;">no projects yet</span>`;
 
-      const fxItem = p.equippedFx ? window.__shopItems?.find(s => s.id === p.equippedFx) : null;
+      const fxItem = p.equippedFx ? shopById.get(p.equippedFx) : null;
       // Extract just the emoji (everything before the first space)
       const fxEmoji = fxItem ? fxItem.name.split(' ')[0] : '';
       const fxIconHtml = fxItem
@@ -5197,7 +5224,7 @@
         : '';
 
       // Equipped title
-      const titleData = p.equippedTitle ? window.__playerTitles?.find(t => t.id === p.equippedTitle) : null;
+      const titleData = p.equippedTitle ? titlesById.get(p.equippedTitle) : null;
       const titleHtml = titleData
         ? `<div style="font-size:0.6rem;letter-spacing:1.5px;color:${titleData.color};margin-top:1px;font-family:'Bebas Neue',sans-serif;">${titleData.name}</div>`
         : '';
@@ -5207,7 +5234,7 @@
           <div class="card-top">
             <div class="rank-badge">${medal}</div>
             <div>
-              <div class="player-name">${escHtml(p.name)}${fxIconHtml}${isMe ? ' <span style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;">(you)</span>' : ''}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}${isSundayEST() && mult ? ` <span style="font-size:0.6rem;color:var(--gold);letter-spacing:1px;">${mult}</span>` : ''}</div>
+              <div class="player-name">${escHtml(p.name)}${fxIconHtml}${isMe ? ' <span style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;">(you)</span>' : ''}${streak > 1 ? ` <span class="streak">🔥 ${streak}d</span>` : ''}${sunday && mult ? ` <span style="font-size:0.6rem;color:var(--gold);letter-spacing:1px;">${mult}</span>` : ''}</div>
               ${titleHtml}
             </div>
             <div class="player-stats">
@@ -5278,16 +5305,15 @@
 
   function renderHistory() {
     const el = document.getElementById('history');
-    const arr = Object.values(logs).sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 20);
-    if (!arr.length) {
+    if (!recentLogsCache.length) {
       el.innerHTML = '<div style="color:var(--muted);font-size:0.75rem;padding:1rem 0;">No activity logged yet.</div>';
       return;
     }
-    el.innerHTML = arr.map(l => `
+    el.innerHTML = recentLogsCache.map(l => `
       <div class="log-item">
         <div>
           <div class="log-who">${escHtml(l.player)} · <span style="color:var(--muted)">${escHtml(l.project || '')}</span></div>
-          <div class="log-detail">${l.note ? escHtml(l.note) : 'no note'} · ${timeAgo(new Date(l.ts))}</div>
+          <div class="log-detail">${l.note ? escHtml(l.note) : 'no note'} · ${timeAgo(l.__tsMs)}</div>
         </div>
         <div class="log-amount">
           <span class="hrs">+${l.hours}h</span>
