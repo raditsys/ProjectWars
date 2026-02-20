@@ -33,6 +33,34 @@
     overflow-x: hidden;
   }
 
+  /* Performance mode for weaker hardware */
+  body.perf-lite *,
+  body.perf-lite *::before,
+  body.perf-lite *::after {
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  body.perf-lite .wavy-letter,
+  body.perf-lite .chest-btn.ready,
+  body.perf-lite .music-btn.playing,
+  body.perf-lite .pr-starbeam,
+  body.perf-lite .pr-beam,
+  body.perf-lite .env-layer-btn,
+  body.perf-lite .npc-talk-btn,
+  body.perf-lite #adventureBtn {
+    animation: none !important;
+  }
+
+  body.perf-lite .player-card,
+  body.perf-lite .win-lb-panel,
+  body.perf-lite .pr-arena,
+  body.perf-lite .casino-body {
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
   header { text-align: center; margin-bottom: 3rem; display: flex; flex-direction: column; align-items: center; }
 
   header h1 {
@@ -4565,6 +4593,15 @@
   makeWavy(document.getElementById('wavyLoginTitle'),   'Project Wars',                 0,    0.08);
   makeWavy(document.getElementById('wavyLoginSubtitle'),'Who ships the most this week?', 0.3, 0.04);
 
+  // ── Performance mode (auto-enable on weaker hardware) ──
+  const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lowCoreCount = (navigator.hardwareConcurrency || 8) <= 4;
+  const lowMemory = typeof navigator.deviceMemory === 'number' && navigator.deviceMemory <= 4;
+  window.__perfLite = !!(prefersReducedMotion || lowCoreCount || lowMemory);
+  if (window.__perfLite) {
+    document.body.classList.add('perf-lite');
+  }
+
   // ── Dev Mode (secret: click title 10 times) ──
   let _devClicks = 0;
   window.devModeClick = function() {
@@ -4651,22 +4688,39 @@
 
   // ── Render scheduling (collapse rapid Firebase updates into 1 paint) ──
   let __rafRenderId = null;
+  let __renderDelayId = null;
+  let __lastRenderAt = 0;
   const __renderPending = { full: false, history: false };
+  const RENDER_MIN_GAP_MS = window.__perfLite ? 120 : 0;
+
+  function runScheduledRender() {
+    __rafRenderId = null;
+    __lastRenderAt = Date.now();
+    if (__renderPending.full) {
+      render();
+    } else if (__renderPending.history) {
+      renderHistory();
+    }
+    __renderPending.full = false;
+    __renderPending.history = false;
+  }
 
   function scheduleRender(kind) {
     if (kind === 'full') __renderPending.full = true;
     if (kind === 'history') __renderPending.history = true;
-    if (__rafRenderId) return;
-    __rafRenderId = requestAnimationFrame(() => {
-      __rafRenderId = null;
-      if (__renderPending.full) {
-        render();
-      } else if (__renderPending.history) {
-        renderHistory();
-      }
-      __renderPending.full = false;
-      __renderPending.history = false;
-    });
+    if (__rafRenderId || __renderDelayId) return;
+
+    const wait = Math.max(0, RENDER_MIN_GAP_MS - (Date.now() - __lastRenderAt));
+    const queueFrame = () => {
+      __renderDelayId = null;
+      __rafRenderId = requestAnimationFrame(runScheduledRender);
+    };
+
+    if (wait > 0) {
+      __renderDelayId = setTimeout(queueFrame, wait);
+    } else {
+      queueFrame();
+    }
   }
 
 
@@ -5903,15 +5957,18 @@
 
   // ── Particle Fanfare ──
   function launchParticles(type) {
+    if (window.__perfLite) return;
     const drawer = document.getElementById('casinoDrawer');
+    if (!drawer) return;
     const rect = drawer.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height * 0.45;
 
+    const q = (navigator.hardwareConcurrency || 8) <= 6 ? 0.7 : 1;
     const configs = {
-      win:  { count: 40, colors: ['#f5c842','#4ade80','#fff','#ff8c42'], emojis: ['🪙','✨','💰'], spread: 260 },
-      bj:   { count: 80, colors: ['#f5c842','#fff','#ff8c42','#ffdd00','#fffacd'], emojis: ['🃏','🪙','⭐','💎','🎰'], spread: 360 },
-      bust: { count: 20, colors: ['#f87171','#ff4400','#880000'], emojis: ['💀','❌'], spread: 180 },
+      win:  { count: Math.round(40 * q), colors: ['#f5c842','#4ade80','#fff','#ff8c42'], emojis: ['🪙','✨','💰'], spread: 260 },
+      bj:   { count: Math.round(80 * q), colors: ['#f5c842','#fff','#ff8c42','#ffdd00','#fffacd'], emojis: ['🃏','🪙','⭐','💎','🎰'], spread: 360 },
+      bust: { count: Math.round(20 * q), colors: ['#f87171','#ff4400','#880000'], emojis: ['💀','❌'], spread: 180 },
     };
     const cfg = configs[type] || configs.win;
 
@@ -8650,17 +8707,32 @@ document.addEventListener('click', e => {
   function refreshResourceNodeVisual(state) {
     if (!state || !state.el) return;
     const node = getWorldNode(state.nodeKey);
-    const existing = state.el.querySelector('.resource-status-tag');
-    if (existing) existing.remove();
-    state.depleted = !!node;
-    state.el.classList.toggle('depleted', !!node);
-    if (!node) return;
+    const isDepleted = !!node;
+    if (state.depleted !== isDepleted) {
+      state.depleted = isDepleted;
+      state.el.classList.toggle('depleted', isDepleted);
+    }
+
+    if (!node) {
+      if (state.statusTag && state.statusTag.isConnected) state.statusTag.remove();
+      state.statusTag = null;
+      state.lastSecs = -1;
+      state.lastBy = '';
+      return;
+    }
+
     const secs = Math.max(0, Math.ceil((Number(node.respawnAt || 0) - Date.now()) / 1000));
-    const tag = document.createElement('div');
-    tag.className = 'resource-status-tag';
     const by = node.takenBy || 'Unknown';
-    tag.innerHTML = `Taken by: ${by}<br/>Back in ${secs}s`;
-    state.el.appendChild(tag);
+    if (!state.statusTag) {
+      state.statusTag = document.createElement('div');
+      state.statusTag.className = 'resource-status-tag';
+      state.el.appendChild(state.statusTag);
+    }
+    if (secs !== state.lastSecs || by !== state.lastBy) {
+      state.statusTag.innerHTML = `Taken by: ${by}<br/>Back in ${secs}s`;
+      state.lastSecs = secs;
+      state.lastBy = by;
+    }
   }
   function refreshResourceVisuals() {
     resourceState.forEach(refreshResourceNodeVisual);
