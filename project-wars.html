@@ -3589,8 +3589,23 @@
   .inv-sell-btn:hover:not(:disabled) { background: #22552a; }
   .inv-sell-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  /* Gear panel */
-  .gear-wrap { display: grid; grid-template-columns: 1fr 108px; gap: 10px; padding: 8px; }
+  /* Gear panel (modular, RuneScape-style) */
+  .gear-modules { padding: 8px; display: flex; flex-direction: column; gap: 8px; min-width: 260px; }
+  .gear-module-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .gear-module-tab {
+    background: #0f0f0f;
+    border: 1px solid #2a2a2a;
+    color: var(--muted);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    padding: 4px 0;
+    cursor: pointer;
+  }
+  .gear-module-tab.active { border-color: var(--gold); color: var(--gold); }
+  .gear-module-pane { display: none; }
+  .gear-module-pane.active { display: block; }
+  .gear-wrap { display: grid; grid-template-columns: 1fr 108px; gap: 10px; }
   .gear-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -3627,6 +3642,10 @@
     padding: 2px;
   }
   .gear-rig-slot .hand { font-size: 0.48rem; color: var(--muted); letter-spacing: 1px; }
+  .gear-module-note { font-size: 0.55rem; color: var(--muted); letter-spacing: 1px; }
+  .gear-stats-list { display: flex; flex-direction: column; gap: 5px; }
+  .gear-stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid #1d1d1d; padding-bottom: 2px; font-size: 0.6rem; }
+  .gear-stat-row strong { color: var(--gold); font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
 
   /* Skills inside hotbar panel */
   .skill-card {
@@ -3892,12 +3911,47 @@
     <button class="hotbar-btn" id="hotbarGearBtn" onclick="hotbarToggle('gear')" title="Backpack & Equipment">🧰</button>
     <div class="hotbar-panel" id="hotbarGearPanel">
       <div class="hotbar-panel-title">🧰 Backpack + Equipment</div>
-      <div class="gear-wrap">
-        <div class="gear-grid" id="gearGrid"></div>
-        <div class="gear-rig">
-          <div class="gear-rig-title">Rig</div>
-          <div class="gear-rig-slot" id="gearLeftHand"><div class="hand">LEFT HAND</div><div>Empty</div></div>
-          <div class="gear-rig-slot" id="gearRightHand"><div class="hand">RIGHT HAND</div><div>Empty</div></div>
+      <div class="gear-modules">
+        <div class="gear-module-tabs">
+          <button class="gear-module-tab active" id="gearTabTools" onclick="switchGearModule('tools')">⚒ Tools</button>
+          <button class="gear-module-tab" id="gearTabWorn" onclick="switchGearModule('worn')">🛡 Worn</button>
+          <button class="gear-module-tab" id="gearTabStats" onclick="switchGearModule('stats')">📊 Stats</button>
+        </div>
+
+        <div class="gear-module-pane active" id="gearPaneTools">
+          <div class="gear-wrap">
+            <div class="gear-grid" id="gearGrid"></div>
+            <div class="gear-rig">
+              <div class="gear-rig-title">Rig</div>
+              <div class="gear-rig-slot" id="gearLeftHand"><div class="hand">LEFT HAND</div><div>Empty</div></div>
+              <div class="gear-rig-slot" id="gearRightHand"><div class="hand">RIGHT HAND</div><div>Empty</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gear-module-pane" id="gearPaneWorn">
+          <div class="gear-module-note">Old School-style layout: weapon slots are currently active. Armour slots unlock later.</div>
+          <div class="gear-wrap">
+            <div class="gear-grid">
+              <div class="gear-slot empty" title="Head slot (coming soon)">🪖</div>
+              <div class="gear-slot empty" title="Cape slot (coming soon)">🧣</div>
+              <div class="gear-slot empty" title="Neck slot (coming soon)">📿</div>
+              <div class="gear-slot empty" title="Body slot (coming soon)">🦺</div>
+              <div class="gear-slot empty" title="Leg slot (coming soon)">👖</div>
+              <div class="gear-slot empty" title="Boot slot (coming soon)">🥾</div>
+              <div class="gear-slot empty" title="Ring slot (coming soon)">💍</div>
+              <div class="gear-slot empty" title="Ammo slot (coming soon)">🏹</div>
+            </div>
+            <div class="gear-rig">
+              <div class="gear-rig-title">Active</div>
+              <div class="gear-rig-slot" id="gearWornLeft"><div class="hand">LEFT HAND</div><div>Empty</div></div>
+              <div class="gear-rig-slot" id="gearWornRight"><div class="hand">RIGHT HAND</div><div>Empty</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gear-module-pane" id="gearPaneStats">
+          <div class="gear-stats-list" id="gearStatsList"></div>
         </div>
       </div>
     </div>
@@ -8324,13 +8378,43 @@ const SELL_IDS = {
   copper_ore: 'sellCopperOre', iron_ore: 'sellIronOre', gold_ore: 'sellGoldOre', runite_ore: 'sellRuniteOre',
 };
 
+window.__gearModule = window.__gearModule || 'tools';
+
+window.switchGearModule = function(moduleId) {
+  const modules = ['tools','worn','stats'];
+  if (!modules.includes(moduleId)) return;
+  window.__gearModule = moduleId;
+  modules.forEach(m => {
+    document.getElementById(`gearPane${m[0].toUpperCase()}${m.slice(1)}`)?.classList.toggle('active', m === moduleId);
+    document.getElementById(`gearTab${m[0].toUpperCase()}${m.slice(1)}`)?.classList.toggle('active', m === moduleId);
+  });
+};
+
 function updateEquipmentUI() {
   const left = document.getElementById('gearLeftHand');
   const right = document.getElementById('gearRightHand');
+  const wornLeft = document.getElementById('gearWornLeft');
+  const wornRight = document.getElementById('gearWornRight');
+  const stats = document.getElementById('gearStatsList');
   const leftItem = window.__equipmentLoadout.leftHand;
   const rightItem = window.__equipmentLoadout.rightHand;
-  if (left) left.innerHTML = `<div class="hand">LEFT HAND</div><div>${leftItem && TOOL_ITEMS[leftItem] ? `${TOOL_ITEMS[leftItem].icon} ${TOOL_ITEMS[leftItem].name}` : 'Empty'}</div>`;
-  if (right) right.innerHTML = `<div class="hand">RIGHT HAND</div><div>${rightItem && TOOL_ITEMS[rightItem] ? `${TOOL_ITEMS[rightItem].icon} ${TOOL_ITEMS[rightItem].name}` : 'Empty'}</div>`;
+  const leftText = `${leftItem && TOOL_ITEMS[leftItem] ? `${TOOL_ITEMS[leftItem].icon} ${TOOL_ITEMS[leftItem].name}` : 'Empty'}`;
+  const rightText = `${rightItem && TOOL_ITEMS[rightItem] ? `${TOOL_ITEMS[rightItem].icon} ${TOOL_ITEMS[rightItem].name}` : 'Empty'}`;
+
+  if (left) left.innerHTML = `<div class="hand">LEFT HAND</div><div>${leftText}</div>`;
+  if (right) right.innerHTML = `<div class="hand">RIGHT HAND</div><div>${rightText}</div>`;
+  if (wornLeft) wornLeft.innerHTML = `<div class="hand">LEFT HAND</div><div>${leftText}</div>`;
+  if (wornRight) wornRight.innerHTML = `<div class="hand">RIGHT HAND</div><div>${rightText}</div>`;
+
+  if (stats) {
+    const logBonus = Math.round((window.__getToolDoubleChance ? window.__getToolDoubleChance('log') : 0) * 100);
+    const oreBonus = Math.round((window.__getToolDoubleChance ? window.__getToolDoubleChance('ore') : 0) * 100);
+    stats.innerHTML = `
+      <div class="gear-stat-row"><span>Woodcutting yield bonus</span><strong>+${logBonus}%</strong></div>
+      <div class="gear-stat-row"><span>Mining yield bonus</span><strong>+${oreBonus}%</strong></div>
+      <div class="gear-stat-row"><span>Quest gear unlocks</span><strong>Soon</strong></div>
+    `;
+  }
 }
 
 function renderGearGrid() {
@@ -8497,7 +8581,7 @@ document.addEventListener('click', e => {
     '4,1': f('Ruins',           'Crumbling stone walls, long forgot', 'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201a14', '#382e20'),
     '5,1': { name:'Mushroom Ring', desc:'A hunched figure mutters over the fungi.', sky:'linear-gradient(180deg,#120a18 0%,#1a1020 60%,#120a18 100%)', ground:'#1e1028', groundBorder:'#341a3e', resources:[], npc:'wren' },
     '6,1': f('Overgrown Path',  'The trail is barely visible',        'linear-gradient(180deg,#0a1008 0%,#0e160a 60%,#0a1008 100%)', '#14200e', '#243a18'),
-    '7,1': null,
+    '7,1': { name:'Village Kitchen', desc:'Warm bread, boiling pots, and a frantic cook.', sky:'linear-gradient(180deg,#20160c 0%,#2a1e12 60%,#181008 100%)', ground:'#2c1c10', groundBorder:'#4a301a', resources:[], npc:'cook' },
 
     '0,2': r('Lakeside',        'Willow trees by the water',          'linear-gradient(180deg,#061420 0%,#0a1e2a 60%,#0d2210 100%)', '#1a3020', '#2a5a30', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}]),
     '1,2': f('Twisted Oaks',    'Gnarled old trees, no timber left',  'linear-gradient(180deg,#0c1808 0%,#101e0c 60%,#0c1808 100%)', '#1a2c10', '#2e4c1a'),
@@ -8564,6 +8648,7 @@ document.addEventListener('click', e => {
   const DECOR = {
     'Flower Meadow': () => [[30,'#ff6688'],[90,'#ffaa33'],[155,'#cc44ff'],[215,'#44ccff'],[260,'#ff88aa']].map(([x,c])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(20,28,`<rect x="9" y="10" width="2" height="18" rx="1" fill="#3a7a2a"/><circle cx="10" cy="8" r="5" fill="${c}" opacity="0.9"/><circle cx="10" cy="8" r="2" fill="#fff" opacity="0.4"/>`)} </div>`).join(''),
     'Mushroom Ring': () => [[20,'#cc3333','#ff8888'],[80,'#8833cc','#cc88ff'],[150,'#cc3333','#ff8888'],[220,'#336633','#88ff88'],[260,'#8833cc','#cc88ff']].map(([x,c,t])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(24,30,`<rect x="10" y="16" width="4" height="14" rx="1" fill="#d4b896"/><ellipse cx="12" cy="16" rx="10" ry="7" fill="${c}"/><circle cx="8" cy="14" r="2" fill="${t}" opacity="0.6"/><circle cx="14" cy="11" r="1.5" fill="${t}" opacity="0.5"/>`)}</div>`).join(''),
+    'Village Kitchen': () => `<div class="env-decor" style="left:18px;bottom:0;width:270px;height:120px">${makeSVG(270,120,`<rect x="25" y="38" width="220" height="82" rx="4" fill="#3a2818"/><rect x="34" y="46" width="202" height="66" rx="3" fill="#1a120a"/><rect x="48" y="60" width="80" height="42" fill="#5a4028"/><rect x="142" y="60" width="80" height="42" fill="#5a4028"/><circle cx="88" cy="82" r="12" fill="#c8a87a"/><ellipse cx="88" cy="82" rx="8" ry="5" fill="#5a4028"/><circle cx="182" cy="82" r="12" fill="#d9d9d9"/><ellipse cx="182" cy="82" rx="9" ry="6" fill="#777"/><circle cx="42" cy="26" r="10" fill="#ffcc66" opacity="0.85"/><ellipse cx="42" cy="20" rx="6" ry="8" fill="#ff8844" opacity="0.85"/><text x="170" y="28" font-size="10" fill="#f5c842" font-family="monospace">COOK'S ASSISTANT</text>`)} </div>`,
     'Ruins': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:80px">${makeSVG(300,80,[[10,40,30,22,'#3a3228'],[55,28,20,15,'#2e2a24'],[100,50,35,18,'#3a3228'],[160,32,18,28,'#2e2a24'],[210,45,28,14,'#3a3228'],[250,22,16,20,'#2e2a24']].map(([x,h,w,d,col])=>`<rect x="${x}" y="${80-h}" width="${w}" height="${h}" rx="1" fill="${col}"/><rect x="${x}" y="${80-h}" width="${w}" height="${d}" fill="#fff" opacity="0.04"/>`).join(''))}</div>`,
     'Crystal Cave': () => [[20,'#44aaff'],[75,'#aa44ff'],[140,'#44ffcc'],[200,'#ff44aa'],[255,'#44aaff']].map(([x,c])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(16,35,`<polygon points="8,0 14,14 12,35 4,35 2,14" fill="${c}" opacity="0.7"/><polygon points="8,0 14,14 8,10" fill="#fff" opacity="0.25"/>`)}</div>`).join(''),
     'Frozen Peak': () => [[15,42,28],[80,30,20],[145,50,32],[210,25,18],[260,38,24]].map(([x,h,w])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(w+4,h+6,`<ellipse cx="${(w+4)/2}" cy="${h+2}" rx="${w/2}" ry="${h*0.55}" fill="#3a4050"/><ellipse cx="${(w+4)/2}" cy="${h-2}" rx="${w*0.4}" ry="${h*0.25}" fill="#ddeeff" opacity="0.7"/>`)}</div>`).join(''),
@@ -8978,6 +9063,7 @@ document.addEventListener('click', e => {
         else if (rm.tollGate)               col = '#4a3a1a';
         else if (rm.tunnel)                 col = clayer===2 ? '#4a3a1a' : '#3a2050';
         else if (rm.npc && clayer===1)      col = '#3a1a10';
+        else if (rm.npc && clayer===0)      col = '#3a2a10';
         else if (rm.resources?.length)      col = clayer===0 ? '#1a4a1a' : clayer===1 ? '#1a3040' : '#4a3a14';
         else                                col = clayer===0 ? '#1e2e1e' : clayer===1 ? '#14101e' : '#3a2e18';
         ctx.fillStyle = col;
@@ -9633,6 +9719,95 @@ document.addEventListener('click', e => {
       }
     },
 
+
+    // ─────────────────────────────────────────────
+    cook: {
+      name: 'Cook Ellena',
+      title: 'Village Kitchen Master',
+      portrait: '🍳',
+      tree: {
+        root: {
+          text: () => {
+            if (window.__questFlags?.cooksAssistantDone) {
+              return `*Ellena is back to kneading dough with military focus.*
+
+"You saved service, adventurer. The kitchen still smells like smoke and victory. If you find more spare logs, I'll always put them to use."`;
+            }
+            return `*A flour-covered cook rushes between bubbling pots and nearly drops a mixing bowl.*
+
+"Oh no, no, no — the lunch bell is in minutes and I'm missing half my prep!
+
+You there, you look capable. I need an assistant, now."`;
+          },
+          choices: () => {
+            if (window.__questFlags?.cooksAssistantDone) {
+              return [
+                { label: 'Anything else you need?', next: 'after_done' },
+                { label: '[Leave]', next: null },
+              ];
+            }
+            return [
+              { label: "What's wrong?", next: 'problem' },
+              { label: 'I can help.', next: 'help_offer' },
+              { label: '[Leave]', next: null },
+            ];
+          }
+        },
+        problem: {
+          text: `"Recipe disaster. I need kindling for the ovens, sturdy wood for prep boards, and copper for a replacement soup pot.
+
+Bring me: 3 Oak Logs, 2 Willow Logs, and 1 Copper Ore.
+
+Do that, and I'll make it worth your while."`,
+          choices: [
+            { label: 'I can gather that.', next: 'help_offer' },
+            { label: '[Back]', next: 'root' },
+          ]
+        },
+        help_offer: {
+          text: () => {
+            const inv = window.__inventory || {};
+            const ok = (inv.oak_log||0) >= 3 && (inv.willow_log||0) >= 2 && (inv.copper_ore||0) >= 1;
+            return ok
+              ? `"Perfect timing! Hand them over and watch this kitchen sing."`
+              : `"Bless you. I need exactly: 3 Oak Logs, 2 Willow Logs, and 1 Copper Ore.
+
+Come back when you've got all of it."`;
+          },
+          choices: () => {
+            const inv = window.__inventory || {};
+            const ok = (inv.oak_log||0) >= 3 && (inv.willow_log||0) >= 2 && (inv.copper_ore||0) >= 1;
+            return ok
+              ? [
+                  { label: 'Hand over supplies.', next: 'turn_in', action: 'cook_assistant_complete' },
+                  { label: '[Back]', next: 'root' },
+                ]
+              : [
+                  { label: 'I will return soon.', next: null },
+                  { label: '[Back]', next: 'root' },
+                ];
+          }
+        },
+        turn_in: {
+          text: `*Ellena sweeps the supplies into organized stacks with practiced speed.*
+
+"Look at that — proper prep materials! You just saved today's service.
+
+Take this coin purse. And if anyone asks, yes, you passed Cook's Assistant with distinction."`,
+          choices: [
+            { label: 'Happy to help.', next: null },
+          ]
+        },
+        after_done: {
+          text: `"You've already done more than enough. If you're after work, try the mines or the deep woods. Kitchens run smoother than dungeons."`,
+          choices: [
+            { label: '[Back]', next: 'root' },
+            { label: '[Leave]', next: null },
+          ]
+        }
+      }
+    },
+
     // ─────────────────────────────────────────────
     orin: {
       name: 'Brother Orin',
@@ -9870,6 +10045,21 @@ document.addEventListener('click', e => {
       toast.textContent = "👑 Received: King's Seal";
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3500);
+    }
+    if (action === 'cook_assistant_complete') {
+      window.__inventory.oak_log = Math.max(0, (window.__inventory.oak_log || 0) - 3);
+      window.__inventory.willow_log = Math.max(0, (window.__inventory.willow_log || 0) - 2);
+      window.__inventory.copper_ore = Math.max(0, (window.__inventory.copper_ore || 0) - 1);
+      window.__questFlags.cooksAssistantDone = true;
+      updateInventoryUI();
+      if (window.__awardGrassCoin) window.__awardGrassCoin(120);
+      if (window.__fbSaveInventory) window.__fbSaveInventory();
+      if (window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
+      const toast = document.createElement('div');
+      toast.className = 'quest-reward-toast';
+      toast.textContent = "🍲 Quest Complete: Cook's Assistant (+120g)";
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2800);
     }
     if (action === 'toll_pay') {
       if (window.__spendCoins) window.__spendCoins(5);
