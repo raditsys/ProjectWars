@@ -9308,8 +9308,7 @@ document.addEventListener('click', e => {
   window.envExitDesert = function() {
     layerFlash(() => {
       clayer = 0;
-      cx = 3; cy = 6;  // back to Toll Gate
-      window.__skipTollAutoOnce = true;
+      cx = 3; cy = 5;  // one tile north of Toll Gate entrance
       renderRoom(0, 0);
     });
   };
