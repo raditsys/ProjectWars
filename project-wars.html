@@ -899,6 +899,34 @@
   /* Action buttons */
   .bj-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
 
+  .bj-progression {
+    margin-top: 0.75rem;
+    border: 1px solid #2a5a2a;
+    background: rgba(0, 0, 0, 0.28);
+    padding: 0.6rem 0.7rem;
+  }
+  .bj-progression-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+  }
+  .bj-rank { font-family: 'Bebas Neue', sans-serif; color: var(--gold); letter-spacing: 2px; font-size: 0.95rem; }
+  .bj-cap { font-size: 0.55rem; letter-spacing: 1px; color: #7fb37f; text-transform: uppercase; }
+  .bj-xp-bar { width: 100%; height: 8px; background: #112611; border: 1px solid #2a5a2a; overflow: hidden; }
+  .bj-xp-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4ade80, #f5c842); transition: width 0.25s ease; }
+  .bj-progression-sub {
+    margin-top: 0.35rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.55rem;
+    color: #7fb37f;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
   .bj-btn {
     flex: 1;
     min-width: 80px;
@@ -3805,6 +3833,17 @@
 <button class="bj-btn surrender" disabled="" id="btnSurrender" onclick="bjSurrender()">Surrender</button>
 <button class="bj-btn split" disabled="" id="btnSplit" onclick="bjSplit()">Split</button>
 </div>
+<div class="bj-progression" id="bjProgressWrap">
+  <div class="bj-progression-top">
+    <div class="bj-rank" id="bjRankLabel">Card Shark Lv.1</div>
+    <div class="bj-cap" id="bjCapLabel">Max bet: 25</div>
+  </div>
+  <div class="bj-xp-bar"><div class="bj-xp-fill" id="bjXpFill"></div></div>
+  <div class="bj-progression-sub">
+    <span id="bjXpLabel">0 / 8 xp</span>
+    <span id="bjHeatLabel">Heat bonus: +0%</span>
+  </div>
+</div>
 <!-- Split second hand (hidden until split) -->
 <div id="splitHand2Wrap" style="display:none;">
   <div class="table-section-label" style="margin-top:0.75rem;">Hand 2</div>
@@ -5790,6 +5829,90 @@
   let bjSplitHands = null; // null or [{cards,bet}, {cards,bet}] when split active
   let bjSplitIdx   = 0;    // which split hand is active
 
+  let bjProgress = { level: 1, xp: 0, hands: 0, heat: 0 };
+
+  const BJ_TITLES = ['Card Shark', 'Pit Grinder', 'Table Ranger', 'High Roller', 'Velvet Legend'];
+
+  function bjProgressKey(playerId) {
+    return `pw_bj_progress_${playerId}`;
+  }
+
+  function bjXpToNext(level) {
+    return 8 + (level - 1) * 6;
+  }
+
+  function bjMaxBetForLevel(level) {
+    return Math.min(300, 25 + (level - 1) * 12);
+  }
+
+  function bjHeatBonusPct() {
+    return Math.min(20, bjProgress.heat * 4);
+  }
+
+  function bjLoadProgress(playerId) {
+    if (!playerId) return;
+    const raw = localStorage.getItem(bjProgressKey(playerId));
+    if (!raw) {
+      bjProgress = { level: 1, xp: 0, hands: 0, heat: 0 };
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      bjProgress = {
+        level: Math.max(1, parsed.level || 1),
+        xp: Math.max(0, parsed.xp || 0),
+        hands: Math.max(0, parsed.hands || 0),
+        heat: Math.max(0, parsed.heat || 0),
+      };
+    } catch {
+      bjProgress = { level: 1, xp: 0, hands: 0, heat: 0 };
+    }
+  }
+
+  function bjSaveProgress(playerId) {
+    if (!playerId) return;
+    localStorage.setItem(bjProgressKey(playerId), JSON.stringify(bjProgress));
+  }
+
+  function bjRenderProgress() {
+    const level = bjProgress.level;
+    const next = bjXpToNext(level);
+    const title = BJ_TITLES[Math.min(BJ_TITLES.length - 1, Math.floor((level - 1) / 2))];
+    document.getElementById('bjRankLabel').textContent = `${title} Lv.${level}`;
+    document.getElementById('bjCapLabel').textContent = `Max bet: ${bjMaxBetForLevel(level)}`;
+    document.getElementById('bjXpLabel').textContent = `${bjProgress.xp} / ${next} xp`;
+    document.getElementById('bjHeatLabel').textContent = `Heat bonus: +${bjHeatBonusPct()}%`;
+    document.getElementById('bjXpFill').style.width = `${Math.min(100, (bjProgress.xp / next) * 100)}%`;
+  }
+
+  function bjAwardProgress(playerId, outcome) {
+    let gain = 1;
+    if (outcome === 'win') gain = 2;
+    if (outcome === 'bj') gain = 3;
+
+    bjProgress.hands += 1;
+    bjProgress.xp += gain;
+
+    let leveled = false;
+    while (bjProgress.xp >= bjXpToNext(bjProgress.level)) {
+      bjProgress.xp -= bjXpToNext(bjProgress.level);
+      bjProgress.level += 1;
+      leveled = true;
+    }
+
+    if (outcome === 'win' || outcome === 'bj') bjProgress.heat = Math.min(5, bjProgress.heat + 1);
+    if (outcome === 'lose' || outcome === 'surrender') bjProgress.heat = 0;
+    if (outcome === 'push') bjProgress.heat = Math.max(0, bjProgress.heat - 1);
+
+    bjSaveProgress(playerId);
+    bjRenderProgress();
+
+    if (leveled) {
+      showResult(`⬆ LEVEL UP! TABLE LV.${bjProgress.level}`, 'bj');
+      setTimeout(() => launchParticles('bj'), 60);
+    }
+  }
+
   function canSplit() {
     if (bjPlayer.length !== 2 || bjSplitHands) return false;
     const tenCards = new Set(['10','J','Q','K']);
@@ -5855,6 +5978,8 @@
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '▶';
     document.getElementById('casinoPlayerDisplay').textContent = currentUser.name;
+    bjLoadProgress(currentUser.id);
+    bjRenderProgress();
     refreshCasinoWallet();
   };
 
@@ -5893,6 +6018,8 @@
     if (bjPhase !== 'bet') return;
     const p = getCurrentCasinoPlayer();
     if (!p) { shakeWallet(); return; }
+    const maxBet = bjMaxBetForLevel(bjProgress.level);
+    if (bjBet + amount > maxBet) { shakeWallet(); return; }
     if (bjBet + amount > (p.coins || 0)) { shakeWallet(); return; }
     bjBet += amount;
     soundChip();
@@ -6961,6 +7088,7 @@
     setTimeout(() => playTone(180, 'sawtooth', 0.3, 0.15), 150);
     spawnCoinFloat(`-${lost} 🪙`);
     await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) - lost));
+    bjAwardProgress(p.id, 'surrender');
     // Keep last blackjack bet selected between hands (Precision-style remember bet)
     updateBetDisplay();
     setTimeout(() => { bjPhase = 'bet'; setBJButtons('bet'); }, 600);
@@ -7086,9 +7214,12 @@
     });
 
     results.forEach(r => totalDelta += r.delta);
+    const heatBonus = totalDelta > 0 ? Math.floor(totalDelta * (bjHeatBonusPct() / 100)) : 0;
+    totalDelta += heatBonus;
     const summary = results.map((r, i) => `H${i+1}: ${r.text}`).join(' · ');
     const sign = totalDelta >= 0 ? '+' : '';
-    showResult(`${summary}  (${sign}${totalDelta} 🪙)`, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
+    const heatNote = heatBonus > 0 ? ` · HEAT +${heatBonus}` : '';
+    showResult(`${summary}${heatNote}  (${sign}${totalDelta} 🪙)`, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
     totalDelta > 0 ? soundWin() : totalDelta < 0 ? soundLose() : soundPush();
     if (totalDelta > 0) {
       setTimeout(() => launchParticles('win'), 80);
@@ -7099,6 +7230,7 @@
     }
 
     await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) + totalDelta));
+    bjAwardProgress(p.id, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
 
     // Clean up split UI
     bjSplitHands = null;
@@ -7160,10 +7292,17 @@
       soundPush();
     }
 
+    const heatBonus = delta > 0 ? Math.floor(delta * (bjHeatBonusPct() / 100)) : 0;
+    if (heatBonus > 0) {
+      delta += heatBonus;
+      resultText += ` · HEAT +${heatBonus} 🪙`;
+    }
+
     showResult(resultText, resultType);
 
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
+    bjAwardProgress(p.id, resultType === 'win' || resultType === 'bj' ? resultType : resultType === 'lose' ? 'lose' : 'push');
 
     if (delta > 0) {
       setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 400);
