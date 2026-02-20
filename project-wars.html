@@ -33,6 +33,19 @@
     overflow-x: hidden;
   }
 
+  /* Hint compositor for frequently-transformed elements */
+  .wavy-letter,
+  .grass-blade,
+  #frogPet,
+  #gardenGnome,
+  .pr-starbeam,
+  .card,
+  .player-card {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
   header { text-align: center; margin-bottom: 3rem; display: flex; flex-direction: column; align-items: center; }
 
   header h1 {
@@ -9983,7 +9996,8 @@ function spawnSkillFloat(x, y, text, cls) {
   let gnomeActive = false;
   let gnomePosX = 160;
   let gnomeVelX = 0.8;
-  let gnomeMoveInterval = null;
+  let gnomeLastTs = 0;
+  let gnomeMoveRaf = null;
   let gnomeCoinInterval = null;
 
   function gnomeSpawnCoin() {
@@ -10012,13 +10026,24 @@ function spawnSkillFloat(x, y, text, cls) {
     gnomePosX = Math.random() * (window.innerWidth * 0.5) + 100;
     gnomeEl.style.left = gnomePosX + 'px';
 
-    // Move gnome slowly across screen
-    gnomeMoveInterval = setInterval(() => {
-      gnomePosX += gnomeVelX;
+    // Move gnome with RAF (avoids fixed-tick setInterval work)
+    function gnomeStep(ts) {
+      if (!gnomeActive) return;
+      if (document.hidden) {
+        gnomeLastTs = ts;
+        gnomeMoveRaf = requestAnimationFrame(gnomeStep);
+        return;
+      }
+      if (!gnomeLastTs) gnomeLastTs = ts;
+      const dt = Math.min((ts - gnomeLastTs) / 1000, 0.05);
+      gnomeLastTs = ts;
+      gnomePosX += gnomeVelX * dt * 25;
       if (gnomePosX > window.innerWidth - 60) { gnomePosX = window.innerWidth - 60; gnomeVelX = -Math.abs(gnomeVelX); gnomeEl.classList.add('gnome-flip'); }
       if (gnomePosX < 10) { gnomePosX = 10; gnomeVelX = Math.abs(gnomeVelX); gnomeEl.classList.remove('gnome-flip'); }
       gnomeEl.style.left = gnomePosX + 'px';
-    }, 40);
+      gnomeMoveRaf = requestAnimationFrame(gnomeStep);
+    }
+    gnomeMoveRaf = requestAnimationFrame(gnomeStep);
 
     // Award a coin every 20–35 seconds
     function scheduleNextCoin() {
@@ -10045,7 +10070,9 @@ function spawnSkillFloat(x, y, text, cls) {
   let posX = 120, posY = 20; // from bottom
   let velX = 1.2;
   let isHopping = false;
-  let hopInterval, moveInterval;
+  let hopInterval;
+  let frogMoveRaf = null;
+  let frogLastTs = 0;
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
   function ribbit() {
@@ -10091,16 +10118,26 @@ function spawnSkillFloat(x, y, text, cls) {
     }, { once: true });
   }
 
-  // Move frog continuously
-  moveInterval = setInterval(() => {
-    posX += velX;
+  // Move frog with RAF (no constant timer tick)
+  function frogStep(ts) {
+    if (document.hidden) {
+      frogLastTs = ts;
+      frogMoveRaf = requestAnimationFrame(frogStep);
+      return;
+    }
+    if (!frogLastTs) frogLastTs = ts;
+    const dt = Math.min((ts - frogLastTs) / 1000, 0.05);
+    frogLastTs = ts;
+    posX += velX * dt * 33;
     if (posX < 10) { posX = 10; velX = Math.abs(velX); }
     if (posX > window.innerWidth - 60) { posX = window.innerWidth - 60; velX = -Math.abs(velX); }
     frog.style.left = posX + 'px';
     frog.style.bottom = posY + 'px';
-    // Flip sprite based on direction
-    frog.style.transform = velX < 0 ? 'scaleX(-1)' : '';
-  }, 30);
+    // Flip sprite based on direction, preserve horizontal centering transform
+    frog.style.transform = velX < 0 ? 'translateX(-50%) scaleX(-1)' : 'translateX(-50%)';
+    frogMoveRaf = requestAnimationFrame(frogStep);
+  }
+  frogMoveRaf = requestAnimationFrame(frogStep);
 
   // Hop periodically
   hopInterval = setInterval(() => {
