@@ -418,6 +418,15 @@
   .msg.ok { color: var(--green); }
   .msg.err { color: var(--red); }
 
+  .dopamine-panel { border-color: #3d2a52; box-shadow: inset 0 0 0 1px rgba(168,130,255,0.12); }
+  .dopamine-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.65rem; }
+  .dopamine-flame { color:#ff8c42; font-size:0.75rem; letter-spacing:1px; }
+  .dopamine-meter { height:10px; border:1px solid #5b3f79; background:#1a1022; overflow:hidden; margin-bottom:0.4rem; }
+  .dopamine-fill { height:100%; width:0%; background: linear-gradient(90deg, #a855f7, #ec4899, #f5c842); transition: width 0.25s ease; }
+  .dopamine-caption { font-size:0.62rem; color:#b38be0; letter-spacing:1px; margin-bottom:0.8rem; text-transform:uppercase; }
+  .btn.dopamine { background: linear-gradient(135deg, #a855f7, #ec4899); color:#fff; border: none; }
+  .btn.dopamine:disabled { opacity:0.35; }
+
   /* ── History ── */
   .history-section { max-width: 900px; margin: 2rem auto 0; }
 
@@ -4335,6 +4344,17 @@
 <h2>This Week</h2>
 <div id="selfStats" style="color:var(--muted);font-size:0.75rem;line-height:2;">Log in to see your stats</div>
 </div>
+
+<div class="panel dopamine-panel">
+<div class="dopamine-title">
+<h2>Hype Loop</h2>
+<div class="dopamine-flame" id="dopamineStreak">🔥 x0</div>
+</div>
+<div class="dopamine-meter"><div class="dopamine-fill" id="dopamineFill"></div></div>
+<div class="dopamine-caption" id="dopamineCaption">Log hours to charge your bonus meter.</div>
+<button class="btn dopamine" id="dopamineBtn" onclick="claimDopamineBonus()" disabled>Claim Hype Bonus</button>
+<div class="msg" id="dopamineMsg"></div>
+</div>
 </div>
 <div class="history-section">
 <div class="history-title">
@@ -4646,6 +4666,7 @@
   let currentUser = null; // { id, name, ...playerData }
   let recentLogsCache = [];
   let streakCache = {};
+  let dopamineState = { charge: 0, combo: 0, lastLogAt: 0, bonusCount: 0 };
 
   const syncEl = document.getElementById('syncStatus');
 
@@ -4772,6 +4793,103 @@
     await update(ref(db, `biggestWins/${playerId}`), { name: playerName, amount });
   }
 
+
+  function dopamineStorageKey() {
+    return currentUser ? `pwDopa_${currentUser.id}` : null;
+  }
+
+  function loadDopamineState() {
+    if (!currentUser) return;
+    const key = dopamineStorageKey();
+    if (!key) return;
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : null;
+      dopamineState = {
+        charge: Math.max(0, Math.min(100, Number(parsed?.charge) || 0)),
+        combo: Math.max(0, Number(parsed?.combo) || 0),
+        lastLogAt: Number(parsed?.lastLogAt) || 0,
+        bonusCount: Math.max(0, Number(parsed?.bonusCount) || 0),
+      };
+    } catch {
+      dopamineState = { charge: 0, combo: 0, lastLogAt: 0, bonusCount: 0 };
+    }
+  }
+
+  function saveDopamineState() {
+    const key = dopamineStorageKey();
+    if (!key) return;
+    localStorage.setItem(key, JSON.stringify(dopamineState));
+  }
+
+  function renderDopaminePanel() {
+    const fill = document.getElementById('dopamineFill');
+    const streak = document.getElementById('dopamineStreak');
+    const caption = document.getElementById('dopamineCaption');
+    const btn = document.getElementById('dopamineBtn');
+    if (!fill || !streak || !caption || !btn) return;
+    const charge = Math.max(0, Math.min(100, Math.round(dopamineState.charge)));
+    fill.style.width = `${charge}%`;
+    streak.textContent = `🔥 x${dopamineState.combo}`;
+    if (!currentUser) {
+      caption.textContent = 'Log in to start your hype loop.';
+      btn.disabled = true;
+      return;
+    }
+    if (charge >= 100) {
+      caption.textContent = 'METER MAXED — claim your random bonus now.';
+      btn.disabled = false;
+    } else {
+      const left = 100 - charge;
+      caption.textContent = `+${left}% to next bonus drop`;
+      btn.disabled = true;
+    }
+  }
+
+  function registerDopamineProgress(hours) {
+    const now = Date.now();
+    const withinComboWindow = now - dopamineState.lastLogAt <= (1000 * 60 * 120);
+    dopamineState.combo = withinComboWindow ? dopamineState.combo + 1 : 1;
+    dopamineState.lastLogAt = now;
+    const rand = 4 + Math.floor(Math.random() * 7);
+    const comboBoost = Math.min(20, dopamineState.combo * 2);
+    const gain = Math.min(55, Math.round(hours * 12) + rand + comboBoost);
+    dopamineState.charge = Math.min(100, dopamineState.charge + gain);
+    saveDopamineState();
+    renderDopaminePanel();
+  }
+
+  window.claimDopamineBonus = async function() {
+    if (!currentUser) return;
+    const msg = document.getElementById('dopamineMsg');
+    if (dopamineState.charge < 100) {
+      msg.textContent = 'Charge the meter first.';
+      msg.className = 'msg err';
+      return;
+    }
+    const player = players[currentUser.id];
+    if (!player) return;
+
+    const jackpot = Math.random() < 0.1;
+    const comboBonus = Math.min(180, dopamineState.combo * 12);
+    const reward = (jackpot ? 350 : 120) + comboBonus + Math.floor(Math.random() * 120);
+
+    try {
+      await update(ref(db, `players/${currentUser.id}`), { coins: (player.coins || 0) + reward });
+      dopamineState.charge = 0;
+      dopamineState.bonusCount += 1;
+      saveDopamineState();
+      renderDopaminePanel();
+      msg.textContent = `${jackpot ? '💥 JACKPOT! ' : ''}+${reward} bonus coins`;
+      msg.className = 'msg ok';
+      spawnCoinFloat(`+${reward} 🪙`);
+      setTimeout(() => msg.textContent = '', 3500);
+    } catch {
+      msg.textContent = 'Bonus claim failed.';
+      msg.className = 'msg err';
+    }
+  };
+
   // ── Login System ──
 
   window.switchLoginTab = function(tab) {
@@ -4839,6 +4957,7 @@
     document.getElementById('userBadgeName').textContent = currentUser.name;
     document.getElementById('loginName').value = '';
     document.getElementById('loginPass').value = '';
+    loadDopamineState();
     render();
     startTutorialIfNeeded();
     if (window.__startGardenWatch) window.__startGardenWatch(currentUser.id);
@@ -5032,6 +5151,7 @@
 
     // Update chest UI
     updateChestUI();
+    renderDopaminePanel();
   };
 
   function showChestInfoModal() {
@@ -5096,6 +5216,7 @@
     window.__currentUser = null;
     window.__currentUserId = null;
     localStorage.removeItem('pwUserId');
+    dopamineState = { charge: 0, combo: 0, lastLogAt: 0, bonusCount: 0 };
     document.body.classList.remove('logged-in');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('loginBg').style.display = '';
@@ -5111,6 +5232,7 @@
     window.__currentUserId = dev.id;
     // Inject a fake player record so casino reads coins correctly
     players['__dev__'] = { name: 'DEV', coins: 99999, projects: {} };
+    loadDopamineState();
     render();
   });
 
@@ -5168,6 +5290,7 @@
     renderHistory();
     refreshCasinoWallet();
     updateChestUI();
+    renderDopaminePanel();
     if (document.getElementById('shopDrawer')?.classList.contains('open')) {
       renderShopItems();
       window.renderTitleSection && window.renderTitleSection();
@@ -5408,6 +5531,7 @@
       setTimeout(() => msg.textContent = '', 4000);
 
       spawnCoinFloat(`+${earnedCoins} 🪙`);
+      registerDopamineProgress(hours);
       const card = document.getElementById(`card-${currentUser.id}`);
       if (card) { card.classList.remove('popped'); void card.offsetWidth; card.classList.add('popped'); }
     } catch(e) { msg.textContent = 'Error saving.'; msg.className = 'msg err'; }
