@@ -4803,6 +4803,65 @@
 
   // ── Login System ──
 
+  const SIGN_IN_APOLOGY = "We're truly sorry — our database was wiped and we know that hurts. Thank you for sticking with us while we rebuild your progress.";
+
+  function xpForTargetLevel(level) {
+    const clamped = Math.max(1, Math.min(99, level));
+    let total = 0;
+    for (let lvl = 1; lvl < clamped; lvl++) {
+      total += Math.floor(lvl + 300 * Math.pow(2, lvl / 7)) / 4;
+    }
+    return Math.floor(total);
+  }
+
+  function getCompensationGardenLevels() {
+    const fallbackUpgrades = [
+      { id: 'seeds', maxLevel: 10 },
+      { id: 'trowel', maxLevel: 8 },
+      { id: 'flowerSeeds', maxLevel: 9 },
+      { id: 'gnome', maxLevel: 5 },
+    ];
+    const upgrades = (typeof GARDEN_UPGRADES !== 'undefined' && Array.isArray(GARDEN_UPGRADES))
+      ? GARDEN_UPGRADES
+      : fallbackUpgrades;
+
+    const levels = {};
+    for (const upg of upgrades) {
+      if (!upg?.id || !upg?.maxLevel) continue;
+      levels[upg.id] = Math.max(1, Math.floor(upg.maxLevel / 2));
+    }
+    return levels;
+  }
+
+  function seedCasinoProgress(playerId) {
+    if (!playerId) return;
+    const base = { level: 15, xp: 0, heat: 0 };
+    localStorage.setItem(`pw_bj_progress_${playerId}`, JSON.stringify({ ...base, hands: 0 }));
+    localStorage.setItem(`pw_rl_progress_${playerId}`, JSON.stringify({ ...base, spins: 0 }));
+    localStorage.setItem(`pw_pk_progress_${playerId}`, JSON.stringify({ ...base, drops: 0 }));
+    localStorage.setItem(`pw_pr_progress_${playerId}`, JSON.stringify({ ...base, rounds: 0 }));
+  }
+
+  function getCompensationStarterPack() {
+    return {
+      projects: {},
+      coins: 3000,
+      shopUnlocked: true,
+      gardenUnlocked: true,
+      gamblingUnlocked: true,
+      skills: {
+        wc: xpForTargetLevel(30),
+        mine: xpForTargetLevel(30),
+      },
+      garden: getCompensationGardenLevels(),
+      ownedPets: ['frog'],
+    };
+  }
+
+  function showSignInApology() {
+    window.setTimeout(() => window.alert(SIGN_IN_APOLOGY), 120);
+  }
+
   window.switchLoginTab = function(tab) {
     document.getElementById('loginForm').style.display    = tab === 'login'    ? 'flex' : 'none';
     document.getElementById('registerForm').style.display = tab === 'register' ? 'flex' : 'none';
@@ -4848,8 +4907,11 @@
     btn.disabled = true;
     msg.textContent = 'Creating account...'; msg.className = 'login-msg';
     try {
-      const newRef = await push(ref(db, 'players'), { name, password: pass, projects: {}, coins: 0 });
-      currentUser = { id: newRef.key, name, password: pass, projects: {}, coins: 0 };
+      const starterPack = getCompensationStarterPack();
+      const newPlayer = { name, password: pass, ...starterPack };
+      const newRef = await push(ref(db, 'players'), newPlayer);
+      seedCasinoProgress(newRef.key);
+      currentUser = { id: newRef.key, ...newPlayer };
       window.__currentUser = currentUser;
       window.__currentUserId = currentUser.id;
       localStorage.setItem('pwUserId', newRef.key);
@@ -4870,6 +4932,7 @@
     document.getElementById('loginPass').value = '';
     render();
     startTutorialIfNeeded();
+    showSignInApology();
     if (window.__startGardenWatch) window.__startGardenWatch(currentUser.id);
   }
 
