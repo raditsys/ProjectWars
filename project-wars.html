@@ -3099,6 +3099,10 @@
     50%  { transform: scale(1.2); opacity: 0.8; }
     100% { transform: scale(0) rotate(20deg); opacity: 0; }
   }
+  @keyframes resourceRingFill {
+    from { stroke-dashoffset: 88; }
+    to   { stroke-dashoffset: 0; }
+  }
   .ore-obj.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
 
   /* ══════════ ADVENTURE BUTTON ══════════ */
@@ -3213,6 +3217,7 @@
     cursor: pointer;
     transition: transform 0.12s;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+    will-change: transform;
   }
   .env-resource:hover:not(.depleted) { transform: scale(1.08); }
   .env-decor {
@@ -3221,6 +3226,10 @@
   }
   .env-resource.depleted { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; }
   .env-resource.chopping { animation: treeChop 0.18s ease-in-out infinite; }
+  .env-resource.chopping,
+  .env-resource.mining {
+    filter: none;
+  }
   .resource-status-tag {
     position: absolute;
     left: 50%;
@@ -9956,6 +9965,9 @@ function makeProgressRing(color = '#4ade80') {
   arc.setAttribute('stroke-linecap','round');
   arc.style.transformOrigin = '17px 17px';
   arc.style.transform = 'rotate(-90deg)';
+  arc.style.animationName = 'resourceRingFill';
+  arc.style.animationTimingFunction = 'linear';
+  arc.style.animationFillMode = 'forwards';
   svg.appendChild(bg); svg.appendChild(arc);
   svg._arc = arc;
   return svg;
@@ -9963,14 +9975,7 @@ function makeProgressRing(color = '#4ade80') {
 
 function animateRing(ring, durationMs) {
   if (!ring || !ring._arc) return;
-  const arc = ring._arc;
-  const start = performance.now();
-  function step(now) {
-    const pct = Math.min((now - start) / durationMs, 1);
-    arc.setAttribute('stroke-dashoffset', (88 * (1 - pct)).toFixed(2));
-    if (pct < 1 && ring.isConnected) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
+  ring._arc.style.animationDuration = `${Math.max(1, durationMs)}ms`;
 }
 
 function spawnSkillFloat(x, y, text, cls) {
