@@ -8504,7 +8504,7 @@ document.addEventListener('click', e => {
     '6,2': { name:'Swamp', desc:'Mist clings low. Someone is watching.', sky:'linear-gradient(180deg,#0a1208 0%,#0e1a0a 60%,#0a1210 100%)', ground:'#102a10', groundBorder:'#1a4a20', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'willow',x:228}], npc:'morrigan' },
     '7,2': f('Brackish Pool',   'Dark water, no fish',                'linear-gradient(180deg,#060e0c 0%,#0a1410 60%,#060e0c 100%)', '#0e2018', '#183028'),
 
-    '0,3': f('Rocky Foothills', 'Loose scree, hard going',            'linear-gradient(180deg,#0e0c0a 0%,#16120e 60%,#0e0c0a 100%)', '#1e1810', '#302818'),
+    '0,3': { name:'West Dune Gate', desc:'A tall metal gate stands at the western border. Twin guards watch the pass into the desert.', sky:'linear-gradient(180deg,#3a2a12 0%,#7a5a24 58%,#c78f42 100%)', ground:'#4a3118', groundBorder:'#7d5425', resources:[], locked:true, npc:'desert_guard' },
     '1,3': { name:'Cave Mouth', desc:'An old miner blocks the entrance, smoking a pipe.', sky:'linear-gradient(180deg,#080808 0%,#0e0e0e 60%,#080808 100%)', ground:'#141414', groundBorder:'#222222', resources:[], npc:'degan' },
     '2,3': r('Copper Pit',      'Shallow copper deposits',            'linear-gradient(180deg,#140e08 0%,#1a1408 60%,#141008 100%)', '#2a1a08', '#4a3010', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'copper',x:128},{kind:'ore',type:'iron',x:228}]),
     '3,3': f('Gravel Pit',      'Just rocks, nothing valuable',       'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201c14', '#342e20'),
@@ -8609,6 +8609,25 @@ document.addEventListener('click', e => {
       <!-- Shield glint -->
       <ellipse cx="128" cy="122" rx="4" ry="6" fill="#44446a" opacity="0.8"/>
     `)}</div>`,
+    'West Dune Gate': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:185px">${makeSVG(300,185,`
+      <rect x="0" y="0" width="300" height="95" fill="#d7a35a" opacity="0.25"/>
+      ${[20,70,130,200,255].map((x,i)=>`<ellipse cx="${x}" cy="${86+i%2*8}" rx="${30+i*3}" ry="${12+i%3*2}" fill="#c88f45" opacity="0.45"/>`).join('')}
+      <rect x="0" y="56" width="84" height="129" fill="#3f4652"/>
+      <rect x="216" y="56" width="84" height="129" fill="#3f4652"/>
+      ${[0,18,36,54,72].map(x=>`<rect x="${x}" y="38" width="12" height="18" fill="#3f4652"/>`).join('')}
+      ${[216,234,252,270,288].map(x=>`<rect x="${x}" y="38" width="12" height="18" fill="#3f4652"/>`).join('')}
+      <rect x="78" y="44" width="144" height="141" fill="#232933" rx="3"/>
+      ${[88,102,116,130,144,158,172,186,200,214].map(x=>`<rect x="${x}" y="46" width="4" height="138" fill="#9aa4b2"/>`).join('')}
+      ${[70,96,122,148].map(y=>`<rect x="82" y="${y}" width="136" height="4" fill="#8b95a4"/>`).join('')}
+      <rect x="76" y="42" width="6" height="143" fill="#151a22"/>
+      <rect x="218" y="42" width="6" height="143" fill="#151a22"/>
+      <rect x="52" y="130" width="18" height="34" rx="2" fill="#2a303a"/><circle cx="61" cy="123" r="8" fill="#c8a87a"/>
+      <rect x="230" y="130" width="18" height="34" rx="2" fill="#2a303a"/><circle cx="239" cy="123" r="8" fill="#c8a87a"/>
+      <rect x="48" y="112" width="26" height="10" fill="#3a4350" rx="2"/>
+      <rect x="226" y="112" width="26" height="10" fill="#3a4350" rx="2"/>
+      <rect x="70" y="106" width="3" height="68" fill="#6a5530"/><polygon points="70,106 73,106 71.5,95" fill="#d5dde8"/>
+      <rect x="248" y="106" width="3" height="68" fill="#6a5530"/><polygon points="248,106 251,106 249.5,95" fill="#d5dde8"/>
+    `)}</div>`,
   };
 
   // ── Underground map (layer 1) — 8×4 grid ──
@@ -8650,6 +8669,92 @@ document.addEventListener('click', e => {
     '7,3': null,
   };
 
+
+
+  const MAP_DESERT = {
+    '0,0': f('Shifting Fringe', 'Dry winds move the dunes every hour.', 'linear-gradient(180deg,#7cc0e8 0%,#d7b16d 70%,#c2873e 100%)', '#7a5428', '#a56f33'),
+    '1,0': r('Scorched Dunes', 'Glittering ore peeks through burnt sand.', 'linear-gradient(180deg,#74b7e5 0%,#d9b06b 68%,#b97f36 100%)', '#6f4b23', '#9a662d', [{kind:'ore',type:'copper',x:26},{kind:'ore',type:'iron',x:126},{kind:'ore',type:'gold',x:230}]),
+    '2,0': f('Windcut Mesa', 'Stone ledges shade the sand below.', 'linear-gradient(180deg,#6db3e4 0%,#cca05a 70%,#a86e2f 100%)', '#5e3f1f', '#895a2a'),
+    '3,0': r('Sunfire Quarry', 'A blazing excavation packed with veins.', 'linear-gradient(180deg,#68afe2 0%,#d2a15b 70%,#b27731 100%)', '#664421', '#8e5d2b', [{kind:'ore',type:'iron',x:22},{kind:'ore',type:'gold',x:128},{kind:'ore',type:'gold',x:232}]),
+    '4,0': f('Dust Canyons', 'Narrow canyons hum with hot wind.', 'linear-gradient(180deg,#65ace0 0%,#cf9f58 70%,#ad732f 100%)', '#6a4824', '#915f2f'),
+    '5,0': r('Amber Crag', 'Copper seams line sun-baked cliffs.', 'linear-gradient(180deg,#67ade0 0%,#d3a560 70%,#b57a35 100%)', '#6f4c26', '#9a6532', [{kind:'ore',type:'copper',x:24},{kind:'ore',type:'iron',x:128},{kind:'ore',type:'gold',x:232}]),
+    '6,0': f('Nomad Tracks', 'Faint caravan tracks snake east-west.', 'linear-gradient(180deg,#70b2e2 0%,#d7ae68 70%,#bf843b 100%)', '#74512a', '#9f6c35'),
+    '7,0': f('Whispering Expanse', 'The horizon shimmers endlessly.', 'linear-gradient(180deg,#7bb9e6 0%,#ddba72 70%,#c88c42 100%)', '#7c572d', '#a97439'),
+
+    '0,1': r('Oasis Verge', 'Palm roots tap hidden springs.', 'linear-gradient(180deg,#7ac2e8 0%,#d8b46f 70%,#be8841 100%)', '#6e5427', '#93933d', [{kind:'tree',type:'oak',x:18},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:222}]),
+    '1,1': r('Salt Flats', 'White crust hides rich mineral pockets.', 'linear-gradient(180deg,#89c9ee 0%,#e0bc78 68%,#c28740 100%)', '#7b5a2f', '#a6763c', [{kind:'ore',type:'copper',x:18},{kind:'ore',type:'iron',x:122},{kind:'ore',type:'gold',x:228}]),
+    '2,1': f('Dune Sea', 'Towering dunes roll like waves.', 'linear-gradient(180deg,#7dbfe8 0%,#dbb56e 70%,#c1883e 100%)', '#785329', '#a06d35'),
+    '3,1': r('Cactus Basin', 'Thick cacti cluster around cracked earth.', 'linear-gradient(180deg,#78bae5 0%,#d4ae67 68%,#bb813a 100%)', '#6f4f26', '#966730', [{kind:'tree',type:'oak',x:22},{kind:'ore',type:'iron',x:126},{kind:'tree',type:'oak',x:228}]),
+    '4,1': r('Mirage Fields', 'Water illusions dance over ore spires.', 'linear-gradient(180deg,#8bcaf0 0%,#e3bf7c 68%,#c78b43 100%)', '#7a5730', '#a9753e', [{kind:'ore',type:'gold',x:24},{kind:'ore',type:'gold',x:128},{kind:'ore',type:'runite',x:232}]),
+    '5,1': f('Bleached Ruins', 'Collapsed pillars buried in sand.', 'linear-gradient(180deg,#74b6e2 0%,#d1aa62 70%,#b97e36 100%)', '#6b4a22', '#92612f'),
+    '6,1': r('Sunspike Ridge', 'Jagged rocks pierce the dunes.', 'linear-gradient(180deg,#70b2df 0%,#ceaa62 70%,#b37831 100%)', '#664722', '#8b5e2d', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:128},{kind:'ore',type:'runite',x:236}]),
+    '7,1': f('Caravan Rest', 'An old campfire pit and torn shade cloth.', 'linear-gradient(180deg,#79b9e4 0%,#d8b26b 70%,#bf833a 100%)', '#715028', '#9b6b34'),
+
+    '0,2': r('Sandbar Thicket', 'Hardy desert trees cling to moisture.', 'linear-gradient(180deg,#7dc0e8 0%,#dcb973 70%,#c28740 100%)', '#6f5527', '#908f38', [{kind:'tree',type:'oak',x:20},{kind:'tree',type:'oak',x:122},{kind:'tree',type:'willow',x:224}]),
+    '1,2': r('Copper Wash', 'Seasonal floods exposed bright copper.', 'linear-gradient(180deg,#75b7e4 0%,#d5af68 70%,#bc833b 100%)', '#6b4c24', '#906030', [{kind:'ore',type:'copper',x:18},{kind:'ore',type:'copper',x:122},{kind:'ore',type:'iron',x:228}]),
+    '2,2': r('Glass Dunes', 'Heat fused these dunes into glittering sheets.', 'linear-gradient(180deg,#86c8ed 0%,#e0bc78 70%,#c98e45 100%)', '#77532c', '#a5723a', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:124},{kind:'ore',type:'gold',x:230}]),
+    '3,2': f('Searing Flats', 'Even boots feel like they are melting.', 'linear-gradient(180deg,#6baede 0%,#cfa85f 70%,#b0752f 100%)', '#62441f', '#85582b'),
+    '4,2': r('Ancient Aquifer', 'A deep spring feeds a hidden pocket oasis.', 'linear-gradient(180deg,#92d0f1 0%,#e5c483 68%,#cd934b 100%)', '#5a5c2b', '#3b7a58', [{kind:'tree',type:'willow',x:18},{kind:'tree',type:'willow',x:122},{kind:'ore',type:'gold',x:228}]),
+    '5,2': r('Obsidian Teeth', 'Black glass rock with rich cores.', 'linear-gradient(180deg,#6daedf 0%,#cea75e 70%,#b07531 100%)', '#3a2a22', '#5a3a2c', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:124},{kind:'ore',type:'runite',x:230}]),
+    '6,2': f('Blisterwind Path', 'The air whistles through narrow cuts.', 'linear-gradient(180deg,#70b2e0 0%,#d3ab63 70%,#b97d36 100%)', '#694822', '#8f5f2f'),
+    '7,2': r('Runite Scar', 'A rare scar of runite streaks the cliff.', 'linear-gradient(180deg,#73b5e3 0%,#d7b069 70%,#be834c 100%)', '#4d3b2e', '#6a5442', [{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:126},{kind:'ore',type:'runite',x:232}]),
+
+    '0,3': { name:'Desert Outpost Gate', desc:'The iron gate back to the frontier. Guards keep the crossing orderly.', sky:'linear-gradient(180deg,#7fc1e8 0%,#deb970 70%,#c38840 100%)', ground:'#6f4e26', groundBorder:'#966534', resources:[], tunnel:'surface' },
+    '1,3': r('Gilded Dune', 'Fine sand sparkles like ground gold.', 'linear-gradient(180deg,#84c6ec 0%,#e2be7b 68%,#cb9147 100%)', '#7b572f', '#a9753d', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:124},{kind:'ore',type:'gold',x:228}]),
+    '2,3': f('Nomad Bazaar', 'Colorful tents flap in the desert wind.', 'linear-gradient(180deg,#85c6ec 0%,#dfb972 70%,#c7893f 100%)', '#714d26', '#986734'),
+    '3,3': r('Sunken Vault', 'Ancient vault stones hide valuable seams.', 'linear-gradient(180deg,#7fbfe8 0%,#d9b26b 70%,#c0843e 100%)', '#624224', '#875b2f', [{kind:'ore',type:'gold',x:24},{kind:'ore',type:'gold',x:126},{kind:'ore',type:'runite',x:230}]),
+    '4,3': f('Zephyr Dunes', 'Wind paints ripples across endless sand.', 'linear-gradient(180deg,#8acaf0 0%,#e4c180 68%,#ce9448 100%)', '#7a5730', '#a9773e'),
+    '5,3': r('Palm Hollow', 'A grove shelters weary travelers.', 'linear-gradient(180deg,#90cef2 0%,#e7c584 68%,#cf964a 100%)', '#5a602c', '#3f875e', [{kind:'tree',type:'oak',x:20},{kind:'tree',type:'willow',x:122},{kind:'tree',type:'oak',x:228}]),
+    '6,3': r('Burnt Mine', 'A long-abandoned mine still yields ore.', 'linear-gradient(180deg,#73b4e1 0%,#d4ad66 70%,#bc803a 100%)', '#5f4223', '#845930', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'iron',x:124},{kind:'ore',type:'gold',x:228}]),
+    '7,3': f('Far Horizon', 'Nothing but dunes to the edge of sight.', 'linear-gradient(180deg,#8bcaf0 0%,#e5c181 68%,#d0944a 100%)', '#7f5b31', '#ad7a3f'),
+
+    '0,4': f('Shade Wall', 'A cliff face offers brief respite from the sun.', 'linear-gradient(180deg,#7bbce6 0%,#d7b06a 70%,#bf833d 100%)', '#6b4b24', '#91622f'),
+    '1,4': r('Stone Bloom', 'Crystalline blooms burst from red stone.', 'linear-gradient(180deg,#82c3ea 0%,#ddb974 68%,#c88f45 100%)', '#6f4f2a', '#97683a', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:124},{kind:'ore',type:'runite',x:228}]),
+    '2,4': r('Hidden Spring', 'Cool water and hardy trees thrive here.', 'linear-gradient(180deg,#98d4f4 0%,#e7c886 68%,#d39a4f 100%)', '#4a5d2c', '#3b8b65', [{kind:'tree',type:'oak',x:20},{kind:'tree',type:'willow',x:124},{kind:'tree',type:'willow',x:228}]),
+    '3,4': f('Dustbone Yard', 'Ancient skeletons sink into powder sand.', 'linear-gradient(180deg,#76b7e3 0%,#d5ae66 70%,#bc8039 100%)', '#6b4a25', '#8f5f31'),
+    '4,4': r('Scarab Pit', 'Scarab tunnels reveal rich veins below.', 'linear-gradient(180deg,#79bae5 0%,#d9b26b 70%,#bf833c 100%)', '#664724', '#8b5c2d', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'iron',x:124},{kind:'ore',type:'gold',x:228}]),
+    '5,4': f('Red Monument', 'A colossal stone pillar towers over the wastes.', 'linear-gradient(180deg,#7cbde7 0%,#dcb671 70%,#c48640 100%)', '#724f28', '#9a6934'),
+    '6,4': r('Twilight Basin', 'Cooler air lets tougher trees survive.', 'linear-gradient(180deg,#8fcef2 0%,#e6c582 68%,#ce944b 100%)', '#4c5c2d', '#3e8660', [{kind:'tree',type:'oak',x:20},{kind:'tree',type:'oak',x:124},{kind:'tree',type:'willow',x:228}]),
+    '7,4': r('Deep Ember Vein', 'Runite and gold shimmer in hot stone.', 'linear-gradient(180deg,#74b5e2 0%,#d6af67 70%,#bd813b 100%)', '#573f2a', '#76573c', [{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:124},{kind:'ore',type:'runite',x:228}]),
+
+    '0,5': f('Backtrail Dunes', 'Your footprints vanish behind you.', 'linear-gradient(180deg,#82c4eb 0%,#dfba75 68%,#ca8f45 100%)', '#79552d', '#a37039'),
+    '1,5': f('Sirocco Rise', 'Hot gusts push at your shoulders.', 'linear-gradient(180deg,#79bbe5 0%,#d8b26b 70%,#bf843d 100%)', '#6f4d27', '#95642f'),
+    '2,5': r('Glass Canyon', 'Shattered glass rock crunches underfoot.', 'linear-gradient(180deg,#84c6eb 0%,#dfbb76 68%,#c98e45 100%)', '#6a4a2b', '#91643d', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'gold',x:124},{kind:'ore',type:'runite',x:228}]),
+    '3,5': f('Sandstorm Shelf', 'Visibility drops as storms gather.', 'linear-gradient(180deg,#73b4e1 0%,#d2ab63 70%,#ba7d36 100%)', '#664823', '#8c5d2d'),
+    '4,5': r('Ruby Dune Mine', 'A rich mining camp carved into the dune.', 'linear-gradient(180deg,#7dbfe8 0%,#dbb56f 70%,#c2863f 100%)', '#654523', '#8a5b2f', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'gold',x:124},{kind:'ore',type:'runite',x:228}]),
+    '5,5': f('Moon Mirage', 'Evening cools the sand and the sky glows.', 'linear-gradient(180deg,#5b87c0 0%,#b98f59 68%,#8e6132 100%)', '#5e4528', '#866039'),
+    '6,5': r('Ancient Sunken Gate', 'Broken metalwork marks a forgotten city entrance.', 'linear-gradient(180deg,#6fa2d1 0%,#c59d62 68%,#9f6f3a 100%)', '#5a4128', '#7e5937', [{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:124},{kind:'tree',type:'oak',x:228}]),
+    '7,5': f('Desert Crown', 'The highest dune commands the whole sea of sand.', 'linear-gradient(180deg,#80c2eb 0%,#e0bc78 68%,#cc9147 100%)', '#7d5930', '#aa7840'),
+  };
+
+  const DECOR_DESERT = {
+    'West Dune Gate': () => DECOR['West Dune Gate'] ? DECOR['West Dune Gate']() : '',
+    'Desert Outpost Gate': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:165px">${makeSVG(300,165,`
+      <rect x="0" y="70" width="64" height="95" fill="#3e4550"/><rect x="236" y="70" width="64" height="95" fill="#3e4550"/>
+      <rect x="64" y="82" width="172" height="83" fill="#20252e" rx="2"/>
+      ${[74,88,102,116,130,144,158,172,186,200,214,228].map(x=>`<rect x="${x}" y="84" width="4" height="79" fill="#8f98a6"/>`).join('')}
+      <rect x="68" y="102" width="164" height="4" fill="#7f8896"/><rect x="68" y="130" width="164" height="4" fill="#7f8896"/>
+      <circle cx="52" cy="116" r="8" fill="#c8a87a"/><rect x="44" y="122" width="16" height="30" fill="#2a3038" rx="2"/>
+      <circle cx="248" cy="116" r="8" fill="#c8a87a"/><rect x="240" y="122" width="16" height="30" fill="#2a3038" rx="2"/>
+      ${[30,96,170,242].map((x,i)=>`<ellipse cx="${x}" cy="${62+i%2*10}" rx="34" ry="13" fill="#c98f46" opacity="0.45"/>`).join('')}
+    `)}</div>`,
+    'Oasis Verge': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:95px">${makeSVG(300,95,`
+      <ellipse cx="150" cy="50" rx="74" ry="24" fill="#3a9fb0" opacity="0.55"/>
+      <ellipse cx="150" cy="50" rx="54" ry="16" fill="#7bd6dd" opacity="0.45"/>
+      ${[80,110,190,220].map(x=>`<rect x="${x}" y="10" width="5" height="44" fill="#6a4b26"/><ellipse cx="${x+2.5}" cy="10" rx="16" ry="8" fill="#4c8d3a"/>`).join('')}
+    `)}</div>`,
+    'Dune Sea': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:75px">${makeSVG(300,75,`${[0,60,130,210].map((x,i)=>`<ellipse cx="${x+55}" cy="${52+i%2*8}" rx="62" ry="22" fill="#cc9145" opacity="0.45"/>`).join('')}`)}</div>`,
+    'Cactus Basin': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:95px">${makeSVG(300,95,`${[40,95,150,210,260].map((x,i)=>`<rect x="${x}" y="${24+i%2*8}" width="10" height="${50-i%3*6}" rx="4" fill="#3c7a2e"/><rect x="${x-8}" y="${34+i%2*8}" width="7" height="20" rx="3" fill="#3c7a2e"/><rect x="${x+11}" y="${30+i%2*8}" width="7" height="24" rx="3" fill="#3c7a2e"/>`).join('')}`)}</div>`,
+    'Nomad Bazaar': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:110px">${makeSVG(300,110,`
+      ${[[30,'#b84f3a'],[95,'#3a6bb8'],[160,'#b88b3a'],[225,'#3a9b6a']].map(([x,c])=>`<polygon points="${x},95 ${x+24},52 ${x+48},95" fill="${c}" opacity="0.85"/><rect x="${x+6}" y="95" width="36" height="12" fill="#6b4a28"/>`).join('')}
+    `)}</div>`,
+    'Far Horizon': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:120px">${makeSVG(300,120,`
+      <rect x="0" y="82" width="300" height="38" fill="#d09a53" opacity="0.35"/>
+      <circle cx="250" cy="44" r="22" fill="#ffd28a" opacity="0.6"/>
+      <circle cx="250" cy="44" r="12" fill="#ffe6b5" opacity="0.55"/>
+    `)}</div>`,
+    'Hidden Spring': () => DECOR_DESERT['Oasis Verge'] ? DECOR_DESERT['Oasis Verge']() : '',
+  };
   const DECOR_UNDER = {
     'Tunnel Entrance': () => {
       const rope = Array.from({length:8},(_,i)=>`<rect x="${148+i%2*4}" y="${i*14}" width="4" height="10" rx="1" fill="#5a4020" opacity="0.9"/>`).join('');
@@ -8686,7 +8791,7 @@ document.addEventListener('click', e => {
   };
 
   let cx = 2, cy = 2;
-  let clayer = 0;  // 0=surface, 1=underground
+  let clayer = 0;  // 0=surface, 1=underground, 2=desert
   let resourceState = [];
   let worldResourceState = {};
 
@@ -8721,12 +8826,17 @@ document.addEventListener('click', e => {
     if (resourceState.length) refreshResourceVisuals();
   }, 1000);
 
+  const LAYERS = {
+    0: { map: MAP, rows: GRID_H, label: 'SURFACE', strip: '#1a3a1a', text: '#4a8a4a' },
+    1: { map: MAP_UNDER, rows: 4, label: 'UNDERGROUND', strip: '#1a1030', text: '#8844ff' },
+    2: { map: MAP_DESERT, rows: GRID_H, label: 'DESERT', strip: '#4a2f14', text: '#f0c26a' },
+  };
+
   function key(c, rr) { return `${c},${rr}`; }
   function room(c, rr) {
-    const H = clayer === 0 ? GRID_H : 4;
-    if (c < 0 || c >= GRID_W || rr < 0 || rr >= H) return null;
-    const m = clayer === 0 ? MAP : MAP_UNDER;
-    return m[key(c, rr)] || null;
+    const layerMeta = LAYERS[clayer] || LAYERS[0];
+    if (c < 0 || c >= GRID_W || rr < 0 || rr >= layerMeta.rows) return null;
+    return layerMeta.map[key(c, rr)] || null;
   }
 
   function makeTreeSVG(type) {
@@ -8757,7 +8867,8 @@ document.addEventListener('click', e => {
     const canvas = document.getElementById('envMinimapCanvas');
     if (!canvas) return;
     const CELL = 13, GAP = 2;
-    const ROWS = clayer === 0 ? GRID_H : 4;
+    const layerMeta = LAYERS[clayer] || LAYERS[0];
+    const ROWS = layerMeta.rows;
     canvas.width  = GRID_W * (CELL + GAP) - GAP;
     canvas.height = ROWS   * (CELL + GAP) - GAP;
     const ctx = canvas.getContext('2d');
@@ -8766,14 +8877,14 @@ document.addEventListener('click', e => {
       for (let c = 0; c < GRID_W; c++) {
         const px = c*(CELL+GAP), py = rr*(CELL+GAP);
         const rm = room(c, rr);
-        if (!rm) { ctx.fillStyle = clayer===0 ? '#0e0e0e' : '#06040a'; ctx.fillRect(px,py,CELL,CELL); continue; }
+        if (!rm) { ctx.fillStyle = clayer===0 ? '#0e0e0e' : clayer===1 ? '#06040a' : '#2b1b0d'; ctx.fillRect(px,py,CELL,CELL); continue; }
         let col;
         if (c===cx && rr===cy)              col = '#f5c842';
         else if (rm.locked)                 col = '#444455';
         else if (rm.tunnel)                 col = '#3a2050';
         else if (rm.npc && clayer===1)      col = '#3a1a10';
-        else if (rm.resources?.length)      col = clayer===0 ? '#1a4a1a' : '#1a3040';
-        else                                col = clayer===0 ? '#1e2e1e' : '#14101e';
+        else if (rm.resources?.length)      col = clayer===0 ? '#1a4a1a' : clayer===1 ? '#1a3040' : '#6e4a22';
+        else                                col = clayer===0 ? '#1e2e1e' : clayer===1 ? '#14101e' : '#4a3216';
         ctx.fillStyle = col;
         ctx.fillRect(px, py, CELL, CELL);
         if (rm.locked) { ctx.fillStyle='#666688'; ctx.fillRect(px+Math.floor(CELL/2)-1,py+Math.floor(CELL/2)-1,2,2); }
@@ -8781,10 +8892,11 @@ document.addEventListener('click', e => {
       }
     }
     // Layer label strip
-    const label = clayer === 0 ? 'SURFACE' : 'UNDERGROUND';
-    ctx.fillStyle = clayer === 0 ? '#1a3a1a' : '#1a1030';
+    const layerMeta2 = LAYERS[clayer] || LAYERS[0];
+    const label = layerMeta2.label;
+    ctx.fillStyle = layerMeta2.strip;
     ctx.fillRect(0, canvas.height-10, canvas.width, 10);
-    ctx.fillStyle = clayer === 0 ? '#4a8a4a' : '#8844ff';
+    ctx.fillStyle = layerMeta2.text;
     ctx.font = '6px monospace';
     ctx.fillText(label, 2, canvas.height-2);
   }
@@ -8796,7 +8908,7 @@ document.addEventListener('click', e => {
     document.getElementById('envBtnE').disabled = !room(cx+1, cy);
     const rm = room(cx, cy);
     const canDescend = clayer === 0 && rm && window.__questFlags?.morriganPaid && rm.name === 'Dead Grove';
-    const canAscend  = clayer === 1 && rm?.tunnel === 'up';
+    const canAscend  = (clayer === 1 && rm?.tunnel === 'up') || (clayer === 2 && rm?.tunnel === 'surface');
     const btnDown = document.getElementById('envBtnDown');
     const btnUp   = document.getElementById('envBtnUp');
     if (btnDown) btnDown.style.display = canDescend ? '' : 'none';
@@ -8827,7 +8939,11 @@ document.addEventListener('click', e => {
     resourceState = [];
 
     // Decorative fluff (layer-aware)
-    const decorFn = clayer === 1 ? (DECOR_UNDER[rm.name] || DECOR[rm.name]) : DECOR[rm.name];
+    const decorFn = clayer === 1
+      ? (DECOR_UNDER[rm.name] || DECOR[rm.name])
+      : clayer === 2
+        ? (DECOR_DESERT[rm.name] || DECOR[rm.name])
+        : DECOR[rm.name];
     if (decorFn) resContainer.innerHTML = decorFn();
 
     // Dead Grove: glowing chest to descend (appears after Morrigan paid)
@@ -9046,18 +9162,40 @@ document.addEventListener('click', e => {
 
   window.envAscend = function() {
     const rm = room(cx, cy);
-    if (!rm || rm.tunnel !== 'up') return;
-    layerFlash(() => {
-      clayer = 0;
-      cx = 5; cy = 2;  // back to Dead Grove
-      renderRoom(0, 0);
-    });
+    if (!rm) return;
+    if (clayer === 1 && rm.tunnel === 'up') {
+      layerFlash(() => {
+        clayer = 0;
+        cx = 5; cy = 2;  // back to Dead Grove
+        renderRoom(0, 0);
+      });
+      return;
+    }
+    if (clayer === 2 && rm.tunnel === 'surface') {
+      layerFlash(() => {
+        clayer = 0;
+        cx = 0; cy = 3;  // back to West Dune Gate
+        renderRoom(0, 0);
+      });
+    }
   };
 
   window.envNavigate = function(dx, dy) {
     const nc=cx+dx, nr=cy+dy;
-    if (!room(nc,nr)) return;
     const curRm = room(cx, cy);
+
+    // Surface -> Desert transition through the west gate
+    if (clayer === 0 && curRm?.name === 'West Dune Gate' && dx === -1 && dy === 0) {
+      if (!window.__questFlags?.desertTollPaid) { openDialogue('desert_guard'); return; }
+      layerFlash(() => {
+        clayer = 2;
+        cx = 0; cy = 3;
+        renderRoom(0, 0);
+      });
+      return;
+    }
+
+    if (!room(nc,nr)) return;
     if (curRm && curRm.locked) {
       if (dx !== -1) { openDialogue(curRm.npc); return; }
     }
@@ -9144,6 +9282,65 @@ document.addEventListener('click', e => {
             { label: 'I\'ll return.', next: null   },
             { label: '[Back]',        next: 'root' },
           ]
+        },
+      }
+    },
+
+
+    // ─────────────────────────────────────────────
+    desert_guard: {
+      name: 'Gate Sergeant Ilya',
+      title: 'Desert Frontier Guard',
+      portrait: '🛡️',
+      tree: {
+        root: {
+          text: () => window.__questFlags?.desertTollPaid
+            ? `*Two armored guards stand beside the iron slats while heat shimmers behind them.*
+
+"You're cleared for the western crossing. Keep your wrist stamp visible and watch for sandstorms.
+
+The desert does not forgive mistakes."`
+            : `*A pair of frontier guards lower their spears as you approach the towering metal gate. Beyond it: dunes, haze, and endless sun.*
+
+"West desert crossing is restricted. Toll is 5 coins per traveler.
+
+Pay the gate fee and we'll open the bars."`,
+          choices: () => {
+            if (window.__questFlags?.desertTollPaid) {
+              return [
+                { label: 'Open the gate. I am heading in.', next: 'cleared' },
+                { label: '[Leave]', next: null },
+              ];
+            }
+            const coins = window.__cachedCoins || 0;
+            const choices = [];
+            if (coins >= 5) {
+              choices.push({ label: '[ Pay 5 coins ]', next: 'paid', action: 'pay_desert_toll' });
+            } else {
+              choices.push({ label: `✗ Need ${5 - coins} more coins`, next: null, locked: true });
+            }
+            choices.push({ label: 'Why is there a toll?', next: 'why' });
+            choices.push({ label: '[Leave]', next: null });
+            return choices;
+          },
+        },
+        why: {
+          text: `"Water caravans, repairs, scouts, medical tents. The toll keeps this gate standing and people alive out there.
+
+Five coins is cheaper than dying of thirst two dunes out."`,
+          choices: [{ label: '[Back]', next: 'root' }],
+        },
+        paid: {
+          text: `*The sergeant stamps your pass and signals the other guard. The giant metal gate groans as it unlocks.*
+
+"Paid and cleared. Head west through the gate to enter the desert world.
+
+Stay sharp."`,
+          choices: [{ label: 'Understood.', next: null }],
+        },
+        cleared: {
+          text: `"Gate's open for you. Step west and the desert's yours. Plenty of nodes out there if you can survive the heat."`,
+          choices: [{ label: '[Leave]', next: null }],
         },
       }
     },
@@ -9519,6 +9716,12 @@ document.addEventListener('click', e => {
       if (window.__fbSaveQuestFlags)  window.__fbSaveQuestFlags();
       // Chest appears — re-render if on Dead Grove
       if (room(cx,cy)?.name === 'Dead Grove') renderRoom(0,0);
+    }
+    if (action === 'pay_desert_toll') {
+      if (window.__spendCoins) window.__spendCoins(5);
+      window.__questFlags.desertTollPaid = true;
+      if (window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
+      if (room(cx,cy)?.name === 'West Dune Gate') renderRoom(0,0);
     }
     if (action === 'buy_seal') {
       if (window.__spendCoins) window.__spendCoins(1000);
