@@ -9086,7 +9086,8 @@ document.addEventListener('click', e => {
     // NPC talk button + auto-open on entry
     if (rm.npc) {
       // Toll gate: after first payment, silently deduct 5g and enter desert
-      if (rm.tollGate && window.__questFlags?.tollPaidOnce) {
+      const skipTollAuto = !!window.__skipTollAutoOnce;
+      if (rm.tollGate && window.__questFlags?.tollPaidOnce && !skipTollAuto) {
         const talkBtn = document.createElement('button');
         talkBtn.className = 'npc-talk-btn';
         talkBtn.textContent = '💬 Talk';
@@ -9107,6 +9108,9 @@ document.addEventListener('click', e => {
           }
         }, 450);
       } else {
+        if (rm.tollGate && window.__skipTollAutoOnce) {
+          window.__skipTollAutoOnce = false;
+        }
         const talkBtn = document.createElement('button');
         talkBtn.className = 'npc-talk-btn';
         talkBtn.textContent = '💬 Talk';
@@ -9302,6 +9306,7 @@ document.addEventListener('click', e => {
     layerFlash(() => {
       clayer = 0;
       cx = 3; cy = 6;  // back to Toll Gate
+      window.__skipTollAutoOnce = true;
       renderRoom(0, 0);
     });
   };
