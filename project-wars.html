@@ -876,21 +876,35 @@
 
   .bet-display {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
+    font-size: 1.7rem;
     color: var(--gold);
-    min-width: 80px;
+    min-width: 180px;
     text-align: center;
+    line-height: 1;
   }
-  .bet-display small { display: block; font-family: 'DM Mono', monospace; font-size: 0.55rem; color: #4a8a4a; letter-spacing: 1px; text-transform: uppercase; }
-
+  .bet-display-main { color: var(--gold); }
+  .bet-display-max {
+    font-size: 1rem;
+    margin-left: 0.25rem;
+    color: #ffe082;
+    text-shadow: 0 0 10px rgba(245, 200, 66, 0.55);
+    animation: maxBetGlow 1.4s ease-in-out infinite;
+  }
+  .bet-display small { display: block; font-family: 'DM Mono', monospace; font-size: 0.6rem; color: #7fb37f; letter-spacing: 1px; text-transform: uppercase; margin-top: 0.15rem; }
 
   .bj-bet-limit-hint {
     width: 100%;
-    font-size: 0.55rem;
+    font-size: 0.7rem;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: #7fb37f;
-    margin-top: -0.2rem;
+    color: #9fd19f;
+    margin-top: -0.1rem;
+    text-align: center;
+  }
+
+  @keyframes maxBetGlow {
+    0%, 100% { opacity: 0.8; text-shadow: 0 0 8px rgba(245, 200, 66, 0.45); }
+    50% { opacity: 1; text-shadow: 0 0 16px rgba(245, 200, 66, 0.85); }
   }
 
   .clear-bet-btn {
@@ -923,7 +937,15 @@
     margin-bottom: 0.4rem;
   }
   .bj-rank { font-family: 'Bebas Neue', sans-serif; color: var(--gold); letter-spacing: 2px; font-size: 0.95rem; }
-  .bj-cap { font-size: 0.55rem; letter-spacing: 1px; color: #7fb37f; text-transform: uppercase; }
+  .bj-cap {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    color: #ffe082;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(245, 200, 66, 0.55);
+    animation: maxBetGlow 1.8s ease-in-out infinite;
+  }
   .bj-xp-bar { width: 100%; height: 8px; background: #112611; border: 1px solid #2a5a2a; overflow: hidden; }
   .bj-xp-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4ade80, #f5c842); transition: width 0.25s ease; }
   .bj-progression-sub {
@@ -3830,7 +3852,7 @@
 <button class="chip chip-25" id="chip25" onclick="addBet(25)">25</button>
 <button class="chip chip-50" id="chip50" onclick="addBet(50)">50</button>
 <button class="chip chip-100" id="chip100" onclick="addBet(100)">100</button>
-<div class="bet-display" id="betDisplay">0<small>bet</small></div>
+<div class="bet-display" id="betDisplay"><span class="bet-display-main">0</span><span class="bet-display-max">/25 MAX</span><small>bet / max</small></div>
 <button class="clear-bet-btn" onclick="clearBet()">Clear</button>
 <div class="bj-bet-limit-hint" id="bjBetLimitHint">Bet cap from your level: 25</div>
 </div>
@@ -5902,7 +5924,7 @@
     const maxBet = bjMaxBetForLevel(bjProgress.level);
     const el = document.getElementById('bjBetLimitHint');
     if (!el) return;
-    el.textContent = `Current bet ${bjBet} / ${maxBet} max from level ${bjProgress.level}`;
+    el.textContent = `Level ${bjProgress.level} cap active • max bet ${maxBet}`;
   }
 
   function bjAwardProgress(playerId, outcome) {
@@ -6058,7 +6080,8 @@
   };
 
   function updateBetDisplay() {
-    document.getElementById('betDisplay').innerHTML = `${bjBet}<small>bet</small>`;
+    const maxBet = bjMaxBetForLevel(bjProgress.level);
+    document.getElementById('betDisplay').innerHTML = `<span class="bet-display-main">${bjBet}</span><span class="bet-display-max">/${maxBet} MAX</span><small>bet / max</small>`;
     updateBJBetLimitHint();
   }
 
