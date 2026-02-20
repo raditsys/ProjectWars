@@ -3235,6 +3235,42 @@
     border-bottom: 1px solid #1e2e1e;
     min-height: 24px;
   }
+  #envResourceStats {
+    border-bottom: 1px solid #1e2e1e;
+    padding: 6px 12px 8px;
+    display: grid;
+    gap: 6px;
+  }
+  .env-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.62rem;
+    color: #8ea88e;
+    letter-spacing: 0.6px;
+  }
+  .env-stat-row .muted { color: #5f745f; }
+  .env-refine-btn {
+    justify-self: flex-start;
+    background: #0f170f;
+    border: 1px solid #2f4a2f;
+    color: #9ed29e;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    padding: 0.25rem 0.45rem;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .env-refine-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .env-refine-btn:hover:not(:disabled) {
+    border-color: var(--green);
+    color: var(--green);
+  }
   #envFooterRow {
     display: flex;
     flex-direction: row;
@@ -3739,6 +3775,7 @@
   </div>
   <div id="envFooter">
     <div id="envRoomDesc"></div>
+    <div id="envResourceStats"></div>
     <div id="envFooterRow">
       <div id="envMapPane">
         <div id="envMinimap"></div>
@@ -8274,6 +8311,8 @@
 window.__inventory = {
   oak_log: 0, willow_log: 0, magic_log: 0,
   copper_ore: 0, iron_ore: 0, gold_ore: 0, runite_ore: 0,
+  oak_plank: 0, willow_plank: 0, enchanted_plank: 0,
+  copper_ingot: 0, iron_ingot: 0, gold_ingot: 0, runite_bar: 0,
   bronze_axe: 1, bronze_pickaxe: 1,
 };
 window.__equipmentLoadout = { leftHand: '', rightHand: '' };
@@ -8287,6 +8326,16 @@ const GEAR_GRID_LAYOUT = ['bronze_axe','bronze_pickaxe',null,null,null,null,null
 const SELL_PRICES = {
   oak_log: 2, willow_log: 5, magic_log: 20,
   copper_ore: 2, iron_ore: 4, gold_ore: 12, runite_ore: 40,
+};
+
+const REFINE_RECIPES = {
+  oak_log:    { outKey:'oak_plank',      outName:'Oak Plank',      outIcon:'🪚', cost:2, station:'Sawbench' },
+  willow_log: { outKey:'willow_plank',   outName:'Willow Plank',   outIcon:'🪚', cost:2, station:'Sawbench' },
+  magic_log:  { outKey:'enchanted_plank',outName:'Enchanted Plank',outIcon:'🪄', cost:2, station:'Runesaw' },
+  copper_ore: { outKey:'copper_ingot',   outName:'Copper Ingot',   outIcon:'🧱', cost:2, station:'Smelter' },
+  iron_ore:   { outKey:'iron_ingot',     outName:'Iron Ingot',     outIcon:'🧱', cost:2, station:'Smelter' },
+  gold_ore:   { outKey:'gold_ingot',     outName:'Gold Ingot',     outIcon:'🧱', cost:2, station:'Smelter' },
+  runite_ore: { outKey:'runite_bar',     outName:'Runite Bar',     outIcon:'🔷', cost:2, station:'Rune Forge' },
 };
 
 const INV_IDS = {
@@ -8340,6 +8389,7 @@ function updateInventoryUI() {
   }
   renderGearGrid();
   updateEquipmentUI();
+  if (window.__refreshEnvResourceStats) window.__refreshEnvResourceStats();
 }
 
 function addInventoryItem(key, amount = 1) {
@@ -8347,6 +8397,32 @@ function addInventoryItem(key, amount = 1) {
   updateInventoryUI();
   if (window.__fbSaveInventory) window.__fbSaveInventory();
 }
+
+window.refineAllResources = async function() {
+  let totalCrafted = 0;
+  const craftedLines = [];
+  for (const [rawKey, recipe] of Object.entries(REFINE_RECIPES)) {
+    const available = window.__inventory[rawKey] || 0;
+    const batches = Math.floor(available / recipe.cost);
+    if (batches < 1) continue;
+    window.__inventory[rawKey] -= batches * recipe.cost;
+    window.__inventory[recipe.outKey] = (window.__inventory[recipe.outKey] || 0) + batches;
+    totalCrafted += batches;
+    craftedLines.push(`${recipe.outIcon} +${batches} ${recipe.outName}`);
+  }
+  if (totalCrafted < 1) return false;
+  updateInventoryUI();
+  if (window.__fbSaveInventory) await window.__fbSaveInventory();
+
+  const el = document.createElement('div');
+  el.className = 'coin-float';
+  el.textContent = craftedLines.slice(0, 2).join(' | ') + (craftedLines.length > 2 ? ` +${craftedLines.length - 2} more` : '');
+  el.style.left = '120px';
+  el.style.top  = (window.innerHeight - 220) + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1400);
+  return true;
+};
 
 window.toggleEquipTool = function(itemKey) {
   const item = TOOL_ITEMS[itemKey];
@@ -8781,12 +8857,57 @@ document.addEventListener('click', e => {
     if (btnUp)   btnUp.style.display   = canAscend  ? '' : 'none';
   }
 
+  function renderEnvResourceStats(rm) {
+    const panel = document.getElementById('envResourceStats');
+    if (!panel) return;
+    const resources = (rm && rm.resources) || [];
+    if (!resources.length) {
+      panel.innerHTML = `<div class="env-stat-row"><span class="muted">No harvestables in this room.</span></div>`;
+      return;
+    }
+
+    const roomMix = {};
+    resources.forEach(res => {
+      const key = `${res.kind}:${res.type}`;
+      roomMix[key] = (roomMix[key] || 0) + 1;
+    });
+
+    const lines = [];
+    Object.entries(roomMix).forEach(([key, count]) => {
+      const [kind, type] = key.split(':');
+      const data = kind === 'tree' ? TREE_TYPES[type] : ORE_TYPES[type];
+      if (!data) return;
+      const recipe = REFINE_RECIPES[data.invKey];
+      if (!recipe) return;
+      const owned = window.__inventory[data.invKey] || 0;
+      const craftable = Math.floor(owned / recipe.cost);
+      const sourceName = kind === 'tree' ? `${data.name} Log` : `${data.name} Ore`;
+      lines.push(`<div class="env-stat-row"><span>${count}x ${sourceName} → ${recipe.outName}</span><span>${owned}/${recipe.cost}ea · ready: ${craftable}</span></div>`);
+    });
+
+    const canRefine = Object.entries(REFINE_RECIPES).some(([rawKey, recipe]) => Math.floor((window.__inventory[rawKey] || 0) / recipe.cost) > 0);
+    panel.innerHTML = lines.join('') + `<button class="env-refine-btn" ${canRefine ? '' : 'disabled'} onclick="refineFromEnvPanel()">Refine Materials</button>`;
+  }
+
+  window.refineFromEnvPanel = async function() {
+    const ok = await window.refineAllResources?.();
+    if (ok) {
+      const rm = room(cx, cy);
+      renderEnvResourceStats(rm);
+    }
+  };
+  window.__refreshEnvResourceStats = function() {
+    const rm = room(cx, cy);
+    if (rm) renderEnvResourceStats(rm);
+  };
+
   function renderRoom(dx, dy) {
     const rm = room(cx, cy);
     if (!rm) return;
     document.getElementById('envRoomName').textContent = rm.name;
     document.getElementById('envRoomDesc').textContent = rm.desc;
     document.getElementById('envCoords').textContent = `${cx},${cy}`;
+    renderEnvResourceStats(rm);
     const scene  = document.getElementById('envScene');
     const ground = document.getElementById('envGround');
     scene.style.background = rm.sky;
