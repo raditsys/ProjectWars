@@ -3798,6 +3798,12 @@
         <span class="inv-count" id="invWillowLog">0</span>
         <button class="inv-sell-btn" onclick="sellResource('willow_log')" disabled id="sellWillowLog">Sell 5🪙</button>
       </div>
+      <div class="inv-row" id="invRowMapleLog">
+        <span class="inv-icon">🍁</span>
+        <span class="inv-label">Maple Log</span>
+        <span class="inv-count" id="invMapleLog">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('maple_log')" disabled id="sellMapleLog">Sell 9🪙</button>
+      </div>
       <div class="inv-row" id="invRowMagicLog">
         <span class="inv-icon">✨</span>
         <span class="inv-label">Magic Log</span>
@@ -3816,11 +3822,23 @@
         <span class="inv-count" id="invIronOre">0</span>
         <button class="inv-sell-btn" onclick="sellResource('iron_ore')" disabled id="sellIronOre">Sell 4🪙</button>
       </div>
+      <div class="inv-row" id="invRowCoalOre">
+        <span class="inv-icon">⚫</span>
+        <span class="inv-label">Coal Ore</span>
+        <span class="inv-count" id="invCoalOre">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('coal_ore')" disabled id="sellCoalOre">Sell 7🪙</button>
+      </div>
       <div class="inv-row" id="invRowGoldOre">
         <span class="inv-icon">🌕</span>
         <span class="inv-label">Gold Ore</span>
         <span class="inv-count" id="invGoldOre">0</span>
         <button class="inv-sell-btn" onclick="sellResource('gold_ore')" disabled id="sellGoldOre">Sell 12🪙</button>
+      </div>
+      <div class="inv-row" id="invRowMithrilOre">
+        <span class="inv-icon">🔷</span>
+        <span class="inv-label">Mithril Ore</span>
+        <span class="inv-count" id="invMithrilOre">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('mithril_ore')" disabled id="sellMithrilOre">Sell 24🪙</button>
       </div>
       <div class="inv-row" id="invRowRuniteOre">
         <span class="inv-icon">💎</span>
@@ -8272,8 +8290,8 @@
 
 // ══════════════════ INVENTORY SYSTEM ══════════════════
 window.__inventory = {
-  oak_log: 0, willow_log: 0, magic_log: 0,
-  copper_ore: 0, iron_ore: 0, gold_ore: 0, runite_ore: 0,
+  oak_log: 0, willow_log: 0, maple_log: 0, magic_log: 0,
+  copper_ore: 0, iron_ore: 0, coal_ore: 0, gold_ore: 0, mithril_ore: 0, runite_ore: 0,
   bronze_axe: 1, bronze_pickaxe: 1,
 };
 window.__equipmentLoadout = { leftHand: '', rightHand: '' };
@@ -8285,17 +8303,17 @@ const TOOL_ITEMS = {
 const GEAR_GRID_LAYOUT = ['bronze_axe','bronze_pickaxe',null,null,null,null,null,null,null,null,null,null];
 
 const SELL_PRICES = {
-  oak_log: 2, willow_log: 5, magic_log: 20,
-  copper_ore: 2, iron_ore: 4, gold_ore: 12, runite_ore: 40,
+  oak_log: 2, willow_log: 5, maple_log: 9, magic_log: 20,
+  copper_ore: 2, iron_ore: 4, coal_ore: 7, gold_ore: 12, mithril_ore: 24, runite_ore: 40,
 };
 
 const INV_IDS = {
-  oak_log: 'invOakLog', willow_log: 'invWillowLog', magic_log: 'invMagicLog',
-  copper_ore: 'invCopperOre', iron_ore: 'invIronOre', gold_ore: 'invGoldOre', runite_ore: 'invRuniteOre',
+  oak_log: 'invOakLog', willow_log: 'invWillowLog', maple_log: 'invMapleLog', magic_log: 'invMagicLog',
+  copper_ore: 'invCopperOre', iron_ore: 'invIronOre', coal_ore: 'invCoalOre', gold_ore: 'invGoldOre', mithril_ore: 'invMithrilOre', runite_ore: 'invRuniteOre',
 };
 const SELL_IDS = {
-  oak_log: 'sellOakLog', willow_log: 'sellWillowLog', magic_log: 'sellMagicLog',
-  copper_ore: 'sellCopperOre', iron_ore: 'sellIronOre', gold_ore: 'sellGoldOre', runite_ore: 'sellRuniteOre',
+  oak_log: 'sellOakLog', willow_log: 'sellWillowLog', maple_log: 'sellMapleLog', magic_log: 'sellMagicLog',
+  copper_ore: 'sellCopperOre', iron_ore: 'sellIronOre', coal_ore: 'sellCoalOre', gold_ore: 'sellGoldOre', mithril_ore: 'sellMithrilOre', runite_ore: 'sellRuniteOre',
 };
 
 function updateEquipmentUI() {
@@ -8445,7 +8463,7 @@ document.addEventListener('click', e => {
     btn.style.display = open ? 'none' : '';
   };
 
-  const GRID_W = 8, GRID_H = 6;
+  const GRID_W = 10, GRID_H = 7, GRID_H_UNDER = 5;
 
   function f(name, desc, sky, ground, groundBorder) {
     return { name, desc, sky, ground, groundBorder, resources:[] };
@@ -8461,8 +8479,10 @@ document.addEventListener('click', e => {
     '3,0': f('Howling Ridge',   'Wind tears through the pines',       'linear-gradient(180deg,#0a0e08 0%,#0e1408 60%,#0a0e08 100%)', '#141e0a', '#243010'),
     '4,0': f('Fog Valley',      'Thick mist clings to the ground',    'linear-gradient(180deg,#101418 0%,#181e24 60%,#101418 100%)', '#1c2428', '#2c3840'),
     '5,0': f('Dark Pines',      'Tall evergreens block the light',    'linear-gradient(180deg,#060a06 0%,#0a100a 60%,#060a06 100%)', '#0e160e', '#182818'),
-    '6,0': null,
-    '7,0': null,
+    '6,0': f('Ice Shelf',       'A frozen shelf hangs over dark water','linear-gradient(180deg,#0a1022 0%,#101a2a 60%,#0a1020 100%)', '#1a2438', '#2e3e5a'),
+    '7,0': f('Raven Perch',     'Black birds watch from broken stone', 'linear-gradient(180deg,#0a0c10 0%,#101418 60%,#0a0c10 100%)', '#1a1e24', '#2a3038'),
+    '8,0': null,
+    '9,0': null,
 
     '0,1': f('Mossy Bank',      'Soft green moss over old stone',     'linear-gradient(180deg,#081408 0%,#0c1c0c 60%,#081408 100%)', '#162412', '#2a3e1a'),
     '1,1': f('Flower Meadow',   'Wildflowers sway in the breeze',     'linear-gradient(180deg,#0c1c08 0%,#10240c 60%,#0c1c08 100%)', '#1e3010', '#3a5020'),
@@ -8471,7 +8491,9 @@ document.addEventListener('click', e => {
     '4,1': f('Ruins',           'Crumbling stone walls, long forgot', 'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201a14', '#382e20'),
     '5,1': { name:'Mushroom Ring', desc:'A hunched figure mutters over the fungi.', sky:'linear-gradient(180deg,#120a18 0%,#1a1020 60%,#120a18 100%)', ground:'#1e1028', groundBorder:'#341a3e', resources:[], npc:'wren' },
     '6,1': f('Overgrown Path',  'The trail is barely visible',        'linear-gradient(180deg,#0a1008 0%,#0e160a 60%,#0a1008 100%)', '#14200e', '#243a18'),
-    '7,1': null,
+    '7,1': f('Heather Rise',    'Purple heather carpets the slope',    'linear-gradient(180deg,#140e1e 0%,#1a1228 60%,#140e1e 100%)', '#241832', '#3a2450'),
+    '8,1': r('Maple Copse',     'Young maple trees grow in tight rows', 'linear-gradient(180deg,#12160a 0%,#1a2010 60%,#12180c 100%)', '#223014', '#385422', [{kind:'tree',type:'oak',x:20},{kind:'tree',type:'maple',x:130},{kind:'tree',type:'maple',x:240}]),
+    '9,1': null,
 
     '0,2': r('Lakeside',        'Willow trees by the water',          'linear-gradient(180deg,#061420 0%,#0a1e2a 60%,#0d2210 100%)', '#1a3020', '#2a5a30', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'oak',x:228}]),
     '1,2': f('Twisted Oaks',    'Gnarled old trees, no timber left',  'linear-gradient(180deg,#0c1808 0%,#101e0c 60%,#0c1808 100%)', '#1a2c10', '#2e4c1a'),
@@ -8481,6 +8503,8 @@ document.addEventListener('click', e => {
     '5,2': f('Dead Grove',      'Bleached trunks, no life here',      'linear-gradient(180deg,#100e0c 0%,#16120e 60%,#100e0c 100%)', '#201a12', '#302820'),
     '6,2': { name:'Swamp', desc:'Mist clings low. Someone is watching.', sky:'linear-gradient(180deg,#0a1208 0%,#0e1a0a 60%,#0a1210 100%)', ground:'#102a10', groundBorder:'#1a4a20', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'willow',x:228}], npc:'morrigan' },
     '7,2': f('Brackish Pool',   'Dark water, no fish',                'linear-gradient(180deg,#060e0c 0%,#0a1410 60%,#060e0c 100%)', '#0e2018', '#183028'),
+    '8,2': f('Thorn Corridor',  'Narrow path choked by briars',       'linear-gradient(180deg,#0c100a 0%,#12180e 60%,#0c100a 100%)', '#1a2412', '#2a3a1a'),
+    '9,2': r('Silverleaf Stand','Maple and willow stand over wet soil','linear-gradient(180deg,#0e140c 0%,#141c10 60%,#0e140c 100%)', '#1c2a12', '#30461c', [{kind:'tree',type:'willow',x:16},{kind:'tree',type:'maple',x:125},{kind:'tree',type:'maple',x:234}]),
 
     '0,3': f('Rocky Foothills', 'Loose scree, hard going',            'linear-gradient(180deg,#0e0c0a 0%,#16120e 60%,#0e0c0a 100%)', '#1e1810', '#302818'),
     '1,3': { name:'Cave Mouth', desc:'An old miner blocks the entrance, smoking a pipe.', sky:'linear-gradient(180deg,#080808 0%,#0e0e0e 60%,#080808 100%)', ground:'#141414', groundBorder:'#222222', resources:[], npc:'degan' },
@@ -8488,8 +8512,10 @@ document.addEventListener('click', e => {
     '3,3': f('Gravel Pit',      'Just rocks, nothing valuable',       'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201c14', '#342e20'),
     '4,3': r('Iron Ridge',      'Iron and copper veins',              'linear-gradient(180deg,#101010 0%,#161616 60%,#101212 100%)', '#202020', '#383838', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'iron',x:128},{kind:'ore',type:'iron',x:228}]),
     '5,3': f('Sinkhole',        'The ground feels unstable here',     'linear-gradient(180deg,#0c0a08 0%,#12100c 60%,#0c0a08 100%)', '#181410', '#282018'),
-    '6,3': r('Deep Woods',      'Willow and magic trees',             'linear-gradient(180deg,#0d0a1a 0%,#120d20 60%,#0a0a15 100%)', '#1a1030', '#2a1a4a', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}]),
+    '6,3': r('Deep Woods',      'Willow and magic trees',             'linear-gradient(180deg,#0d0a1a 0%,#120d20 60%,#0a0a15 100%)', '#1a1030', '#2a1a4a', [{kind:'tree',type:'willow',x:10},{kind:'tree',type:'maple',x:110},{kind:'tree',type:'magic',x:220}]),
     '7,3': { name:'Castle Gate', desc:'Massive iron gates. A guard blocks the way.', sky:'linear-gradient(180deg,#080810 0%,#0e0e1c 60%,#080810 100%)', ground:'#181820', groundBorder:'#303048', resources:[], locked:true, npc:'guard' },
+    '8,3': r('Coal Cut',        'Dark seams thread the cliff face',   'linear-gradient(180deg,#0a0a0a 0%,#121212 60%,#0a0a0a 100%)', '#181818', '#282828', [{kind:'ore',type:'iron',x:20},{kind:'ore',type:'coal',x:130},{kind:'ore',type:'coal',x:240}]),
+    '9,3': f('Watch Camp',      'Abandoned bedrolls circle a cold fire','linear-gradient(180deg,#0c0c10 0%,#121218 60%,#0c0c10 100%)', '#1a1a22', '#2c2c38'),
 
     '0,4': null,
     '1,4': { name:'Forgotten Shrine', desc:'A robed figure tends a low flame here.', sky:'linear-gradient(180deg,#10060a 0%,#180a10 60%,#100608 100%)', ground:'#20100a', groundBorder:'#381a14', resources:[], npc:'orin' },
@@ -8498,7 +8524,9 @@ document.addEventListener('click', e => {
     '4,4': f('Bone Yard',       'Scattered remains of past battles',  'linear-gradient(180deg,#0e0e0e 0%,#141412 60%,#0e0e0e 100%)', '#1c1c18', '#2c2c24'),
     '5,4': r('Enchanted Grove', 'Magic trees glow at night',          'linear-gradient(180deg,#10063a 0%,#180a50 60%,#0e0430 100%)', '#1a0a40', '#3a1a70', [{kind:'tree',type:'magic',x:10},{kind:'tree',type:'magic',x:110},{kind:'tree',type:'willow',x:220}]),
     '6,4': f('Void Hollow',     'The air feels wrong here',           'linear-gradient(180deg,#06060e 0%,#0a0a18 60%,#06060e 100%)', '#0e0e20', '#181830'),
-    '7,4': null,
+    '7,4': f('Shattered Causeway','Broken stones lead nowhere',       'linear-gradient(180deg,#0c0e12 0%,#141820 60%,#0c0e12 100%)', '#1a1e28', '#2c3448'),
+    '8,4': r('Mithril Shelf',   'Blue ore veins pulse beneath dust',  'linear-gradient(180deg,#060a14 0%,#0a101c 60%,#060a12 100%)', '#101828', '#1c2e46', [{kind:'ore',type:'gold',x:20},{kind:'ore',type:'mithril',x:128},{kind:'ore',type:'mithril',x:228}]),
+    '9,4': r('Arcane Grove',    'Maple and magic trees arc with static','linear-gradient(180deg,#120a2c 0%,#1a1042 60%,#120a30 100%)', '#1e1242', '#34206a', [{kind:'tree',type:'maple',x:12},{kind:'tree',type:'magic',x:120},{kind:'tree',type:'magic',x:228}]),
 
     '0,5': null,
     '1,5': null,
@@ -8506,19 +8534,35 @@ document.addEventListener('click', e => {
     '3,5': f('Magma Chamber',   'Intense heat, nothing survives',     'linear-gradient(180deg,#160604 0%,#200804 60%,#160604 100%)', '#260c06', '#3e1408'),
     '4,5': r('Runite Mine',     'Rare runite ore glimmers',           'linear-gradient(180deg,#060810 0%,#08100a 60%,#060a10 100%)', '#0e1018', '#1a2030', [{kind:'ore',type:'gold',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'runite',x:228}]),
     '5,5': f('Abyss Edge',      'Looking down into nothing',          'linear-gradient(180deg,#040408 0%,#06060e 60%,#040408 100%)', '#08080e', '#10101a'),
-    '6,5': null,
-    '7,5': null,
+    '6,5': f('Obsidian Steps',  'Black stone stairs descend in silence','linear-gradient(180deg,#0a0606 0%,#120808 60%,#0a0606 100%)', '#160a0a', '#261010'),
+    '7,5': f('Ash Barrens',     'Volcanic ash drifts in low winds',   'linear-gradient(180deg,#100c0a 0%,#18120e 60%,#100c0a 100%)', '#1e1812', '#30261c'),
+    '8,5': r('Starfall Quarry', 'Fallen ore chunks from old meteors', 'linear-gradient(180deg,#060810 0%,#0a0e18 60%,#060810 100%)', '#101420', '#1e2a40', [{kind:'ore',type:'mithril',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'runite',x:228}]),
+    '9,5': f('Moonlit Verge',   'Blue mist curls over pale stone',    'linear-gradient(180deg,#080a16 0%,#0e1222 60%,#080a16 100%)', '#141a2e', '#243454'),
+
+    '0,6': null,
+    '1,6': null,
+    '2,6': f('Whisper Marsh',   'Reeds hiss with every passing gust', 'linear-gradient(180deg,#08120c 0%,#0c1a10 60%,#08120c 100%)', '#122016', '#203428'),
+    '3,6': r('Coal Hollow',     'Coal pockets line the shallow cave', 'linear-gradient(180deg,#0a0a0c 0%,#101014 60%,#0a0a0c 100%)', '#14141a', '#242432', [{kind:'ore',type:'coal',x:24},{kind:'ore',type:'coal',x:132},{kind:'ore',type:'iron',x:240}]),
+    '4,6': f('Ancient Road',    'Weathered stones from a lost empire','linear-gradient(180deg,#100e0a 0%,#18140e 60%,#100e0a 100%)', '#1a1612', '#2a241c'),
+    '5,6': r('Elder Timberline','Towering maple crowns scrape the fog','linear-gradient(180deg,#120e18 0%,#1a1222 60%,#120e18 100%)', '#20182c', '#322244', [{kind:'tree',type:'willow',x:14},{kind:'tree',type:'maple',x:122},{kind:'tree',type:'magic',x:230}]),
+    '6,6': f('Sunset Bluffs',   'Orange light spills over jagged rock','linear-gradient(180deg,#1a1008 0%,#24160a 60%,#1a1008 100%)', '#2a180c', '#3c2410'),
+    '7,6': f('Storm Flats',     'Lightning scars spiderweb the earth', 'linear-gradient(180deg,#0c1020 0%,#12182c 60%,#0c1020 100%)', '#1a2032', '#2a3650'),
+    '8,6': r('Royal Mine',      'Elite veins guarded by old wards',   'linear-gradient(180deg,#060a10 0%,#0a1018 60%,#060a10 100%)', '#101622', '#1e2e48', [{kind:'ore',type:'mithril',x:20},{kind:'ore',type:'runite',x:128},{kind:'ore',type:'runite',x:228}]),
+    '9,6': r('Wyrmwood Crest',  'The strongest trees in the region',  'linear-gradient(180deg,#140a20 0%,#1c1032 60%,#140a20 100%)', '#241238', '#38205a', [{kind:'tree',type:'maple',x:16},{kind:'tree',type:'magic',x:126},{kind:'tree',type:'magic',x:236}]),
   };
 
   const TREE_TYPES = {
     oak:    { name:'Oak',    invKey:'oak_log',    color:'#2d5a1a', trunkColor:'#5a3010', reqLevel:1,  xp:25,  chopMs:4000,  respawnMs:45000,  coinChance:0.08, coinAmt:1, scale:1.0 },
     willow: { name:'Willow', invKey:'willow_log', color:'#1a5a3a', trunkColor:'#3a2a10', reqLevel:30, xp:68,  chopMs:7000,  respawnMs:90000,  coinChance:0.15, coinAmt:2, scale:1.25 },
+    maple:  { name:'Maple',  invKey:'maple_log',  color:'#7a4a1a', trunkColor:'#4a240c', reqLevel:45, xp:105, chopMs:9500,  respawnMs:140000, coinChance:0.22, coinAmt:3, scale:1.35 },
     magic:  { name:'Magic',  invKey:'magic_log',  color:'#4a1a5a', trunkColor:'#6a00aa', reqLevel:75, xp:250, chopMs:15000, respawnMs:240000, coinChance:0.30, coinAmt:5, scale:1.5 },
   };
   const ORE_TYPES = {
     copper: { name:'Copper', invKey:'copper_ore', color:'#b87333', shine:'#e8a070', reqLevel:1,  xp:18,  mineMs:3500,  respawnMs:35000,  coinChance:0.06, coinAmt:1 },
     iron:   { name:'Iron',   invKey:'iron_ore',   color:'#7a7a7a', shine:'#aaaaaa', reqLevel:15, xp:35,  mineMs:5500,  respawnMs:60000,  coinChance:0.10, coinAmt:1 },
+    coal:   { name:'Coal',   invKey:'coal_ore',   color:'#303030', shine:'#6a6a6a', reqLevel:30, xp:50,  mineMs:7500,  respawnMs:95000,  coinChance:0.16, coinAmt:2 },
     gold:   { name:'Gold',   invKey:'gold_ore',   color:'#d4af37', shine:'#ffe066', reqLevel:40, xp:65,  mineMs:9000,  respawnMs:120000, coinChance:0.22, coinAmt:3 },
+    mithril:{ name:'Mithril',invKey:'mithril_ore',color:'#4f8cc9', shine:'#8bc3f5', reqLevel:60, xp:90,  mineMs:12000, respawnMs:210000, coinChance:0.30, coinAmt:5 },
     runite: { name:'Runite', invKey:'runite_ore', color:'#3a6a8a', shine:'#6ab0d0', reqLevel:85, xp:125, mineMs:18000, respawnMs:600000, coinChance:0.40, coinAmt:8 },
   };
 
@@ -8589,7 +8633,7 @@ document.addEventListener('click', e => {
     `)}</div>`,
   };
 
-  // ── Underground map (layer 1) — 8×4 grid ──
+  // ── Underground map (layer 1) — 10×5 grid ──
   const MAP_UNDER = {
     '0,0': null,
     '1,0': null,
@@ -8599,24 +8643,30 @@ document.addEventListener('click', e => {
     '5,0': null,
     '6,0': null,
     '7,0': null,
+    '8,0': null,
+    '9,0': null,
 
     '0,1': null,
     '1,1': { name:'Flooded Shaft',   desc:'Black water fills the passage. Cold.', sky:'linear-gradient(180deg,#040810 0%,#060c14 100%)', ground:'#0c1018', groundBorder:'#182030', resources:[] },
     '2,1': { name:'Fungal Cavern',   desc:'Glowing mushrooms. Eerily beautiful.',  sky:'linear-gradient(180deg,#08040e 0%,#100818 100%)', ground:'#160c1e', groundBorder:'#2e1840', resources:[{kind:'ore',type:'copper',x:30},{kind:'ore',type:'iron',x:200}] },
-    '3,1': { name:'Collapsed Vein',  desc:'Cave-in barely passable. Iron glints in the rubble.',       sky:'linear-gradient(180deg,#060606 0%,#0c0a0a 100%)', ground:'#100e0c', groundBorder:'#201c18', resources:[{kind:'ore',type:'iron',x:80},{kind:'ore',type:'gold',x:310}] },
+    '3,1': { name:'Collapsed Vein',  desc:'Cave-in barely passable. Iron glints in the rubble.',       sky:'linear-gradient(180deg,#060606 0%,#0c0a0a 100%)', ground:'#100e0c', groundBorder:'#201c18', resources:[{kind:'ore',type:'iron',x:80},{kind:'ore',type:'coal',x:200},{kind:'ore',type:'gold',x:310}] },
     '4,1': { name:'Echo Shaft',      desc:'Sound travels strangely down here.',    sky:'linear-gradient(180deg,#040408 0%,#08060c 100%)', ground:'#0e0c12', groundBorder:'#1c1828', resources:[] },
     '5,1': { name:'Runed Alcove',    desc:'Strange symbols carved into the rock.',sky:'linear-gradient(180deg,#060408 0%,#0c0614 100%)', ground:'#120a1a', groundBorder:'#241440', resources:[] },
-    '6,1': null,
+    '6,1': { name:'Ore Sump',        desc:'Waterlogged stone rich in coal.',         sky:'linear-gradient(180deg,#040606 0%,#080c0c 100%)', ground:'#0c1010', groundBorder:'#182222', resources:[{kind:'ore',type:'coal',x:50},{kind:'ore',type:'coal',x:180},{kind:'ore',type:'iron',x:310}] },
     '7,1': null,
+    '8,1': null,
+    '9,1': null,
 
     '0,2': null,
     '1,2': { name:'Old Storehouse',  desc:'Crates of forgotten supplies.',        sky:'linear-gradient(180deg,#080608 0%,#0e0a0e 100%)', ground:'#14101a', groundBorder:'#281e30', resources:[] },
     '2,2': { name:'Sewer Junction',  desc:'Four tunnels meet here. A smell.',     sky:'linear-gradient(180deg,#040808 0%,#08100a 100%)', ground:'#0c1008', groundBorder:'#182018', resources:[] },
-    '3,2': { name:'Crystal Seam',    desc:'Raw crystals glow faintly blue.',      sky:'linear-gradient(180deg,#04060e 0%,#060810 100%)', ground:'#0a0c14', groundBorder:'#141c28', resources:[{kind:'ore',type:'runite',x:60},{kind:'ore',type:'gold',x:300}] },
+    '3,2': { name:'Crystal Seam',    desc:'Raw crystals glow faintly blue.',      sky:'linear-gradient(180deg,#04060e 0%,#060810 100%)', ground:'#0a0c14', groundBorder:'#141c28', resources:[{kind:'ore',type:'mithril',x:60},{kind:'ore',type:'gold',x:180},{kind:'ore',type:'runite',x:300}] },
     '4,2': { name:'Black Market',    desc:'Lanterns. Voices. Trade happening in the dark.',   sky:'linear-gradient(180deg,#0a0608 0%,#12080a 100%)', ground:'#1a100e', groundBorder:'#382018', resources:[], npc:'blackmarket' },
     '5,2': { name:'Guard Post',      desc:'An empty chair. A warm fire. Someone was just here.',         sky:'linear-gradient(180deg,#080808 0%,#0e0a08 100%)', ground:'#12100c', groundBorder:'#22201a', resources:[] },
-    '6,2': null,
+    '6,2': { name:'Mithril Drift',   desc:'Pale-blue ore seams in brittle stone.',  sky:'linear-gradient(180deg,#040810 0%,#061020 100%)', ground:'#0a1220', groundBorder:'#142844', resources:[{kind:'ore',type:'mithril',x:60},{kind:'ore',type:'mithril',x:190},{kind:'ore',type:'gold',x:320}] },
     '7,2': null,
+    '8,2': null,
+    '9,2': null,
 
     '0,3': null,
     '1,3': null,
@@ -8626,6 +8676,19 @@ document.addEventListener('click', e => {
     '5,3': null,
     '6,3': null,
     '7,3': null,
+    '8,3': null,
+    '9,3': null,
+
+    '0,4': null,
+    '1,4': null,
+    '2,4': null,
+    '3,4': { name:'Ancient Lode',    desc:'A hidden chamber thick with rare ore.',   sky:'linear-gradient(180deg,#02040a 0%,#040810 100%)', ground:'#080c14', groundBorder:'#141c30', resources:[{kind:'ore',type:'mithril',x:70},{kind:'ore',type:'runite',x:200},{kind:'ore',type:'runite',x:320}] },
+    '4,4': null,
+    '5,4': null,
+    '6,4': null,
+    '7,4': null,
+    '8,4': null,
+    '9,4': null,
   };
 
   const DECOR_UNDER = {
@@ -8701,7 +8764,7 @@ document.addEventListener('click', e => {
 
   function key(c, rr) { return `${c},${rr}`; }
   function room(c, rr) {
-    const H = clayer === 0 ? GRID_H : 4;
+    const H = clayer === 0 ? GRID_H : GRID_H_UNDER;
     if (c < 0 || c >= GRID_W || rr < 0 || rr >= H) return null;
     const m = clayer === 0 ? MAP : MAP_UNDER;
     return m[key(c, rr)] || null;
@@ -8735,7 +8798,7 @@ document.addEventListener('click', e => {
     const canvas = document.getElementById('envMinimapCanvas');
     if (!canvas) return;
     const CELL = 13, GAP = 2;
-    const ROWS = clayer === 0 ? GRID_H : 4;
+    const ROWS = clayer === 0 ? GRID_H : GRID_H_UNDER;
     canvas.width  = GRID_W * (CELL + GAP) - GAP;
     canvas.height = ROWS   * (CELL + GAP) - GAP;
     const ctx = canvas.getContext('2d');
