@@ -883,6 +883,16 @@
   }
   .bet-display small { display: block; font-family: 'DM Mono', monospace; font-size: 0.55rem; color: #4a8a4a; letter-spacing: 1px; text-transform: uppercase; }
 
+
+  .bj-bet-limit-hint {
+    width: 100%;
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #7fb37f;
+    margin-top: -0.2rem;
+  }
+
   .clear-bet-btn {
     background: none;
     border: 1px solid #2a5a2a;
@@ -3822,6 +3832,7 @@
 <button class="chip chip-100" id="chip100" onclick="addBet(100)">100</button>
 <div class="bet-display" id="betDisplay">0<small>bet</small></div>
 <button class="clear-bet-btn" onclick="clearBet()">Clear</button>
+<div class="bj-bet-limit-hint" id="bjBetLimitHint">Bet cap from your level: 25</div>
 </div>
 </div>
 <!-- Action buttons -->
@@ -5878,11 +5889,20 @@
     const level = bjProgress.level;
     const next = bjXpToNext(level);
     const title = BJ_TITLES[Math.min(BJ_TITLES.length - 1, Math.floor((level - 1) / 2))];
+    const maxBet = bjMaxBetForLevel(level);
     document.getElementById('bjRankLabel').textContent = `${title} Lv.${level}`;
-    document.getElementById('bjCapLabel').textContent = `Max bet: ${bjMaxBetForLevel(level)}`;
+    document.getElementById('bjCapLabel').textContent = `Level ${level} cap: max bet ${maxBet}`;
     document.getElementById('bjXpLabel').textContent = `${bjProgress.xp} / ${next} xp`;
-    document.getElementById('bjHeatLabel').textContent = `Heat bonus: +${bjHeatBonusPct()}%`;
+    document.getElementById('bjHeatLabel').textContent = `Heat streak ${bjProgress.heat}/5: +${bjHeatBonusPct()}% win bonus`;
     document.getElementById('bjXpFill').style.width = `${Math.min(100, (bjProgress.xp / next) * 100)}%`;
+    updateBJBetLimitHint();
+  }
+
+  function updateBJBetLimitHint() {
+    const maxBet = bjMaxBetForLevel(bjProgress.level);
+    const el = document.getElementById('bjBetLimitHint');
+    if (!el) return;
+    el.textContent = `Current bet ${bjBet} / ${maxBet} max from level ${bjProgress.level}`;
   }
 
   function bjAwardProgress(playerId, outcome) {
@@ -5980,6 +6000,7 @@
     document.getElementById('casinoPlayerDisplay').textContent = currentUser.name;
     bjLoadProgress(currentUser.id);
     bjRenderProgress();
+    updateBetDisplay();
     refreshCasinoWallet();
   };
 
@@ -6019,7 +6040,11 @@
     const p = getCurrentCasinoPlayer();
     if (!p) { shakeWallet(); return; }
     const maxBet = bjMaxBetForLevel(bjProgress.level);
-    if (bjBet + amount > maxBet) { shakeWallet(); return; }
+    if (bjBet + amount > maxBet) {
+      shakeWallet();
+      showResult(`LEVEL ${bjProgress.level} CAP: MAX BET ${maxBet}`, 'push');
+      return;
+    }
     if (bjBet + amount > (p.coins || 0)) { shakeWallet(); return; }
     bjBet += amount;
     soundChip();
@@ -6034,6 +6059,7 @@
 
   function updateBetDisplay() {
     document.getElementById('betDisplay').innerHTML = `${bjBet}<small>bet</small>`;
+    updateBJBetLimitHint();
   }
 
   function shakeWallet() {
