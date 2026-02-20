@@ -3711,6 +3711,21 @@
     .coin-float, .skill-float { animation: none !important; }
   }
 
+  /* ── Automatic low-end device mode ── */
+  body.low-perf .bg-blobs,
+  body.low-perf .bg-blobs-mid,
+  body.low-perf .wavy-letter,
+  body.low-perf .tutorial-glow,
+  body.low-perf .chest-btn.ready,
+  body.low-perf .frog-svg,
+  body.low-perf .pet-emoji {
+    animation: none !important;
+  }
+  body.low-perf .bg-blobs,
+  body.low-perf .bg-blobs-mid {
+    display: none;
+  }
+
 </style>
 </head>
 <body>
@@ -4609,6 +4624,24 @@
       return `<span class="wavy-letter" style="animation-delay:${delay}s">${ch}</span>`;
     }).join('');
   };
+</script>
+<script>
+  // ── Performance profile (auto-detect weak hardware) ──
+  (function() {
+    const cores = navigator.hardwareConcurrency || 8;
+    const memGB = navigator.deviceMemory || 8;
+    const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isLowEnd = reducedMotion || cores <= 4 || memGB <= 4;
+
+    window.__perfProfile = {
+      lowEnd: isLowEnd,
+      pauseAnimations: reducedMotion || isLowEnd,
+    };
+
+    if (window.__perfProfile.pauseAnimations) {
+      document.body.classList.add('low-perf');
+    }
+  })();
 </script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -7956,15 +7989,17 @@
 // ══════════════════ GRASS SYSTEM ══════════════════
 (function() {
   const layer = document.getElementById('grassLayer');
+  const perf = window.__perfProfile || { lowEnd: false };
+  const isLowEnd = !!perf.lowEnd;
 
   // Slow + random growth tuning
-  const INITIAL_CLUMPS = 6;           // start sparse
-  const MAX_CLUMPS = 10;              // never exceed this many on screen
+  const INITIAL_CLUMPS = isLowEnd ? 4 : 6;   // start sparse
+  const MAX_CLUMPS = isLowEnd ? 7 : 10;      // never exceed this many on screen
 
   const MIN_REGROW_MS = 30_000;       // 30s
   const MAX_REGROW_MS = 120_000;      // 120s (2 min)
 
-  const SPAWN_TICK_MS = 8_000;        // every 8s, maybe spawn one
+  const SPAWN_TICK_MS = isLowEnd ? 12_000 : 8_000;        // every tick, maybe spawn one
   const SPAWN_CHANCE_PER_TICK = 0.18; // 18% chance each tick (~one spawn every ~45s average)
 
   // Coin tuning: only sometimes
@@ -8075,7 +8110,7 @@
 
   function makeClumpEl(x) {
     const width = randi(44, 78);
-    const bladeCount = randi(5, 10);
+    const bladeCount = isLowEnd ? randi(4, 7) : randi(5, 10);
     const baseHeight = randi(26, 42);
 
     const clump = document.createElement('div');
@@ -8143,6 +8178,7 @@
 
     // Very slow background growth: occasional new clump
     setInterval(() => {
+      if (document.hidden) return;
       const boost = window.__grassConfig || {};
       const effectiveMax = MAX_CLUMPS + (boost.maxClumpsBonus || 0);
       const effectiveChance = SPAWN_CHANCE_PER_TICK + (boost.spawnChanceBonus || 0) * SPAWN_CHANCE_PER_TICK;
@@ -9590,6 +9626,8 @@ function spawnSkillFloat(x, y, text, cls) {
 (function() {
   const gnomeEl = document.getElementById('gardenGnome');
   if (!gnomeEl) return;
+  const perf = window.__perfProfile || { lowEnd: false };
+  const moveTickMs = perf.lowEnd ? 80 : 40;
 
   let gnomeActive = false;
   let gnomePosX = 160;
@@ -9623,11 +9661,12 @@ function spawnSkillFloat(x, y, text, cls) {
 
     // Move gnome slowly across screen
     gnomeMoveInterval = setInterval(() => {
+      if (document.hidden) return;
       gnomePosX += gnomeVelX;
       if (gnomePosX > window.innerWidth - 60) { gnomePosX = window.innerWidth - 60; gnomeVelX = -Math.abs(gnomeVelX); gnomeEl.classList.add('gnome-flip'); }
       if (gnomePosX < 10) { gnomePosX = 10; gnomeVelX = Math.abs(gnomeVelX); gnomeEl.classList.remove('gnome-flip'); }
       gnomeEl.style.left = gnomePosX + 'px';
-    }, 40);
+    }, moveTickMs);
 
     // Award a coin every 20–35 seconds
     function scheduleNextCoin() {
@@ -9649,6 +9688,7 @@ function spawnSkillFloat(x, y, text, cls) {
 // ══════════════════ FROG PET ══════════════════
 (function() {
   const frog = document.getElementById('frogPet');
+  const perf = window.__perfProfile || { lowEnd: false };
   let posX = 120, posY = 20; // from bottom
   let velX = 1.2;
   let isHopping = false;
@@ -9700,6 +9740,7 @@ function spawnSkillFloat(x, y, text, cls) {
 
   // Move frog continuously
   moveInterval = setInterval(() => {
+    if (document.hidden) return;
     posX += velX;
     if (posX < 10) { posX = 10; velX = Math.abs(velX); }
     if (posX > window.innerWidth - 60) { posX = window.innerWidth - 60; velX = -Math.abs(velX); }
@@ -9707,12 +9748,13 @@ function spawnSkillFloat(x, y, text, cls) {
     frog.style.bottom = posY + 'px';
     // Flip sprite based on direction
     frog.style.transform = velX < 0 ? 'scaleX(-1)' : '';
-  }, 30);
+  }, perf.lowEnd ? 60 : 30);
 
   // Hop periodically
   hopInterval = setInterval(() => {
+    if (document.hidden) return;
     if (Math.random() < 0.6) hop();
-  }, 1400);
+  }, perf.lowEnd ? 2200 : 1400);
 
   window.frogClick = function() {
     ribbit();
