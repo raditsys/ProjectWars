@@ -4902,6 +4902,9 @@
     openApologyModal();
   }
 
+  // Show once when the site opens (not on every login)
+  setTimeout(maybeShowApologyModalOncePerSiteOpen, 250);
+
   function getHalfShopUnlocks() {
     const half = Math.ceil((SHOP_ITEMS?.length || 0) / 2);
     return Object.fromEntries((SHOP_ITEMS || []).slice(0, half).map(item => [item.id, true]));
@@ -5024,7 +5027,6 @@
     document.getElementById('loginName').value = '';
     document.getElementById('loginPass').value = '';
     render();
-    maybeShowApologyModalOncePerSiteOpen();
     startTutorialIfNeeded();
     if (window.__startGardenWatch) window.__startGardenWatch(currentUser.id);
   }
