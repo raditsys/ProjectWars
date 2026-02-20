@@ -2966,6 +2966,7 @@
   filter: none;
 }
 .grass-clump:hover { transform: scaleY(1.06); }
+.grass-clump { animation: clumpSway var(--clump-sway-dur, 7.5s) var(--clump-sway-delay, 0s) ease-in-out infinite; }
 
 /* Blades live inside the clump */
 .grass-blade {
@@ -2979,9 +2980,9 @@
 
 .scissors-cursor { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext y='20' font-size='20'%3E✂%3C/text%3E%3C/svg%3E") 12 12, crosshair; }
 
-@keyframes bladeSway {
-  0%,100% { transform: rotate(var(--sway-base)); }
-  50%      { transform: rotate(calc(var(--sway-base) + var(--sway-amt))); }
+@keyframes clumpSway {
+  0%,100% { transform: rotate(var(--clump-lean, 0deg)); }
+  50%     { transform: rotate(calc(var(--clump-lean, 0deg) + var(--clump-sway-amt, 2deg))); }
 }
 @keyframes bladeGrow {
   from { transform: scaleY(0) rotate(var(--sway-base)); opacity: 0; }
@@ -3036,13 +3037,13 @@
     transform: translateX(-50%);
     font-size: 1.4rem;
     line-height: 1;
-    animation: flowerSway 3s ease-in-out infinite;
+    animation: flowerSway 6s ease-in-out infinite;
     transform-origin: bottom center;
     user-select: none;
   }
   @keyframes flowerSway {
-    0%,100% { transform: translateX(-50%) rotate(-4deg); }
-    50%      { transform: translateX(-50%) rotate(4deg); }
+    0%,100% { transform: translateX(-50%) rotate(-2.5deg); }
+    50%      { transform: translateX(-50%) rotate(2.5deg); }
   }
   @keyframes flowerGrow {
     from { transform: translateX(-50%) scaleY(0); opacity: 0; }
@@ -3063,7 +3064,7 @@
     z-index: 49;
   }
   .tree-obj:hover:not(.depleted) { transform: scale(1.05); }
-  .tree-obj.chopping { animation: treeChop 0.18s ease-in-out infinite; }
+  .tree-obj.chopping { animation: treeChop 0.36s steps(2, end) infinite; }
   .tree-obj.depleted { opacity: 0.35; filter: grayscale(0.8) drop-shadow(0 2px 4px rgba(0,0,0,0.3)); cursor: not-allowed; pointer-events: none; }
   @keyframes treeChop {
     0%,100% { transform: rotate(-2deg) translateX(-2px); }
@@ -3088,7 +3089,7 @@
     z-index: 49;
   }
   .ore-obj:hover:not(.depleted) { transform: scale(1.08); }
-  .ore-obj.mining { animation: oreShake 0.12s ease-in-out infinite; }
+  .ore-obj.mining { animation: oreShake 0.32s steps(2, end) infinite; }
   .ore-obj.depleted { opacity: 0.3; filter: grayscale(1) drop-shadow(0 2px 4px rgba(0,0,0,0.3)); cursor: not-allowed; pointer-events: none; }
   @keyframes oreShake {
     0%,100% { transform: translate(-1px, 0) rotate(-1deg); }
@@ -3225,7 +3226,7 @@
     pointer-events: none;
   }
   .env-resource.depleted { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; }
-  .env-resource.chopping { animation: treeChop 0.18s ease-in-out infinite; }
+  .env-resource.chopping { animation: treeChop 0.36s steps(2, end) infinite; }
   .env-resource.chopping,
   .env-resource.mining {
     filter: none;
@@ -3249,7 +3250,7 @@
     pointer-events: none;
     line-height: 1.2;
   }
-  .env-resource.mining   { animation: oreShake 0.12s ease-in-out infinite; }
+  .env-resource.mining   { animation: oreShake 0.32s steps(2, end) infinite; }
   .env-resource.falling  { animation: treeFall 0.55s ease-in forwards !important; pointer-events: none; }
   .env-resource.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
   #envFooter {
@@ -3710,7 +3711,7 @@
     0%,95%,100% { transform: scaleY(1); }
     97%          { transform: scaleY(0.1); }
   }
-  .frog-svg { animation: frogBlink 4s ease-in-out infinite; }
+  .frog-svg { animation: frogBlink 7s steps(1, end) infinite; }
 
   /* ── PETS (non-frog) ── */
   .pet-emoji-wrap {
@@ -3725,13 +3726,13 @@
     font-size: 2.6rem;
     line-height: 1;
     display: block;
-    animation: petBob 1.8s ease-in-out infinite;
+    animation: petBob 3.6s ease-in-out infinite;
     transform-origin: bottom center;
     user-select: none;
   }
   @keyframes petBob {
-    0%,100% { transform: translateY(0px) rotate(-2deg); }
-    50%      { transform: translateY(-5px) rotate(2deg); }
+    0%,100% { transform: translateY(0px) rotate(-1deg); }
+    50%      { transform: translateY(-3px) rotate(1deg); }
   }
   #frogPet.hopping .pet-emoji { animation: frogHop 0.45s ease forwards; }
 
@@ -8143,7 +8144,13 @@
     clump.style.width = width + 'px';
 
     const clumpLean = (Math.random() - 0.5) * 6;
-    clump.style.transform = `rotate(${clumpLean}deg)`;
+    const clumpSwayAmt = (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 2.2);
+    const clumpSwayDelay = (Math.random() * 3).toFixed(2);
+    const clumpSwayDur = (6 + Math.random() * 4).toFixed(2);
+    clump.style.setProperty('--clump-lean', `${clumpLean}deg`);
+    clump.style.setProperty('--clump-sway-amt', `${clumpSwayAmt}deg`);
+    clump.style.setProperty('--clump-sway-delay', `${clumpSwayDelay}s`);
+    clump.style.setProperty('--clump-sway-dur', `${clumpSwayDur}s`);
 
     for (let i = 0; i < bladeCount; i++) {
       const blade = document.createElement('div');
@@ -8158,13 +8165,8 @@
 
       const g = greens[Math.floor(Math.random() * greens.length)];
       const swayBase = (Math.random() - 0.5) * 10;
-      const swayAmt  = (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 4);
-      const delay    = (Math.random() * 2.8).toFixed(2);
-      const dur      = (1.6 + Math.random() * 2.3).toFixed(2);
-
       blade.style.setProperty('--sway-base', swayBase + 'deg');
-      blade.style.setProperty('--sway-amt',  swayAmt  + 'deg');
-      blade.style.animation = `bladeSway ${dur}s ${delay}s ease-in-out infinite, bladeGrow 0.45s ease forwards`;
+      blade.style.animation = 'bladeGrow 0.45s ease forwards';
 
       blade.innerHTML = makeBladeHTML(h, g);
       clump.appendChild(blade);
@@ -9996,7 +9998,7 @@ function spawnSkillFloat(x, y, text, cls) {
   let gnomeActive = false;
   let gnomePosX = 160;
   let gnomeVelX = 0.8;
-  let gnomeMoveRaf = null;
+  let gnomeMoveInterval = null;
   let gnomeLastTs = 0;
   let gnomeCoinInterval = null;
 
@@ -10021,7 +10023,7 @@ function spawnSkillFloat(x, y, text, cls) {
 
   function gnomeStep(ts) {
     if (!gnomeActive || document.hidden) {
-      gnomeMoveRaf = null;
+      gnomeMoveInterval = null;
       gnomeLastTs = 0;
       return;
     }
@@ -10041,13 +10043,12 @@ function spawnSkillFloat(x, y, text, cls) {
       gnomeEl.classList.remove('gnome-flip');
     }
     gnomeEl.style.left = gnomePosX + 'px';
-    gnomeMoveRaf = requestAnimationFrame(gnomeStep);
   }
 
   function startGnomeMotion() {
-    if (!gnomeActive || gnomeMoveRaf || document.hidden) return;
+    if (!gnomeActive || gnomeMoveInterval || document.hidden) return;
     gnomeLastTs = 0;
-    gnomeMoveRaf = requestAnimationFrame(gnomeStep);
+    gnomeMoveInterval = setInterval(() => gnomeStep(performance.now()), 90);
   }
 
   function gnomeStart() {
@@ -10079,9 +10080,9 @@ function spawnSkillFloat(x, y, text, cls) {
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      if (gnomeMoveRaf) {
-        cancelAnimationFrame(gnomeMoveRaf);
-        gnomeMoveRaf = null;
+      if (gnomeMoveInterval) {
+        clearInterval(gnomeMoveInterval);
+        gnomeMoveInterval = null;
       }
       return;
     }
@@ -10095,7 +10096,7 @@ function spawnSkillFloat(x, y, text, cls) {
   let posX = 120, posY = 20; // from bottom
   let velX = 1.2;
   let isHopping = false;
-  let frogRaf = null;
+  let frogMoveInterval = null;
   let frogLastTs = 0;
   let hopElapsedMs = 0;
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -10145,7 +10146,7 @@ function spawnSkillFloat(x, y, text, cls) {
 
   function frogStep(ts) {
     if (document.hidden) {
-      frogRaf = null;
+      frogMoveInterval = null;
       frogLastTs = 0;
       return;
     }
@@ -10166,22 +10167,21 @@ function spawnSkillFloat(x, y, text, cls) {
       if (Math.random() < 0.6) hop();
     }
 
-    frogRaf = requestAnimationFrame(frogStep);
   }
 
   function startFrogLoop() {
-    if (frogRaf || document.hidden) return;
+    if (frogMoveInterval || document.hidden) return;
     frogLastTs = 0;
-    frogRaf = requestAnimationFrame(frogStep);
+    frogMoveInterval = setInterval(() => frogStep(performance.now()), 90);
   }
 
   startFrogLoop();
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      if (frogRaf) {
-        cancelAnimationFrame(frogRaf);
-        frogRaf = null;
+      if (frogMoveInterval) {
+        clearInterval(frogMoveInterval);
+        frogMoveInterval = null;
       }
       return;
     }
