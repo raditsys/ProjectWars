@@ -1178,6 +1178,23 @@
     text-align: center;
     margin-top: 0.2rem;
   }
+  .rl-progression {
+    margin-top: 0.65rem;
+    border: 1px solid #2a4f2a;
+    background: #071707;
+    border-radius: 8px;
+    padding: 0.5rem 0.6rem;
+  }
+  .rl-progression-top,
+  .rl-progress-sub {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6rem;
+    align-items: baseline;
+    font-size: 0.68rem;
+  }
+  .rl-rank { color: var(--gold); letter-spacing: 0.6px; }
+  .rl-cap, .rl-progress-sub { color: #8cb58c; }
 
   .r-spin-btn {
     width: 100%;
@@ -3963,7 +3980,7 @@
     <button class="r-bet-btn" id="rb2nd12" onclick="rlSelectBet('2nd12')">2nd 12</button>
     <button class="r-bet-btn" id="rb3rd12" onclick="rlSelectBet('3rd12')">3rd 12</button>
   </div>
-  <div class="r-payout-label" id="rlPayoutLabel">Select a bet type</div>
+  <div class="r-payout-label" id="rlPayoutLabel">Select a spot, then place chips</div>
 </div>
 <!-- Bet amount -->
 <div>
@@ -3975,8 +3992,20 @@
 <button class="chip chip-25" onclick="rlAddBet(25)">25</button>
 <button class="chip chip-50" onclick="rlAddBet(50)">50</button>
 <button class="chip chip-100" onclick="rlAddBet(100)">100</button>
-<div class="bet-display" id="rlBetDisplay">0<small>bet</small></div>
+<div class="bet-display" id="rlBetDisplay"><span class="bet-display-main">0</span><span class="bet-display-max">/25 MAX</span><small>total bet / max</small></div>
 <button class="clear-bet-btn" onclick="rlClearBet()">Clear</button>
+</div>
+<div class="bj-bet-limit-hint" id="rlBetLimitHint">Level 1 cap active • max bet 25</div>
+<div class="rl-progression" id="rlProgressWrap">
+  <div class="rl-progression-top">
+    <div class="rl-rank" id="rlRankLabel">Wheel Rookie Lv.1</div>
+    <div class="rl-cap" id="rlCapLabel">Level 1 cap: max bet 25</div>
+  </div>
+  <div class="xp-track"><div class="xp-fill" id="rlXpFill" style="width:0%"></div></div>
+  <div class="rl-progress-sub">
+    <span id="rlXpLabel">0 / 10 xp</span>
+    <span id="rlHeatLabel">Streak bonus: +0%</span>
+  </div>
 </div>
 </div>
 <div class="result-banner" id="rlResultBanner"></div>
@@ -6090,6 +6119,8 @@
     pkLoadProgress(currentUser.id);
     pkRenderProgress();
     pkUpdateBetDisplay();
+    rlLoadProgress(currentUser.id);
+    rlRenderProgress();
     refreshCasinoWallet();
   };
 
@@ -6292,27 +6323,200 @@
   const RL_SEQUENCE = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
   const RL_REDS = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
 
+  let rlBet = 0;
+  let rlSelectedBetType = null;
+  let rlSpinning = false;
+  let rlBets = {};
+  let rlProgress = { level: 1, xp: 0, spins: 0, heat: 0 };
+
+  const RL_TITLES = ['Wheel Rookie', 'Pocket Chaser', 'Street Shark', 'Table Maestro', 'Roulette Royal'];
+
+  const RL_BET_CONFIG = {
+    red:    { label: 'Red', payout: 1 },
+    black:  { label: 'Black', payout: 1 },
+    green:  { label: 'Green 0', payout: 35 },
+    odd:    { label: 'Odd', payout: 1 },
+    even:   { label: 'Even', payout: 1 },
+    '1to18':  { label: '1–18', payout: 1 },
+    '19to36': { label: '19–36', payout: 1 },
+    '1st12':  { label: '1st 12', payout: 2 },
+    '2nd12':  { label: '2nd 12', payout: 2 },
+    '3rd12':  { label: '3rd 12', payout: 2 },
+  };
+
+  function rlProgressKey(playerId) {
+    return `pw_rl_progress_${playerId}`;
+  }
+
+  function rlXpToNext(level) {
+    return 10 + (level - 1) * 7;
+  }
+
+  function rlMaxBetForLevel(level) {
+    return Math.min(350, 25 + (level - 1) * 12);
+  }
+
+  function rlHeatBonusPct() {
+    return Math.min(30, rlProgress.heat * 5);
+  }
+
+  function rlLoadProgress(playerId) {
+    if (!playerId) return;
+    const raw = localStorage.getItem(rlProgressKey(playerId));
+    if (!raw) {
+      rlProgress = { level: 1, xp: 0, spins: 0, heat: 0 };
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      rlProgress = {
+        level: Math.max(1, parsed.level || 1),
+        xp: Math.max(0, parsed.xp || 0),
+        spins: Math.max(0, parsed.spins || 0),
+        heat: Math.max(0, parsed.heat || 0),
+      };
+    } catch {
+      rlProgress = { level: 1, xp: 0, spins: 0, heat: 0 };
+    }
+  }
+
+  function rlSaveProgress(playerId) {
+    if (!playerId) return;
+    localStorage.setItem(rlProgressKey(playerId), JSON.stringify(rlProgress));
+  }
+
+  function rlRenderProgress() {
+    const level = rlProgress.level;
+    const next = rlXpToNext(level);
+    const title = RL_TITLES[Math.min(RL_TITLES.length - 1, Math.floor((level - 1) / 2))];
+    const maxBet = rlMaxBetForLevel(level);
+    const rankEl = document.getElementById('rlRankLabel');
+    if (rankEl) rankEl.textContent = `${title} Lv.${level}`;
+    const capEl = document.getElementById('rlCapLabel');
+    if (capEl) capEl.textContent = `Level ${level} cap: max bet ${maxBet}`;
+    const xpEl = document.getElementById('rlXpLabel');
+    if (xpEl) xpEl.textContent = `${rlProgress.xp} / ${next} xp`;
+    const heatEl = document.getElementById('rlHeatLabel');
+    if (heatEl) heatEl.textContent = `Streak bonus: +${rlHeatBonusPct()}%`;
+    const fillEl = document.getElementById('rlXpFill');
+    if (fillEl) fillEl.style.width = `${Math.min(100, (rlProgress.xp / next) * 100)}%`;
+    rlUpdateBetDisplay();
+  }
+
+  function rlAwardProgress(playerId, outcome) {
+    let gain = 1;
+    if (outcome === 'win') gain = 2;
+    if (outcome === 'bigwin') gain = 3;
+
+    rlProgress.spins += 1;
+    rlProgress.xp += gain;
+
+    let leveled = false;
+    while (rlProgress.xp >= rlXpToNext(rlProgress.level)) {
+      rlProgress.xp -= rlXpToNext(rlProgress.level);
+      rlProgress.level += 1;
+      leveled = true;
+    }
+
+    if (outcome === 'win' || outcome === 'bigwin') rlProgress.heat = Math.min(6, rlProgress.heat + 1);
+    if (outcome === 'lose') rlProgress.heat = 0;
+    if (outcome === 'push') rlProgress.heat = Math.max(0, rlProgress.heat - 1);
+
+    rlSaveProgress(playerId);
+    rlRenderProgress();
+
+    if (leveled) {
+      const banner = document.getElementById('rlResultBanner');
+      if (banner) {
+        banner.textContent = `⬆ ROULETTE LV.${rlProgress.level}`;
+        banner.className = 'result-banner show bj';
+        setTimeout(() => banner.classList.remove('show'), 2200);
+      }
+      setTimeout(() => launchParticles('bj'), 60);
+    }
+  }
+
   function rlColor(n) {
     if (n === 0) return 'green-num';
     return RL_REDS.has(n) ? 'red-num' : 'black-num';
   }
 
-  let rlBet = 0;
-  let rlBetType = null;  // 'red','black','green','odd','even','1to18','19to36','1st12','2nd12','3rd12', or number 0-36
-  let rlSpinning = false;
+  function rlBetKey(type) {
+    return typeof type === 'number' ? `n:${type}` : `t:${type}`;
+  }
 
-  const RL_BET_CONFIG = {
-    red:    { label: 'Red (×2)',    payout: 1 },
-    black:  { label: 'Black (×2)',  payout: 1 },
-    green:  { label: 'Green (×36)', payout: 35 },
-    odd:    { label: 'Odd (×2)',    payout: 1 },
-    even:   { label: 'Even (×2)',   payout: 1 },
-    '1to18':  { label: '1–18 (×2)',   payout: 1 },
-    '19to36': { label: '19–36 (×2)',  payout: 1 },
-    '1st12':  { label: '1st 12 (×3)', payout: 2 },
-    '2nd12':  { label: '2nd 12 (×3)', payout: 2 },
-    '3rd12':  { label: '3rd 12 (×3)', payout: 2 },
-  };
+  function rlParseBetKey(key) {
+    if (key.startsWith('n:')) return Number(key.slice(2));
+    return key.slice(2);
+  }
+
+  function rlGetPayout(type) {
+    return typeof type === 'number' ? 35 : (RL_BET_CONFIG[type]?.payout ?? 1);
+  }
+
+  function rlBetLabel(type) {
+    if (typeof type === 'number') return `Number ${type}`;
+    return RL_BET_CONFIG[type]?.label || type;
+  }
+
+  function rlWinCheck(num, betType) {
+    if (typeof betType === 'number') return num === betType;
+    const isRed   = RL_REDS.has(num);
+    const isBlack = num !== 0 && !isRed;
+    switch(betType) {
+      case 'red':    return isRed;
+      case 'black':  return isBlack;
+      case 'green':  return num === 0;
+      case 'odd':    return num !== 0 && num % 2 === 1;
+      case 'even':   return num !== 0 && num % 2 === 0;
+      case '1to18':  return num >= 1 && num <= 18;
+      case '19to36': return num >= 19 && num <= 36;
+      case '1st12':  return num >= 1 && num <= 12;
+      case '2nd12':  return num >= 13 && num <= 24;
+      case '3rd12':  return num >= 25 && num <= 36;
+    }
+    return false;
+  }
+
+  function rlUpdateBetDisplay() {
+    const maxBet = rlMaxBetForLevel(rlProgress.level);
+    const betEl = document.getElementById('rlBetDisplay');
+    if (betEl) {
+      betEl.innerHTML = `<span class="bet-display-main">${rlBet}</span><span class="bet-display-max">/${maxBet} MAX</span><small>total bet / max</small>`;
+    }
+    const hintEl = document.getElementById('rlBetLimitHint');
+    if (hintEl) hintEl.textContent = `Level ${rlProgress.level} cap active • max bet ${maxBet}`;
+  }
+
+  function rlRefreshSelectionUI() {
+    document.querySelectorAll('.r-bet-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.rl-num').forEach(b => b.classList.remove('selected-num'));
+
+    for (const key of Object.keys(rlBets)) {
+      const type = rlParseBetKey(key);
+      if (typeof type === 'number') {
+        const btn = document.getElementById('rlNum' + type);
+        if (btn) btn.classList.add('selected-num');
+      } else {
+        const idMap = { red:'Red',black:'Black',green:'Green',odd:'Odd',even:'Even','1to18':'1to18','19to36':'19to36','1st12':'1st12','2nd12':'2nd12','3rd12':'3rd12' };
+        const btn = document.getElementById('rb' + idMap[type]);
+        if (btn) btn.classList.add('selected');
+      }
+    }
+
+    const payoutEl = document.getElementById('rlPayoutLabel');
+    if (!payoutEl) return;
+    if (rlSelectedBetType !== null) {
+      payoutEl.textContent = `${rlBetLabel(rlSelectedBetType)} selected • payout ×${rlGetPayout(rlSelectedBetType) + 1}`;
+      return;
+    }
+    const spots = Object.keys(rlBets).length;
+    if (spots > 0) {
+      payoutEl.textContent = `${spots} active roulette ${spots === 1 ? 'spot' : 'spots'} • choose another to stack bets`;
+    } else {
+      payoutEl.textContent = 'Select a spot, then place chips';
+    }
+  }
 
   // Build the number grid (3 rows × 12 cols + green 0 spanning rows)
   // Layout: col 0 = green "0", cols 1-12 = numbers top→bottom in columns
@@ -6335,7 +6539,7 @@
     // Numbers in 3-row layout
     for (let row = 0; row < 3; row++) {
       for (let col = 1; col <= 12; col++) {
-        const n = (3 - row) + (col - 1) * 3; // 3,6,9... / 2,5,8... / 1,4,7...
+        const n = (3 - row) + (col - 1) * 3;
         const btn = document.createElement('div');
         btn.className = 'rl-num ' + rlColor(n);
         btn.id = 'rlNum' + n;
@@ -6344,76 +6548,62 @@
         grid.appendChild(btn);
       }
     }
-  }
 
-  function rlWinCheck(num, betType) {
-    if (typeof betType === 'number') return num === betType;
-    const isRed   = RL_REDS.has(num);
-    const isBlack = num !== 0 && !isRed;
-    switch(betType) {
-      case 'red':    return isRed;
-      case 'black':  return isBlack;
-      case 'green':  return num === 0;
-      case 'odd':    return num !== 0 && num % 2 === 1;
-      case 'even':   return num !== 0 && num % 2 === 0;
-      case '1to18':  return num >= 1 && num <= 18;
-      case '19to36': return num >= 19 && num <= 36;
-      case '1st12':  return num >= 1 && num <= 12;
-      case '2nd12':  return num >= 13 && num <= 24;
-      case '3rd12':  return num >= 25 && num <= 36;
-    }
-    return false;
+    rlRefreshSelectionUI();
   }
 
   window.rlSelectBet = function(type) {
     if (rlSpinning) return;
-    rlBetType = type;
-    // Clear all highlights
-    document.querySelectorAll('.r-bet-btn').forEach(b => b.classList.remove('selected'));
-    document.querySelectorAll('.rl-num').forEach(b => b.classList.remove('selected-num'));
-
-    if (typeof type === 'number') {
-      // Single number
-      const btn = document.getElementById('rlNum' + type);
-      if (btn) btn.classList.add('selected-num');
-      document.getElementById('rlPayoutLabel').textContent = `Number ${type} (×36)`;
-    } else {
-      const idMap = { red:'Red',black:'Black',green:'Green',odd:'Odd',even:'Even','1to18':'1to18','19to36':'19to36','1st12':'1st12','2nd12':'2nd12','3rd12':'3rd12' };
-      const btn = document.getElementById('rb' + idMap[type]);
-      if (btn) btn.classList.add('selected');
-      const cfg = RL_BET_CONFIG[type];
-      document.getElementById('rlPayoutLabel').textContent = cfg ? cfg.label : '';
-    }
+    rlSelectedBetType = type;
+    rlRefreshSelectionUI();
   };
 
   window.rlAddBet = function(amount) {
     if (rlSpinning) return;
     const p = getCurrentCasinoPlayer();
-    if (!p) { shakeWallet(); return; }
+    if (!p || rlSelectedBetType === null) { shakeWallet(); return; }
+
+    const maxBet = rlMaxBetForLevel(rlProgress.level);
+    if (rlBet + amount > maxBet) {
+      shakeWallet();
+      const banner = document.getElementById('rlResultBanner');
+      if (banner) {
+        banner.textContent = `LEVEL ${rlProgress.level} CAP: MAX BET ${maxBet}`;
+        banner.className = 'result-banner show push';
+        setTimeout(() => banner.classList.remove('show'), 2200);
+      }
+      return;
+    }
     if (rlBet + amount > (p.coins || 0)) { shakeWallet(); return; }
+
+    const key = rlBetKey(rlSelectedBetType);
+    rlBets[key] = (rlBets[key] || 0) + amount;
     rlBet += amount;
     soundChip();
-    document.getElementById('rlBetDisplay').innerHTML = `${rlBet}<small>bet</small>`;
+    rlUpdateBetDisplay();
+    rlRefreshSelectionUI();
   };
 
   window.rlClearBet = function() {
     if (rlSpinning) return;
     rlBet = 0;
-    document.getElementById('rlBetDisplay').innerHTML = `0<small>bet</small>`;
+    rlBets = {};
+    rlSelectedBetType = null;
+    rlUpdateBetDisplay();
+    rlRefreshSelectionUI();
   };
 
   window.rlSpin = async function() {
     if (rlSpinning) return;
     const p = getCurrentCasinoPlayer();
     if (!p) return;
-    if (rlBetType === null) {
+    if (rlBet < 1 || Object.keys(rlBets).length === 0) {
       const el = document.getElementById('rlResultBanner');
-      el.textContent = 'SELECT A BET FIRST';
+      el.textContent = 'PLACE AT LEAST ONE BET';
       el.className = 'result-banner show lose';
       setTimeout(() => el.classList.remove('show'), 2000);
       return;
     }
-    if (rlBet < 1) { shakeWallet(); return; }
     if (rlBet > (p.coins || 0)) { shakeWallet(); return; }
 
     rlSpinning = true;
@@ -6422,12 +6612,10 @@
     document.getElementById('rouletteResultNum').textContent = '…';
     document.getElementById('rouletteResultNum').className = 'roulette-result-num';
 
-    // Remove any existing ball
     document.querySelectorAll('.rl-ball').forEach(b => b.remove());
     document.querySelectorAll('.rl-num').forEach(b => b.classList.remove('winning-num'));
 
-    // Brief "rolling" flash through random numbers
-    const resultNum = Math.floor(Math.random() * 37); // 0-36
+    const resultNum = Math.floor(Math.random() * 37);
     const flashCount = 12 + Math.floor(Math.random() * 8);
     let flashed = 0;
     let flashDelay = 60;
@@ -6440,11 +6628,10 @@
         setTimeout(() => { if (el) el.style.filter = ''; }, flashDelay * 0.8);
       }
       flashed++;
-      flashDelay = Math.min(flashDelay * 1.18, 300); // slow down
+      flashDelay = Math.min(flashDelay * 1.18, 300);
       if (flashed < flashCount) {
         setTimeout(flashNext, flashDelay);
       } else {
-        // Land on result
         setTimeout(() => rlFinish(resultNum, p), flashDelay + 100);
       }
     }
@@ -6452,7 +6639,6 @@
   };
 
   async function rlFinish(num, p) {
-    // Show ball on winning number
     const winEl = document.getElementById('rlNum' + num);
     if (winEl) {
       winEl.classList.add('winning-num');
@@ -6462,28 +6648,41 @@
       winEl.appendChild(ball);
     }
 
-    // Update result display
     const col = num === 0 ? 'green' : (RL_REDS.has(num) ? 'red' : 'black');
     const numEl = document.getElementById('rouletteResultNum');
     numEl.textContent = num;
     numEl.className = `roulette-result-num ${col}`;
 
-    const won = rlWinCheck(num, rlBetType);
-    const payout = typeof rlBetType === 'number' ? 35 : (RL_BET_CONFIG[rlBetType]?.payout ?? 1);
-    let delta = 0, resultText = '', resultType = '';
+    let grossWin = 0;
+    let winningSpots = 0;
+    for (const [key, amount] of Object.entries(rlBets)) {
+      const type = rlParseBetKey(key);
+      if (!rlWinCheck(num, type)) continue;
+      winningSpots += 1;
+      grossWin += amount * (rlGetPayout(type) + 1);
+    }
 
-    if (won) {
-      delta = rlBet * payout;
-      const profit = rlBet * payout;
-      resultText = `✅ ${num} — YOU WIN +${profit} 🪙`;
+    const bonusPct = rlHeatBonusPct();
+    const bonusCoins = grossWin > 0 ? Math.floor(grossWin * (bonusPct / 100)) : 0;
+    const totalReturn = grossWin + bonusCoins;
+    const delta = totalReturn - rlBet;
+
+    let resultText = '';
+    let resultType = '';
+    if (delta > 0) {
+      resultText = `✅ ${num} — ${winningSpots} hit${winningSpots === 1 ? '' : 's'} • +${delta} 🪙`;
+      if (bonusCoins > 0) resultText += ` (+${bonusCoins} streak)`;
       resultType = 'win';
       soundWin();
       setTimeout(() => launchParticles('win'), 80);
-      setTimeout(() => spawnCoinFloat(`+${profit} 🪙`), 400);
-      recordBiggestWin(p.name, p.id, profit);
+      setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 400);
+      recordBiggestWin(p.name, p.id, delta);
+    } else if (delta === 0) {
+      resultText = `➖ ${num} — BREAK EVEN`;
+      resultType = 'push';
+      soundCashout();
     } else {
-      delta = -rlBet;
-      resultText = `❌ ${num} — YOU LOSE`;
+      resultText = `❌ ${num} — YOU LOSE ${Math.abs(delta)}`;
       resultType = 'lose';
       soundLose();
       setTimeout(() => launchParticles('bust'), 100);
@@ -6497,7 +6696,9 @@
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
 
-    // Keep last roulette bet selected between spins (Precision-style remember bet)
+    const outcome = delta > rlBet ? 'bigwin' : delta > 0 ? 'win' : delta === 0 ? 'push' : 'lose';
+    rlAwardProgress(p.id, outcome);
+
     rlSpinning = false;
     document.getElementById('rlSpinBtn').disabled = false;
   }
