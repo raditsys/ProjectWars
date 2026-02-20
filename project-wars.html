@@ -1622,6 +1622,78 @@
     animation: coinPop 1s ease forwards;
   }
 
+  .ragdoll-playground {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    width: min(320px, 36vw);
+    height: min(260px, 28vh);
+    min-width: 220px;
+    min-height: 180px;
+    border: 1px solid #2f3f2f;
+    background: rgba(12, 24, 12, 0.85);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.25);
+    z-index: 350;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .ragdoll-hud {
+    position: absolute;
+    top: 0.35rem;
+    left: 0.45rem;
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+    color: #9bb99b;
+    text-transform: uppercase;
+    pointer-events: none;
+    z-index: 2;
+    text-shadow: 0 1px 1px #000;
+  }
+
+  .ragdoll-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ragdoll-limb {
+    stroke: #c8d7c8;
+    stroke-width: 3;
+    stroke-linecap: round;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  }
+
+  .ragdoll-node {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #dfe8df;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.45);
+    pointer-events: none;
+  }
+
+  .ragdoll-head {
+    width: 18px;
+    height: 18px;
+    background: #f5d6b8;
+  }
+
+  .ragdoll-coin-pop {
+    position: absolute;
+    color: var(--gold);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    pointer-events: none;
+    animation: coinPop 0.9s ease forwards;
+    text-shadow: 0 0 8px rgba(245, 200, 66, 0.3);
+  }
+
   @keyframes shake {
     0%,100% { transform: translateX(0); }
     20%,60% { transform: translateX(-6px); }
@@ -4670,6 +4742,216 @@
       __renderPending.history = false;
     });
   }
+
+  // ── Ragdoll Playground ──
+  function initRagdollPlayground() {
+    const playground = document.createElement('div');
+    playground.className = 'ragdoll-playground';
+    playground.innerHTML = `
+      <div class="ragdoll-hud">Ragdoll toss pit • border bonks can drop coins</div>
+      <svg class="ragdoll-svg" viewBox="0 0 300 220" preserveAspectRatio="none"></svg>
+    `;
+    document.body.appendChild(playground);
+
+    const hud = playground.querySelector('.ragdoll-hud');
+    const svg = playground.querySelector('.ragdoll-svg');
+    const NS = 'http://www.w3.org/2000/svg';
+
+    let width = 300;
+    let height = 220;
+    const gravity = 0.45;
+    const air = 0.995;
+    const bounce = 0.78;
+    const dragRadius = 26;
+    let collisionCooldown = 0;
+
+    function node(x, y, cls = '') {
+      const el = document.createElement('div');
+      el.className = `ragdoll-node ${cls}`.trim();
+      playground.appendChild(el);
+      return { x, y, px: x, py: y, el };
+    }
+
+    const pts = {
+      head: node(150, 45, 'ragdoll-head'),
+      chest: node(150, 72),
+      hip: node(150, 108),
+      lHand: node(120, 84),
+      rHand: node(180, 84),
+      lFoot: node(135, 160),
+      rFoot: node(165, 160)
+    };
+
+    const sticks = [
+      ['head', 'chest', 29], ['chest', 'hip', 36],
+      ['chest', 'lHand', 34], ['chest', 'rHand', 34],
+      ['hip', 'lFoot', 56], ['hip', 'rFoot', 56],
+      ['lHand', 'rHand', 56], ['lFoot', 'rFoot', 30],
+      ['head', 'lHand', 46], ['head', 'rHand', 46]
+    ].map(([a, b, d]) => ({ a: pts[a], b: pts[b], d }));
+
+    const lines = sticks.map(() => {
+      const ln = document.createElementNS(NS, 'line');
+      ln.setAttribute('class', 'ragdoll-limb');
+      svg.appendChild(ln);
+      return ln;
+    });
+
+    function resizeBounds() {
+      const rect = playground.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    }
+    resizeBounds();
+    window.addEventListener('resize', resizeBounds);
+
+    let dragNode = null;
+    let lastPointer = null;
+
+    function localPointer(e) {
+      const r = playground.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+
+    playground.addEventListener('pointerdown', e => {
+      const p = localPointer(e);
+      let best = null;
+      let bestDist = Infinity;
+      Object.values(pts).forEach(n => {
+        const dist = Math.hypot(n.x - p.x, n.y - p.y);
+        if (dist < bestDist) { bestDist = dist; best = n; }
+      });
+      if (best && bestDist < dragRadius) {
+        dragNode = best;
+        lastPointer = p;
+        playground.setPointerCapture(e.pointerId);
+      }
+    });
+
+    playground.addEventListener('pointermove', e => {
+      if (!dragNode) return;
+      const p = localPointer(e);
+      const vx = p.x - lastPointer.x;
+      const vy = p.y - lastPointer.y;
+      dragNode.px = p.x - vx * 1.25;
+      dragNode.py = p.y - vy * 1.25;
+      dragNode.x = p.x;
+      dragNode.y = p.y;
+      lastPointer = p;
+    });
+
+    function endDrag(e) {
+      if (!dragNode) return;
+      dragNode = null;
+      lastPointer = null;
+      if (playground.hasPointerCapture(e.pointerId)) playground.releasePointerCapture(e.pointerId);
+    }
+    playground.addEventListener('pointerup', endDrag);
+    playground.addEventListener('pointercancel', endDrag);
+
+    async function awardRagdollCoins(amount, x, y) {
+      if (!currentUser || amount <= 0) return;
+      const id = currentUser.id;
+      const p = players[id];
+      if (!p) return;
+      const newCoins = (p.coins || 0) + amount;
+      if (id === '__dev__') {
+        players['__dev__'].coins = newCoins;
+      } else {
+        await update(ref(db, `players/${id}`), { coins: newCoins });
+      }
+      const pop = document.createElement('div');
+      pop.className = 'ragdoll-coin-pop';
+      pop.textContent = `+${amount} 🪙`;
+      pop.style.left = `${Math.max(10, Math.min(width - 24, x))}px`;
+      pop.style.top = `${Math.max(20, Math.min(height - 20, y))}px`;
+      playground.appendChild(pop);
+      setTimeout(() => pop.remove(), 900);
+      spawnCoinFloat(`Ragdoll +${amount} 🪙`);
+      hud.textContent = `Ragdoll toss pit • jackpot bonk! +${amount} coins`;
+      setTimeout(() => {
+        hud.textContent = 'Ragdoll toss pit • border bonks can drop coins';
+      }, 1100);
+    }
+
+    function tick() {
+      collisionCooldown = Math.max(0, collisionCooldown - 1);
+
+      Object.values(pts).forEach(n => {
+        if (n === dragNode) return;
+        const vx = (n.x - n.px) * air;
+        const vy = (n.y - n.py) * air;
+        n.px = n.x;
+        n.py = n.y;
+        n.x += vx;
+        n.y += vy + gravity;
+      });
+
+      for (let i = 0; i < 4; i++) {
+        sticks.forEach(s => {
+          const dx = s.b.x - s.a.x;
+          const dy = s.b.y - s.a.y;
+          const dist = Math.hypot(dx, dy) || 1;
+          const diff = (dist - s.d) / dist;
+          const ox = dx * 0.5 * diff;
+          const oy = dy * 0.5 * diff;
+          if (s.a !== dragNode) { s.a.x += ox; s.a.y += oy; }
+          if (s.b !== dragNode) { s.b.x -= ox; s.b.y -= oy; }
+        });
+
+        Object.values(pts).forEach(n => {
+          if (n === dragNode) return;
+          const vx = n.x - n.px;
+          const vy = n.y - n.py;
+          let impact = 0;
+
+          if (n.x < 0) {
+            n.x = 0;
+            n.px = n.x + vx * -bounce;
+            impact = Math.max(impact, Math.abs(vx));
+          } else if (n.x > width) {
+            n.x = width;
+            n.px = n.x + vx * -bounce;
+            impact = Math.max(impact, Math.abs(vx));
+          }
+
+          if (n.y < 0) {
+            n.y = 0;
+            n.py = n.y + vy * -bounce;
+            impact = Math.max(impact, Math.abs(vy));
+          } else if (n.y > height) {
+            n.y = height;
+            n.py = n.y + vy * -bounce;
+            impact = Math.max(impact, Math.abs(vy));
+          }
+
+          if (impact > 6 && collisionCooldown === 0 && Math.random() < 0.055) {
+            collisionCooldown = 16;
+            const coins = 1 + Math.floor(Math.random() * 4);
+            awardRagdollCoins(coins, n.x, n.y);
+          }
+        });
+      }
+
+      sticks.forEach((s, i) => {
+        lines[i].setAttribute('x1', s.a.x);
+        lines[i].setAttribute('y1', s.a.y);
+        lines[i].setAttribute('x2', s.b.x);
+        lines[i].setAttribute('y2', s.b.y);
+      });
+
+      Object.values(pts).forEach(n => {
+        n.el.style.left = `${n.x}px`;
+        n.el.style.top = `${n.y}px`;
+      });
+
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  }
+  initRagdollPlayground();
 
 
   onValue(ref(db, 'players'), snap => {
