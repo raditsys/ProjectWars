@@ -2419,11 +2419,125 @@
   .btn-equip   { background: var(--gold); color: #000; }
   .btn-unequip { background: transparent; color: var(--muted); border: 1px solid #3d00b3 !important; }
 
+  /* ── STOCK TAB & DRAWER ── */
+  .stock-tab {
+    position: fixed;
+    right: 0;
+    top: calc(50% + 290px);
+    transform: translateY(-50%);
+    z-index: 200;
+    writing-mode: vertical-rl;
+    background: linear-gradient(180deg, #0d9488, #0f766e);
+    color: #d9fffb;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+    padding: 1.5rem 0.6rem;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: filter 0.2s;
+    box-shadow: -4px 0 20px rgba(13,148,136,0.5);
+  }
+  .stock-tab:hover { filter: brightness(1.1); }
+
+  .stock-drawer {
+    position: fixed;
+    top: 0;
+    right: -520px;
+    width: 500px;
+    max-width: 95vw;
+    height: 100vh;
+    background: #031816;
+    border-left: 2px solid #0f766e;
+    z-index: 300;
+    transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .stock-drawer.open { right: 0; }
+
+  .stock-header {
+    background: #052120;
+    border-bottom: 1px solid #0f766e;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .stock-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #5eead4, #67e8f9, #2dd4bf);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stock-close {
+    background: none;
+    border: 1px solid #0f766e;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.75rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  .stock-close:hover { border-color: var(--red); color: var(--red); }
+
+  .stock-body { flex: 1; overflow-y: auto; padding: 1.15rem; display: flex; flex-direction: column; gap: 0.9rem; }
+  .stock-wallet {
+    background: radial-gradient(circle at 50% 10%, rgba(45,212,191,0.25), transparent 60%), #052120;
+    border: 1px solid #0f766e;
+    text-align: center;
+    padding: 0.8rem;
+  }
+  .stock-wallet-amt { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; color: var(--gold); }
+  .stock-wallet-note { font-size: 0.55rem; letter-spacing: 2px; color: #5eead4; text-transform: uppercase; }
+  .stock-meta { font-size: 0.6rem; letter-spacing: 1px; color: #7dd3c7; display: flex; justify-content: space-between; gap: 1rem; }
+  .stock-ticker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+  .stock-card {
+    background: linear-gradient(160deg, #042c29, #031f1d);
+    border: 1px solid #115e59;
+    padding: 0.65rem;
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.2s, border-color 0.2s;
+  }
+  .stock-card:hover, .stock-card.selected { transform: translateY(-2px); border-color: #2dd4bf; box-shadow: 0 8px 18px rgba(45,212,191,0.22); }
+  .stock-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; }
+  .stock-symbol { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 1rem; color: #99f6e4; }
+  .stock-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--text); }
+  .stock-change { font-size: 0.62rem; letter-spacing: 1px; }
+  .stock-change.up { color: var(--green); }
+  .stock-change.down { color: var(--red); }
+  .stock-spark { height: 6px; border-radius: 99px; background: #0a3b36; margin-top: 0.4rem; overflow: hidden; }
+  .stock-spark-fill { height: 100%; background: linear-gradient(90deg,#2dd4bf,#99f6e4); }
+  .stock-action-box { border: 1px solid #115e59; background: #04211f; padding: 0.75rem; }
+  .stock-action-title { font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px; font-size: 0.95rem; color: #5eead4; margin-bottom: 0.45rem; }
+  .stock-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.55rem; }
+  .stock-btn { border: none; padding: 0.45rem 0.55rem; font-size: 0.66rem; letter-spacing: 1px; cursor: pointer; font-family: 'DM Mono', monospace; }
+  .stock-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .stock-btn.buy { background: #14532d; color: #bbf7d0; }
+  .stock-btn.sell { background: #78350f; color: #fde68a; }
+  .stock-btn.short { background: #7f1d1d; color: #fecaca; }
+  .stock-btn.cover { background: #1e3a8a; color: #bfdbfe; }
+  .stock-input { width: 100%; background: #031816; border: 1px solid #115e59; color: #d1fae5; padding: 0.45rem; font-family: 'DM Mono', monospace; }
+  .stock-pos-list, .stock-feed { border: 1px solid #115e59; background: #032220; padding: 0.7rem; }
+  .stock-sec-title { font-size: 0.64rem; letter-spacing: 2px; color: #5eead4; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .stock-row { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.65rem; padding: 0.28rem 0; border-bottom: 1px solid rgba(45,212,191,0.15); }
+  .stock-row:last-child { border-bottom: none; }
+  .stock-msg { font-size: 0.62rem; min-height: 1rem; color: #7dd3c7; margin-top: 0.5rem; }
+
   /* ── GARDEN TAB & DRAWER ── */
   .garden-tab {
     position: fixed;
     right: 0;
-    top: calc(50% + 290px);
+    top: calc(50% + 440px);
     transform: translateY(-50%);
     z-index: 200;
     writing-mode: vertical-rl;
@@ -2463,7 +2577,7 @@
   .changelog-tab {
     position: fixed;
     right: 0;
-    top: calc(50% + 440px);
+    top: calc(50% + 590px);
     transform: translateY(-50%);
     z-index: 200;
     writing-mode: vertical-rl;
@@ -3987,7 +4101,7 @@
   GAMBLE
 </button>
 <!-- CASINO DRAWER OVERLAY -->
-<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop(); if(window.closeGarden) window.closeGarden(); if(window.closeChangelog) window.closeChangelog();"></div>
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeCasino(); closeShop(); if(window.closeStock) window.closeStock(); if(window.closeGarden) window.closeGarden(); if(window.closeChangelog) window.closeChangelog();"></div>
 <!-- CASINO DRAWER -->
 <div class="casino-drawer" id="casinoDrawer">
 <div class="drawer-header">
@@ -4229,6 +4343,10 @@
 <span id="shopTabArrow">◀</span>
   SHOP
 </button>
+<button class="stock-tab" id="stockTab" onclick="openStock()">
+<span id="stockTabArrow">◀</span>
+  STOCKS
+</button>
 <button class="garden-tab" id="gardenTab" onclick="openGarden()">
 <span id="gardenTabArrow">◀</span>
   GARDEN
@@ -4251,6 +4369,43 @@
 </div>
 </div>
 </div>
+</div>
+<!-- STOCK DRAWER -->
+<div class="stock-drawer" id="stockDrawer">
+  <div class="stock-header">
+    <h2>📈 Juice Exchange</h2>
+    <button class="stock-close" onclick="closeStock()">✕ Close</button>
+  </div>
+  <div class="stock-body">
+    <div class="stock-wallet">
+      <div class="stock-wallet-amt" id="stockWalletDisplay">—</div>
+      <div class="stock-wallet-note">Liquid coins</div>
+    </div>
+    <div class="stock-meta">
+      <span id="stockTickMeta">Next tick: --</span>
+      <span id="stockSelectedMeta">No ticker selected</span>
+    </div>
+    <div class="stock-ticker-grid" id="stockTickerGrid"></div>
+    <div class="stock-action-box">
+      <div class="stock-action-title">Trade ticket</div>
+      <input class="stock-input" id="stockSharesInput" min="1" step="1" type="number" value="1"/>
+      <div class="stock-actions">
+        <button class="stock-btn buy" id="stockBuyBtn" onclick="buyStock()">Buy</button>
+        <button class="stock-btn sell" id="stockSellBtn" onclick="sellStock()">Sell</button>
+        <button class="stock-btn short" id="stockShortBtn" onclick="shortStock()">Short</button>
+        <button class="stock-btn cover" id="stockCoverBtn" onclick="coverStock()">Cover</button>
+      </div>
+      <div class="stock-msg" id="stockTradeMsg"></div>
+    </div>
+    <div class="stock-pos-list">
+      <div class="stock-sec-title">🌍 Shared positions</div>
+      <div id="stockSharedPositions"></div>
+    </div>
+    <div class="stock-feed">
+      <div class="stock-sec-title">📰 Tape</div>
+      <div id="stockTradeFeed"></div>
+    </div>
+  </div>
 </div>
 <!-- GARDEN DRAWER -->
 <div class="garden-drawer" id="gardenDrawer">
@@ -4672,7 +4827,9 @@
   let players = {};
   let logs = {};
   let worldResources = {};
+  let stockMarketState = {};
   let currentUser = null; // { id, name, ...playerData }
+  let selectedStockTicker = 'PWR';
   let recentLogsCache = [];
   let streakCache = {};
 
@@ -4733,6 +4890,11 @@
     logs = snap.val() || {};
     rebuildLogCaches();
     scheduleRender('history');
+  });
+
+  onValue(ref(db, 'stockMarket'), snap => {
+    stockMarketState = snap.val() || {};
+    renderStockMarket();
   });
 
   function rebuildLogCaches() {
@@ -5201,6 +5363,7 @@
       renderShopItems();
       window.renderTitleSection && window.renderTitleSection();
     }
+    renderStockMarket();
   }
 
   function renderWeek() {
@@ -5702,6 +5865,7 @@
   window.openShop = function() {
     if (!currentUser) { doLogout(); return; }
     closeCasino();
+    if (window.closeStock) window.closeStock();
     if (window.closeGarden) window.closeGarden();
     document.getElementById('shopDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
@@ -5792,6 +5956,222 @@
 
   // Re-render shop wallet when firebase updates
   // (handled via patched onValue above — renders shop if open)
+
+
+  const DEFAULT_STOCK_TICKERS = {
+    PWR: { name: 'ProjectWare', price: 84, history: [84], change: 0 },
+    BUG: { name: 'BugCoin Labs', price: 51, history: [51], change: 0 },
+    MEME: { name: 'Meme Dynamics', price: 27, history: [27], change: 0 },
+    SHIP: { name: 'ShipRight Corp', price: 63, history: [63], change: 0 },
+    FROG: { name: 'Frog Futures', price: 38, history: [38], change: 0 },
+    RISK: { name: 'Risky Ventures', price: 102, history: [102], change: 0 },
+  };
+
+  function getMarketTickers() {
+    const live = stockMarketState?.tickers || {};
+    const out = {};
+    for (const [symbol, base] of Object.entries(DEFAULT_STOCK_TICKERS)) {
+      out[symbol] = { ...base, ...(live[symbol] || {}) };
+      out[symbol].history = Array.isArray(out[symbol].history) && out[symbol].history.length ? out[symbol].history : [out[symbol].price || base.price];
+      out[symbol].price = Math.max(1, Number(out[symbol].price || base.price));
+      out[symbol].change = Number(out[symbol].change || 0);
+    }
+    return out;
+  }
+
+  function stockCountdownText() {
+    const eta = Number(stockMarketState?.nextTickAt || 0);
+    if (!eta) return 'Next tick: warming up...';
+    const left = Math.max(0, Math.ceil((eta - Date.now()) / 1000));
+    return `Next tick: ${left}s`;
+  }
+
+  async function maybeAdvanceStockMarket() {
+    if (!currentUser) return;
+    const now = Date.now();
+    await runTransaction(ref(db, 'stockMarket'), current => {
+      const market = current || {};
+      const tickers = market.tickers || JSON.parse(JSON.stringify(DEFAULT_STOCK_TICKERS));
+      if ((market.nextTickAt || 0) > now) return;
+      for (const [symbol, t] of Object.entries(tickers)) {
+        const volatility = symbol === 'RISK' ? 0.12 : symbol === 'MEME' ? 0.15 : 0.08;
+        const drift = (Math.random() - 0.5) * volatility;
+        const next = Math.max(1, Number((t.price * (1 + drift)).toFixed(2)));
+        const hist = Array.isArray(t.history) ? [...t.history, next] : [t.price || next, next];
+        tickers[symbol] = {
+          ...t,
+          price: next,
+          change: Number((((next - (t.price || next)) / (t.price || next)) * 100).toFixed(2)),
+          history: hist.slice(-16),
+        };
+      }
+      market.tickers = tickers;
+      market.nextTickAt = now + 60000;
+      market.lastTickAt = now;
+      market.lastTickBy = currentUser?.name || 'system';
+      if (!market.tape) market.tape = [];
+      return market;
+    });
+  }
+
+  window.openStock = function() {
+    if (!currentUser) { doLogout(); return; }
+    closeCasino();
+    closeShop();
+    if (window.closeGarden) window.closeGarden();
+    if (window.closeChangelog) window.closeChangelog();
+    document.getElementById('stockDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('stockTabArrow').textContent = '▶';
+    renderStockMarket();
+    maybeAdvanceStockMarket();
+  };
+
+  window.closeStock = function() {
+    document.getElementById('stockDrawer').classList.remove('open');
+    document.getElementById('stockTabArrow').textContent = '◀';
+    if (![ 'casinoDrawer', 'shopDrawer', 'gardenDrawer', 'changelogDrawer' ].some(id => document.getElementById(id)?.classList.contains('open'))) {
+      document.getElementById('drawerOverlay').classList.remove('open');
+    }
+  };
+
+  function renderStockMarket() {
+    const walletEl = document.getElementById('stockWalletDisplay');
+    const tickerGrid = document.getElementById('stockTickerGrid');
+    if (!walletEl || !tickerGrid) return;
+
+    const tickers = getMarketTickers();
+    const tickerEntries = Object.entries(tickers);
+    if (!tickerEntries.some(([sym]) => sym === selectedStockTicker)) selectedStockTicker = tickerEntries[0]?.[0] || 'PWR';
+
+    const me = currentUser ? (players[currentUser.id] || currentUser) : null;
+    walletEl.textContent = me ? (me.coins || 0).toLocaleString() : '—';
+    document.getElementById('stockTickMeta').textContent = stockCountdownText();
+
+    tickerGrid.innerHTML = tickerEntries.map(([sym, t]) => {
+      const up = t.change >= 0;
+      const spread = t.history.length > 1 ? ((t.history[t.history.length - 1] - Math.min(...t.history)) / Math.max(1, (Math.max(...t.history) - Math.min(...t.history)))) * 100 : 55;
+      return `<div class="stock-card ${selectedStockTicker === sym ? 'selected' : ''}" onclick="selectStockTicker('${sym}')">
+        <div class="stock-top"><span class="stock-symbol">${sym}</span><span class="stock-price">${Number(t.price).toFixed(2)}</span></div>
+        <div style="font-size:0.55rem;color:#7dd3c7;">${t.name}</div>
+        <div class="stock-change ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${Math.abs(t.change).toFixed(2)}%</div>
+        <div class="stock-spark"><div class="stock-spark-fill" style="width:${Math.max(6, Math.min(100, spread))}%;"></div></div>
+      </div>`;
+    }).join('');
+
+    const selected = tickers[selectedStockTicker];
+    const shareInput = document.getElementById('stockSharesInput');
+    const qty = Math.max(1, Math.floor(Number(shareInput?.value || 1)));
+    const positions = stockMarketState?.positions || {};
+    const mine = (currentUser && positions[currentUser.id]) || { longs: {}, shorts: {} };
+    const myLong = Number(mine.longs?.[selectedStockTicker]?.shares || 0);
+    const myShort = Number(mine.shorts?.[selectedStockTicker]?.shares || 0);
+
+    document.getElementById('stockSelectedMeta').textContent = selected ? `${selectedStockTicker} @ ${selected.price.toFixed(2)} | Qty ${qty}` : 'No ticker selected';
+    const disabled = !currentUser || !selected;
+    document.getElementById('stockBuyBtn').disabled = disabled;
+    document.getElementById('stockShortBtn').disabled = disabled;
+    document.getElementById('stockSellBtn').disabled = disabled || myLong < qty;
+    document.getElementById('stockCoverBtn').disabled = disabled || myShort < qty;
+
+    const sharedEl = document.getElementById('stockSharedPositions');
+    const rows = Object.entries(positions).map(([uid, pos]) => {
+      const pname = players[uid]?.name || pos.name || 'Unknown';
+      const longText = Object.entries(pos.longs || {}).filter(([,v]) => (v.shares || 0) > 0).map(([sym,v]) => `${sym}:${v.shares}`).join(' · ') || '—';
+      const shortText = Object.entries(pos.shorts || {}).filter(([,v]) => (v.shares || 0) > 0).map(([sym,v]) => `${sym}:${v.shares}`).join(' · ') || '—';
+      return `<div class="stock-row"><span>${escHtml(pname)}</span><span style="color:#86efac;">L ${longText}</span><span style="color:#fca5a5;">S ${shortText}</span></div>`;
+    });
+    sharedEl.innerHTML = rows.length ? rows.join('') : '<div style="font-size:0.65rem;color:#7dd3c7;">No open positions yet. Be the first degen.</div>';
+
+    const tape = Array.isArray(stockMarketState?.tape) ? stockMarketState.tape.slice(-12).reverse() : [];
+    document.getElementById('stockTradeFeed').innerHTML = tape.length
+      ? tape.map(t => `<div class="stock-row"><span>${new Date(t.ts || Date.now()).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span><span>${escHtml(t.player || 'Unknown')}</span><span>${escHtml(t.action || '')} ${escHtml(t.symbol || '')} x${t.shares || 0}</span></div>`).join('')
+      : '<div style="font-size:0.65rem;color:#7dd3c7;">Tape is quiet... for now.</div>';
+  }
+
+  window.selectStockTicker = function(symbol) {
+    selectedStockTicker = symbol;
+    renderStockMarket();
+  };
+
+  async function executeStockTrade(action) {
+    if (!currentUser) return;
+    const qty = Math.max(1, Math.floor(Number(document.getElementById('stockSharesInput').value || 1)));
+    const symbol = selectedStockTicker;
+    const msg = document.getElementById('stockTradeMsg');
+    msg.style.color = '#7dd3c7';
+    msg.textContent = 'Submitting to exchange...';
+
+    const tx = await runTransaction(ref(db, '/'), root => {
+      if (!root || !root.players || !root.players[currentUser.id]) return root;
+      root.stockMarket = root.stockMarket || {};
+      root.stockMarket.tickers = root.stockMarket.tickers || JSON.parse(JSON.stringify(DEFAULT_STOCK_TICKERS));
+      root.stockMarket.positions = root.stockMarket.positions || {};
+      root.stockMarket.tape = Array.isArray(root.stockMarket.tape) ? root.stockMarket.tape : [];
+
+      const player = root.players[currentUser.id];
+      const ticker = root.stockMarket.tickers[symbol];
+      if (!ticker) return;
+
+      const price = Number(ticker.price || 1);
+      const notional = Number((price * qty).toFixed(2));
+      const pos = root.stockMarket.positions[currentUser.id] || { name: player.name || currentUser.name, longs: {}, shorts: {} };
+      const longPos = pos.longs[symbol] || { shares: 0, avg: 0 };
+      const shortPos = pos.shorts[symbol] || { shares: 0, avg: 0 };
+      const coins = Number(player.coins || 0);
+
+      if (action === 'buy') {
+        if (coins < notional) return;
+        player.coins = Number((coins - notional).toFixed(2));
+        const totalShares = longPos.shares + qty;
+        longPos.avg = Number((((longPos.avg * longPos.shares) + notional) / totalShares).toFixed(2));
+        longPos.shares = totalShares;
+        pos.longs[symbol] = longPos;
+      } else if (action === 'sell') {
+        if (longPos.shares < qty) return;
+        longPos.shares -= qty;
+        player.coins = Number((coins + notional).toFixed(2));
+        pos.longs[symbol] = longPos;
+      } else if (action === 'short') {
+        player.coins = Number((coins + notional).toFixed(2));
+        const totalShares = shortPos.shares + qty;
+        shortPos.avg = Number((((shortPos.avg * shortPos.shares) + notional) / totalShares).toFixed(2));
+        shortPos.shares = totalShares;
+        pos.shorts[symbol] = shortPos;
+      } else if (action === 'cover') {
+        if (shortPos.shares < qty || coins < notional) return;
+        shortPos.shares -= qty;
+        player.coins = Number((coins - notional).toFixed(2));
+        pos.shorts[symbol] = shortPos;
+      }
+
+      pos.name = player.name || currentUser.name;
+      root.stockMarket.positions[currentUser.id] = pos;
+      root.stockMarket.tape.push({ ts: Date.now(), player: player.name || currentUser.name, action: action.toUpperCase(), symbol, shares: qty, price });
+      root.stockMarket.tape = root.stockMarket.tape.slice(-30);
+      return root;
+    });
+
+    if (!tx.committed) {
+      msg.style.color = 'var(--red)';
+      msg.textContent = 'Trade failed. Check funds or position size.';
+      return;
+    }
+
+    msg.style.color = 'var(--green)';
+    msg.textContent = `${action.toUpperCase()} ${symbol} x${qty} filled ✅`;
+    renderStockMarket();
+  }
+
+  window.buyStock = () => executeStockTrade('buy');
+  window.sellStock = () => executeStockTrade('sell');
+  window.shortStock = () => executeStockTrade('short');
+  window.coverStock = () => executeStockTrade('cover');
+
+  setInterval(() => {
+    maybeAdvanceStockMarket();
+    renderStockMarket();
+  }, 15000);
 
   // ── Nuke Modal ──
   window.openNukeModal = function() {
@@ -6263,6 +6643,7 @@
   window.openCasino = function() {
     if (!currentUser) { doLogout(); return; }
     closeShop();
+    if (window.closeStock) window.closeStock();
     if (window.closeGarden) window.closeGarden();
     document.getElementById('casinoDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
@@ -10322,6 +10703,7 @@ function gardenUpgradeCost(upgrade, currentLevel) {
 window.openGarden = function() {
   closeShop && closeShop();
   closeCasino && closeCasino();
+  closeStock && closeStock();
   document.getElementById('gardenDrawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
   document.getElementById('gardenTabArrow').textContent = '▶';
@@ -10846,6 +11228,7 @@ window.submitChangelogEntry = async function() {
 window.openChangelog = function() {
   if (window.closeCasino) closeCasino();
   if (window.closeShop)   closeShop();
+  if (window.closeStock)  closeStock();
   if (window.closeGarden) closeGarden();
   document.getElementById('changelogDrawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
