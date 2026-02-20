@@ -3132,7 +3132,7 @@
     position: fixed;
     left: 16px;
     bottom: 90px;
-    width: 420px;
+    width: 560px;
     z-index: 144;
     background: rgba(8,12,8,0.97);
     border: 1px solid #2a3a2a;
@@ -3142,11 +3142,30 @@
     user-select: none;
   }
   #envPanel.open { display: flex; }
+  @media (max-width: 700px) {
+    #envPanel {
+      left: 8px;
+      right: 8px;
+      width: auto;
+    }
+    #envFooterRow {
+      flex-direction: column;
+      gap: 0;
+    }
+    #envMapPane {
+      border-right: none;
+      border-bottom: 1px solid #1e2e1e;
+      padding-right: 14px;
+    }
+    #envDpadPane {
+      padding-left: 14px;
+    }
+  }
   #envHeader {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px 7px;
+    padding: 10px 14px 9px;
     border-bottom: 1px solid #1e2e1e;
     gap: 8px;
   }
@@ -3164,14 +3183,14 @@
   #envCloseBtn:hover { color: var(--muted); }
   #envRoomName {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.35rem;
+    font-size: 1.6rem;
     letter-spacing: 4px;
     color: var(--gold);
     flex: 1;
   }
   #envCoords {
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.8rem;
     color: #555;
     letter-spacing: 1px;
     white-space: nowrap;
@@ -3179,32 +3198,23 @@
   #envScene {
     position: relative;
     width: 100%;
-    height: 240px;
+    height: 280px;
     overflow: hidden;
     background: linear-gradient(180deg, #0a1a0e 0%, #0d200d 60%, #111a0a 100%);
     transition: background 0.4s ease;
   }
-  #envRoomDesc {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 1px;
-    padding: 5px 10px 6px;
-    border-top: 1px solid #1e2e1e;
-    min-height: 26px;
-  }
   #envGround {
     position: absolute;
     bottom: 0; left: 0;
-    width: 100%; height: 30px;
+    width: 100%; height: 36px;
     background: linear-gradient(180deg, #1a2e10 0%, #0e1a08 100%);
     border-top: 1px solid #2a4a1a;
     transition: background 0.4s ease, border-color 0.4s ease;
   }
   #envResources {
     position: absolute;
-    bottom: 28px; left: 0;
-    width: 100%; height: 212px;
+    bottom: 34px; left: 0;
+    width: 100%; height: 246px;
   }
   .env-resource {
     position: absolute;
@@ -3249,25 +3259,27 @@
   }
   #envRoomDesc {
     font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.85rem;
     color: var(--muted);
     letter-spacing: 1px;
-    padding: 5px 12px 5px;
+    padding: 9px 14px 8px;
     border-bottom: 1px solid #1e2e1e;
-    min-height: 24px;
+    min-height: 36px;
   }
   #envFooterRow {
     display: flex;
     flex-direction: row;
     align-items: stretch;
+    gap: 8px;
   }
   #envMapPane {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 8px 10px 12px;
+    padding: 14px 10px 14px 14px;
     border-right: 1px solid #1e2e1e;
+    min-width: 0;
   }
   #envMinimap {
     display: flex;
@@ -3279,13 +3291,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 12px 10px 8px;
+    padding: 14px 14px 14px 8px;
   }
   #envNavGrid {
     display: grid;
-    grid-template-columns: 36px 36px 36px;
-    grid-template-rows: 32px 32px 32px;
-    gap: 3px;
+    grid-template-columns: 44px 44px 44px;
+    grid-template-rows: 38px 38px 38px;
+    gap: 4px;
     align-items: center;
     justify-items: center;
   }
@@ -3293,9 +3305,9 @@
     background: rgba(255,255,255,0.03);
     border: 1px solid #2a3a2a;
     color: var(--muted);
-    font-size: 0.8rem;
-    width: 34px;
-    height: 30px;
+    font-size: 1rem;
+    width: 42px;
+    height: 36px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -3314,8 +3326,8 @@
   #envLayerBtns {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-top: 8px;
+    gap: 6px;
+    margin-top: 10px;
     align-items: center;
   }
   .env-layer-btn {
@@ -3323,11 +3335,11 @@
     border: 1px solid #3a2a5a;
     color: #9988cc;
     font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
+    font-size: 0.72rem;
     letter-spacing: 1.5px;
-    padding: 5px 10px;
+    padding: 7px 12px;
     cursor: pointer;
-    width: 110px;
+    width: 126px;
     transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
     animation: layerPulse 2.5s ease-in-out infinite;
   }
@@ -8947,7 +8959,7 @@ document.addEventListener('click', e => {
   function renderMinimap() {
     const canvas = document.getElementById('envMinimapCanvas');
     if (!canvas) return;
-    const CELL = 13, GAP = 2;
+    const CELL = 16, GAP = 3;
     const ROWS = clayer === 0 ? GRID_H : clayer === 1 ? 4 : DESERT_H;
     const COLS = clayer === 2 ? DESERT_W : GRID_W;
     canvas.width  = COLS * (CELL + GAP) - GAP;
@@ -8977,10 +8989,11 @@ document.addEventListener('click', e => {
     // Layer label strip
     const label = clayer === 0 ? 'SURFACE' : clayer === 1 ? 'UNDERGROUND' : 'DESERT';
     ctx.fillStyle = clayer === 0 ? '#1a3a1a' : clayer === 1 ? '#1a1030' : '#2a1e08';
-    ctx.fillRect(0, canvas.height-10, canvas.width, 10);
+    const stripH = 14;
+    ctx.fillRect(0, canvas.height-stripH, canvas.width, stripH);
     ctx.fillStyle = clayer === 0 ? '#4a8a4a' : clayer === 1 ? '#8844ff' : '#d4af37';
-    ctx.font = '6px monospace';
-    ctx.fillText(label, 2, canvas.height-2);
+    ctx.font = '9px monospace';
+    ctx.fillText(label, 4, canvas.height-4);
   }
 
   function updateNavButtons() {
