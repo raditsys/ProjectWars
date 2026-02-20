@@ -1179,6 +1179,58 @@
     margin-top: 0.2rem;
   }
 
+  .rl-progression {
+    margin-top: 0.65rem;
+    border: 1px solid #2a5a2a;
+    background: rgba(0, 0, 0, 0.24);
+    padding: 0.55rem 0.65rem;
+  }
+  .rl-progression-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.7rem;
+    margin-bottom: 0.35rem;
+  }
+  .rl-rank {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    color: #ffb74d;
+    text-shadow: 0 0 10px rgba(255, 183, 77, 0.45);
+  }
+  .rl-cap {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    color: #ffe082;
+    text-shadow: 0 0 10px rgba(245, 200, 66, 0.55);
+    animation: maxBetGlow 1.8s ease-in-out infinite;
+  }
+  .rl-xp-bar {
+    width: 100%;
+    height: 8px;
+    background: #112611;
+    border: 1px solid #2a5a2a;
+    overflow: hidden;
+  }
+  .rl-xp-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #fb923c, #facc15);
+    transition: width 0.25s ease;
+  }
+  .rl-progress-sub {
+    margin-top: 0.3rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.65rem;
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+    color: #ffddb0;
+    text-transform: uppercase;
+  }
+
   .r-spin-btn {
     width: 100%;
     padding: 0.75rem;
@@ -1423,6 +1475,123 @@
   @keyframes prPulse {
     from { box-shadow: inset 0 0 40px rgba(255,50,50,0.1); }
     to   { box-shadow: inset 0 0 80px rgba(255,50,50,0.25); }
+  }
+
+  .pr-progression {
+    margin-top: 0.65rem;
+    border: 1px solid #5a3a1a;
+    background: rgba(20, 8, 0, 0.35);
+    padding: 0.55rem 0.65rem;
+  }
+  .pr-progression-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.7rem;
+    margin-bottom: 0.35rem;
+  }
+  .pr-rank {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    color: #ff9d4d;
+    text-shadow: 0 0 10px rgba(255, 157, 77, 0.45);
+  }
+  .pr-cap {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    color: #ffe082;
+    text-shadow: 0 0 10px rgba(245, 200, 66, 0.55);
+    animation: maxBetGlow 1.8s ease-in-out infinite;
+  }
+  .pr-xp-bar {
+    width: 100%;
+    height: 8px;
+    background: #1a1208;
+    border: 1px solid #5a3a1a;
+    overflow: hidden;
+  }
+  .pr-xp-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ff6b6b, #f59e0b);
+    transition: width 0.25s ease;
+  }
+  .pr-progress-sub {
+    margin-top: 0.3rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.65rem;
+    font-size: 0.55rem;
+    letter-spacing: 1px;
+    color: #ffd4ae;
+    text-transform: uppercase;
+  }
+
+  .pr-ao-wrap {
+    margin-top: 0.65rem;
+    border: 1px solid #8b0000;
+    background: linear-gradient(180deg, rgba(40,0,0,0.82), rgba(10,0,0,0.92));
+    padding: 0.65rem;
+    box-shadow: inset 0 0 24px rgba(255, 0, 0, 0.12);
+  }
+  .pr-ao-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+  .pr-ao-title {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    color: #ff5454;
+    font-size: 0.95rem;
+    text-shadow: 0 0 12px rgba(255, 60, 60, 0.6);
+  }
+  .pr-ao-cost {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    color: #ffb3b3;
+  }
+  .pr-ao-desc {
+    margin-top: 0.35rem;
+    font-size: 0.58rem;
+    letter-spacing: 1px;
+    color: #ff9a9a;
+    text-transform: uppercase;
+    line-height: 1.35;
+  }
+  .pr-ao-btn {
+    margin-top: 0.45rem;
+    width: 100%;
+    border: 1px solid #ff3333;
+    background: #2a0000;
+    color: #ff6b6b;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    font-size: 0.95rem;
+    padding: 0.45rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .pr-ao-btn:hover:not(:disabled) {
+    border-color: #ff8a8a;
+    color: #ffd0d0;
+    background: #3d0000;
+  }
+  .pr-ao-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .pr-ao-wrap.armed {
+    border-color: #ffcc00;
+    box-shadow: inset 0 0 28px rgba(255, 80, 0, 0.25), 0 0 12px rgba(255, 80, 0, 0.3);
+  }
+  .pr-ao-wrap.armed .pr-ao-title {
+    color: #ffd166;
+    text-shadow: 0 0 12px rgba(255, 209, 102, 0.7);
   }
 
   /* ── Delete Modal ── */
@@ -3948,22 +4117,22 @@
 <div class="roulette-board">
   <div class="table-section-label" style="margin-bottom:0.25rem;">Outside bets</div>
   <div class="roulette-bet-row">
-    <button class="r-bet-btn red-btn" id="rbRed" onclick="rlSelectBet('red')">🔴 Red</button>
-    <button class="r-bet-btn black-btn" id="rbBlack" onclick="rlSelectBet('black')">⚫ Black</button>
-    <button class="r-bet-btn green-btn" id="rbGreen" onclick="rlSelectBet('green')">0 Green</button>
+    <button class="r-bet-btn red-btn" id="rbRed" onclick="rlToggleBet('red')">🔴 Red</button>
+    <button class="r-bet-btn black-btn" id="rbBlack" onclick="rlToggleBet('black')">⚫ Black</button>
+    <button class="r-bet-btn green-btn" id="rbGreen" onclick="rlToggleBet('green')">0 Green</button>
   </div>
   <div class="roulette-bet-row">
-    <button class="r-bet-btn" id="rbOdd" onclick="rlSelectBet('odd')">Odd</button>
-    <button class="r-bet-btn" id="rbEven" onclick="rlSelectBet('even')">Even</button>
-    <button class="r-bet-btn" id="rb1to18" onclick="rlSelectBet('1to18')">1–18</button>
-    <button class="r-bet-btn" id="rb19to36" onclick="rlSelectBet('19to36')">19–36</button>
+    <button class="r-bet-btn" id="rbOdd" onclick="rlToggleBet('odd')">Odd</button>
+    <button class="r-bet-btn" id="rbEven" onclick="rlToggleBet('even')">Even</button>
+    <button class="r-bet-btn" id="rb1to18" onclick="rlToggleBet('1to18')">1–18</button>
+    <button class="r-bet-btn" id="rb19to36" onclick="rlToggleBet('19to36')">19–36</button>
   </div>
   <div class="roulette-bet-row">
-    <button class="r-bet-btn" id="rb1st12" onclick="rlSelectBet('1st12')">1st 12</button>
-    <button class="r-bet-btn" id="rb2nd12" onclick="rlSelectBet('2nd12')">2nd 12</button>
-    <button class="r-bet-btn" id="rb3rd12" onclick="rlSelectBet('3rd12')">3rd 12</button>
+    <button class="r-bet-btn" id="rb1st12" onclick="rlToggleBet('1st12')">1st 12</button>
+    <button class="r-bet-btn" id="rb2nd12" onclick="rlToggleBet('2nd12')">2nd 12</button>
+    <button class="r-bet-btn" id="rb3rd12" onclick="rlToggleBet('3rd12')">3rd 12</button>
   </div>
-  <div class="r-payout-label" id="rlPayoutLabel">Select a bet type</div>
+  <div class="r-payout-label" id="rlPayoutLabel">Pick one or more spots • same bet goes on each spot</div>
 </div>
 <!-- Bet amount -->
 <div>
@@ -3975,9 +4144,21 @@
 <button class="chip chip-25" onclick="rlAddBet(25)">25</button>
 <button class="chip chip-50" onclick="rlAddBet(50)">50</button>
 <button class="chip chip-100" onclick="rlAddBet(100)">100</button>
-<div class="bet-display" id="rlBetDisplay">0<small>bet</small></div>
+<div class="bet-display" id="rlBetDisplay"><span class="bet-display-main">0</span><span class="bet-display-max">×0 = 0</span><small>each / spots / total</small></div>
 <button class="clear-bet-btn" onclick="rlClearBet()">Clear</button>
+<div class="bj-bet-limit-hint" id="rlBetLimitHint">Level 1 cap active • max bet 25 each spot</div>
 </div>
+</div>
+<div class="rl-progression" id="rlProgressWrap">
+  <div class="rl-progression-top">
+    <div class="rl-rank" id="rlRankLabel">Wheel Rookie Lv.1</div>
+    <div class="rl-cap" id="rlCapLabel">Level 1 cap: max bet 25</div>
+  </div>
+  <div class="rl-xp-bar"><div class="rl-xp-fill" id="rlXpFill"></div></div>
+  <div class="rl-progress-sub">
+    <span id="rlXpLabel">0 / 9 xp</span>
+    <span id="rlHeatLabel">Streak boost: +0%</span>
+  </div>
 </div>
 <div class="result-banner" id="rlResultBanner"></div>
 <button class="r-spin-btn" id="rlSpinBtn" onclick="rlSpin()">🎡 Spin</button>
@@ -4054,9 +4235,31 @@
       <button class="chip chip-25"  onclick="prAddBet(25)">25</button>
       <button class="chip chip-50"  onclick="prAddBet(50)">50</button>
       <button class="chip chip-100" onclick="prAddBet(100)">100</button>
-      <div class="bet-display" id="prBetDisplay">0<small>bet</small></div>
+      <div class="bet-display" id="prBetDisplay"><span class="bet-display-main">0</span><span class="bet-display-max">/25 MAX</span><small>bet / max</small></div>
       <button class="clear-bet-btn" onclick="prClearBet()">Clear</button>
+      <div class="bj-bet-limit-hint" id="prBetLimitHint">Level 1 cap active • max bet 25</div>
     </div>
+  </div>
+
+  <div class="pr-progression" id="prProgressWrap">
+    <div class="pr-progression-top">
+      <div class="pr-rank" id="prRankLabel">Focus Rookie Lv.1</div>
+      <div class="pr-cap" id="prCapLabel">Level 1 cap: max bet 25</div>
+    </div>
+    <div class="pr-xp-bar"><div class="pr-xp-fill" id="prXpFill"></div></div>
+    <div class="pr-progress-sub">
+      <span id="prXpLabel">0 / 9 xp</span>
+      <span id="prHeatLabel">Composure bonus: +0%</span>
+    </div>
+  </div>
+
+  <div class="pr-ao-wrap" id="prAllOrNothingWrap">
+    <div class="pr-ao-head">
+      <div class="pr-ao-title">☠ All or Nothing</div>
+      <div class="pr-ao-cost">1000 🪙 activation</div>
+    </div>
+    <div class="pr-ao-desc" id="prAoDesc">Arm this to double the next round's multipliers. If that round fails, your wallet is wiped to 0.</div>
+    <button class="pr-ao-btn" id="prAllOrNothingBtn" onclick="prEnableAllOrNothing()">Arm for next round</button>
   </div>
 
   <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
@@ -6090,6 +6293,13 @@
     pkLoadProgress(currentUser.id);
     pkRenderProgress();
     pkUpdateBetDisplay();
+    rlLoadProgress(currentUser.id);
+    rlRenderProgress();
+    prLoadProgress(currentUser.id);
+    prRenderProgress();
+    prAllOrNothingArmed = false;
+    prAllOrNothingRoundActive = false;
+    prSyncAllOrNothingUi();
     refreshCasinoWallet();
   };
 
@@ -6298,8 +6508,11 @@
   }
 
   let rlBet = 0;
-  let rlBetType = null;  // 'red','black','green','odd','even','1to18','19to36','1st12','2nd12','3rd12', or number 0-36
+  let rlSelectedBets = new Set();
   let rlSpinning = false;
+  let rlProgress = { level: 1, xp: 0, spins: 0, heat: 0 };
+
+  const RL_TITLES = ['Wheel Rookie', 'Pocket Hunter', 'Table Tactician', 'Lucky Baron', 'Casino Phantom'];
 
   const RL_BET_CONFIG = {
     red:    { label: 'Red (×2)',    payout: 1 },
@@ -6313,6 +6526,137 @@
     '2nd12':  { label: '2nd 12 (×3)', payout: 2 },
     '3rd12':  { label: '3rd 12 (×3)', payout: 2 },
   };
+
+  function rlProgressKey(playerId) {
+    return `pw_rl_progress_${playerId}`;
+  }
+
+  function rlXpToNext(level) {
+    return 9 + (level - 1) * 6;
+  }
+
+  function rlMaxBetForLevel(level) {
+    return Math.min(350, 25 + (level - 1) * 12);
+  }
+
+  function rlHeatBonusPct() {
+    return Math.min(25, rlProgress.heat * 5);
+  }
+
+  function rlLoadProgress(playerId) {
+    if (!playerId) return;
+    const raw = localStorage.getItem(rlProgressKey(playerId));
+    if (!raw) {
+      rlProgress = { level: 1, xp: 0, spins: 0, heat: 0 };
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      rlProgress = {
+        level: Math.max(1, parsed.level || 1),
+        xp: Math.max(0, parsed.xp || 0),
+        spins: Math.max(0, parsed.spins || 0),
+        heat: Math.max(0, parsed.heat || 0),
+      };
+    } catch {
+      rlProgress = { level: 1, xp: 0, spins: 0, heat: 0 };
+    }
+  }
+
+  function rlSaveProgress(playerId) {
+    if (!playerId) return;
+    localStorage.setItem(rlProgressKey(playerId), JSON.stringify(rlProgress));
+  }
+
+  function rlRenderProgress() {
+    const level = rlProgress.level;
+    const next = rlXpToNext(level);
+    const title = RL_TITLES[Math.min(RL_TITLES.length - 1, Math.floor((level - 1) / 2))];
+    const maxBet = rlMaxBetForLevel(level);
+    document.getElementById('rlRankLabel').textContent = `${title} Lv.${level}`;
+    document.getElementById('rlCapLabel').textContent = `Level ${level} cap: max bet ${maxBet}`;
+    document.getElementById('rlXpLabel').textContent = `${rlProgress.xp} / ${next} xp`;
+    document.getElementById('rlHeatLabel').textContent = `Streak boost ${rlProgress.heat}/5: +${rlHeatBonusPct()}%`;
+    document.getElementById('rlXpFill').style.width = `${Math.min(100, (rlProgress.xp / next) * 100)}%`;
+    updateRLBetLimitHint();
+    rlUpdateBetDisplay();
+  }
+
+  function updateRLBetLimitHint() {
+    const maxBet = rlMaxBetForLevel(rlProgress.level);
+    const el = document.getElementById('rlBetLimitHint');
+    if (!el) return;
+    el.textContent = `Level ${rlProgress.level} cap active • max bet ${maxBet} each spot`;
+  }
+
+  function rlAwardProgress(playerId, netDelta) {
+    let gain = 1;
+    if (netDelta > 0) gain = 3;
+    else if (netDelta === 0) gain = 2;
+
+    rlProgress.spins += 1;
+    rlProgress.xp += gain;
+
+    let leveled = false;
+    while (rlProgress.xp >= rlXpToNext(rlProgress.level)) {
+      rlProgress.xp -= rlXpToNext(rlProgress.level);
+      rlProgress.level += 1;
+      leveled = true;
+    }
+
+    if (netDelta > 0) rlProgress.heat = Math.min(5, rlProgress.heat + 1);
+    if (netDelta < 0) rlProgress.heat = 0;
+    if (netDelta === 0) rlProgress.heat = Math.max(0, rlProgress.heat - 1);
+
+    rlSaveProgress(playerId);
+    rlRenderProgress();
+
+    if (leveled) {
+      const banner = document.getElementById('rlResultBanner');
+      banner.textContent = `⬆ LEVEL UP! WHEEL LV.${rlProgress.level}`;
+      banner.className = 'result-banner show win';
+      setTimeout(() => banner.classList.remove('show'), 2600);
+      setTimeout(() => launchParticles('bigwin'), 60);
+    }
+  }
+
+  function rlPayoutForBet(type) {
+    return typeof type === 'number' ? 35 : (RL_BET_CONFIG[type]?.payout ?? 1);
+  }
+
+  function rlUpdateBetDisplay() {
+    const spots = rlSelectedBets.size;
+    const total = rlBet * spots;
+    document.getElementById('rlBetDisplay').innerHTML = `<span class="bet-display-main">${rlBet}</span><span class="bet-display-max">×${spots} = ${total}</span><small>each / spots / total</small>`;
+  }
+
+  function rlRefreshSelectionHighlights() {
+    document.querySelectorAll('.r-bet-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.rl-num').forEach(b => b.classList.remove('selected-num'));
+
+    for (const type of rlSelectedBets) {
+      if (typeof type === 'number') {
+        const btn = document.getElementById('rlNum' + type);
+        if (btn) btn.classList.add('selected-num');
+        continue;
+      }
+      const idMap = { red:'Red',black:'Black',green:'Green',odd:'Odd',even:'Even','1to18':'1to18','19to36':'19to36','1st12':'1st12','2nd12':'2nd12','3rd12':'3rd12' };
+      const btn = document.getElementById('rb' + idMap[type]);
+      if (btn) btn.classList.add('selected');
+    }
+
+    if (!rlSelectedBets.size) {
+      document.getElementById('rlPayoutLabel').textContent = 'Pick one or more spots • same bet goes on each spot';
+      return;
+    }
+
+    const labels = [];
+    for (const type of rlSelectedBets) {
+      if (typeof type === 'number') labels.push(`Number ${type} (×36)`);
+      else labels.push(RL_BET_CONFIG[type]?.label || type);
+    }
+    document.getElementById('rlPayoutLabel').textContent = labels.join(' • ');
+  }
 
   // Build the number grid (3 rows × 12 cols + green 0 spanning rows)
   // Layout: col 0 = green "0", cols 1-12 = numbers top→bottom in columns
@@ -6329,7 +6673,7 @@
     zeroBtn.className = 'rl-num green-num';
     zeroBtn.id = 'rlNum0';
     zeroBtn.textContent = '0';
-    zeroBtn.onclick = () => rlSelectBet(0);
+    zeroBtn.onclick = () => rlToggleBet(0);
     grid.appendChild(zeroBtn);
 
     // Numbers in 3-row layout
@@ -6340,10 +6684,12 @@
         btn.className = 'rl-num ' + rlColor(n);
         btn.id = 'rlNum' + n;
         btn.textContent = n;
-        btn.onclick = () => rlSelectBet(n);
+        btn.onclick = () => rlToggleBet(n);
         grid.appendChild(btn);
       }
     }
+
+    rlRefreshSelectionHighlights();
   }
 
   function rlWinCheck(num, betType) {
@@ -6365,56 +6711,51 @@
     return false;
   }
 
-  window.rlSelectBet = function(type) {
+  window.rlToggleBet = function(type) {
     if (rlSpinning) return;
-    rlBetType = type;
-    // Clear all highlights
-    document.querySelectorAll('.r-bet-btn').forEach(b => b.classList.remove('selected'));
-    document.querySelectorAll('.rl-num').forEach(b => b.classList.remove('selected-num'));
-
-    if (typeof type === 'number') {
-      // Single number
-      const btn = document.getElementById('rlNum' + type);
-      if (btn) btn.classList.add('selected-num');
-      document.getElementById('rlPayoutLabel').textContent = `Number ${type} (×36)`;
-    } else {
-      const idMap = { red:'Red',black:'Black',green:'Green',odd:'Odd',even:'Even','1to18':'1to18','19to36':'19to36','1st12':'1st12','2nd12':'2nd12','3rd12':'3rd12' };
-      const btn = document.getElementById('rb' + idMap[type]);
-      if (btn) btn.classList.add('selected');
-      const cfg = RL_BET_CONFIG[type];
-      document.getElementById('rlPayoutLabel').textContent = cfg ? cfg.label : '';
-    }
+    if (rlSelectedBets.has(type)) rlSelectedBets.delete(type);
+    else rlSelectedBets.add(type);
+    rlRefreshSelectionHighlights();
+    rlUpdateBetDisplay();
   };
+
+  window.rlSelectBet = window.rlToggleBet;
 
   window.rlAddBet = function(amount) {
     if (rlSpinning) return;
     const p = getCurrentCasinoPlayer();
     if (!p) { shakeWallet(); return; }
-    if (rlBet + amount > (p.coins || 0)) { shakeWallet(); return; }
+    const maxBet = rlMaxBetForLevel(rlProgress.level);
+    if (rlBet + amount > maxBet) { shakeWallet(); return; }
+    const spots = Math.max(1, rlSelectedBets.size);
+    if ((rlBet + amount) * spots > (p.coins || 0)) { shakeWallet(); return; }
     rlBet += amount;
     soundChip();
-    document.getElementById('rlBetDisplay').innerHTML = `${rlBet}<small>bet</small>`;
+    rlUpdateBetDisplay();
   };
 
   window.rlClearBet = function() {
     if (rlSpinning) return;
     rlBet = 0;
-    document.getElementById('rlBetDisplay').innerHTML = `0<small>bet</small>`;
+    rlSelectedBets.clear();
+    rlRefreshSelectionHighlights();
+    rlUpdateBetDisplay();
   };
 
   window.rlSpin = async function() {
     if (rlSpinning) return;
     const p = getCurrentCasinoPlayer();
     if (!p) return;
-    if (rlBetType === null) {
+    if (!rlSelectedBets.size) {
       const el = document.getElementById('rlResultBanner');
-      el.textContent = 'SELECT A BET FIRST';
+      el.textContent = 'SELECT AT LEAST ONE BET';
       el.className = 'result-banner show lose';
       setTimeout(() => el.classList.remove('show'), 2000);
       return;
     }
     if (rlBet < 1) { shakeWallet(); return; }
-    if (rlBet > (p.coins || 0)) { shakeWallet(); return; }
+    const totalWager = rlBet * rlSelectedBets.size;
+    if (totalWager > (p.coins || 0)) { shakeWallet(); return; }
 
     rlSpinning = true;
     document.getElementById('rlSpinBtn').disabled = true;
@@ -6445,13 +6786,13 @@
         setTimeout(flashNext, flashDelay);
       } else {
         // Land on result
-        setTimeout(() => rlFinish(resultNum, p), flashDelay + 100);
+        setTimeout(() => rlFinish(resultNum, p, totalWager), flashDelay + 100);
       }
     }
     flashNext();
   };
 
-  async function rlFinish(num, p) {
+  async function rlFinish(num, p, totalWager) {
     // Show ball on winning number
     const winEl = document.getElementById('rlNum' + num);
     if (winEl) {
@@ -6468,22 +6809,37 @@
     numEl.textContent = num;
     numEl.className = `roulette-result-num ${col}`;
 
-    const won = rlWinCheck(num, rlBetType);
-    const payout = typeof rlBetType === 'number' ? 35 : (RL_BET_CONFIG[rlBetType]?.payout ?? 1);
-    let delta = 0, resultText = '', resultType = '';
+    let delta = 0;
+    let winHits = 0;
+    for (const betType of rlSelectedBets) {
+      if (rlWinCheck(num, betType)) {
+        winHits += 1;
+        delta += rlBet * rlPayoutForBet(betType);
+      } else {
+        delta -= rlBet;
+      }
+    }
 
-    if (won) {
-      delta = rlBet * payout;
-      const profit = rlBet * payout;
-      resultText = `✅ ${num} — YOU WIN +${profit} 🪙`;
+    let bonus = 0;
+    if (delta > 0) {
+      bonus = Math.floor(delta * (rlHeatBonusPct() / 100));
+      delta += bonus;
+    }
+
+    let resultText = '', resultType = '';
+    if (delta > 0) {
+      resultText = `✅ ${num} — ${winHits} HIT${winHits > 1 ? 'S' : ''}! +${delta} 🪙${bonus ? ` (${bonus} streak)` : ''}`;
       resultType = 'win';
       soundWin();
-      setTimeout(() => launchParticles('win'), 80);
-      setTimeout(() => spawnCoinFloat(`+${profit} 🪙`), 400);
-      recordBiggestWin(p.name, p.id, profit);
+      setTimeout(() => launchParticles(delta >= totalWager ? 'bigwin' : 'win'), 80);
+      setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 400);
+      recordBiggestWin(p.name, p.id, delta);
+    } else if (delta === 0) {
+      resultText = `➖ ${num} — BREAK EVEN`;
+      resultType = 'push';
+      soundChip();
     } else {
-      delta = -rlBet;
-      resultText = `❌ ${num} — YOU LOSE`;
+      resultText = `❌ ${num} — -${Math.abs(delta)} 🪙`;
       resultType = 'lose';
       soundLose();
       setTimeout(() => launchParticles('bust'), 100);
@@ -6492,12 +6848,13 @@
     const banner = document.getElementById('rlResultBanner');
     banner.textContent = resultText;
     banner.className = `result-banner show ${resultType}`;
-    setTimeout(() => banner.classList.remove('show'), 3000);
+    setTimeout(() => banner.classList.remove('show'), 3200);
 
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
+    rlAwardProgress(p.id, delta);
 
-    // Keep last roulette bet selected between spins (Precision-style remember bet)
+    // Keep last roulette bet selected between spins
     rlSpinning = false;
     document.getElementById('rlSpinBtn').disabled = false;
   }
@@ -6917,9 +7274,8 @@
   let prRunning    = false;
   let prPhase      = 'idle';
   let prStreak     = 0;
-  let prRoundNum   = 0;      // increments every round start, never resets mid-session
+  let prRoundNum   = 0;
   let prAccumMult  = 1.0;
-  let prTotalPayout = 0;     // running cashout value shown at top
   let prNeedlePos  = 0.5;
   let prDirection  = 1;
   let prSpeed      = 0.048;
@@ -6927,8 +7283,137 @@
   let prRafId      = null;
   let prMusicNodes = [];
   let prMusicCtx   = null;
-  let prSpaceDown  = false;
+  let prLastTime = null;
   let prContinueBoost = 1.0;
+  let prProgress = { level: 1, xp: 0, rounds: 0, heat: 0 };
+  let prAllOrNothingArmed = false;
+  let prAllOrNothingRoundActive = false;
+
+  const PR_TITLES = ['Focus Rookie', 'Needle Reader', 'Edge Walker', 'Risk Savant', 'Void Virtuoso'];
+
+  function prProgressKey(playerId) {
+    return `pw_pr_progress_${playerId}`;
+  }
+
+  function prXpToNext(level) {
+    return 9 + (level - 1) * 7;
+  }
+
+  function prMaxBetForLevel(level) {
+    return Math.min(325, 25 + (level - 1) * 12);
+  }
+
+  function prHeatBonusPct() {
+    return Math.min(25, prProgress.heat * 5);
+  }
+
+  function prLoadProgress(playerId) {
+    if (!playerId) return;
+    const raw = localStorage.getItem(prProgressKey(playerId));
+    if (!raw) {
+      prProgress = { level: 1, xp: 0, rounds: 0, heat: 0 };
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      prProgress = {
+        level: Math.max(1, parsed.level || 1),
+        xp: Math.max(0, parsed.xp || 0),
+        rounds: Math.max(0, parsed.rounds || 0),
+        heat: Math.max(0, parsed.heat || 0),
+      };
+    } catch {
+      prProgress = { level: 1, xp: 0, rounds: 0, heat: 0 };
+    }
+  }
+
+  function prSaveProgress(playerId) {
+    if (!playerId) return;
+    localStorage.setItem(prProgressKey(playerId), JSON.stringify(prProgress));
+  }
+
+  function prUpdateBetDisplay() {
+    const maxBet = prMaxBetForLevel(prProgress.level);
+    document.getElementById('prBetDisplay').innerHTML = `<span class="bet-display-main">${prBet}</span><span class="bet-display-max">/${maxBet} MAX</span><small>bet / max</small>`;
+  }
+
+  function updatePRBetLimitHint() {
+    const maxBet = prMaxBetForLevel(prProgress.level);
+    const el = document.getElementById('prBetLimitHint');
+    if (!el) return;
+    el.textContent = `Level ${prProgress.level} cap active • max bet ${maxBet}`;
+  }
+
+  function prRenderProgress() {
+    const level = prProgress.level;
+    const next = prXpToNext(level);
+    const title = PR_TITLES[Math.min(PR_TITLES.length - 1, Math.floor((level - 1) / 2))];
+    const maxBet = prMaxBetForLevel(level);
+    document.getElementById('prRankLabel').textContent = `${title} Lv.${level}`;
+    document.getElementById('prCapLabel').textContent = `Level ${level} cap: max bet ${maxBet}`;
+    document.getElementById('prXpLabel').textContent = `${prProgress.xp} / ${next} xp`;
+    document.getElementById('prHeatLabel').textContent = `Composure bonus ${prProgress.heat}/5: +${prHeatBonusPct()}%`;
+    document.getElementById('prXpFill').style.width = `${Math.min(100, (prProgress.xp / next) * 100)}%`;
+    updatePRBetLimitHint();
+    prUpdateBetDisplay();
+  }
+
+  function prAwardProgress(playerId, outcome) {
+    let gain = 1;
+    if (outcome === 'win') gain = 3;
+    else if (outcome === 'push') gain = 2;
+
+    prProgress.rounds += 1;
+    prProgress.xp += gain;
+
+    let leveled = false;
+    while (prProgress.xp >= prXpToNext(prProgress.level)) {
+      prProgress.xp -= prXpToNext(prProgress.level);
+      prProgress.level += 1;
+      leveled = true;
+    }
+
+    if (outcome === 'win') prProgress.heat = Math.min(5, prProgress.heat + 1);
+    if (outcome === 'lose') prProgress.heat = 0;
+    if (outcome === 'push') prProgress.heat = Math.max(0, prProgress.heat - 1);
+
+    prSaveProgress(playerId);
+    prRenderProgress();
+
+    if (leveled) {
+      const result = document.getElementById('prResult');
+      result.textContent = `⬆ LEVEL UP! FOCUS LV.${prProgress.level}`;
+      result.className = 'pr-result win';
+      setTimeout(() => launchParticles('bigwin'), 70);
+    }
+  }
+
+  function prSyncAllOrNothingUi() {
+    const wrap = document.getElementById('prAllOrNothingWrap');
+    const desc = document.getElementById('prAoDesc');
+    const btn = document.getElementById('prAllOrNothingBtn');
+    if (!wrap || !desc || !btn) return;
+
+    wrap.classList.toggle('armed', prAllOrNothingArmed || prAllOrNothingRoundActive);
+
+    if (prAllOrNothingRoundActive) {
+      btn.textContent = 'Round in progress...';
+      btn.disabled = true;
+      desc.textContent = 'DOUBLE MULTIPLIERS ACTIVE — one miss and your wallet is wiped to 0.';
+      return;
+    }
+
+    if (prAllOrNothingArmed) {
+      btn.textContent = 'Armed for next round';
+      btn.disabled = true;
+      desc.textContent = 'DOOM ROUND READY: next round has 2× multipliers, but one fail wipes your wallet.';
+      return;
+    }
+
+    btn.textContent = 'Arm for next round';
+    btn.disabled = prPhase === 'running';
+    desc.textContent = 'Arm this for 1000 🪙 to double the next round's multipliers. Fail that round and your wallet is wiped to 0.';
+  }
 
   // Build zone DOM once
   function prBuildZones() {
@@ -6990,7 +7475,6 @@
     const needle = document.getElementById('prNeedle');
     if (!needle) return;
     needle.style.left = (prNeedlePos * 100) + '%';
-    // Colour needle by current zone
     const z = prGetZoneAtPos(prNeedlePos);
     if (z.mult === 0)       needle.style.background = '#6a2a2a';
     else if (z.mult >= 5)   needle.style.background = '#ff3333';
@@ -6998,19 +7482,18 @@
     else if (z.mult >= 1.5) needle.style.background = '#f5c842';
     else                    needle.style.background = '#4ade80';
 
-    const ml = prGetMultLabel(z.mult);
+    const dispMult = prAllOrNothingRoundActive && z.mult > 0 ? z.mult * 2 : z.mult;
+    const ml = prGetMultLabel(dispMult);
     const lbl = document.getElementById('prMultLabel');
     lbl.textContent = z.id.startsWith('skull') ? '☠' : (z.mult === 0 ? 'MISS' : ml.label);
     lbl.className = 'pr-multiplier-label ' + ml.cls;
   }
 
-  let prLastTime = null;
   function prLoop(timestamp) {
     if (!prRunning) return;
     if (prLastTime === null) prLastTime = timestamp;
-    const dt = Math.min((timestamp - prLastTime) / 1000, 0.05); // seconds, capped at 50ms to avoid jumps on tab focus
+    const dt = Math.min((timestamp - prLastTime) / 1000, 0.05);
     prLastTime = timestamp;
-    // prSpeed was tuned at 60fps, so multiply by 60 to convert to units/second
     prNeedlePos += prDirection * prSpeed * 60 * dt;
     if (prNeedlePos >= 1) { prNeedlePos = 1; prDirection = -1; }
     if (prNeedlePos <= 0) { prNeedlePos = 0; prDirection =  1; }
@@ -7031,7 +7514,6 @@
     arena.className = 'pr-arena ' + prIntensityClass();
   }
 
-  // Generative music — drones that get more intense
   function prStartMusic(intensity) {
     prStopMusic();
     try {
@@ -7092,26 +7574,38 @@
     const result = document.getElementById('prResult');
 
     if (zone.mult === 0 || zone.mult === 0.5) {
-      // MISS / SKULL or 0.5× center — lose coins, reset, auto-restart
       prStopMusic();
       playTone(80, 'sawtooth', 0.5, 0.18);
       setTimeout(() => playTone(60, 'sawtooth', 0.5, 0.2), 200);
       flash.style.background = '#ff000044';
       flash.animate([{opacity:0.8},{opacity:0}], {duration:400,fill:'forwards'});
       arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
-      const lost = zone.loss === 'full' ? prBet : Math.floor(prBet / 2);
-      await setCasinoCoins(p.id, Math.max(0, (p.coins||0) - lost));
-      spawnCoinFloat(`-${lost} 🪙`);
-      result.textContent = zone.mult === 0 ? `${zone.loss === 'full' ? '☠ SKULL' : 'MISS'} — lost ${lost} 🪙` : `0.5× — lost ${lost} 🪙`;
+
+      const normalLost = zone.loss === 'full' ? prBet : Math.floor(prBet / 2);
+      let newCoins = Math.max(0, (p.coins||0) - normalLost);
+      let lostText = `lost ${normalLost} 🪙`;
+
+      if (prAllOrNothingRoundActive) {
+        newCoins = 0;
+        lostText = 'ALL COINS LOST ☠';
+        setTimeout(() => launchParticles('bust'), 90);
+      }
+
+      await setCasinoCoins(p.id, newCoins);
+      spawnCoinFloat(newCoins === 0 && prAllOrNothingRoundActive ? 'WIPED TO 0' : `-${(p.coins||0) - newCoins} 🪙`);
+      result.textContent = zone.mult === 0 ? `${zone.loss === 'full' ? '☠ SKULL' : 'MISS'} — ${lostText}` : `0.5× — ${lostText}`;
       result.className = 'pr-result miss';
       prStreak = 0;
       prRoundNum = 0;
       prAccumMult = 1.0;
       prContinueBoost = 1.0;
+      prAllOrNothingRoundActive = false;
+      prAwardProgress(p.id, 'lose');
       document.getElementById('prStreakDisplay').className = 'pr-streak-display';
       prUpdateCashoutDisplay();
       prUpdateArenaClass();
-      // Auto-restart after brief pause
+      prSyncAllOrNothingUi();
+
       prPhase = 'result';
       prShowCashOut(false);
       setTimeout(() => {
@@ -7123,8 +7617,8 @@
       return;
     }
 
-    // HIT
-    const appliedMult = zone.mult * prContinueBoost;
+    const baseMult = prAllOrNothingRoundActive ? zone.mult * 2 : zone.mult;
+    const appliedMult = baseMult * prContinueBoost;
     const usedBoost = prContinueBoost;
     prContinueBoost = 1.0;
     prStreak++;
@@ -7138,41 +7632,35 @@
       arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
     }
 
-    // Sound: pitch rises with streak
     const hitFreqs = [440, 523, 659, 784, 1047];
     playTone(hitFreqs[Math.min(prStreak-1, 4)], 'sine', 0.25, 0.2);
-    if (zone.mult >= 5) setTimeout(() => playTone(1568, 'sine', 0.3, 0.15), 100);
+    if (zone.mult >= 5 || baseMult >= 10) setTimeout(() => playTone(1568, 'sine', 0.3, 0.15), 100);
 
-    // Update UI
-    const ml = prGetMultLabel(zone.mult);
+    const ml = prGetMultLabel(baseMult);
     const boostSuffix = usedBoost > 1 ? ` (pressure ${usedBoost.toFixed(2)}×)` : '';
-    result.textContent = `HIT ${ml.label}${boostSuffix} — TOTAL ${prAccumMult.toFixed(2)}× (+${totalPayout} 🪙)`;
-    result.className   = zone.mult >= 5 ? 'pr-result jackpot' : 'pr-result win';
+    const aoSuffix = prAllOrNothingRoundActive ? ' [AON 2×]' : '';
+    result.textContent = `HIT ${ml.label}${boostSuffix}${aoSuffix} — TOTAL ${prAccumMult.toFixed(2)}× (+${totalPayout} 🪙)`;
+    result.className   = baseMult >= 5 ? 'pr-result jackpot' : 'pr-result win';
     document.getElementById('prStreakDisplay').textContent = `STREAK: ${prStreak}`;
     document.getElementById('prStreakDisplay').className = 'pr-streak-display' + (prStreak >= 3 ? ' hot' : '');
     prUpdateCashoutDisplay();
 
-    // Intensify music
     prStartMusic(Math.min(prStreak, 5));
     prUpdateArenaClass();
     const nextBoost = prGetContinueBoost();
     document.getElementById('prHint').innerHTML = `Cash out now, or <strong>risk it</strong> for a <strong>${nextBoost.toFixed(2)}×</strong> pressure boost on your next hit.`;
 
-    // Show cash out, offer continue
     prShowCashOut(true);
     prPhase = 'result';
   }
 
   function prRebuildZones() {
     const r = prRoundNum;
-    // Fixed widths — never change
     const skullW   = 0.04;
     const extremeW = 0.02;
     const farW     = 0.04;
     const edgeW    = 0.075;
-    // Miss starts small and grows each round
     const missW    = Math.min(0.08 + r * 0.02, 0.28);
-    // Center safe gets whatever remains
     const safeW    = Math.max(1 - (skullW + missW + extremeW + farW + edgeW) * 2, 0.04);
 
     const zoneWidths = [skullW, missW, extremeW, farW, edgeW, safeW, edgeW, farW, extremeW, missW, skullW];
@@ -7189,13 +7677,38 @@
     document.getElementById('prStartBtn').style.display = show ? 'none' : '';
   }
 
+  window.prEnableAllOrNothing = async function() {
+    if (prPhase === 'running' || prAllOrNothingArmed || prAllOrNothingRoundActive) return;
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+    if ((p.coins || 0) < 1000) {
+      shakeWallet();
+      const r = document.getElementById('prResult');
+      r.textContent = 'Need 1000 🪙 to arm All or Nothing';
+      r.className = 'pr-result miss';
+      return;
+    }
+    await setCasinoCoins(p.id, (p.coins || 0) - 1000);
+    prAllOrNothingArmed = true;
+    prSyncAllOrNothingUi();
+    const r = document.getElementById('prResult');
+    r.textContent = '☠ ALL OR NOTHING ARMED';
+    r.className = 'pr-result jackpot';
+    soundChip();
+  };
+
   window.prCashOut = async function() {
     if (prPhase !== 'result' || prStreak === 0) return;
     const p = getCurrentCasinoPlayer();
     if (!p) return;
     prStopMusic();
     const payout = Math.floor(prBet * prAccumMult);
-    const profit = payout - prBet;
+    let profit = payout - prBet;
+    let bonus = 0;
+    if (profit > 0) {
+      bonus = Math.floor(profit * (prHeatBonusPct() / 100));
+      profit += bonus;
+    }
     await setCasinoCoins(p.id, (p.coins||0) + profit);
     if (profit > 0) {
       soundWin();
@@ -7204,16 +7717,19 @@
       recordBiggestWin(p.name, p.id, profit);
     }
     const result = document.getElementById('prResult');
-    result.textContent = `CASHED OUT +${profit} 🪙`;
+    result.textContent = `CASHED OUT +${profit} 🪙${bonus ? ` (heat +${bonus})` : ''}`;
     result.className = 'pr-result win';
     prStreak = 0;
     prRoundNum = 0;
     prAccumMult = 1.0;
     prContinueBoost = 1.0;
+    prAllOrNothingRoundActive = false;
+    prAwardProgress(p.id, profit > 0 ? 'win' : profit === 0 ? 'push' : 'lose');
     document.getElementById('prStreakDisplay').textContent = 'STREAK: 0';
     document.getElementById('prStreakDisplay').className = 'pr-streak-display';
     prUpdateCashoutDisplay();
     prUpdateArenaClass();
+    prSyncAllOrNothingUi();
     prPhase = 'idle';
     document.getElementById('prHint').innerHTML = 'Press <kbd>SPACE</kbd> or tap to lock in';
   };
@@ -7225,16 +7741,18 @@
     if (prBet > (p.coins||0)) { shakeWallet(); return; }
     if (prPhase === 'running') return;
 
-    // Continue from streak result — next hit
     if (prPhase === 'result' && prStreak > 0) {
       prContinueBoost = prGetContinueBoost();
       prShowCashOut(false);
     } else {
       prContinueBoost = 1.0;
       document.getElementById('prHint').innerHTML = 'Press <kbd>SPACE</kbd> or tap to lock in';
+      if (prAllOrNothingArmed) {
+        prAllOrNothingRoundActive = true;
+        prAllOrNothingArmed = false;
+      }
     }
 
-    // Increment round counter and apply escalating difficulty
     prRoundNum++;
     prApplyRoundDifficulty();
 
@@ -7249,6 +7767,7 @@
     prRafId = requestAnimationFrame(prLoop);
     if (prStreak === 0) prStartMusic(0);
     document.getElementById('prStartBtn').style.display = 'none';
+    prSyncAllOrNothingUi();
   };
 
   function prApplyRoundDifficulty() {
@@ -7265,12 +7784,15 @@
     prStreak = 0;
     prRoundNum = 0;
     prAccumMult = 1.0;
+    prContinueBoost = 1.0;
+    prAllOrNothingRoundActive = false;
     prSpeed = 0.048;
     prSafeHalf = 0.12;
     prRebuildZones();
+    prUpdateCashoutDisplay();
+    prSyncAllOrNothingUi();
   };
 
-  // Spacebar / tap to lock in
   document.addEventListener('keydown', e => {
     if (e.code === 'Space' && document.getElementById('panelPR')?.classList.contains('active')) {
       if (prPhase === 'idle' || (prPhase === 'result' && prStreak > 0)) {
@@ -7293,9 +7815,11 @@
     const p = getCurrentCasinoPlayer();
     if (!p) return;
     if (prPhase === 'running') return;
+    const maxBet = prMaxBetForLevel(prProgress.level);
+    if (prBet + amt > maxBet) { shakeWallet(); return; }
     if (prBet + amt > (p.coins||0)) { shakeWallet(); return; }
     prBet += amt;
-    document.getElementById('prBetDisplay').innerHTML = `${prBet}<small>bet</small>`;
+    prUpdateBetDisplay();
     prUpdateCashoutDisplay();
     soundChip();
   };
@@ -7303,12 +7827,14 @@
   window.prClearBet = function() {
     if (prPhase === 'running') return;
     prBet = 0;
-    document.getElementById('prBetDisplay').innerHTML = `0<small>bet</small>`;
+    prUpdateBetDisplay();
     prUpdateCashoutDisplay();
   };
 
   // Init on load
   prBuildZones();
+  prRenderProgress();
+  prSyncAllOrNothingUi();
 
 
   // Surrender — return half bet, end hand
