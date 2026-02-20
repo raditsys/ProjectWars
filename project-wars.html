@@ -9083,7 +9083,7 @@ document.addEventListener('click', e => {
       resContainer.appendChild(ascDiv);
     }
 
-    // NPC talk button + auto-open on entry
+    // NPC talk button (dialogue opens only when clicked)
     if (rm.npc) {
       // Toll gate: after first payment, silently deduct 5g and enter desert
       const skipTollAuto = !!window.__skipTollAutoOnce;
@@ -9104,7 +9104,11 @@ document.addEventListener('click', e => {
             setTimeout(() => toast.remove(), 2000);
             setTimeout(() => envEnterDesert(), 400);
           } else {
-            openDialogue(rm.npc);
+            const toast = document.createElement('div');
+            toast.className = 'quest-reward-toast';
+            toast.textContent = '🛡️ Need 5g to pass the toll gate';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
           }
         }, 450);
       } else {
@@ -9116,7 +9120,6 @@ document.addEventListener('click', e => {
         talkBtn.textContent = '💬 Talk';
         talkBtn.onclick = () => openDialogue(rm.npc);
         resContainer.appendChild(talkBtn);
-        setTimeout(() => openDialogue(rm.npc), 450);
       }
     }
 
