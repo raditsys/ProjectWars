@@ -2483,6 +2483,23 @@
   }
   .changelog-tab:hover { background: #1e4d7a; }
 
+  .changelog-new-badge {
+    margin-left: 0.45rem;
+    padding: 0.12rem 0.42rem;
+    border: 1px solid #f5c842;
+    border-radius: 999px;
+    color: #f5c842;
+    font-size: 0.52rem;
+    letter-spacing: 1.5px;
+    animation: changelogPulse 1.8s ease-in-out infinite;
+    vertical-align: middle;
+  }
+  .changelog-new-badge.hidden { display: none; }
+  @keyframes changelogPulse {
+    0%, 100% { opacity: 0.65; box-shadow: 0 0 0 rgba(245,200,66,0); }
+    50% { opacity: 1; box-shadow: 0 0 10px rgba(245,200,66,0.35); }
+  }
+
   .changelog-drawer {
     position: fixed;
     top: 0;
@@ -4247,6 +4264,7 @@
 <button class="changelog-tab" id="changelogTab" onclick="openChangelog()">
 <span id="changelogTabArrow">◀</span>
   CHANGELOG
+  <span class="changelog-new-badge hidden" id="changelogNewBadge">NEW</span>
 </button>
 
 <!-- CHANGELOG DRAWER -->
@@ -10340,12 +10358,24 @@ const db = getDatabase(getApp());
 const clRef = ref(db, 'changelog');
 const ADMIN_PASS = 'buyandsell';
 
+const CL_SEEN_KEY = 'pw_changelog_seen_ts';
+
+function getSeenChangelogTs() {
+  const raw = Number(localStorage.getItem(CL_SEEN_KEY) || '0');
+  return Number.isFinite(raw) ? raw : 0;
+}
+
 // ── Live listener: render entries newest-first ──
 onValue(clRef, snap => {
   const data = snap.val() || {};
   const entries = Object.entries(data)
     .map(([key, val]) => ({ key, ...val }))
     .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+  window.__latestChangelogTs = entries[0]?.ts || 0;
+  if (window.__updateChangelogNewBadge) {
+    window.__updateChangelogNewBadge(window.__latestChangelogTs > getSeenChangelogTs());
+  }
 
   const body = document.getElementById('changelogBody');
   if (!body) return;
@@ -10421,6 +10451,7 @@ window.openChangelog = function() {
   document.getElementById('changelogDrawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
   document.getElementById('changelogTabArrow').textContent = '▶';
+  window.__markChangelogSeen && window.__markChangelogSeen();
 };
 
 window.closeChangelog = function() {
@@ -10439,6 +10470,21 @@ window.openChangelogAdmin = function() {
 window.closeChangelogAdmin = function() {
   document.getElementById('clModalOverlay').classList.remove('open');
 };
+
+window.__updateChangelogNewBadge = function(hasNew) {
+  const badge = document.getElementById('changelogNewBadge');
+  if (!badge) return;
+  badge.classList.toggle('hidden', !hasNew);
+};
+
+window.__markChangelogSeen = function() {
+  const latest = Number(window.__latestChangelogTs || 0);
+  if (!latest) return;
+  localStorage.setItem('pw_changelog_seen_ts', String(latest));
+  window.__updateChangelogNewBadge(false);
+};
+
+window.__updateChangelogNewBadge((Number(window.__latestChangelogTs || 0)) > (Number(localStorage.getItem('pw_changelog_seen_ts') || 0)));
 </script>
 
 </body>
