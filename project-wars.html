@@ -4675,25 +4675,48 @@
 
   let autoLoginDone = false;
 
-  // ── Render scheduling (collapse rapid Firebase updates into 1 paint) ──
-  let __rafRenderId = null;
+  // ── Render scheduling (coalesce bursty Firebase updates + throttle heavy DOM rebuilds) ──
+  const RENDER_MIN_INTERVAL_MS = 180;
+  let __renderTimerId = null;
+  let __lastRenderAt = 0;
   const __renderPending = { full: false, history: false };
+
+  function flushPendingRender() {
+    if (document.hidden) return;
+
+    const now = performance.now();
+    const remaining = RENDER_MIN_INTERVAL_MS - (now - __lastRenderAt);
+    if (remaining > 0) {
+      if (!__renderTimerId) {
+        __renderTimerId = setTimeout(() => {
+          __renderTimerId = null;
+          flushPendingRender();
+        }, remaining);
+      }
+      return;
+    }
+
+    __lastRenderAt = now;
+    if (__renderPending.full) {
+      render();
+    } else if (__renderPending.history) {
+      renderHistory();
+    }
+    __renderPending.full = false;
+    __renderPending.history = false;
+  }
 
   function scheduleRender(kind) {
     if (kind === 'full') __renderPending.full = true;
     if (kind === 'history') __renderPending.history = true;
-    if (__rafRenderId) return;
-    __rafRenderId = requestAnimationFrame(() => {
-      __rafRenderId = null;
-      if (__renderPending.full) {
-        render();
-      } else if (__renderPending.history) {
-        renderHistory();
-      }
-      __renderPending.full = false;
-      __renderPending.history = false;
-    });
+    flushPendingRender();
   }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && (__renderPending.full || __renderPending.history)) {
+      flushPendingRender();
+    }
+  });
 
 
   onValue(ref(db, 'players'), snap => {
