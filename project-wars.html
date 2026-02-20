@@ -3864,6 +3864,10 @@
 <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
   <canvas id="plinkoCanvas" width="380" height="440" style="background:#0a1f0a;border:1px solid #2a5a2a;display:block;max-width:100%;"></canvas>
   <div class="roulette-result-num" id="plinkoResultNum" style="min-height:2.5rem;">—</div>
+  <div style="font-size:0.58rem;letter-spacing:1px;color:#a8b2bd;text-align:center;max-width:380px;line-height:1.5;">
+    <span id="pkHypeText" style="color:#f5c842;">Drop into the chaos lane!</span><br/>
+    <span id="pkEvText">Balanced board EV: 96.95%</span>
+  </div>
 </div>
 <!-- Bet amount -->
 <div>
@@ -6265,8 +6269,18 @@
   // ══════════════════ PLINKO ══════════════════
   const PK_ROWS = 12;
   const PK_COLS = 9;
-  const PK_MULTIPLIERS = [2.0, 1.5, 1.0, 0.5, 0.0, 0.5, 1.0, 1.5, 2.0];
-  const PK_COLORS      = ['#cd7f42','#4ade80','#f87171','#f87171','#f87171','#f87171','#f87171','#4ade80','#cd7f42'];
+  const PK_MULTIPLIERS = [10.0, 2.8, 1.4, 0.75, 0.30, 0.75, 1.4, 2.8, 10.0];
+  const PK_COLORS      = ['#ff4d4d','#ff8c00','#f5c842','#4ade80','#a8b2bd','#4ade80','#f5c842','#ff8c00','#ff4d4d'];
+  const PK_BUCKET_PROBS = [1, 8, 28, 56, 70, 56, 28, 8, 1].map(v => v / 256);
+  const PK_EV = PK_MULTIPLIERS.reduce((sum, mult, idx) => sum + mult * PK_BUCKET_PROBS[idx], 0);
+  const PK_HYPE_LINES = [
+    'Crowd is chanting for a miracle lane!',
+    'Smooth bounce, laser focus.',
+    'Edge buckets are JUICED but rare.',
+    'Center lane = steady survival mode.',
+    'Peg physics engaged. Trust the drop.',
+    'Dealer says this board is fair-ish 😈'
+  ];
 
   let pkBet = 0;
   let pkRunning = false;
@@ -6275,6 +6289,8 @@
   let pkBalls = [];
   let pkBuckets = [];
   let pkAnimFrame = null;
+  let pkGlowBucket = -1;
+  let pkDropCount = 0;
   const PK_W = 380, PK_H = 440;
   const PK_PEG_R = 5;
   const PK_BALL_R = 7;
@@ -6287,6 +6303,8 @@
     pkCanvas.height = PK_H;
     pkCtx = pkCanvas.getContext('2d');
     pkBuildLayout();
+    const evEl = document.getElementById('pkEvText');
+    if (evEl) evEl.textContent = `Balanced board EV: ${(PK_EV * 100).toFixed(2)}%`;
     pkDraw();
   }
 
@@ -6338,7 +6356,7 @@
     });
 
     // Draw buckets
-    pkBuckets.forEach((b) => {
+    pkBuckets.forEach((b, idx) => {
       const bx = b.x - b.w / 2;
       const bh = PK_BOT_PAD - 8;
       ctx.fillStyle = b.color + '33';
@@ -6350,6 +6368,16 @@
       ctx.font = `bold ${b.mult >= 3 ? 10 : 9}px DM Mono, monospace`;
       ctx.textAlign = 'center';
       ctx.fillText(b.mult + 'x', b.x, b.y + bh * 0.62);
+
+      if (idx === pkGlowBucket) {
+        ctx.save();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = b.color;
+        ctx.shadowBlur = 14;
+        ctx.strokeRect(bx + 2, b.y + 2, b.w - 4, bh - 4);
+        ctx.restore();
+      }
     });
 
     // Draw balls
@@ -6450,11 +6478,20 @@
     const payout = Math.floor(bet * mult);
     const profit = payout - bet;
 
+    pkGlowBucket = pkBuckets.findIndex(b => b === bucket);
+
     const resultEl = document.getElementById('plinkoResultNum');
     resultEl.textContent = mult + 'x  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙';
     resultEl.className = 'roulette-result-num ' + (profit > 0 ? 'green' : profit === 0 ? '' : 'red');
 
     const banner = document.getElementById('pkResultBanner');
+    const hypeEl = document.getElementById('pkHypeText');
+    if (hypeEl) {
+      if (mult >= 2.8) hypeEl.textContent = '🚨 JACKPOT LANE SNIPED!';
+      else if (mult >= 1.4) hypeEl.textContent = 'Nice line. Profitable bounce.';
+      else if (mult >= 0.75) hypeEl.textContent = 'Soft landing. Minimal damage.';
+      else hypeEl.textContent = 'Center trap! Reset and fire again.';
+    }
     if (profit > 0) {
       banner.textContent = '✅ +' + profit + ' 🪙';
       banner.className = 'result-banner show win';
@@ -6471,6 +6508,7 @@
       soundLose();
     }
     setTimeout(() => banner.classList.remove('show'), 3000);
+    setTimeout(() => { pkGlowBucket = -1; pkDraw(); }, 900);
 
     // Bet was already deducted in pkDrop — read fresh coins from DB and add payout
     const snap = await new Promise(res => onValue(ref(db, `players/${p.id}/coins`), res, { onlyOnce: true }));
@@ -6505,10 +6543,13 @@
     if (!pkCanvas) return;
 
     pkRunning = true;
+    pkDropCount += 1;
     document.getElementById('pkDropBtn').disabled = true;
     document.getElementById('pkResultBanner').className = 'result-banner';
     document.getElementById('plinkoResultNum').textContent = '…';
     document.getElementById('plinkoResultNum').className = 'roulette-result-num';
+    const hypeEl = document.getElementById('pkHypeText');
+    if (hypeEl) hypeEl.textContent = PK_HYPE_LINES[(pkDropCount - 1) % PK_HYPE_LINES.length];
 
     // Deduct bet immediately
     const newCoins = Math.max(0, (p.coins || 0) - pkBet);
