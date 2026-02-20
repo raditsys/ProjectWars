@@ -3213,6 +3213,8 @@
     cursor: pointer;
     transition: transform 0.12s;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
   .env-resource:hover:not(.depleted) { transform: scale(1.08); }
   .env-decor {
@@ -3220,7 +3222,11 @@
     pointer-events: none;
   }
   .env-resource.depleted { opacity: 0.3; filter: grayscale(1); cursor: not-allowed; }
-  .env-resource.chopping { animation: treeChop 0.18s ease-in-out infinite; }
+  .env-resource.chopping {
+    animation: treeChop 0.18s ease-in-out infinite;
+    filter: none;
+    will-change: transform;
+  }
   .resource-status-tag {
     position: absolute;
     left: 50%;
@@ -3240,7 +3246,11 @@
     pointer-events: none;
     line-height: 1.2;
   }
-  .env-resource.mining   { animation: oreShake 0.12s ease-in-out infinite; }
+  .env-resource.mining {
+    animation: oreShake 0.12s ease-in-out infinite;
+    filter: none;
+    will-change: transform;
+  }
   .env-resource.falling  { animation: treeFall 0.55s ease-in forwards !important; pointer-events: none; }
   .env-resource.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
   #envFooter {
@@ -9964,13 +9974,30 @@ function makeProgressRing(color = '#4ade80') {
 function animateRing(ring, durationMs) {
   if (!ring || !ring._arc) return;
   const arc = ring._arc;
-  const start = performance.now();
-  function step(now) {
-    const pct = Math.min((now - start) / durationMs, 1);
-    arc.setAttribute('stroke-dashoffset', (88 * (1 - pct)).toFixed(2));
-    if (pct < 1 && ring.isConnected) requestAnimationFrame(step);
+  const animateToDone = () => {
+    if (!ring.isConnected) return;
+    if (typeof arc.animate === 'function') {
+      const animation = arc.animate(
+        [
+          { strokeDashoffset: 88 },
+          { strokeDashoffset: 0 }
+        ],
+        { duration: durationMs, easing: 'linear', fill: 'forwards' }
+      );
+      ring._ringAnimation = animation;
+      return;
+    }
+    arc.style.transition = `stroke-dashoffset ${durationMs}ms linear`;
+    requestAnimationFrame(() => {
+      if (ring.isConnected) arc.setAttribute('stroke-dashoffset', '0');
+    });
+  };
+
+  arc.setAttribute('stroke-dashoffset', '88');
+  if (ring._ringAnimation && typeof ring._ringAnimation.cancel === 'function') {
+    ring._ringAnimation.cancel();
   }
-  requestAnimationFrame(step);
+  animateToDone();
 }
 
 function spawnSkillFloat(x, y, text, cls) {
