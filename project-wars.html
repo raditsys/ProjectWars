@@ -2849,6 +2849,7 @@
     user-select: none;
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
     transition: transform 0.1s;
+    will-change: left, transform;
   }
   #gardenGnome.gnome-flip { transform: scaleX(-1); }
   .gnome-coin {
@@ -3675,6 +3676,7 @@
     user-select: none;
     transition: transform 0.05s;
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+    will-change: left, transform;
   }
   body:not(.logged-in) #frogPet { z-index: 1000; }
   #frogPet:active { transform: scale(0.88); }
@@ -8907,9 +8909,15 @@ document.addEventListener('click', e => {
     worldResourceState = resources || {};
     refreshResourceVisuals();
   };
-  setInterval(() => {
-    if (resourceState.length) refreshResourceVisuals();
-  }, 1000);
+  let resourceRefreshTimer = null;
+  function scheduleResourceRefresh() {
+    if (resourceRefreshTimer) clearTimeout(resourceRefreshTimer);
+    resourceRefreshTimer = setTimeout(() => {
+      if (!document.hidden && resourceState.some(s => s.depleted)) refreshResourceVisuals();
+      scheduleResourceRefresh();
+    }, 1000);
+  }
+  scheduleResourceRefresh();
 
   function key(c, rr) { return `${c},${rr}`; }
   function room(c, rr) {
@@ -9983,7 +9991,8 @@ function spawnSkillFloat(x, y, text, cls) {
   let gnomeActive = false;
   let gnomePosX = 160;
   let gnomeVelX = 0.8;
-  let gnomeMoveInterval = null;
+  let gnomeMoveRaf = null;
+  let gnomeLastTs = 0;
   let gnomeCoinInterval = null;
 
   function gnomeSpawnCoin() {
@@ -10005,6 +10014,37 @@ function spawnSkillFloat(x, y, text, cls) {
     if (window.__awardGrassCoin) window.__awardGrassCoin(coinAmount);
   }
 
+  function gnomeStep(ts) {
+    if (!gnomeActive || document.hidden) {
+      gnomeMoveRaf = null;
+      gnomeLastTs = 0;
+      return;
+    }
+    if (!gnomeLastTs) gnomeLastTs = ts;
+    const dt = Math.min(64, ts - gnomeLastTs);
+    gnomeLastTs = ts;
+
+    gnomePosX += gnomeVelX * (dt / 40);
+    if (gnomePosX > window.innerWidth - 60) {
+      gnomePosX = window.innerWidth - 60;
+      gnomeVelX = -Math.abs(gnomeVelX);
+      gnomeEl.classList.add('gnome-flip');
+    }
+    if (gnomePosX < 10) {
+      gnomePosX = 10;
+      gnomeVelX = Math.abs(gnomeVelX);
+      gnomeEl.classList.remove('gnome-flip');
+    }
+    gnomeEl.style.left = gnomePosX + 'px';
+    gnomeMoveRaf = requestAnimationFrame(gnomeStep);
+  }
+
+  function startGnomeMotion() {
+    if (!gnomeActive || gnomeMoveRaf || document.hidden) return;
+    gnomeLastTs = 0;
+    gnomeMoveRaf = requestAnimationFrame(gnomeStep);
+  }
+
   function gnomeStart() {
     if (gnomeActive) return;
     gnomeActive = true;
@@ -10012,13 +10052,7 @@ function spawnSkillFloat(x, y, text, cls) {
     gnomePosX = Math.random() * (window.innerWidth * 0.5) + 100;
     gnomeEl.style.left = gnomePosX + 'px';
 
-    // Move gnome slowly across screen
-    gnomeMoveInterval = setInterval(() => {
-      gnomePosX += gnomeVelX;
-      if (gnomePosX > window.innerWidth - 60) { gnomePosX = window.innerWidth - 60; gnomeVelX = -Math.abs(gnomeVelX); gnomeEl.classList.add('gnome-flip'); }
-      if (gnomePosX < 10) { gnomePosX = 10; gnomeVelX = Math.abs(gnomeVelX); gnomeEl.classList.remove('gnome-flip'); }
-      gnomeEl.style.left = gnomePosX + 'px';
-    }, 40);
+    startGnomeMotion();
 
     // Award a coin every 20–35 seconds
     function scheduleNextCoin() {
@@ -10037,6 +10071,17 @@ function spawnSkillFloat(x, y, text, cls) {
   window.__spawnGnome = function() {
     gnomeStart();
   };
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (gnomeMoveRaf) {
+        cancelAnimationFrame(gnomeMoveRaf);
+        gnomeMoveRaf = null;
+      }
+      return;
+    }
+    startGnomeMotion();
+  });
 })();
 
 // ══════════════════ FROG PET ══════════════════
@@ -10045,7 +10090,9 @@ function spawnSkillFloat(x, y, text, cls) {
   let posX = 120, posY = 20; // from bottom
   let velX = 1.2;
   let isHopping = false;
-  let hopInterval, moveInterval;
+  let frogRaf = null;
+  let frogLastTs = 0;
+  let hopElapsedMs = 0;
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
   function ribbit() {
@@ -10091,21 +10138,50 @@ function spawnSkillFloat(x, y, text, cls) {
     }, { once: true });
   }
 
-  // Move frog continuously
-  moveInterval = setInterval(() => {
-    posX += velX;
+  function frogStep(ts) {
+    if (document.hidden) {
+      frogRaf = null;
+      frogLastTs = 0;
+      return;
+    }
+    if (!frogLastTs) frogLastTs = ts;
+    const dt = Math.min(64, ts - frogLastTs);
+    frogLastTs = ts;
+
+    posX += velX * (dt / 30);
     if (posX < 10) { posX = 10; velX = Math.abs(velX); }
     if (posX > window.innerWidth - 60) { posX = window.innerWidth - 60; velX = -Math.abs(velX); }
     frog.style.left = posX + 'px';
     frog.style.bottom = posY + 'px';
-    // Flip sprite based on direction
     frog.style.transform = velX < 0 ? 'scaleX(-1)' : '';
-  }, 30);
 
-  // Hop periodically
-  hopInterval = setInterval(() => {
-    if (Math.random() < 0.6) hop();
-  }, 1400);
+    hopElapsedMs += dt;
+    if (hopElapsedMs >= 1400) {
+      hopElapsedMs = 0;
+      if (Math.random() < 0.6) hop();
+    }
+
+    frogRaf = requestAnimationFrame(frogStep);
+  }
+
+  function startFrogLoop() {
+    if (frogRaf || document.hidden) return;
+    frogLastTs = 0;
+    frogRaf = requestAnimationFrame(frogStep);
+  }
+
+  startFrogLoop();
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (frogRaf) {
+        cancelAnimationFrame(frogRaf);
+        frogRaf = null;
+      }
+      return;
+    }
+    startFrogLoop();
+  });
 
   window.frogClick = function() {
     ribbit();
