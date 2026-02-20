@@ -3590,8 +3590,27 @@
   .inv-sell-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
   /* Gear panel */
-  .gear-wrap { display: grid; grid-template-columns: 1fr 108px; gap: 10px; padding: 8px; }
-  .gear-grid {
+  .gear-tabs {
+    display: flex;
+    border-bottom: 1px solid #1f1f1f;
+  }
+  .gear-tab {
+    flex: 1;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    background: #0f0f0f;
+    border: none;
+    border-right: 1px solid #1f1f1f;
+    padding: 7px 6px;
+    cursor: pointer;
+  }
+  .gear-tab:last-child { border-right: none; }
+  .gear-tab.active { color: var(--gold); background: #16130a; }
+  .gear-content { display: none; padding: 8px; }
+  .gear-content.active { display: block; }
+  .gear-backpack-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 6px;
@@ -3612,12 +3631,16 @@
   .gear-slot.empty { opacity: 0.55; cursor: default; }
   .gear-slot.active { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(245,200,66,0.15); }
   .gear-slot-count { position: absolute; right: 3px; bottom: 1px; font-size: 0.5rem; color: var(--gold); }
-  .gear-rig { border-left: 1px solid #222; padding-left: 8px; display: flex; flex-direction: column; gap: 6px; }
-  .gear-rig-title { font-size: 0.52rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .gear-rs-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    min-width: 172px;
+  }
   .gear-rig-slot {
     border: 1px solid #2a2a2a;
     background: #111;
-    min-height: 45px;
+    min-height: 42px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3626,7 +3649,18 @@
     text-align: center;
     padding: 2px;
   }
-  .gear-rig-slot .hand { font-size: 0.48rem; color: var(--muted); letter-spacing: 1px; }
+  .gear-rig-slot.active { border-color: var(--gold); box-shadow: inset 0 0 10px rgba(245,200,66,0.15); }
+  .gear-rig-slot .hand { font-size: 0.44rem; color: var(--muted); letter-spacing: 1px; }
+  .gear-rs-char {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    border: 1px dashed #2a2a2a;
+    color: #8a8a8a;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   /* Skills inside hotbar panel */
   .skill-card {
@@ -3891,14 +3925,29 @@
   <div style="position:relative;">
     <button class="hotbar-btn" id="hotbarGearBtn" onclick="hotbarToggle('gear')" title="Backpack & Equipment">🧰</button>
     <div class="hotbar-panel" id="hotbarGearPanel">
-      <div class="hotbar-panel-title">🧰 Backpack + Equipment</div>
-      <div class="gear-wrap">
-        <div class="gear-grid" id="gearGrid"></div>
-        <div class="gear-rig">
-          <div class="gear-rig-title">Rig</div>
-          <div class="gear-rig-slot" id="gearLeftHand"><div class="hand">LEFT HAND</div><div>Empty</div></div>
-          <div class="gear-rig-slot" id="gearRightHand"><div class="hand">RIGHT HAND</div><div>Empty</div></div>
+      <div class="hotbar-panel-title">🧰 Equipment</div>
+      <div class="gear-tabs">
+        <button class="gear-tab active" id="gearTabEquipment" onclick="switchGearTab('equipment')">Equipment</button>
+        <button class="gear-tab" id="gearTabBackpack" onclick="switchGearTab('backpack')">Backpack</button>
+      </div>
+      <div class="gear-content active" id="gearEquipmentView">
+        <div class="gear-rs-layout">
+          <div class="gear-rig-slot" id="gearSlot-head"><div class="hand">HEAD</div><div>Empty</div></div>
+          <div class="gear-rig-slot" id="gearSlot-cape"><div class="hand">CAPE</div><div>Empty</div></div>
+          <div class="gear-rig-slot" id="gearSlot-neck"><div class="hand">NECK</div><div>Empty</div></div>
+          <div class="gear-rig-slot" id="gearSlot-weapon"><div class="hand">WEAPON</div><div>Empty</div></div>
+          <div class="gear-rs-char">🧍</div>
+          <div class="gear-rig-slot" id="gearSlot-body"><div class="hand">BODY</div><div>Empty</div></div>
+          <div class="gear-rig-slot" id="gearSlot-offhand"><div class="hand">OFFHAND</div><div>Empty</div></div>
+          <div class="gear-rig-slot" id="gearSlot-legs"><div class="hand">LEGS</div><div>Empty</div></div>
+          <div class="gear-rig-slot" id="gearSlot-hands"><div class="hand">HANDS</div><div>Empty</div></div>
+          <div class="gear-rig-slot" id="gearSlot-feet"><div class="hand">FEET</div><div>Empty</div></div>
+          <div class="gear-rig-slot" id="gearSlot-ring"><div class="hand">RING</div><div>Empty</div></div>
+          <div class="gear-rig-slot" id="gearSlot-ammo"><div class="hand">AMMO</div><div>Empty</div></div>
         </div>
+      </div>
+      <div class="gear-content" id="gearBackpackView">
+        <div class="gear-backpack-grid" id="gearGrid"></div>
       </div>
     </div>
   </div>
@@ -8302,11 +8351,12 @@ window.__inventory = {
   copper_ore: 0, iron_ore: 0, gold_ore: 0, runite_ore: 0,
   bronze_axe: 1, bronze_pickaxe: 1,
 };
-window.__equipmentLoadout = { leftHand: '', rightHand: '' };
+const EQUIP_SLOTS = ['head','cape','neck','weapon','body','offhand','legs','hands','feet','ring','ammo'];
+window.__equipmentLoadout = Object.fromEntries(EQUIP_SLOTS.map(slot => [slot, '']));
 
 const TOOL_ITEMS = {
-  bronze_axe: { icon:'🪓', name:'Bronze Axe', slot:'leftHand', bonusText:'+50% extra log chance' },
-  bronze_pickaxe: { icon:'⛏️', name:'Bronze Pickaxe', slot:'rightHand', bonusText:'+50% extra ore chance' },
+  bronze_axe: { icon:'🪓', name:'Bronze Axe', preferredSlot:'weapon', allowedSlots:['weapon','offhand'], bonusText:'+50% extra log chance' },
+  bronze_pickaxe: { icon:'⛏️', name:'Bronze Pickaxe', preferredSlot:'offhand', allowedSlots:['weapon','offhand'], bonusText:'+50% extra ore chance' },
 };
 const GEAR_GRID_LAYOUT = ['bronze_axe','bronze_pickaxe',null,null,null,null,null,null,null,null,null,null];
 
@@ -8325,12 +8375,14 @@ const SELL_IDS = {
 };
 
 function updateEquipmentUI() {
-  const left = document.getElementById('gearLeftHand');
-  const right = document.getElementById('gearRightHand');
-  const leftItem = window.__equipmentLoadout.leftHand;
-  const rightItem = window.__equipmentLoadout.rightHand;
-  if (left) left.innerHTML = `<div class="hand">LEFT HAND</div><div>${leftItem && TOOL_ITEMS[leftItem] ? `${TOOL_ITEMS[leftItem].icon} ${TOOL_ITEMS[leftItem].name}` : 'Empty'}</div>`;
-  if (right) right.innerHTML = `<div class="hand">RIGHT HAND</div><div>${rightItem && TOOL_ITEMS[rightItem] ? `${TOOL_ITEMS[rightItem].icon} ${TOOL_ITEMS[rightItem].name}` : 'Empty'}</div>`;
+  EQUIP_SLOTS.forEach(slot => {
+    const slotEl = document.getElementById(`gearSlot-${slot}`);
+    if (!slotEl) return;
+    const itemKey = window.__equipmentLoadout[slot];
+    const item = itemKey && TOOL_ITEMS[itemKey] ? TOOL_ITEMS[itemKey] : null;
+    slotEl.innerHTML = `<div class="hand">${slot.toUpperCase()}</div><div>${item ? `${item.icon} ${item.name}` : 'Empty'}</div>`;
+    slotEl.classList.toggle('active', !!item);
+  });
 }
 
 function renderGearGrid() {
@@ -8350,7 +8402,7 @@ function renderGearGrid() {
     const count = window.__inventory[itemKey] || 0;
     slot.innerHTML = `<div>${item.icon}</div><div class="gear-slot-count">x${count}</div>`;
     if (!count) slot.classList.add('empty');
-    if ((window.__equipmentLoadout.leftHand === itemKey) || (window.__equipmentLoadout.rightHand === itemKey)) slot.classList.add('active');
+    if (Object.values(window.__equipmentLoadout).includes(itemKey)) slot.classList.add('active');
     slot.title = `${item.name} — ${item.bonusText}`;
     slot.onclick = () => window.toggleEquipTool(itemKey);
     grid.appendChild(slot);
@@ -8378,18 +8430,32 @@ window.toggleEquipTool = function(itemKey) {
   const item = TOOL_ITEMS[itemKey];
   if (!item) return;
   if ((window.__inventory[itemKey] || 0) < 1) return;
-  const slot = item.slot;
-  window.__equipmentLoadout[slot] = window.__equipmentLoadout[slot] === itemKey ? '' : itemKey;
+
+  const equippedSlot = EQUIP_SLOTS.find(slot => window.__equipmentLoadout[slot] === itemKey);
+  if (equippedSlot) {
+    window.__equipmentLoadout[equippedSlot] = '';
+  } else {
+    const slot = item.preferredSlot;
+    if (!item.allowedSlots.includes(slot)) return;
+    if (window.__equipmentLoadout[slot]) {
+      const existing = window.__equipmentLoadout[slot];
+      const fallback = item.allowedSlots.find(s => s !== slot && !window.__equipmentLoadout[s]);
+      if (fallback) window.__equipmentLoadout[fallback] = existing;
+    }
+    window.__equipmentLoadout[slot] = itemKey;
+  }
+
   updateInventoryUI();
   if (window.__fbSaveInventory) window.__fbSaveInventory();
 };
 
 window.__getToolDoubleChance = function(kind) {
+  const equippedItems = Object.values(window.__equipmentLoadout);
   if (kind === 'log') {
-    return (window.__equipmentLoadout.leftHand === 'bronze_axe' || window.__equipmentLoadout.rightHand === 'bronze_axe') ? 0.5 : 0;
+    return equippedItems.includes('bronze_axe') ? 0.5 : 0;
   }
   if (kind === 'ore') {
-    return (window.__equipmentLoadout.leftHand === 'bronze_pickaxe' || window.__equipmentLoadout.rightHand === 'bronze_pickaxe') ? 0.5 : 0;
+    return equippedItems.includes('bronze_pickaxe') ? 0.5 : 0;
   }
   return 0;
 };
@@ -8435,13 +8501,28 @@ window.__loadInventoryFromPlayer = function(playerData) {
   if (!window.__inventory.bronze_axe) { window.__inventory.bronze_axe = 1; changed = true; }
   if (!window.__inventory.bronze_pickaxe) { window.__inventory.bronze_pickaxe = 1; changed = true; }
   const eq = playerData?.equipment || {};
-  window.__equipmentLoadout.leftHand = eq.leftHand || '';
-  window.__equipmentLoadout.rightHand = eq.rightHand || '';
+  EQUIP_SLOTS.forEach(slot => {
+    window.__equipmentLoadout[slot] = eq[slot] || '';
+  });
+  if (eq.leftHand && !window.__equipmentLoadout.weapon && TOOL_ITEMS[eq.leftHand]) {
+    window.__equipmentLoadout.weapon = eq.leftHand;
+  }
+  if (eq.rightHand && !window.__equipmentLoadout.offhand && TOOL_ITEMS[eq.rightHand]) {
+    window.__equipmentLoadout.offhand = eq.rightHand;
+  }
   updateInventoryUI();
   if (changed && window.__fbSaveInventory) window.__fbSaveInventory();
 };
 
 updateInventoryUI();
+
+window.switchGearTab = function(tab) {
+  const equipment = tab === 'equipment';
+  document.getElementById('gearTabEquipment')?.classList.toggle('active', equipment);
+  document.getElementById('gearTabBackpack')?.classList.toggle('active', !equipment);
+  document.getElementById('gearEquipmentView')?.classList.toggle('active', equipment);
+  document.getElementById('gearBackpackView')?.classList.toggle('active', !equipment);
+};
 
 // ── Hotbar toggle ──
 window.hotbarToggle = function(id) {
@@ -8491,7 +8572,7 @@ document.addEventListener('click', e => {
     '7,0': null,
 
     '0,1': f('Mossy Bank',      'Soft green moss over old stone',     'linear-gradient(180deg,#081408 0%,#0c1c0c 60%,#081408 100%)', '#162412', '#2a3e1a'),
-    '1,1': f('Flower Meadow',   'Wildflowers sway in the breeze',     'linear-gradient(180deg,#0c1c08 0%,#10240c 60%,#0c1c08 100%)', '#1e3010', '#3a5020'),
+    '1,1': { name:'Cookfire Camp', desc:'A field kitchen smells of burnt pie. The chef looks stressed.', sky:'linear-gradient(180deg,#0c1c08 0%,#10240c 60%,#0c1c08 100%)', ground:'#1e3010', groundBorder:'#3a5020', resources:[], npc:'chef' },
     '2,1': f('Babbling Brook',  'Clear water over smooth pebbles',    'linear-gradient(180deg,#061420 0%,#0a1e2e 60%,#0c2218 100%)', '#1a2e28', '#2a4e3a'),
     '3,1': f('Sunlit Clearing', 'A warm patch of open sky',           'linear-gradient(180deg,#101c08 0%,#162408 60%,#101c08 100%)', '#1e3010', '#365020'),
     '4,1': f('Ruins',           'Crumbling stone walls, long forgot', 'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201a14', '#382e20'),
@@ -8567,6 +8648,7 @@ document.addEventListener('click', e => {
     'Ruins': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:80px">${makeSVG(300,80,[[10,40,30,22,'#3a3228'],[55,28,20,15,'#2e2a24'],[100,50,35,18,'#3a3228'],[160,32,18,28,'#2e2a24'],[210,45,28,14,'#3a3228'],[250,22,16,20,'#2e2a24']].map(([x,h,w,d,col])=>`<rect x="${x}" y="${80-h}" width="${w}" height="${h}" rx="1" fill="${col}"/><rect x="${x}" y="${80-h}" width="${w}" height="${d}" fill="#fff" opacity="0.04"/>`).join(''))}</div>`,
     'Crystal Cave': () => [[20,'#44aaff'],[75,'#aa44ff'],[140,'#44ffcc'],[200,'#ff44aa'],[255,'#44aaff']].map(([x,c])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(16,35,`<polygon points="8,0 14,14 12,35 4,35 2,14" fill="${c}" opacity="0.7"/><polygon points="8,0 14,14 8,10" fill="#fff" opacity="0.25"/>`)}</div>`).join(''),
     'Frozen Peak': () => [[15,42,28],[80,30,20],[145,50,32],[210,25,18],[260,38,24]].map(([x,h,w])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(w+4,h+6,`<ellipse cx="${(w+4)/2}" cy="${h+2}" rx="${w/2}" ry="${h*0.55}" fill="#3a4050"/><ellipse cx="${(w+4)/2}" cy="${h-2}" rx="${w*0.4}" ry="${h*0.25}" fill="#ddeeff" opacity="0.7"/>`)}</div>`).join(''),
+    'Cookfire Camp': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:90px">${makeSVG(300,90,`<rect x="18" y="32" width="110" height="52" fill="#2a2014" opacity="0.75"/><polygon points="14,32 74,6 134,32" fill="#3a2c1a" opacity="0.8"/><rect x="66" y="43" width="16" height="27" fill="#1a1208"/><rect x="188" y="48" width="68" height="16" rx="2" fill="#352410"/><ellipse cx="222" cy="42" rx="19" ry="9" fill="#20140a"/><rect x="212" y="31" width="20" height="8" fill="#4a3012"/><ellipse cx="222" cy="27" rx="10" ry="6" fill="#d99242" opacity="0.75"/><ellipse cx="222" cy="23" rx="6" ry="4" fill="#ffe082" opacity="0.6"/>`)}</div>`,
     'Babbling Brook': () => `<div class="env-decor" style="left:0;bottom:2px;width:300px;height:20px">${makeSVG(300,20,Array.from({length:12},(_,i)=>`<ellipse cx="${i*24+12}" cy="${13}" rx="${4+i%3*2}" ry="3" fill="#607080" opacity="0.6"/>`).join(''))}</div>`,
     'Cliff Edge': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:80px">${makeSVG(300,80,`<polygon points="0,80 0,30 40,10 90,25 140,5 200,20 260,0 300,15 300,80" fill="#2a3040" opacity="0.9"/><polygon points="0,80 0,50 30,35 80,45 130,30 190,40 250,25 300,38 300,80" fill="#1a2030" opacity="0.7"/>`)}</div>`,
     'Forgotten Shrine': () => `<div class="env-decor" style="left:90px;bottom:0;width:120px;height:100px">${makeSVG(120,100,`<rect x="45" y="40" width="30" height="60" fill="#2a2018"/><polygon points="10,40 60,5 110,40" fill="#3a3028"/><rect x="50" y="55" width="20" height="30" fill="#1a1408"/><circle cx="60" cy="30" r="6" fill="#d4af37" opacity="0.5"/><rect x="20" y="80" width="15" height="20" fill="#2a2018"/><rect x="85" y="80" width="15" height="20" fill="#2a2018"/>`)}</div>`,
@@ -9343,6 +9425,50 @@ document.addEventListener('click', e => {
 
   const NPCS = {
     // ─────────────────────────────────────────────
+    chef: {
+      name: 'Chef Bram',
+      title: 'Camp Cook',
+      portrait: '👨‍🍳',
+      tree: {
+        root: {
+          text: () => {
+            if (window.__questFlags?.cooksAssistantDone) {
+              return `*Chef Bram hums while stirring a pot.*\n\n"You saved service, champion. Cookfire Camp owes you one."`;
+            }
+            return `*A flour-covered chef slams a spoon into an empty pot.*\n\n"Disaster! Absolute disaster! My assistant vanished before supper rush.\n\nIf you can fetch what I need, I'll make it worth your while."`;
+          },
+          choices: () => {
+            if (window.__questFlags?.cooksAssistantDone) {
+              return [
+                { label: 'What are you cooking now?', next: 'after_done' },
+                { label: '[Leave]', next: null },
+              ];
+            }
+            return [
+              { label: 'What do you need?', next: 'requirements' },
+              { label: '[ I can help ]', next: 'turn_in', action: 'cooks_assistant_turnin' },
+              { label: '[Leave]', next: null },
+            ];
+          },
+        },
+        requirements: {
+          text: `"Simple list. Three Oak Logs for the oven fire, two Willow Logs for smoke flavour, and one Gold Ore so the smith can fix my sacred frying pan handle.\n\nBring all six pieces and dinner is saved."`,
+          choices: () => [{ label: '[ I can help ]', next: 'turn_in', action: 'cooks_assistant_turnin' }, { label: '[Back]', next: 'root' }],
+        },
+        turn_in: {
+          text: () => window.__questFlags?.cooksAssistantDone
+            ? `*Chef Bram checks your satchel and grins.*\n\n"Perfect! Kitchen crisis avoided. Take this tip and come back hungry."`
+            : `*Chef Bram pats your shoulder, still panicking.*\n\n"That's not the full order yet! I still need 3 Oak Logs, 2 Willow Logs, and 1 Gold Ore."`,
+          choices: () => [{ label: window.__questFlags?.cooksAssistantDone ? 'Glad to help.' : 'I will gather it.', next: null }],
+        },
+        after_done: {
+          text: `"Tonight's special: swamp-herb stew and emberbread. No refunds if it bites back."`,
+          choices: [{ label: '[Back]', next: 'root' }],
+        },
+      },
+    },
+
+    // ─────────────────────────────────────────────
     guard: {
       name: 'Captain Aldric',
       title: 'Royal Gate Guard',
@@ -9851,6 +9977,29 @@ document.addEventListener('click', e => {
 
   // Resolve action side-effects (inventory cost, quest flags, Firebase save)
   function applyAction(action) {
+    if (action === 'cooks_assistant_turnin') {
+      const hasOak = (window.__inventory.oak_log || 0) >= 3;
+      const hasWillow = (window.__inventory.willow_log || 0) >= 2;
+      const hasGold = (window.__inventory.gold_ore || 0) >= 1;
+      if (window.__questFlags.cooksAssistantDone || (hasOak && hasWillow && hasGold)) {
+        if (!window.__questFlags.cooksAssistantDone) {
+          window.__inventory.oak_log = Math.max(0, (window.__inventory.oak_log || 0) - 3);
+          window.__inventory.willow_log = Math.max(0, (window.__inventory.willow_log || 0) - 2);
+          window.__inventory.gold_ore = Math.max(0, (window.__inventory.gold_ore || 0) - 1);
+          window.__questFlags.cooksAssistantDone = true;
+          updateInventoryUI();
+          if (window.__fbSaveInventory) window.__fbSaveInventory();
+          if (window.__awardGrassCoin) window.__awardGrassCoin(125);
+          const toast = document.createElement('div');
+          toast.className = 'quest-reward-toast';
+          toast.textContent = "🍲 Quest Complete: Cook's Assistant (+125 coins)";
+          document.body.appendChild(toast);
+          setTimeout(() => toast.remove(), 3500);
+        }
+      }
+      if (window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
+    }
+
     if (action === 'morrigan_pay') {
       window.__inventory.oak_log    = Math.max(0, (window.__inventory.oak_log    || 0) - 10);
       window.__inventory.copper_ore = Math.max(0, (window.__inventory.copper_ore || 0) - 10);
