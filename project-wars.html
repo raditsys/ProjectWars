@@ -2482,6 +2482,27 @@
     box-shadow: -4px 0 20px rgba(26,90,140,0.45);
   }
   .changelog-tab:hover { background: #1e4d7a; }
+  .changelog-tab.has-unread {
+    background: linear-gradient(180deg, #315f8a, #1a3a5c);
+  }
+  .changelog-unread {
+    display: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 1px;
+    color: #fef3c7;
+    border: 1px solid #f59e0b;
+    background: rgba(245, 158, 11, 0.15);
+    padding: 0.15rem 0.3rem;
+    border-radius: 999px;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+    animation: pulseUnread 1.5s ease-in-out infinite;
+  }
+  .changelog-tab.has-unread .changelog-unread { display: inline-flex; }
+  @keyframes pulseUnread {
+    0%, 100% { opacity: 0.65; }
+    50% { opacity: 1; }
+  }
 
   .changelog-drawer {
     position: fixed;
@@ -4246,6 +4267,7 @@
 <!-- CHANGELOG TAB -->
 <button class="changelog-tab" id="changelogTab" onclick="openChangelog()">
 <span id="changelogTabArrow">◀</span>
+<span class="changelog-unread" id="changelogUnreadBadge">NEW</span>
   CHANGELOG
 </button>
 
@@ -10339,6 +10361,19 @@ import { getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.
 const db = getDatabase(getApp());
 const clRef = ref(db, 'changelog');
 const ADMIN_PASS = 'buyandsell';
+const CL_SEEN_KEY = 'pwLastSeenChangelogTs';
+
+function getLastSeenChangelogTs() {
+  return Number(localStorage.getItem(CL_SEEN_KEY) || 0);
+}
+
+window.__latestChangelogTs = 0;
+window.__refreshChangelogIndicator = function() {
+  const tab = document.getElementById('changelogTab');
+  if (!tab) return;
+  const hasUnread = window.__latestChangelogTs > getLastSeenChangelogTs();
+  tab.classList.toggle('has-unread', hasUnread);
+};
 
 // ── Live listener: render entries newest-first ──
 onValue(clRef, snap => {
@@ -10346,6 +10381,8 @@ onValue(clRef, snap => {
   const entries = Object.entries(data)
     .map(([key, val]) => ({ key, ...val }))
     .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  window.__latestChangelogTs = entries[0]?.ts || 0;
+  window.__refreshChangelogIndicator();
 
   const body = document.getElementById('changelogBody');
   if (!body) return;
@@ -10421,6 +10458,10 @@ window.openChangelog = function() {
   document.getElementById('changelogDrawer').classList.add('open');
   document.getElementById('drawerOverlay').classList.add('open');
   document.getElementById('changelogTabArrow').textContent = '▶';
+  if (window.__latestChangelogTs) {
+    localStorage.setItem('pwLastSeenChangelogTs', String(window.__latestChangelogTs));
+    window.__refreshChangelogIndicator && window.__refreshChangelogIndicator();
+  }
 };
 
 window.closeChangelog = function() {
