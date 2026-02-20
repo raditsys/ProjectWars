@@ -8504,7 +8504,7 @@ document.addEventListener('click', e => {
     '6,2': { name:'Swamp', desc:'Mist clings low. Someone is watching.', sky:'linear-gradient(180deg,#0a1208 0%,#0e1a0a 60%,#0a1210 100%)', ground:'#102a10', groundBorder:'#1a4a20', resources:[{kind:'tree',type:'willow',x:10},{kind:'tree',type:'willow',x:118},{kind:'tree',type:'willow',x:228}], npc:'morrigan' },
     '7,2': f('Brackish Pool',   'Dark water, no fish',                'linear-gradient(180deg,#060e0c 0%,#0a1410 60%,#060e0c 100%)', '#0e2018', '#183028'),
 
-    '0,3': f('Rocky Foothills', 'Loose scree, hard going',            'linear-gradient(180deg,#0e0c0a 0%,#16120e 60%,#0e0c0a 100%)', '#1e1810', '#302818'),
+    '0,3': { name:'Frontier Gate', desc:'A pair of hired guards watch a towering iron gate. Heat haze and dunes shimmer beyond.', sky:'linear-gradient(180deg,#2b1a0c 0%,#4b2b12 52%,#f1a652 100%)', ground:'#3b2818', groundBorder:'#6a4830', resources:[], locked:true, npc:'desert_guard' },
     '1,3': { name:'Cave Mouth', desc:'An old miner blocks the entrance, smoking a pipe.', sky:'linear-gradient(180deg,#080808 0%,#0e0e0e 60%,#080808 100%)', ground:'#141414', groundBorder:'#222222', resources:[], npc:'degan' },
     '2,3': r('Copper Pit',      'Shallow copper deposits',            'linear-gradient(180deg,#140e08 0%,#1a1408 60%,#141008 100%)', '#2a1a08', '#4a3010', [{kind:'ore',type:'copper',x:20},{kind:'ore',type:'copper',x:128},{kind:'ore',type:'iron',x:228}]),
     '3,3': f('Gravel Pit',      'Just rocks, nothing valuable',       'linear-gradient(180deg,#100e0c 0%,#181410 60%,#100e0c 100%)', '#201c14', '#342e20'),
@@ -8609,6 +8609,39 @@ document.addEventListener('click', e => {
       <!-- Shield glint -->
       <ellipse cx="128" cy="122" rx="4" ry="6" fill="#44446a" opacity="0.8"/>
     `)}</div>`,
+    'Frontier Gate': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:185px">${makeSVG(300,185,`
+      <!-- Distant desert backdrop -->
+      <rect x="0" y="0" width="300" height="65" fill="#d8843f" opacity="0.28"/>
+      <polygon points="0,80 40,62 95,74 145,58 195,70 250,54 300,69 300,96 0,96" fill="#e0a05a" opacity="0.75"/>
+      <polygon points="0,104 50,90 120,102 180,86 250,98 300,89 300,120 0,120" fill="#b56d2f" opacity="0.55"/>
+      <!-- Stone towers -->
+      <rect x="0" y="46" width="66" height="139" fill="#332a24"/>
+      <rect x="234" y="46" width="66" height="139" fill="#332a24"/>
+      ${[0,16,32,48].map(x=>`<rect x="${x}" y="30" width="10" height="16" fill="#3f352f"/>`).join('')}
+      ${[234,250,266,282].map(x=>`<rect x="${x}" y="30" width="10" height="16" fill="#3f352f"/>`).join('')}
+      <!-- Tall metal gate -->
+      <path d="M66,185 L66,88 Q66,45 150,45 Q234,45 234,88 L234,185 Z" fill="#1a1c24"/>
+      <path d="M74,185 L74,90 Q74,58 150,58 Q226,58 226,90 L226,185 Z" fill="#0f1118"/>
+      ${[88,102,116,130,144,158,172,186,200,214].map(x=>`<rect x="${x}" y="58" width="5" height="127" rx="1" fill="#4f5567"/>`).join('')}
+      <rect x="82" y="86" width="136" height="7" rx="2" fill="#565d72"/>
+      <rect x="82" y="122" width="136" height="7" rx="2" fill="#565d72"/>
+      <rect x="82" y="156" width="136" height="7" rx="2" fill="#565d72"/>
+      <!-- Guards -->
+      <rect x="96" y="126" width="18" height="36" rx="2" fill="#2b2f3c"/>
+      <rect x="94" y="134" width="6" height="25" rx="1" fill="#262a36"/>
+      <rect x="110" y="134" width="6" height="25" rx="1" fill="#262a36"/>
+      <circle cx="105" cy="118" r="8" fill="#c89d74"/>
+      <rect x="95" y="112" width="20" height="8" rx="2" fill="#4a3b2d"/>
+      <rect x="119" y="96" width="3" height="66" fill="#8a6a3d" rx="1"/>
+      <polygon points="119,96 122,96 120.5,84" fill="#b8bfd2"/>
+      <rect x="186" y="126" width="18" height="36" rx="2" fill="#2b2f3c"/>
+      <rect x="184" y="134" width="6" height="25" rx="1" fill="#262a36"/>
+      <rect x="200" y="134" width="6" height="25" rx="1" fill="#262a36"/>
+      <circle cx="195" cy="118" r="8" fill="#c89d74"/>
+      <rect x="185" y="112" width="20" height="8" rx="2" fill="#4a3b2d"/>
+      <rect x="178" y="96" width="3" height="66" fill="#8a6a3d" rx="1"/>
+      <polygon points="178,96 181,96 179.5,84" fill="#b8bfd2"/>
+    `)}</div>",
   };
 
   // ── Underground map (layer 1) — 8×4 grid ──
@@ -8650,6 +8683,98 @@ document.addEventListener('click', e => {
     '7,3': null,
   };
 
+  // ── Desert map (layer 2) — 8×6 grid ──
+  const MAP_DESERT = {
+    '0,0': null,
+    '1,0': null,
+    '2,0': { name:'Dune Threshold', desc:'Wind bites at your face as the desert opens up in every direction.', sky:'linear-gradient(180deg,#2b1b0b 0%,#5f3412 58%,#f0ac5d 100%)', ground:'#5a351a', groundBorder:'#8a5630', resources:[{kind:'ore',type:'copper',x:38},{kind:'ore',type:'iron',x:278}] },
+    '3,0': { name:'Scorched Caravan Trail', desc:'Old wagon tracks vanish into moving sand.', sky:'linear-gradient(180deg,#311d0c 0%,#623512 55%,#f3b66a 100%)', ground:'#623919', groundBorder:'#8f5a2f', resources:[{kind:'tree',type:'oak',x:110},{kind:'ore',type:'copper',x:256}] },
+    '4,0': { name:'Sunspike Rise', desc:'Jagged sandstone pillars cast narrow blades of shade.', sky:'linear-gradient(180deg,#2a180a 0%,#4d2b0f 50%,#e29f58 100%)', ground:'#5a3016', groundBorder:'#7b4728', resources:[{kind:'ore',type:'iron',x:70},{kind:'ore',type:'gold',x:240}] },
+    '5,0': { name:'Mirage Flats', desc:'Shimmering air makes distant ruins dance at the horizon.', sky:'linear-gradient(180deg,#301b0a 0%,#6d3a12 58%,#f2b15f 100%)', ground:'#6a3d1b', groundBorder:'#9b6638', resources:[{kind:'ore',type:'gold',x:44},{kind:'ore',type:'iron',x:212}] },
+    '6,0': { name:'Nomad Lookout', desc:'A weathered perch overlooks the sea of dunes.', sky:'linear-gradient(180deg,#261607 0%,#4b2b0f 52%,#dc9552 100%)', ground:'#4f2f17', groundBorder:'#744726', resources:[{kind:'tree',type:'willow',x:140},{kind:'ore',type:'gold',x:296}] },
+    '7,0': null,
+
+    '0,1': null,
+    '1,1': { name:'Saltwind Basin', desc:'Cracked white flats crunch under your boots.', sky:'linear-gradient(180deg,#2d1908 0%,#523011 56%,#ebb268 100%)', ground:'#613c22', groundBorder:'#8d6340', resources:[{kind:'ore',type:'copper',x:28},{kind:'ore',type:'iron',x:190},{kind:'ore',type:'gold',x:325}] },
+    '2,1': { name:'Windcut Arch', desc:'A colossal stone arch hums with hot wind.', sky:'linear-gradient(180deg,#2a1809 0%,#573010 55%,#e7a55d 100%)', ground:'#5f3518', groundBorder:'#8e5830', resources:[{kind:'ore',type:'iron',x:78},{kind:'tree',type:'oak',x:246}] },
+    '3,1': { name:'Red Dune Sea', desc:'Dunes roll like waves to the edge of sight.', sky:'linear-gradient(180deg,#321c0b 0%,#6d3d14 58%,#f0b36a 100%)', ground:'#6f3f1c', groundBorder:'#a6693d', resources:[{kind:'ore',type:'gold',x:36},{kind:'ore',type:'gold',x:156},{kind:'ore',type:'iron',x:286}] },
+    '4,1': { name:'Glass Canyon', desc:'Walls of fused sand reflect the sun in blinding shards.', sky:'linear-gradient(180deg,#261507 0%,#4d2a10 53%,#df9d5b 100%)', ground:'#542f18', groundBorder:'#7a4b2b', resources:[{kind:'ore',type:'runite',x:92},{kind:'ore',type:'gold',x:276}] },
+    '5,1': { name:'Ashen Oasis', desc:'A rare pool wrapped in black palms and mineral-rich ground.', sky:'linear-gradient(180deg,#1f160c 0%,#3a2b16 52%,#ca985f 100%)', ground:'#3f301f', groundBorder:'#5f4a33', resources:[{kind:'tree',type:'willow',x:48},{kind:'tree',type:'willow',x:188},{kind:'ore',type:'gold',x:314}] },
+    '6,1': { name:'Obsidian Verge', desc:'Dark stone teeth break through sand like ancient armor.', sky:'linear-gradient(180deg,#1d130a 0%,#3c2512 54%,#b67f4a 100%)', ground:'#3b2616', groundBorder:'#5b3a24', resources:[{kind:'ore',type:'runite',x:58},{kind:'ore',type:'iron',x:220}] },
+    '7,1': null,
+
+    '0,2': { name:'Dustfall Approach', desc:'The frontier path disappears behind you in swirling dust.', sky:'linear-gradient(180deg,#2f1c0d 0%,#6a3a15 58%,#efb062 100%)', ground:'#6a3e1f', groundBorder:'#9c673e', resources:[{kind:'ore',type:'copper',x:52},{kind:'ore',type:'iron',x:252}] },
+    '1,2': { name:'Shifting Yard', desc:'Sand churns where something massive once camped.', sky:'linear-gradient(180deg,#291707 0%,#533011 55%,#e1a05a 100%)', ground:'#593418', groundBorder:'#85532d', resources:[{kind:'ore',type:'gold',x:36},{kind:'tree',type:'oak',x:178}] },
+    '2,2': { name:'Bandit Remnants', desc:'Collapsed tents and buried loot glint under the dunes.', sky:'linear-gradient(180deg,#2d1909 0%,#5b3413 56%,#e8ab61 100%)', ground:'#643a1a', groundBorder:'#8f5d33', resources:[{kind:'ore',type:'iron',x:46},{kind:'ore',type:'gold',x:178},{kind:'ore',type:'gold',x:318}] },
+    '3,2': { name:'Saffron Expanse', desc:'The desert stretches wide and brilliantly gold.', sky:'linear-gradient(180deg,#311d0d 0%,#744016 60%,#f5bc71 100%)', ground:'#72431f', groundBorder:'#a76f43', resources:[{kind:'ore',type:'gold',x:34},{kind:'ore',type:'gold',x:140},{kind:'ore',type:'runite',x:258}] },
+    '4,2': { name:'Ancient Sunwell', desc:'Broken columns ring a dry basin humming with old power.', sky:'linear-gradient(180deg,#261708 0%,#4f2d11 54%,#df9d57 100%)', ground:'#56331a', groundBorder:'#7e5231', resources:[{kind:'ore',type:'runite',x:88},{kind:'ore',type:'runite',x:260}] },
+    '5,2': { name:'Titan Ribcage', desc:'Fossil arches rise from the sand like bleached towers.', sky:'linear-gradient(180deg,#23160a 0%,#4c2f16 56%,#d89b60 100%)', ground:'#4b311d', groundBorder:'#70503a', resources:[{kind:'ore',type:'gold',x:58},{kind:'ore',type:'iron',x:220}] },
+    '6,2': { name:'Dawnfire Dunes', desc:'Every gust paints the dunes in bronze and crimson bands.', sky:'linear-gradient(180deg,#331f0f 0%,#7a4519 61%,#f5be72 100%)', ground:'#764626', groundBorder:'#ab7249', resources:[{kind:'ore',type:'gold',x:56},{kind:'ore',type:'runite',x:198},{kind:'ore',type:'gold',x:332}] },
+    '7,2': null,
+
+    '0,3': { name:'Canyon Mouth', desc:'A cooler current spills out from narrow canyon walls.', sky:'linear-gradient(180deg,#2c1808 0%,#5a3010 56%,#e5a15b 100%)', ground:'#5d3518', groundBorder:'#89572f', resources:[{kind:'ore',type:'iron',x:62},{kind:'ore',type:'gold',x:246}] },
+    '1,3': { name:'Amber Shelf', desc:'A high shelf of compacted amber sand overlooks the wastes.', sky:'linear-gradient(180deg,#291607 0%,#4f2e10 55%,#dc9d57 100%)', ground:'#543318', groundBorder:'#7c502b', resources:[{kind:'tree',type:'willow',x:112},{kind:'ore',type:'iron',x:296}] },
+    '2,3': { name:'Scorpion Hollow', desc:'Tiny tracks scatter around thorny scrub.', sky:'linear-gradient(180deg,#2b1708 0%,#523112 56%,#e1a55f 100%)', ground:'#5a351a', groundBorder:'#845732', resources:[{kind:'ore',type:'gold',x:48},{kind:'ore',type:'runite',x:196}] },
+    '3,3': { name:'Sunken Observatory', desc:'Half-buried lenses still catch and split the light.', sky:'linear-gradient(180deg,#2f1b0c 0%,#6a3914 58%,#f0b167 100%)', ground:'#6c3f1f', groundBorder:'#9a673f', resources:[{kind:'ore',type:'runite',x:80},{kind:'ore',type:'gold',x:252}] },
+    '4,3': { name:'Zephyr Pillars', desc:'Stone pillars whistle as desert winds thread through them.', sky:'linear-gradient(180deg,#281708 0%,#4d2c11 53%,#d99856 100%)', ground:'#533118', groundBorder:'#79502d', resources:[{kind:'ore',type:'runite',x:92},{kind:'ore',type:'runite',x:272}] },
+    '5,3': { name:'Gilded Basin', desc:'Rich deposits glitter from every slope.', sky:'linear-gradient(180deg,#32200f 0%,#7a461c 61%,#f6c079 100%)', ground:'#794a28', groundBorder:'#b17a52', resources:[{kind:'ore',type:'gold',x:42},{kind:'ore',type:'gold',x:148},{kind:'ore',type:'gold',x:300}] },
+    '6,3': { name:'Howlstep Bluff', desc:'Wind roars along the cliff with a low metallic howl.', sky:'linear-gradient(180deg,#261607 0%,#4b2b10 55%,#d79254 100%)', ground:'#4f3018', groundBorder:'#734a2a', resources:[{kind:'ore',type:'iron',x:64},{kind:'ore',type:'runite',x:212}] },
+    '7,3': null,
+
+    '0,4': null,
+    '1,4': { name:'Pale Basin', desc:'Powder-fine sand puffs around each step.', sky:'linear-gradient(180deg,#2a1708 0%,#513011 56%,#de9f5b 100%)', ground:'#57361d', groundBorder:'#835a37', resources:[{kind:'ore',type:'gold',x:56},{kind:'ore',type:'iron',x:224}] },
+    '2,4': { name:'Dervish Flats', desc:'Dust devils spin in lazy circles around you.', sky:'linear-gradient(180deg,#2e1a0a 0%,#613714 58%,#ecb269 100%)', ground:'#643c1f', groundBorder:'#94623a', resources:[{kind:'ore',type:'gold',x:36},{kind:'ore',type:'gold',x:168},{kind:'ore',type:'runite',x:298}] },
+    '3,4': { name:'Starfall Trench', desc:'Meteor fragments are half-buried in blackened sand.', sky:'linear-gradient(180deg,#201408 0%,#402714 54%,#c78d58 100%)', ground:'#443021', groundBorder:'#664a35', resources:[{kind:'ore',type:'runite',x:66},{kind:'ore',type:'runite',x:226}] },
+    '4,4': { name:'Golden Exchequer', desc:'A vast cache of exposed ore veins crowns this crater.', sky:'linear-gradient(180deg,#36220f 0%,#865022 63%,#ffca7f 100%)', ground:'#83512b', groundBorder:'#bb8256', resources:[{kind:'ore',type:'gold',x:38},{kind:'ore',type:'gold',x:130},{kind:'ore',type:'gold',x:222},{kind:'ore',type:'runite',x:314}] },
+    '5,4': { name:'Ashglass Cliffs', desc:'Layered cliffs hide dense mineral pockets.', sky:'linear-gradient(180deg,#24150a 0%,#472d17 55%,#d09762 100%)', ground:'#4d3423', groundBorder:'#74533a', resources:[{kind:'ore',type:'runite',x:70},{kind:'ore',type:'gold',x:246}] },
+    '6,4': { name:'Burning Verge', desc:'The western horizon burns orange as night approaches.', sky:'linear-gradient(180deg,#3a220f 0%,#8d4c1e 63%,#ffbf72 100%)', ground:'#874826', groundBorder:'#bf7646', resources:[{kind:'ore',type:'gold',x:62},{kind:'ore',type:'runite',x:204}] },
+    '7,4': null,
+
+    '0,5': null,
+    '1,5': null,
+    '2,5': { name:'Backtrail Camp', desc:'A tiny shaded camp marks the safe route back to the gate.', sky:'linear-gradient(180deg,#2c1a0c 0%,#5d3415 58%,#e8aa64 100%)', ground:'#5f3b22', groundBorder:'#8c6240', resources:[{kind:'ore',type:'iron',x:80},{kind:'tree',type:'oak',x:246}] },
+    '3,5': { name:'Dustbound Crossing', desc:'Tracks from dozens of expeditions cross here.', sky:'linear-gradient(180deg,#301d0e 0%,#704119 60%,#f4b971 100%)', ground:'#714426', groundBorder:'#a26f47', resources:[{kind:'ore',type:'gold',x:44},{kind:'ore',type:'runite',x:186}] },
+    '4,5': { name:'Duneward Outpost', desc:'A weather-beaten outpost where prospectors tally their haul.', sky:'linear-gradient(180deg,#28180a 0%,#563214 57%,#dea562 100%)', ground:'#5a3a22', groundBorder:'#835f3d', resources:[{kind:'ore',type:'gold',x:58},{kind:'ore',type:'gold',x:218}] },
+    '5,5': { name:'Edge of the Endless', desc:'Beyond this ridge the dunes continue forever.', sky:'linear-gradient(180deg,#2d1b0c 0%,#684019 60%,#eeb572 100%)', ground:'#6a4327', groundBorder:'#986a46', resources:[{kind:'ore',type:'runite',x:74},{kind:'ore',type:'gold',x:244}] },
+    '6,5': null,
+    '7,5': null,
+  };
+
+  const DECOR_DESERT = {
+    default: () => `<div class="env-decor" style="left:0;bottom:0;width:420px;height:170px">${makeSVG(420,170,`
+      <polygon points="0,170 0,132 64,120 124,134 194,118 268,136 334,122 420,140 420,170" fill="#9d622f" opacity="0.86"/>
+      <polygon points="0,170 0,148 92,136 164,148 248,134 328,150 420,138 420,170" fill="#c98749" opacity="0.62"/>
+      ${[40,120,210,300,365].map(x=>`<ellipse cx="${x}" cy="152" rx="24" ry="8" fill="#6c4525" opacity="0.38"/>`).join('')}
+      ${[28,86,160,236,292,352].map((x,i)=>`<path d="M${x} 126 q 12 -18 24 0" stroke="#704829" stroke-width="2" fill="none" opacity="${0.24 + (i%2)*0.08}"/>`).join('')}
+    `)}</div>`,
+    'Ashen Oasis': () => `<div class="env-decor" style="left:0;bottom:0;width:420px;height:170px">${makeSVG(420,170,`
+      <ellipse cx="205" cy="142" rx="78" ry="20" fill="#2f6058" opacity="0.68"/>
+      <ellipse cx="205" cy="145" rx="58" ry="12" fill="#4f9f8f" opacity="0.74"/>
+      ${[124,154,256,286].map(x=>`<rect x="${x}" y="84" width="8" height="60" fill="#3a2616"/><ellipse cx="${x+4}" cy="82" rx="17" ry="11" fill="#202718" opacity="0.9"/>`).join('')}
+      <polygon points="0,170 0,136 94,128 170,138 250,126 326,136 420,128 420,170" fill="#a86a34" opacity="0.66"/>
+    `)}</div>`,
+    'Sunken Observatory': () => `<div class="env-decor" style="left:0;bottom:0;width:420px;height:180px">${makeSVG(420,180,`
+      <ellipse cx="208" cy="164" rx="122" ry="20" fill="#6d4425" opacity="0.58"/>
+      <ellipse cx="208" cy="154" rx="92" ry="14" fill="#8d5a33" opacity="0.62"/>
+      <circle cx="208" cy="118" r="44" fill="#4c311f" opacity="0.76"/>
+      <circle cx="208" cy="118" r="28" fill="#2f2015" opacity="0.82"/>
+      ${[146,266].map(x=>`<rect x="${x}" y="86" width="16" height="54" fill="#553724"/><rect x="${x-4}" y="80" width="24" height="10" fill="#6a452d"/>`).join('')}
+      <line x1="208" y1="74" x2="252" y2="98" stroke="#b78a52" stroke-width="4" opacity="0.75"/>
+    `)}</div>`,
+    'Duneward Outpost': () => `<div class="env-decor" style="left:0;bottom:0;width:420px;height:176px">${makeSVG(420,176,`
+      <rect x="122" y="92" width="176" height="70" fill="#5e3b22"/>
+      <polygon points="110,92 210,52 312,92" fill="#7d5332"/>
+      <rect x="138" y="112" width="30" height="50" fill="#3e2818"/>
+      <rect x="190" y="122" width="40" height="40" fill="#3e2818"/>
+      <rect x="246" y="108" width="36" height="54" fill="#3e2818"/>
+      <rect x="316" y="98" width="12" height="64" fill="#8d5d34"/>
+      <rect x="318" y="72" width="8" height="30" fill="#8d5d34"/>
+      <polygon points="326,72 360,86 326,100" fill="#d24d33"/>
+      <polygon points="0,176 0,142 94,132 178,144 262,132 334,146 420,136 420,176" fill="#c9894b" opacity="0.62"/>
+    `)}</div>`,
+  };
+
+
   const DECOR_UNDER = {
     'Tunnel Entrance': () => {
       const rope = Array.from({length:8},(_,i)=>`<rect x="${148+i%2*4}" y="${i*14}" width="4" height="10" rx="1" fill="#5a4020" opacity="0.9"/>`).join('');
@@ -8686,7 +8811,7 @@ document.addEventListener('click', e => {
   };
 
   let cx = 2, cy = 2;
-  let clayer = 0;  // 0=surface, 1=underground
+  let clayer = 0;  // 0=surface, 1=underground, 2=desert
   let resourceState = [];
   let worldResourceState = {};
 
@@ -8723,9 +8848,9 @@ document.addEventListener('click', e => {
 
   function key(c, rr) { return `${c},${rr}`; }
   function room(c, rr) {
-    const H = clayer === 0 ? GRID_H : 4;
+    const H = clayer === 1 ? 4 : GRID_H;
     if (c < 0 || c >= GRID_W || rr < 0 || rr >= H) return null;
-    const m = clayer === 0 ? MAP : MAP_UNDER;
+    const m = clayer === 0 ? MAP : (clayer === 1 ? MAP_UNDER : MAP_DESERT);
     return m[key(c, rr)] || null;
   }
 
@@ -8757,7 +8882,7 @@ document.addEventListener('click', e => {
     const canvas = document.getElementById('envMinimapCanvas');
     if (!canvas) return;
     const CELL = 13, GAP = 2;
-    const ROWS = clayer === 0 ? GRID_H : 4;
+    const ROWS = clayer === 1 ? 4 : GRID_H;
     canvas.width  = GRID_W * (CELL + GAP) - GAP;
     canvas.height = ROWS   * (CELL + GAP) - GAP;
     const ctx = canvas.getContext('2d');
@@ -8766,14 +8891,15 @@ document.addEventListener('click', e => {
       for (let c = 0; c < GRID_W; c++) {
         const px = c*(CELL+GAP), py = rr*(CELL+GAP);
         const rm = room(c, rr);
-        if (!rm) { ctx.fillStyle = clayer===0 ? '#0e0e0e' : '#06040a'; ctx.fillRect(px,py,CELL,CELL); continue; }
+        if (!rm) { ctx.fillStyle = clayer===0 ? '#0e0e0e' : (clayer===1 ? '#06040a' : '#24150a'); ctx.fillRect(px,py,CELL,CELL); continue; }
         let col;
         if (c===cx && rr===cy)              col = '#f5c842';
         else if (rm.locked)                 col = '#444455';
         else if (rm.tunnel)                 col = '#3a2050';
         else if (rm.npc && clayer===1)      col = '#3a1a10';
-        else if (rm.resources?.length)      col = clayer===0 ? '#1a4a1a' : '#1a3040';
-        else                                col = clayer===0 ? '#1e2e1e' : '#14101e';
+        else if (rm.npc && clayer===2)      col = '#6a3a1a';
+        else if (rm.resources?.length)      col = clayer===0 ? '#1a4a1a' : (clayer===1 ? '#1a3040' : '#6a4a18');
+        else                                col = clayer===0 ? '#1e2e1e' : (clayer===1 ? '#14101e' : '#4a2f18');
         ctx.fillStyle = col;
         ctx.fillRect(px, py, CELL, CELL);
         if (rm.locked) { ctx.fillStyle='#666688'; ctx.fillRect(px+Math.floor(CELL/2)-1,py+Math.floor(CELL/2)-1,2,2); }
@@ -8781,10 +8907,10 @@ document.addEventListener('click', e => {
       }
     }
     // Layer label strip
-    const label = clayer === 0 ? 'SURFACE' : 'UNDERGROUND';
-    ctx.fillStyle = clayer === 0 ? '#1a3a1a' : '#1a1030';
+    const label = clayer === 0 ? 'SURFACE' : (clayer === 1 ? 'UNDERGROUND' : 'DESERT');
+    ctx.fillStyle = clayer === 0 ? '#1a3a1a' : (clayer === 1 ? '#1a1030' : '#4a250d');
     ctx.fillRect(0, canvas.height-10, canvas.width, 10);
-    ctx.fillStyle = clayer === 0 ? '#4a8a4a' : '#8844ff';
+    ctx.fillStyle = clayer === 0 ? '#4a8a4a' : (clayer === 1 ? '#8844ff' : '#f0b35a');
     ctx.font = '6px monospace';
     ctx.fillText(label, 2, canvas.height-2);
   }
@@ -8792,9 +8918,10 @@ document.addEventListener('click', e => {
   function updateNavButtons() {
     document.getElementById('envBtnN').disabled = !room(cx, cy-1);
     document.getElementById('envBtnS').disabled = !room(cx, cy+1);
-    document.getElementById('envBtnW').disabled = !room(cx-1, cy);
-    document.getElementById('envBtnE').disabled = !room(cx+1, cy);
     const rm = room(cx, cy);
+    const canGoWest = (clayer === 0 && rm?.name === 'Frontier Gate') || !!room(cx-1, cy);
+    document.getElementById('envBtnW').disabled = !canGoWest;
+    document.getElementById('envBtnE').disabled = !room(cx+1, cy);
     const canDescend = clayer === 0 && rm && window.__questFlags?.morriganPaid && rm.name === 'Dead Grove';
     const canAscend  = clayer === 1 && rm?.tunnel === 'up';
     const btnDown = document.getElementById('envBtnDown');
@@ -8827,7 +8954,9 @@ document.addEventListener('click', e => {
     resourceState = [];
 
     // Decorative fluff (layer-aware)
-    const decorFn = clayer === 1 ? (DECOR_UNDER[rm.name] || DECOR[rm.name]) : DECOR[rm.name];
+    const decorFn = clayer === 1
+      ? (DECOR_UNDER[rm.name] || DECOR[rm.name])
+      : (clayer === 2 ? (DECOR_DESERT[rm.name] || DECOR_DESERT.default) : DECOR[rm.name]);
     if (decorFn) resContainer.innerHTML = decorFn();
 
     // Dead Grove: glowing chest to descend (appears after Morrigan paid)
@@ -8871,6 +9000,22 @@ document.addEventListener('click', e => {
       resContainer.appendChild(ascDiv);
     }
 
+    if (clayer === 2 && cx === 0 && cy === 2) {
+      const returnDiv = document.createElement('div');
+      returnDiv.className = 'env-chest';
+      returnDiv.title = 'Return to the Frontier Gate';
+      returnDiv.style.left = '6px';
+      returnDiv.style.filter = 'drop-shadow(0 0 9px rgba(255,190,110,0.65))';
+      returnDiv.innerHTML = makeSVG(56,48,
+        '<rect x="5" y="21" width="46" height="23" rx="3" fill="#4a2a12"/>' +
+        '<rect x="5" y="16" width="46" height="9" rx="3" fill="#6a3a1a"/>' +
+        '<polygon points="12,28 30,28 30,22 44,32 30,42 30,36 12,36" fill="#f6b86a"/>' +
+        '<circle cx="46" cy="31" r="3" fill="#dba25a"/>'
+      );
+      returnDiv.onclick = () => leaveDesert();
+      resContainer.appendChild(returnDiv);
+    }
+
     // NPC talk button + auto-open on entry
     if (rm.npc) {
       const talkBtn = document.createElement('button');
@@ -8878,7 +9023,7 @@ document.addEventListener('click', e => {
       talkBtn.textContent = '💬 Talk';
       talkBtn.onclick = () => openDialogue(rm.npc);
       resContainer.appendChild(talkBtn);
-      setTimeout(() => openDialogue(rm.npc), 450);
+      if (rm.npc !== 'desert_guard') setTimeout(() => openDialogue(rm.npc), 450);
     }
 
     // Interactive resources
@@ -9054,11 +9199,32 @@ document.addEventListener('click', e => {
     });
   };
 
+  function enterDesert() {
+    layerFlash(() => {
+      clayer = 2;
+      cx = 0; cy = 2; // desert entrance
+      renderRoom(0, 0);
+    });
+  }
+
+  function leaveDesert() {
+    layerFlash(() => {
+      clayer = 0;
+      cx = 0; cy = 3; // frontier gate
+      renderRoom(0, 0);
+    });
+  }
+
   window.envNavigate = function(dx, dy) {
+    const curRm = room(cx, cy);
+    if (clayer === 0 && curRm?.name === 'Frontier Gate' && dx === -1) {
+      if (window.__questFlags?.desertGatePaid) { enterDesert(); return; }
+      openDialogue(curRm.npc);
+      return;
+    }
     const nc=cx+dx, nr=cy+dy;
     if (!room(nc,nr)) return;
-    const curRm = room(cx, cy);
-    if (curRm && curRm.locked) {
+    if (curRm && curRm.locked && !(clayer === 0 && curRm.name === 'Frontier Gate')) {
       if (dx !== -1) { openDialogue(curRm.npc); return; }
     }
     cx=nc; cy=nr;
@@ -9147,6 +9313,58 @@ document.addEventListener('click', e => {
         },
       }
     },
+
+    // ─────────────────────────────────────────────
+    desert_guard: {
+      name: 'Dune Wardens',
+      title: 'Frontier Toll Guards',
+      portrait: '🛡️',
+      tree: {
+        root: {
+          text: () => {
+            if (window.__questFlags?.desertGatePaid) {
+              return `*Two wardens stand aside, spears grounded beside the towering iron bars.*
+
+"Toll's already paid, traveler. Keep to the marked routes and mind the sink dunes."`;
+            }
+            return `*The twin wardens cross their spears before the gate. Heat waves shimmer through the bars into an endless sea of dunes.*
+
+"Desert frontier passage is restricted. Toll is 5g per traveler. Pay, and we'll open the gate."`;
+          },
+          choices: () => {
+            if (window.__questFlags?.desertGatePaid) {
+              return [
+                { label: '[Enter the desert]', next: null, action: 'enter_desert' },
+                { label: '[Leave]', next: null },
+              ];
+            }
+            const coins = window.__cachedCoins || 0;
+            const arr = [];
+            if (coins >= 5) arr.push({ label: '[Pay 5g toll]', next: 'paid', action: 'desert_toll' });
+            else arr.push({ label: `✗ Need ${5 - coins} more coins`, next: null, locked: true });
+            arr.push({ label: 'What is beyond this gate?', next: 'about_desert' });
+            arr.push({ label: '[Leave]', next: null });
+            return arr;
+          },
+        },
+        about_desert: {
+          text: `"An old empire's bones and rich veins of ore," one guard says.
+
+"Bring water, keep your eyes on the horizon, and don't chase mirages. The desert eats the careless."`,
+          choices: [{ label: '[Back]', next: 'root' }],
+        },
+        paid: {
+          text: `*One guard counts your coins while the other hauls the heavy bars open with a metallic groan.*
+
+"Paid in full. You can cross now. If you need to return, use the marked camp trail."`,
+          choices: [
+            { label: '[Enter the desert]', next: null, action: 'enter_desert' },
+            { label: 'I need a second.', next: null },
+          ],
+        },
+      },
+    },
+
 
     // ─────────────────────────────────────────────
     morrigan: {
@@ -9529,6 +9747,14 @@ document.addEventListener('click', e => {
       toast.textContent = "👑 Received: King's Seal";
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3500);
+    }
+    if (action === 'desert_toll') {
+      if (window.__spendCoins) window.__spendCoins(5);
+      window.__questFlags.desertGatePaid = true;
+      if (window.__fbSaveQuestFlags) window.__fbSaveQuestFlags();
+    }
+    if (action === 'enter_desert') {
+      enterDesert();
     }
   }
 
