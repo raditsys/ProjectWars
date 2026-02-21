@@ -66,9 +66,10 @@ function writeJsonGz(outputDir, name, content) {
 }
 
 async function main() {
+  const dbUrl = process.env.FIREBASE_DATABASE_URL;
   const app = admin.initializeApp({
     credential: getCredential(),
-    databaseURL: process.env.FIREBASE_DATABASE_URL
+    ...(dbUrl ? { databaseURL: dbUrl } : {})
   });
 
   const outputDir = ensureOutputDir();
@@ -76,7 +77,6 @@ async function main() {
   const firestoreDump = await dumpFirestore(admin.firestore(app));
   writeJsonGz(outputDir, 'firestore', firestoreDump);
 
-  const dbUrl = process.env.FIREBASE_DATABASE_URL;
   if (dbUrl) {
     const rtdb = await admin.database(app).ref('/').once('value');
     writeJsonGz(outputDir, 'rtdb', rtdb.val());
@@ -89,7 +89,7 @@ async function main() {
   };
 
   writeJsonGz(outputDir, 'metadata', metadata);
-  app.delete();
+  await app.delete();
 
   console.log(`Backup complete: ${outputDir}`);
 }
