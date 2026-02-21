@@ -1074,6 +1074,84 @@
   .game-panel { display: none; flex-direction: column; gap: 1.25rem; }
   .game-panel.active { display: flex; }
 
+  /* ── Learn to Fly ── */
+  .ltf-panel {
+    background: linear-gradient(180deg, rgba(16, 34, 65, 0.35), rgba(13, 43, 13, 0.25));
+    border: 1px solid #2f5072;
+    padding: 0.75rem;
+    display: grid;
+    gap: 0.7rem;
+  }
+  .ltf-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    color: #b5d2f5;
+    flex-wrap: wrap;
+  }
+  .ltf-canvas {
+    width: 100%;
+    height: 230px;
+    background: linear-gradient(180deg, #1f4e7f 0%, #6fb3f2 55%, #d4f0ff 100%);
+    border: 1px solid #2f5072;
+    image-rendering: crisp-edges;
+  }
+  .ltf-controls {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .ltf-btn {
+    flex: 1;
+    min-width: 130px;
+    border: 1px solid #4778ab;
+    background: #102241;
+    color: #d4e8ff;
+    padding: 0.5rem;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  .ltf-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+  .ltf-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .ltf-sub {
+    font-size: 0.58rem;
+    color: #c7dbf5;
+    letter-spacing: 1px;
+    line-height: 1.4;
+  }
+  .ltf-upgrades {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .ltf-up {
+    border: 1px solid #3b6187;
+    background: rgba(0, 12, 26, 0.45);
+    padding: 0.45rem;
+  }
+  .ltf-up-title {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1.5px;
+    color: #b9ddff;
+    font-size: 0.85rem;
+  }
+  .ltf-up button {
+    margin-top: 0.45rem;
+    width: 100%;
+    border: 1px solid #4d7cad;
+    background: #112947;
+    color: #d8ebff;
+    font-size: 0.65rem;
+    padding: 0.35rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  .ltf-up button:disabled { opacity: 0.35; cursor: not-allowed; }
+
   /* ── Roulette ── */
   /* Roulette number grid */
   .rl-grid-wrap {
@@ -4093,6 +4171,7 @@
   <button class="game-tab" id="tabRL" onclick="switchGame('rl')">🎡 Roulette</button>
   <button class="game-tab" id="tabPK" onclick="switchGame('pk')">🔵 Plinko</button>
   <button class="game-tab" id="tabPR" onclick="switchGame('pr')">🎯 Precision</button>
+  <button class="game-tab" id="tabLF" onclick="switchGame('lf')">🐧 Learn to Fly</button>
 </div>
 
 <!-- ── BLACKJACK PANEL ── -->
@@ -4303,6 +4382,24 @@
     <button class="r-spin-btn" id="prCashBtn" onclick="prCashOut()" style="flex:1;background:#1a3a1a;border-color:var(--green);color:var(--green);display:none;">💰 Cash Out</button>
   </div>
 
+</div>
+
+<!-- ── LEARN TO FLY PANEL ── -->
+<div class="game-panel" id="panelLF">
+  <div class="ltf-panel">
+    <div class="ltf-head">
+      <div>RUN MONEY: <strong id="ltfMoney">0</strong> 🪙</div>
+      <div>BEST DISTANCE: <strong id="ltfBest">0m</strong></div>
+      <div>RAMP LV <strong id="ltfRampLv">1</strong> · BOOST LV <strong id="ltfBoostLv">1</strong> · GLIDER LV <strong id="ltfGliderLv">1</strong> · BODY LV <strong id="ltfBodyLv">1</strong></div>
+    </div>
+    <canvas id="ltfCanvas" class="ltf-canvas" width="720" height="230"></canvas>
+    <div class="ltf-sub" id="ltfTelemetry">Launch to start. Hold <strong>SPACE</strong> to boost, use <strong>↑ / ↓</strong> to control angle, and cash in your flight distance for upgrades.</div>
+    <div class="ltf-controls">
+      <button class="ltf-btn" id="ltfLaunchBtn" onclick="ltfStartRun()">🚀 Start Run</button>
+      <button class="ltf-btn" id="ltfResetBtn" onclick="ltfResetProgress()">♻ Reset LTF Save</button>
+    </div>
+    <div class="ltf-upgrades" id="ltfUpgrades"></div>
+  </div>
 </div>
 
 </div>
@@ -5279,6 +5376,8 @@
   }
 
   window.doLogout = function() {
+    ltfStopLoop();
+    ltfState = null;
     currentUser = null;
     window.__currentUser = null;
     window.__currentUserId = null;
@@ -6437,10 +6536,14 @@
     prLoadProgress(currentUser.id);
     prRenderProgress();
     prUpdateBetDisplay();
+    ltfLoad(currentUser.id);
+    ltfRenderMeta();
+    ltfDraw();
     refreshCasinoWallet();
   };
 
   window.closeCasino = function() {
+    ltfStopLoop();
     document.getElementById('casinoDrawer').classList.remove('open');
     document.getElementById('drawerOverlay').classList.remove('open');
     document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '◀';
@@ -6625,14 +6728,337 @@
     document.getElementById('panelRL').classList.toggle('active', game === 'rl');
     document.getElementById('panelPK').classList.toggle('active', game === 'pk');
     document.getElementById('panelPR').classList.toggle('active', game === 'pr');
+    document.getElementById('panelLF').classList.toggle('active', game === 'lf');
     document.getElementById('tabBJ').classList.toggle('active', game === 'bj');
     document.getElementById('tabRL').classList.toggle('active', game === 'rl');
     document.getElementById('tabPK').classList.toggle('active', game === 'pk');
     document.getElementById('tabPR').classList.toggle('active', game === 'pr');
+    document.getElementById('tabLF').classList.toggle('active', game === 'lf');
     if (game === 'rl') { rlBuildGrid(); }
     if (game === 'pk') { pkInitCanvas(); }
+    if (game === 'lf') { ltfInit(); }
     if (game !== 'pr') { prStop(); }
+    if (game !== 'lf') { ltfStopLoop(); }
   };
+
+  // ══════════════════ LEARN TO FLY ══════════════════
+  const LTF_UPGRADE_DEFS = {
+    ramp: { label: '🏔 Ramp', desc: 'Launch speed + angle', baseCost: 45 },
+    boost: { label: '🚀 Boost', desc: 'More thrust + fuel', baseCost: 65 },
+    glider: { label: '🪂 Glider', desc: 'More lift, lower drag', baseCost: 60 },
+    body: { label: '🐧 Body', desc: 'Weight + bounce control', baseCost: 55 },
+  };
+  let ltfState = null;
+  let ltfFrame = 0;
+  let ltfKeysBound = false;
+  let ltfBoostHeld = false;
+  let ltfPitchInput = 0;
+
+  function ltfSaveKey(playerId) { return `pw_ltf_save_${playerId}`; }
+  function ltfDefaultState() {
+    return {
+      money: 0,
+      bestDistance: 0,
+      upgrades: { ramp: 1, boost: 1, glider: 1, body: 1 },
+      run: null,
+    };
+  }
+
+  function ltfLoad(playerId) {
+    ltfState = ltfDefaultState();
+    if (!playerId) return;
+    const raw = localStorage.getItem(ltfSaveKey(playerId));
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      ltfState.money = Math.max(0, Number(parsed.money || 0));
+      ltfState.bestDistance = Math.max(0, Number(parsed.bestDistance || 0));
+      ltfState.upgrades = {
+        ramp: Math.max(1, Number(parsed?.upgrades?.ramp || 1)),
+        boost: Math.max(1, Number(parsed?.upgrades?.boost || 1)),
+        glider: Math.max(1, Number(parsed?.upgrades?.glider || 1)),
+        body: Math.max(1, Number(parsed?.upgrades?.body || 1)),
+      };
+    } catch {
+      ltfState = ltfDefaultState();
+    }
+  }
+
+  function ltfSave() {
+    if (!currentUser || !ltfState) return;
+    localStorage.setItem(ltfSaveKey(currentUser.id), JSON.stringify({
+      money: ltfState.money,
+      bestDistance: ltfState.bestDistance,
+      upgrades: ltfState.upgrades,
+    }));
+  }
+
+  function ltfUpgradeCost(type) {
+    const lvl = ltfState.upgrades[type];
+    return Math.round(LTF_UPGRADE_DEFS[type].baseCost * Math.pow(1.45, lvl - 1));
+  }
+
+  function ltfRenderUpgrades() {
+    const wrap = document.getElementById('ltfUpgrades');
+    if (!wrap || !ltfState) return;
+    wrap.innerHTML = Object.entries(LTF_UPGRADE_DEFS).map(([type, meta]) => {
+      const lvl = ltfState.upgrades[type];
+      const cost = ltfUpgradeCost(type);
+      const canBuy = ltfState.money >= cost;
+      return `<div class="ltf-up">
+        <div class="ltf-up-title">${meta.label} Lv.${lvl}</div>
+        <div class="ltf-sub">${meta.desc}</div>
+        <button onclick="ltfBuyUpgrade('${type}')" ${canBuy ? '' : 'disabled'}>BUY · ${cost} 🪙</button>
+      </div>`;
+    }).join('');
+  }
+
+  function ltfRenderMeta() {
+    if (!ltfState) return;
+    document.getElementById('ltfMoney').textContent = Math.floor(ltfState.money).toLocaleString();
+    document.getElementById('ltfBest').textContent = `${Math.floor(ltfState.bestDistance)}m`;
+    document.getElementById('ltfRampLv').textContent = ltfState.upgrades.ramp;
+    document.getElementById('ltfBoostLv').textContent = ltfState.upgrades.boost;
+    document.getElementById('ltfGliderLv').textContent = ltfState.upgrades.glider;
+    document.getElementById('ltfBodyLv').textContent = ltfState.upgrades.body;
+    ltfRenderUpgrades();
+  }
+
+  function ltfBuildRunState() {
+    const rampLv = ltfState.upgrades.ramp;
+    const boostLv = ltfState.upgrades.boost;
+    const gliderLv = ltfState.upgrades.glider;
+    const bodyLv = ltfState.upgrades.body;
+    const rampAngle = 0.36 + rampLv * 0.02;
+    const startSpeed = 9 + rampLv * 1.7 + bodyLv * 0.35;
+    const fuelMax = 80 + boostLv * 30;
+    return {
+      x: 85,
+      y: 174,
+      vx: startSpeed * Math.cos(rampAngle),
+      vy: -startSpeed * Math.sin(rampAngle),
+      angle: -0.15,
+      fuel: fuelMax,
+      fuelMax,
+      boosting: false,
+      crashed: false,
+      done: false,
+      maxHeight: 0,
+      maxSpeed: startSpeed,
+      flightTime: 0,
+      distance: 0,
+      boostPower: 0.05 + boostLv * 0.013,
+      drag: Math.max(0.006, 0.016 - gliderLv * 0.0012),
+      liftCoeff: 0.0038 + gliderLv * 0.0012,
+      gravity: 0.145,
+      weight: 1 + bodyLv * 0.09,
+      bounce: Math.min(0.7, 0.3 + bodyLv * 0.05),
+    };
+  }
+
+  function ltfDraw() {
+    const cv = document.getElementById('ltfCanvas');
+    if (!cv || !ltfState) return;
+    const ctx = cv.getContext('2d');
+    const run = ltfState.run;
+
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    const baseY = 195;
+    const camX = run ? Math.max(0, run.x - 140) : 0;
+
+    ctx.fillStyle = '#bde8ff';
+    ctx.fillRect(0, 0, cv.width, baseY);
+    ctx.fillStyle = '#f3fbff';
+    ctx.fillRect(0, baseY, cv.width, cv.height - baseY);
+
+    const rampPts = [
+      { x: 0 - camX, y: baseY },
+      { x: 45 - camX, y: baseY },
+      { x: 80 - camX, y: 170 },
+      { x: 120 - camX, y: 146 },
+      { x: 160 - camX, y: 140 },
+    ];
+    ctx.fillStyle = '#375675';
+    ctx.beginPath();
+    ctx.moveTo(rampPts[0].x, rampPts[0].y);
+    rampPts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.lineTo(160 - camX, baseY);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#0f2a45';
+    for (let i = 0; i < 12; i++) {
+      const mark = i * 100;
+      const sx = 170 + mark - camX;
+      if (sx < 0 || sx > cv.width) continue;
+      ctx.fillRect(sx, baseY, 2, 10);
+      ctx.font = '11px DM Mono';
+      ctx.fillText(`${mark}m`, sx - 12, baseY + 22);
+    }
+
+    if (run) {
+      const px = run.x - camX;
+      const py = run.y;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.rotate(run.angle);
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 14, 10, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f5f5f5';
+      ctx.beginPath();
+      ctx.ellipse(2, 1, 8, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#88bbff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-8, -3);
+      ctx.lineTo(-21, -11 - ltfState.upgrades.glider * 0.9);
+      ctx.lineTo(2, -6);
+      ctx.stroke();
+      if (run.boosting && run.fuel > 0) {
+        ctx.fillStyle = '#ff8a35';
+        ctx.beginPath();
+        ctx.moveTo(-14, 0);
+        ctx.lineTo(-26 - Math.random() * 5, 2);
+        ctx.lineTo(-15, 4);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  function ltfStep() {
+    const run = ltfState.run;
+    if (!run || run.done) return;
+    const dt = 1;
+    run.flightTime += dt / 60;
+    run.boosting = ltfBoostHeld && run.fuel > 0;
+    run.angle += ltfPitchInput * 0.035;
+    run.angle = Math.max(-0.65, Math.min(0.75, run.angle));
+
+    if (run.boosting) {
+      run.vx += run.boostPower;
+      run.fuel -= 1;
+    }
+
+    const lift = Math.max(0, run.vx) * run.liftCoeff * Math.cos(run.angle);
+    const dragX = run.drag * run.vx;
+    const dragY = run.drag * run.vy * 0.22;
+
+    run.vy += run.gravity * run.weight;
+    run.vy -= lift;
+    run.vx -= dragX;
+    run.vy -= dragY;
+
+    run.x += run.vx * dt;
+    run.y += run.vy * dt;
+
+    const baseY = 195;
+    if (run.y >= baseY) {
+      const impact = Math.abs(run.angle);
+      run.y = baseY;
+      if (impact < 0.38 && Math.abs(run.vy) < 6.6) {
+        run.vx *= run.bounce;
+        run.vy *= -0.2;
+      } else {
+        run.vx *= 0.35;
+        run.vy = 0;
+      }
+      if (run.vx < 0.24) run.done = true;
+    }
+
+    run.maxHeight = Math.max(run.maxHeight, baseY - run.y);
+    run.maxSpeed = Math.max(run.maxSpeed, Math.hypot(run.vx, run.vy));
+    run.distance = Math.max(0, run.x - 85);
+
+    const telemetry = `DIST ${Math.floor(run.distance)}m · ALT ${Math.floor(run.maxHeight)}m · SPD ${run.maxSpeed.toFixed(1)} · FUEL ${Math.max(0, Math.floor((run.fuel / run.fuelMax) * 100))}%`;
+    document.getElementById('ltfTelemetry').innerHTML = telemetry;
+
+    if (run.done) ltfFinishRun();
+  }
+
+  function ltfLoop() {
+    if (!ltfState || !ltfState.run) return;
+    ltfStep();
+    ltfDraw();
+    if (!ltfState.run.done) ltfFrame = requestAnimationFrame(ltfLoop);
+  }
+
+  function ltfFinishRun() {
+    const run = ltfState.run;
+    const reward = Math.floor(
+      run.distance * 0.55 +
+      run.maxHeight * 0.3 +
+      run.maxSpeed * 3 +
+      run.flightTime * 6
+    );
+    ltfState.money += reward;
+    ltfState.bestDistance = Math.max(ltfState.bestDistance, run.distance);
+    document.getElementById('ltfTelemetry').innerHTML = `Run complete: +${reward} 🪙 · ${Math.floor(run.distance)}m distance · ${Math.floor(run.maxHeight)}m height. Upgrade and launch again.`;
+    document.getElementById('ltfLaunchBtn').disabled = false;
+    ltfRenderMeta();
+    ltfSave();
+  }
+
+  window.ltfStartRun = function() {
+    if (!ltfState || (ltfState.run && !ltfState.run.done)) return;
+    ltfStopLoop();
+    ltfState.run = ltfBuildRunState();
+    document.getElementById('ltfLaunchBtn').disabled = true;
+    ltfLoop();
+  };
+
+  window.ltfBuyUpgrade = function(type) {
+    if (!ltfState || !LTF_UPGRADE_DEFS[type]) return;
+    const cost = ltfUpgradeCost(type);
+    if (ltfState.money < cost) return;
+    ltfState.money -= cost;
+    ltfState.upgrades[type] += 1;
+    ltfRenderMeta();
+    ltfSave();
+  };
+
+  window.ltfResetProgress = function() {
+    if (!currentUser) return;
+    localStorage.removeItem(ltfSaveKey(currentUser.id));
+    ltfLoad(currentUser.id);
+    ltfRenderMeta();
+    ltfState.run = null;
+    document.getElementById('ltfTelemetry').innerHTML = 'Save reset. Launch again from level 1.';
+    document.getElementById('ltfLaunchBtn').disabled = false;
+    ltfDraw();
+  };
+
+  function ltfBindKeys() {
+    if (ltfKeysBound) return;
+    ltfKeysBound = true;
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space') { ltfBoostHeld = true; e.preventDefault(); }
+      if (e.code === 'ArrowUp') ltfPitchInput = -1;
+      if (e.code === 'ArrowDown') ltfPitchInput = 1;
+    });
+    document.addEventListener('keyup', e => {
+      if (e.code === 'Space') ltfBoostHeld = false;
+      if (e.code === 'ArrowUp' && ltfPitchInput === -1) ltfPitchInput = 0;
+      if (e.code === 'ArrowDown' && ltfPitchInput === 1) ltfPitchInput = 0;
+    });
+  }
+
+  function ltfStopLoop() {
+    if (ltfFrame) cancelAnimationFrame(ltfFrame);
+    ltfFrame = 0;
+  }
+
+  function ltfInit() {
+    if (!currentUser) return;
+    if (!ltfState) ltfLoad(currentUser.id);
+    ltfBindKeys();
+    ltfRenderMeta();
+    if (!ltfState.run) ltfDraw();
+  }
 
   // ══════════════════ ROULETTE ══════════════════
   // European roulette: 37 pockets (0–36)
