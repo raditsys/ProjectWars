@@ -3315,6 +3315,29 @@
   .env-resource.mining   { animation: oreShake 0.3s ease-in-out 3; }
   .env-resource.falling  { animation: treeFall 0.55s ease-in forwards !important; pointer-events: none; }
   .env-resource.breaking { animation: oreBreak 0.4s ease-in forwards !important; pointer-events: none; }
+  .env-dungeon-item {
+    position: absolute;
+    bottom: 6px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.8));
+    transition: transform 0.14s ease;
+  }
+  .env-dungeon-item:hover { transform: translateY(-4px) scale(1.1); }
+  .env-leave-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: rgba(20,10,24,0.9);
+    color: #ccb6ff;
+    border: 1px solid #573788;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 1.4px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  .env-leave-btn:hover { border-color: #a978ff; color: #e9dcff; }
   #envFooter {
     border-top: 1px solid #1e2e1e;
     display: flex;
@@ -8642,7 +8665,7 @@ document.addEventListener('click', e => {
     '0,0': f('Cliff Edge',      'A sheer drop into the mist',         'linear-gradient(180deg,#060c14 0%,#0a1220 70%,#0c1420 100%)', '#1a2a38', '#2a4a5a'),
     '1,0': f('Stone Pass',      'Ancient carved stone markers',       'linear-gradient(180deg,#0e0e0e 0%,#161616 60%,#121212 100%)', '#282828', '#404040'),
     '2,0': f('Frozen Peak',     'Snow-dusted rocks and silence',      'linear-gradient(180deg,#0c1020 0%,#101828 60%,#0c1020 100%)', '#202838', '#3a4a5a'),
-    '3,0': f('Howling Ridge',   'Wind tears through the pines',       'linear-gradient(180deg,#0a0e08 0%,#0e1408 60%,#0a0e08 100%)', '#141e0a', '#243010'),
+    '3,0': { name:'Howling Ridge', desc:'Wind tears through the pines. A stone stair descends into darkness to the north.', sky:'linear-gradient(180deg,#0a0e08 0%,#0e1408 60%,#0a0e08 100%)', ground:'#141e0a', groundBorder:'#243010', resources:[], dungeonEntrance:true },
     '4,0': f('Fog Valley',      'Thick mist clings to the ground',    'linear-gradient(180deg,#101418 0%,#181e24 60%,#101418 100%)', '#1c2428', '#2c3840'),
     '5,0': f('Dark Pines',      'Tall evergreens block the light',    'linear-gradient(180deg,#060a06 0%,#0a100a 60%,#060a06 100%)', '#0e160e', '#182818'),
     '6,0': null,
@@ -9037,10 +9060,66 @@ document.addEventListener('click', e => {
     `)}</div>`,
   };
 
+  const DUNGEON_LOOT = [
+    { key:'copper_ore', icon:'🧱', name:'Ancient Brick' },
+    { key:'iron_ore', icon:'⛓️', name:'Rusted Chain' },
+    { key:'gold_ore', icon:'🏺', name:'Gilded Relic' },
+    { key:'willow_log', icon:'🕯️', name:'Tallow Candle' },
+    { key:'magic_log', icon:'📜', name:'Arcane Scrap' },
+  ];
   let cx = 2, cy = 2;
-  let clayer = 0;  // 0=surface, 1=underground
+  let clayer = 0;  // 0=surface, 1=underground, 2=desert, 3=infinite dungeon
   let resourceState = [];
   let worldResourceState = {};
+  let dungeonLootTaken = new Set();
+
+  function hashSeed(str) {
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0) || 1;
+  }
+  function seededRandom(seed) {
+    let t = seed >>> 0;
+    return function() {
+      t += 0x6D2B79F5;
+      let r = Math.imul(t ^ (t >>> 15), t | 1);
+      r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+      return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function dungeonRoom(depth) {
+    const rand = seededRandom(hashSeed('dungeon_'+depth));
+    const themes = ['Mossy Hall', 'Echo Hall', 'Torch Gallery', 'Forgotten Passage', 'Catacomb Hall'];
+    const vibes = [
+      'The air tastes like iron and wet stone.',
+      'Tiny pebbles skip across the floor whenever the tunnel groans.',
+      'Old torch soot stains the walls in long black fingers.',
+      'Cold drafts keep brushing past your neck.',
+      'The hallway bends into darkness beyond your torchlight.'
+    ];
+    const theme = themes[Math.floor(rand()*themes.length)];
+    const desc = `${vibes[Math.floor(rand()*vibes.length)]} Depth ${depth} stretches ahead forever.`;
+    const items = [];
+    const count = 1 + Math.floor(rand()*2);
+    for (let i = 0; i < count; i++) {
+      const loot = DUNGEON_LOOT[Math.floor(rand()*DUNGEON_LOOT.length)];
+      items.push({ ...loot, idx:i, x: 24 + Math.floor(rand()*350) });
+    }
+    return {
+      name: `${theme} ${depth}`,
+      desc,
+      sky: 'linear-gradient(180deg,#06040a 0%,#0d0816 65%,#120a1e 100%)',
+      ground: '#1a1224',
+      groundBorder: '#3a2660',
+      resources: [],
+      items,
+      tunnel: depth === 0 ? 'up' : undefined,
+      depth,
+    };
+  }
 
   function resourceNodeKey(layer, c, rr, idx) { return `${layer}_${c}_${rr}_${idx}`; }
   function getWorldNode(nodeKey) {
@@ -9081,6 +9160,10 @@ document.addEventListener('click', e => {
 
   function key(c, rr) { return `${c},${rr}`; }
   function room(c, rr) {
+    if (clayer === 3) {
+      if (c !== 0 || rr < 0) return null;
+      return dungeonRoom(rr);
+    }
     const H = clayer === 0 ? GRID_H : clayer === 1 ? 4 : DESERT_H;
     const W = clayer === 2 ? DESERT_W : GRID_W;
     if (c < 0 || c >= W || rr < 0 || rr >= H) return null;
@@ -9116,28 +9199,30 @@ document.addEventListener('click', e => {
     const canvas = document.getElementById('envMinimapCanvas');
     if (!canvas) return;
     const CELL = 17, GAP = 3, STRIP_H = 16;
-    const ROWS = clayer === 0 ? GRID_H : clayer === 1 ? 4 : DESERT_H;
-    const COLS = clayer === 2 ? DESERT_W : GRID_W;
+    const ROWS = clayer === 0 ? GRID_H : clayer === 1 ? 4 : clayer === 2 ? DESERT_H : 9;
+    const COLS = clayer === 3 ? 1 : (clayer === 2 ? DESERT_W : GRID_W);
     const mapWidth = COLS * (CELL + GAP) - GAP;
     const mapHeight = ROWS * (CELL + GAP) - GAP;
     canvas.width = mapWidth;
     canvas.height = mapHeight + STRIP_H;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const dungeonStart = clayer === 3 ? Math.max(0, cy - 4) : 0;
     for (let rr = 0; rr < ROWS; rr++) {
       for (let c = 0; c < COLS; c++) {
         const px = c*(CELL+GAP), py = rr*(CELL+GAP);
-        const rm = room(c, rr);
-        const emptyCol = clayer===0 ? '#0e0e0e' : clayer===1 ? '#06040a' : '#1a1408';
+        const worldRow = clayer === 3 ? dungeonStart + rr : rr;
+        const rm = room(c, worldRow);
+        const emptyCol = clayer===0 ? '#0e0e0e' : clayer===1 ? '#06040a' : clayer===2 ? '#1a1408' : '#10091a';
         if (!rm) { ctx.fillStyle = emptyCol; ctx.fillRect(px,py,CELL,CELL); continue; }
         let col;
-        if (c===cx && rr===cy)              col = '#f5c842';
+        if (c===cx && worldRow===cy)              col = '#f5c842';
         else if (rm.locked)                 col = '#444455';
         else if (rm.tollGate)               col = '#4a3a1a';
         else if (rm.tunnel)                 col = clayer===2 ? '#4a3a1a' : '#3a2050';
         else if (rm.npc && clayer===1)      col = '#3a1a10';
-        else if (rm.resources?.length)      col = clayer===0 ? '#1a4a1a' : clayer===1 ? '#1a3040' : '#4a3a14';
-        else                                col = clayer===0 ? '#1e2e1e' : clayer===1 ? '#14101e' : '#3a2e18';
+        else if (rm.resources?.length)      col = clayer===0 ? '#1a4a1a' : clayer===1 ? '#1a3040' : clayer===2 ? '#4a3a14' : '#402060';
+        else                                col = clayer===0 ? '#1e2e1e' : clayer===1 ? '#14101e' : clayer===2 ? '#3a2e18' : '#221131';
         ctx.fillStyle = col;
         ctx.fillRect(px, py, CELL, CELL);
         if (rm.locked) { ctx.fillStyle='#666688'; ctx.fillRect(px+Math.floor(CELL/2)-1,py+Math.floor(CELL/2)-1,2,2); }
@@ -9145,10 +9230,10 @@ document.addEventListener('click', e => {
       }
     }
     // Layer label strip
-    const label = clayer === 0 ? 'SURFACE' : clayer === 1 ? 'UNDERGROUND' : 'DESERT';
-    ctx.fillStyle = clayer === 0 ? '#1a3a1a' : clayer === 1 ? '#1a1030' : '#2a1e08';
+    const label = clayer === 0 ? 'SURFACE' : clayer === 1 ? 'UNDERGROUND' : clayer === 2 ? 'DESERT' : `DUNGEON D${cy}`;
+    ctx.fillStyle = clayer === 0 ? '#1a3a1a' : clayer === 1 ? '#1a1030' : clayer === 2 ? '#2a1e08' : '#1a0f2a';
     ctx.fillRect(0, mapHeight, canvas.width, STRIP_H);
-    ctx.fillStyle = clayer === 0 ? '#4a8a4a' : clayer === 1 ? '#8844ff' : '#d4af37';
+    ctx.fillStyle = clayer === 0 ? '#4a8a4a' : clayer === 1 ? '#8844ff' : clayer === 2 ? '#d4af37' : '#b48cff';
     ctx.font = 'bold 9px monospace';
     ctx.fillText(label, 4, canvas.height - 5);
   }
@@ -9194,6 +9279,45 @@ document.addEventListener('click', e => {
     const decorFn = clayer === 2 ? (DECOR_DESERT[rm.name] || DECOR[rm.name]) : clayer === 1 ? (DECOR_UNDER[rm.name] || DECOR[rm.name]) : DECOR[rm.name];
     if (decorFn) resContainer.innerHTML = decorFn();
 
+    if (clayer === 3) {
+      const rand = seededRandom(hashSeed('dungeon_art_'+cy));
+      const pillars = Array.from({length:4}, (_,i)=> {
+        const x = 18 + i*100 + Math.floor(rand()*22);
+        const h = 80 + Math.floor(rand()*90);
+        return `<rect x="${x}" y="${230-h}" width="18" height="${h}" fill="#261734" opacity="0.85" rx="2"/><rect x="${x+2}" y="${230-h+4}" width="14" height="8" fill="#3f2a58" opacity="0.7"/>`;
+      }).join('');
+      const glyphs = Array.from({length:7}, ()=>`<text x="${20+Math.floor(rand()*360)}" y="${30+Math.floor(rand()*110)}" font-size="${11+Math.floor(rand()*10)}" fill="#8e65d9" opacity="0.45" font-family="serif">${['᛭','ᚱ','✶','☽','ᛉ'][Math.floor(rand()*5)]}</text>`).join('');
+      const art = document.createElement('div');
+      art.className = 'env-decor';
+      art.style.left = '0'; art.style.bottom = '0'; art.style.width = '420px'; art.style.height = '240px';
+      art.innerHTML = makeSVG(420,240, pillars + glyphs);
+      resContainer.appendChild(art);
+
+      rm.items.forEach(item => {
+        const lootId = `${cy}:${item.idx}`;
+        if (dungeonLootTaken.has(lootId)) return;
+        const itemEl = document.createElement('div');
+        itemEl.className = 'env-dungeon-item';
+        itemEl.style.left = item.x + 'px';
+        itemEl.title = `Pick up ${item.name}`;
+        itemEl.textContent = item.icon;
+        itemEl.onclick = () => {
+          dungeonLootTaken.add(lootId);
+          addInventoryItem(item.key, 1);
+          const r = itemEl.getBoundingClientRect();
+          spawnResourceFloat(`${item.icon} ${item.name}`, r.left, r.top, 'mine');
+          itemEl.remove();
+        };
+        resContainer.appendChild(itemEl);
+      });
+
+      const leaveBtn = document.createElement('button');
+      leaveBtn.className = 'env-leave-btn';
+      leaveBtn.textContent = '↩ Leave Dungeon';
+      leaveBtn.onclick = () => envLeaveDungeon();
+      resContainer.appendChild(leaveBtn);
+    }
+
     // Dead Grove: glowing chest to descend (appears after Morrigan paid)
     if (clayer === 0 && rm.name === 'Dead Grove' && window.__questFlags?.morriganPaid) {
       const chestDiv = document.createElement('div');
@@ -9228,6 +9352,22 @@ document.addEventListener('click', e => {
       );
       exitDiv.onclick = () => envExitDesert();
       resContainer.appendChild(exitDiv);
+    }
+
+    // North ridge: descend into infinite dungeon
+    if (clayer === 0 && rm.dungeonEntrance) {
+      const dungeonDiv = document.createElement('div');
+      dungeonDiv.className = 'env-chest';
+      dungeonDiv.style.filter = 'drop-shadow(0 0 10px rgba(180,140,255,0.7))';
+      dungeonDiv.title = 'Enter the northern dungeon hallway';
+      dungeonDiv.innerHTML = makeSVG(56,56,
+        '<path d="M8,54 L8,22 Q28,2 48,22 L48,54 Z" fill="#120a1e"/>' +
+        '<path d="M12,54 L12,25 Q28,8 44,25 L44,54 Z" fill="#1d1230"/>' +
+        '<circle cx="28" cy="32" r="5" fill="#9c72ff"/>' +
+        '<circle cx="28" cy="32" r="2" fill="#d9c5ff"/>'
+      );
+      dungeonDiv.onclick = () => envEnterDungeon();
+      resContainer.appendChild(dungeonDiv);
     }
 
     // Tunnel Entrance: rope-chest to ascend back to surface
@@ -9479,6 +9619,22 @@ document.addEventListener('click', e => {
     layerFlash(() => {
       clayer = 0;
       cx = 3; cy = 5;  // one tile north of Toll Gate entrance
+      renderRoom(0, 0);
+    });
+  };
+
+  window.envEnterDungeon = function() {
+    layerFlash(() => {
+      clayer = 3;
+      cx = 0; cy = 0;
+      renderRoom(0, 0);
+    });
+  };
+
+  window.envLeaveDungeon = function() {
+    layerFlash(() => {
+      clayer = 0;
+      cx = 3; cy = 0;
       renderRoom(0, 0);
     });
   };
