@@ -3853,6 +3853,7 @@
         <div id="envLayerBtns">
           <button class="env-layer-btn" id="envBtnDown" onclick="envDescend()" style="display:none">⬇ Descend</button>
           <button class="env-layer-btn" id="envBtnUp"   onclick="envAscend()"  style="display:none">⬆ Ascend</button>
+          <button class="env-layer-btn" id="envBtnLeaveDungeon" onclick="envLeaveDungeon()" style="display:none">↩ Leave Dungeon</button>
         </div>
       </div>
     </div>
@@ -3922,6 +3923,18 @@
         <span class="inv-label">Runite Ore</span>
         <span class="inv-count" id="invRuniteOre">0</span>
         <button class="inv-sell-btn" onclick="sellResource('runite_ore')" disabled id="sellRuniteOre">Sell 40🪙</button>
+      </div>
+      <div class="inv-row" id="invRowAncientCoin">
+        <span class="inv-icon">🪙</span>
+        <span class="inv-label">Ancient Coin</span>
+        <span class="inv-count" id="invAncientCoin">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('ancient_coin')" disabled id="sellAncientCoin">Sell 9🪙</button>
+      </div>
+      <div class="inv-row" id="invRowDungeonRelic">
+        <span class="inv-icon">🗿</span>
+        <span class="inv-label">Dungeon Relic</span>
+        <span class="inv-count" id="invDungeonRelic">0</span>
+        <button class="inv-sell-btn" onclick="sellResource('dungeon_relic')" disabled id="sellDungeonRelic">Sell 30🪙</button>
       </div>
     </div>
   </div>
@@ -8458,6 +8471,7 @@
 window.__inventory = {
   oak_log: 0, willow_log: 0, magic_log: 0,
   copper_ore: 0, iron_ore: 0, gold_ore: 0, runite_ore: 0,
+  ancient_coin: 0, dungeon_relic: 0,
   bronze_axe: 1, bronze_pickaxe: 1,
 };
 window.__equipmentLoadout = { leftHand: '', rightHand: '' };
@@ -8471,15 +8485,18 @@ const GEAR_GRID_LAYOUT = ['bronze_axe','bronze_pickaxe',null,null,null,null,null
 const SELL_PRICES = {
   oak_log: 2, willow_log: 5, magic_log: 20,
   copper_ore: 2, iron_ore: 4, gold_ore: 12, runite_ore: 40,
+  ancient_coin: 9, dungeon_relic: 30,
 };
 
 const INV_IDS = {
   oak_log: 'invOakLog', willow_log: 'invWillowLog', magic_log: 'invMagicLog',
   copper_ore: 'invCopperOre', iron_ore: 'invIronOre', gold_ore: 'invGoldOre', runite_ore: 'invRuniteOre',
+  ancient_coin: 'invAncientCoin', dungeon_relic: 'invDungeonRelic',
 };
 const SELL_IDS = {
   oak_log: 'sellOakLog', willow_log: 'sellWillowLog', magic_log: 'sellMagicLog',
   copper_ore: 'sellCopperOre', iron_ore: 'sellIronOre', gold_ore: 'sellGoldOre', runite_ore: 'sellRuniteOre',
+  ancient_coin: 'sellAncientCoin', dungeon_relic: 'sellDungeonRelic',
 };
 
 function updateEquipmentUI() {
@@ -8645,7 +8662,7 @@ document.addEventListener('click', e => {
     '3,0': f('Howling Ridge',   'Wind tears through the pines',       'linear-gradient(180deg,#0a0e08 0%,#0e1408 60%,#0a0e08 100%)', '#141e0a', '#243010'),
     '4,0': f('Fog Valley',      'Thick mist clings to the ground',    'linear-gradient(180deg,#101418 0%,#181e24 60%,#101418 100%)', '#1c2428', '#2c3840'),
     '5,0': f('Dark Pines',      'Tall evergreens block the light',    'linear-gradient(180deg,#060a06 0%,#0a100a 60%,#060a06 100%)', '#0e160e', '#182818'),
-    '6,0': null,
+    '6,0': { name:'Ancient Stair', desc:'A cracked stairwell descends into a forgotten dungeon to the north.', sky:'linear-gradient(180deg,#0a1018 0%,#0f1620 60%,#0a1018 100%)', ground:'#182028', groundBorder:'#2e3a46', resources:[], tunnel:'dungeon' },
     '7,0': null,
 
     '0,1': f('Mossy Bank',      'Soft green moss over old stone',     'linear-gradient(180deg,#081408 0%,#0c1c0c 60%,#081408 100%)', '#162412', '#2a3e1a'),
@@ -8730,6 +8747,14 @@ document.addEventListener('click', e => {
     'Forgotten Shrine': () => `<div class="env-decor" style="left:90px;bottom:0;width:120px;height:100px">${makeSVG(120,100,`<rect x="45" y="40" width="30" height="60" fill="#2a2018"/><polygon points="10,40 60,5 110,40" fill="#3a3028"/><rect x="50" y="55" width="20" height="30" fill="#1a1408"/><circle cx="60" cy="30" r="6" fill="#d4af37" opacity="0.5"/><rect x="20" y="80" width="15" height="20" fill="#2a2018"/><rect x="85" y="80" width="15" height="20" fill="#2a2018"/>`)}</div>`,
     'Sunken Temple': () => `<div class="env-decor" style="left:20px;bottom:0;width:260px;height:90px">${makeSVG(260,90,`<rect x="0" y="50" width="260" height="40" fill="#1a2820" opacity="0.6"/><rect x="30" y="20" width="200" height="70" fill="#1e2e20" opacity="0.5"/><rect x="20" y="10" width="220" height="20" fill="#243428"/><rect x="50" y="0" width="160" height="12" fill="#2a3a2e"/>${[50,100,160,210].map(x=>`<rect x="${x}" y="20" width="8" height="70" fill="#1a2818"/>`).join('')}<rect x="90" y="35" width="80" height="55" fill="#101a12"/>`)}</div>`,
     'Dead Grove': () => [[20,65],[90,55],[160,70],[230,50],[275,60]].map(([x,h])=>`<div class="env-decor" style="left:${x}px;bottom:0">${makeSVG(30,h+5,`<rect x="12" y="0" width="6" height="${h}" rx="2" fill="#2a2018"/><line x1="15" y1="${h*0.3}" x2="4" y2="${h*0.15}" stroke="#2a2018" stroke-width="3" stroke-linecap="round"/><line x1="15" y1="${h*0.3}" x2="26" y2="${h*0.18}" stroke="#2a2018" stroke-width="3" stroke-linecap="round"/>`)}</div>`).join(''),
+    'Ancient Stair': () => `<div class="env-decor" style="left:70px;bottom:0;width:220px;height:120px">${makeSVG(220,120,`
+      <rect x="20" y="54" width="180" height="64" rx="3" fill="#1b222a"/>
+      ${[0,1,2,3,4].map(i=>`<rect x="${34+i*30}" y="${86-i*9}" width="28" height="34" fill="#24303a"/>`).join('')}
+      <rect x="86" y="22" width="48" height="36" rx="2" fill="#0b0f14"/>
+      <rect x="94" y="18" width="32" height="8" rx="2" fill="#2a3642"/>
+      <circle cx="110" cy="40" r="3" fill="#d4af37"/>
+      <ellipse cx="110" cy="58" rx="58" ry="10" fill="#6aa4d8" opacity="0.2"/>
+    `)}</div>`,
     'Bone Yard': () => `<div class="env-decor" style="left:0;bottom:2px;width:300px;height:30px">${makeSVG(300,30,`<ellipse cx="40" cy="20" rx="18" ry="6" fill="#d4cfc0" opacity="0.6"/><ellipse cx="100" cy="22" rx="12" ry="5" fill="#ccc8b8" opacity="0.5"/><rect x="140" y="14" width="30" height="4" rx="2" fill="#d0cbb8" opacity="0.6"/><ellipse cx="200" cy="19" rx="15" ry="5" fill="#ccc8b8" opacity="0.55"/><rect x="240" y="16" width="22" height="3" rx="1.5" fill="#d0cbb8" opacity="0.5"/><circle cx="58" cy="16" r="5" fill="#c8c4b4" opacity="0.5"/>`)}</div>`,
     'Cave Mouth': () => `<div class="env-decor" style="left:60px;bottom:0;width:180px;height:100px">${makeSVG(180,100,`<ellipse cx="90" cy="100" rx="80" ry="55" fill="#0a0a0a"/><ellipse cx="90" cy="100" rx="60" ry="40" fill="#060606"/>${[30,60,130,150].map((x,i)=>`<polygon points="${x},${40+i*5} ${x+12},${15+i*3} ${x+24},${42+i*4}" fill="#1a1a1a"/>`).join('')}`)}</div>`,
     'Magma Chamber': () => `<div class="env-decor" style="left:0;bottom:0;width:300px;height:60px">${makeSVG(300,60,`<ellipse cx="50" cy="55" rx="40" ry="18" fill="#cc4400" opacity="0.8"/><ellipse cx="150" cy="58" rx="60" ry="15" fill="#dd5500" opacity="0.7"/><ellipse cx="260" cy="54" rx="35" ry="16" fill="#cc4400" opacity="0.75"/><ellipse cx="100" cy="52" rx="25" ry="10" fill="#ff8800" opacity="0.5"/><ellipse cx="210" cy="50" rx="20" ry="8" fill="#ff6600" opacity="0.55"/>${[20,80,140,200,265].map(x=>`<polygon points="${x},30 ${x+8},5 ${x+16},30" fill="#2a1a14" opacity="0.9"/>`).join('')}`)}</div>`,
@@ -9037,8 +9062,119 @@ document.addEventListener('click', e => {
     `)}</div>`,
   };
 
+
+  // ── Infinite dungeon hallway (layer 3) ──
+  const DUNGEON_W = 3;
+  const DUNGEON_ITEMS = [
+    { invKey:'ancient_coin', icon:'🪙', name:'Ancient Coin', min:2, max:5 },
+    { invKey:'dungeon_relic', icon:'🗿', name:'Dungeon Relic', min:1, max:1 },
+    { invKey:'iron_ore', icon:'⚙️', name:'Rusted Iron Chunk', min:1, max:2 },
+    { invKey:'gold_ore', icon:'🌕', name:'Gilded Fragment', min:1, max:1 },
+  ];
+  const DUNGEON_DESCRIPTORS = {
+    prefixes: ['Collapsed', 'Torchlit', 'Whispering', 'Runed', 'Damp', 'Jagged', 'Silent', 'Echoing'],
+    nouns: ['Hallway', 'Passage', 'Vaultway', 'Catacomb', 'Corridor', 'Channel'],
+    details: [
+      'The air smells of wet stone and dust.',
+      'Faded carvings pulse with dim violet light.',
+      'Water drips rhythmically from cracks overhead.',
+      'A cold draft blows from deeper darkness to the north.',
+      'Boot prints appear, then vanish in the grime.',
+      'Old chains sway even though there is no wind.'
+    ]
+  };
+  const dungeonLootClaimed = {};
+
+  function dungeonRand(seed) {
+    let h = 2166136261;
+    const str = String(seed);
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return ((h >>> 0) % 1000000) / 1000000;
+  }
+
+  function dungeonRoom(depth) {
+    if (depth === 0) {
+      return {
+        name: 'Dungeon Threshold',
+        desc: 'A narrow stone hallway stretches endlessly to the north. You can leave whenever you want.',
+        sky: 'linear-gradient(180deg,#05070c 0%,#080b12 70%,#05070c 100%)',
+        ground: '#11161d',
+        groundBorder: '#293341',
+        resources: [],
+        tunnel: 'up'
+      };
+    }
+    const i1 = Math.floor(dungeonRand(`n${depth}`) * DUNGEON_DESCRIPTORS.prefixes.length);
+    const i2 = Math.floor(dungeonRand(`m${depth}`) * DUNGEON_DESCRIPTORS.nouns.length);
+    const i3 = Math.floor(dungeonRand(`d${depth}`) * DUNGEON_DESCRIPTORS.details.length);
+    const hue = 215 + Math.floor(dungeonRand(`h${depth}`) * 40);
+    return {
+      name: `${DUNGEON_DESCRIPTORS.prefixes[i1]} ${DUNGEON_DESCRIPTORS.nouns[i2]}`,
+      desc: `${DUNGEON_DESCRIPTORS.details[i3]} Depth marker: ${Math.abs(depth)} north of the threshold.`,
+      sky: `linear-gradient(180deg,hsl(${hue},35%,6%) 0%, hsl(${hue+8},26%,9%) 60%, hsl(${hue},34%,5%) 100%)`,
+      ground: `hsl(${hue},22%,12%)`,
+      groundBorder: `hsl(${hue+10},28%,22%)`,
+      resources: []
+    };
+  }
+
+  function dungeonDecor(depth) {
+    const torchCount = 2 + Math.floor(dungeonRand(`t${depth}`) * 3);
+    const pillarCount = 3 + Math.floor(dungeonRand(`p${depth}`) * 4);
+    const runes = Array.from({length:4}, (_, i) => {
+      const x = 45 + i * 90 + Math.floor(dungeonRand(`rx${depth}_${i}`) * 26);
+      const y = 18 + Math.floor(dungeonRand(`ry${depth}_${i}`) * 26);
+      const glow = 0.2 + dungeonRand(`rg${depth}_${i}`) * 0.3;
+      return `<text x="${x}" y="${y}" font-size="13" fill="#8d76ff" opacity="${glow}" font-family="serif">ᚱ</text>`;
+    }).join('');
+    return `<div class="env-decor" style="left:0;bottom:0;width:420px;height:160px">${makeSVG(420,160,`
+      <rect x="0" y="108" width="420" height="52" fill="#10151c"/>
+      ${Array.from({length:pillarCount}, (_, i) => {
+        const x = 18 + i * 62 + Math.floor(dungeonRand(`px${depth}_${i}`) * 15);
+        const h = 52 + Math.floor(dungeonRand(`ph${depth}_${i}`) * 48);
+        return `<rect x="${x}" y="${108-h}" width="16" height="${h}" fill="#1b2530"/><rect x="${x+2}" y="${110-h}" width="12" height="8" fill="#293747"/>`;
+      }).join('')}
+      ${Array.from({length:torchCount}, (_, i) => {
+        const x = 64 + i * 128;
+        return `<rect x="${x}" y="56" width="5" height="18" fill="#5a3a10"/><ellipse cx="${x+2.5}" cy="53" rx="7" ry="9" fill="#ff8a00" opacity="0.75"/><ellipse cx="${x+2.5}" cy="49" rx="4" ry="5" fill="#ffd56a" opacity="0.55"/>`;
+      }).join('')}
+      ${runes}
+    `)}</div>`;
+  }
+
+  function spawnDungeonLoot(resContainer, depth) {
+    const lootCount = 1 + Math.floor(dungeonRand(`lc${depth}`) * 2);
+    for (let i = 0; i < lootCount; i++) {
+      const roomKey = `${depth}_${i}`;
+      if (dungeonLootClaimed[roomKey]) continue;
+      const item = DUNGEON_ITEMS[Math.floor(dungeonRand(`li${depth}_${i}`) * DUNGEON_ITEMS.length)];
+      const amount = item.min + Math.floor(dungeonRand(`la${depth}_${i}`) * (item.max - item.min + 1));
+      const x = 42 + Math.floor(dungeonRand(`lx${depth}_${i}`) * 300);
+      const y = 80 + Math.floor(dungeonRand(`ly${depth}_${i}`) * 34);
+      const lootBtn = document.createElement('button');
+      lootBtn.className = 'npc-talk-btn';
+      lootBtn.style.left = `${x}px`;
+      lootBtn.style.top = `${y}px`;
+      lootBtn.style.background = 'rgba(16,24,30,0.92)';
+      lootBtn.style.borderColor = '#5f7c9a';
+      lootBtn.textContent = `${item.icon} Take ${item.name}`;
+      lootBtn.title = `Pick up ${item.name}`;
+      lootBtn.onclick = () => {
+        dungeonLootClaimed[roomKey] = true;
+        addInventoryItem(item.invKey, amount);
+        const r = lootBtn.getBoundingClientRect();
+        spawnResourceFloat(`${item.icon} +${amount} ${item.name}`, r.left + 40, r.top - 8, 'mine');
+        lootBtn.remove();
+      };
+      resContainer.appendChild(lootBtn);
+    }
+  }
+
   let cx = 2, cy = 2;
-  let clayer = 0;  // 0=surface, 1=underground
+  let clayer = 0;  // 0=surface, 1=underground, 2=desert, 3=dungeon
   let resourceState = [];
   let worldResourceState = {};
 
@@ -9081,6 +9217,10 @@ document.addEventListener('click', e => {
 
   function key(c, rr) { return `${c},${rr}`; }
   function room(c, rr) {
+    if (clayer === 3) {
+      if (c !== 1 || rr > 0) return null;
+      return dungeonRoom(rr);
+    }
     const H = clayer === 0 ? GRID_H : clayer === 1 ? 4 : DESERT_H;
     const W = clayer === 2 ? DESERT_W : GRID_W;
     if (c < 0 || c >= W || rr < 0 || rr >= H) return null;
@@ -9115,6 +9255,35 @@ document.addEventListener('click', e => {
   function renderMinimap() {
     const canvas = document.getElementById('envMinimapCanvas');
     if (!canvas) return;
+    if (clayer === 3) {
+      const CELL = 18, GAP = 3, STRIP_H = 16, ROWS = 7, COLS = 3;
+      const mapWidth = COLS * (CELL + GAP) - GAP;
+      const mapHeight = ROWS * (CELL + GAP) - GAP;
+      canvas.width = mapWidth;
+      canvas.height = mapHeight + STRIP_H;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let rr = 0; rr < ROWS; rr++) {
+        for (let c = 0; c < COLS; c++) {
+          const px = c*(CELL+GAP), py = rr*(CELL+GAP);
+          ctx.fillStyle = c === 1 ? '#151c24' : '#080b10';
+          ctx.fillRect(px, py, CELL, CELL);
+          ctx.strokeStyle = '#243243';
+          ctx.strokeRect(px+0.5, py+0.5, CELL-1, CELL-1);
+        }
+      }
+      const centerRow = Math.floor(ROWS / 2);
+      const curX = 1 * (CELL + GAP);
+      const curY = centerRow * (CELL + GAP);
+      ctx.fillStyle = '#8d76ff';
+      ctx.fillRect(curX + 3, curY + 3, CELL - 6, CELL - 6);
+      ctx.fillStyle = '#120d1f';
+      ctx.fillRect(0, mapHeight, canvas.width, STRIP_H);
+      ctx.fillStyle = '#b794ff';
+      ctx.font = 'bold 9px monospace';
+      ctx.fillText(`DUNGEON ${Math.abs(cy)}N`, 4, canvas.height - 5);
+      return;
+    }
     const CELL = 17, GAP = 3, STRIP_H = 16;
     const ROWS = clayer === 0 ? GRID_H : clayer === 1 ? 4 : DESERT_H;
     const COLS = clayer === 2 ? DESERT_W : GRID_W;
@@ -9160,11 +9329,13 @@ document.addEventListener('click', e => {
     document.getElementById('envBtnE').disabled = !room(cx+1, cy);
     const rm = room(cx, cy);
     const canDescend = clayer === 0 && rm && window.__questFlags?.morriganPaid && rm.name === 'Dead Grove';
-    const canAscend  = clayer === 1 && rm?.tunnel === 'up';
+    const canAscend  = (clayer === 1 || clayer === 2) && rm?.tunnel === 'up';
     const btnDown = document.getElementById('envBtnDown');
     const btnUp   = document.getElementById('envBtnUp');
+    const btnLeaveDungeon = document.getElementById('envBtnLeaveDungeon');
     if (btnDown) btnDown.style.display = canDescend ? '' : 'none';
     if (btnUp)   btnUp.style.display   = canAscend  ? '' : 'none';
+    if (btnLeaveDungeon) btnLeaveDungeon.style.display = clayer === 3 ? '' : 'none';
   }
 
   function renderRoom(dx, dy) {
@@ -9191,8 +9362,15 @@ document.addEventListener('click', e => {
     resourceState = [];
 
     // Decorative fluff (layer-aware)
-    const decorFn = clayer === 2 ? (DECOR_DESERT[rm.name] || DECOR[rm.name]) : clayer === 1 ? (DECOR_UNDER[rm.name] || DECOR[rm.name]) : DECOR[rm.name];
+    const decorFn = clayer === 3
+      ? () => dungeonDecor(cy)
+      : clayer === 2
+        ? (DECOR_DESERT[rm.name] || DECOR[rm.name])
+        : clayer === 1
+          ? (DECOR_UNDER[rm.name] || DECOR[rm.name])
+          : DECOR[rm.name];
     if (decorFn) resContainer.innerHTML = decorFn();
+    if (clayer === 3) spawnDungeonLoot(resContainer, cy);
 
     // Dead Grove: glowing chest to descend (appears after Morrigan paid)
     if (clayer === 0 && rm.name === 'Dead Grove' && window.__questFlags?.morriganPaid) {
@@ -9251,6 +9429,23 @@ document.addEventListener('click', e => {
       );
       ascDiv.onclick = () => envAscend();
       resContainer.appendChild(ascDiv);
+    }
+
+    // Ancient Stair: descend into infinite dungeon hallway
+    if (clayer === 0 && rm.tunnel === 'dungeon') {
+      const dungeonDiv = document.createElement('div');
+      dungeonDiv.className = 'env-chest';
+      dungeonDiv.style.filter = 'drop-shadow(0 0 10px rgba(141,118,255,0.8))';
+      dungeonDiv.title = 'Enter the infinite dungeon hallway';
+      dungeonDiv.innerHTML = makeSVG(56,56,
+        '<rect x="8" y="26" width="40" height="28" rx="3" fill="#1b2430"/>' +
+        '<rect x="14" y="8" width="28" height="20" rx="2" fill="#10161e"/>' +
+        '<path d="M18,26 L28,12 L38,26" fill="#2a3648"/>' +
+        '<circle cx="28" cy="36" r="4" fill="#8d76ff"/>' +
+        '<ellipse cx="28" cy="52" rx="18" ry="4" fill="#8d76ff" opacity="0.25"/>'
+      );
+      dungeonDiv.onclick = () => envEnterDungeon();
+      resContainer.appendChild(dungeonDiv);
     }
 
     // NPC talk button (dialogue opens only when clicked)
@@ -9463,6 +9658,22 @@ document.addEventListener('click', e => {
     layerFlash(() => {
       clayer = 0;
       cx = 5; cy = 2;  // back to Dead Grove
+      renderRoom(0, 0);
+    });
+  };
+
+  window.envEnterDungeon = function() {
+    layerFlash(() => {
+      clayer = 3;
+      cx = 1; cy = 0;
+      renderRoom(0, 0);
+    });
+  };
+
+  window.envLeaveDungeon = function() {
+    layerFlash(() => {
+      clayer = 0;
+      cx = 6; cy = 0;  // back to Ancient Stair
       renderRoom(0, 0);
     });
   };
