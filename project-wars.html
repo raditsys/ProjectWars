@@ -1074,6 +1074,53 @@
   .game-panel { display: none; flex-direction: column; gap: 1.25rem; }
   .game-panel.active { display: flex; }
 
+  .ltf-wrap {
+    border: 1px solid #2a5a2a;
+    background: linear-gradient(180deg, #031320 0%, #082235 45%, #0c2c1a 100%);
+    padding: 0.75rem;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .ltf-hud {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+  .ltf-stat {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #234623;
+    padding: 0.35rem;
+    text-align: center;
+  }
+  .ltf-stat strong {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1px;
+    font-size: 1.05rem;
+    color: #ffe082;
+  }
+  .ltf-stat span { font-size: 0.6rem; letter-spacing: 1px; color: #8ab58a; text-transform: uppercase; }
+  .ltf-controls { font-size: 0.62rem; color: #9ec59e; letter-spacing: 1px; text-align:center; }
+  .ltf-upgrade-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .ltf-upgrade {
+    border: 1px solid #2a5a2a;
+    background: #0d2b0d;
+    color: var(--text);
+    padding: 0.55rem;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.68rem;
+    letter-spacing: 0.7px;
+  }
+  .ltf-upgrade:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+  .ltf-upgrade:disabled { opacity: 0.4; cursor: not-allowed; }
+  .ltf-upgrade b { display:block; font-family:'Bebas Neue',sans-serif; letter-spacing:1px; font-size:0.95rem; color:#9fd4ff; }
+  .ltf-upgrade small { display:block; margin-top:0.2rem; color:#8ab58a; }
+
   /* ── Roulette ── */
   /* Roulette number grid */
   .rl-grid-wrap {
@@ -4093,6 +4140,7 @@
   <button class="game-tab" id="tabRL" onclick="switchGame('rl')">🎡 Roulette</button>
   <button class="game-tab" id="tabPK" onclick="switchGame('pk')">🔵 Plinko</button>
   <button class="game-tab" id="tabPR" onclick="switchGame('pr')">🎯 Precision</button>
+  <button class="game-tab" id="tabLTF" onclick="switchGame('ltf')">🐧 Learn to Fly</button>
 </div>
 
 <!-- ── BLACKJACK PANEL ── -->
@@ -4303,6 +4351,31 @@
     <button class="r-spin-btn" id="prCashBtn" onclick="prCashOut()" style="flex:1;background:#1a3a1a;border-color:var(--green);color:var(--green);display:none;">💰 Cash Out</button>
   </div>
 
+</div>
+
+<!-- ── LEARN TO FLY PANEL ── -->
+<div class="game-panel" id="panelLTF">
+  <div class="ltf-wrap">
+    <div class="ltf-hud">
+      <div class="ltf-stat"><strong id="ltfDistance">0m</strong><span>Distance</span></div>
+      <div class="ltf-stat"><strong id="ltfHeight">0m</strong><span>Peak Height</span></div>
+      <div class="ltf-stat"><strong id="ltfSpeed">0m/s</strong><span>Speed</span></div>
+      <div class="ltf-stat"><strong id="ltfMoney">+0</strong><span>Run Reward</span></div>
+      <div class="ltf-stat"><strong id="ltfFuel">100%</strong><span>Fuel</span></div>
+    </div>
+    <canvas id="ltfCanvas" width="660" height="260" style="width:100%;max-width:100%;background:rgba(0,0,0,0.2);border:1px solid #1e4a1e;"></canvas>
+    <div class="ltf-controls">Launch to start • Hold <kbd>SPACE</kbd> to boost • Use <kbd>↑</kbd>/<kbd>↓</kbd> to adjust angle and convert speed into lift</div>
+  </div>
+
+  <button class="r-spin-btn" id="ltfLaunchBtn" onclick="ltfLaunch()">🐧 Launch Run</button>
+  <div class="result-banner" id="ltfResultBanner"></div>
+
+  <div class="ltf-upgrade-grid">
+    <button class="ltf-upgrade" id="ltfRampBtn" onclick="ltfBuyUpgrade('ramp')"></button>
+    <button class="ltf-upgrade" id="ltfBoostBtn" onclick="ltfBuyUpgrade('boost')"></button>
+    <button class="ltf-upgrade" id="ltfGliderBtn" onclick="ltfBuyUpgrade('glider')"></button>
+    <button class="ltf-upgrade" id="ltfBodyBtn" onclick="ltfBuyUpgrade('body')"></button>
+  </div>
 </div>
 
 </div>
@@ -6437,6 +6510,10 @@
     prLoadProgress(currentUser.id);
     prRenderProgress();
     prUpdateBetDisplay();
+    ltfLoadProgress(currentUser.id);
+    ltfRenderUpgrades();
+    ltfRenderHud();
+    ltfDrawScene();
     refreshCasinoWallet();
   };
 
@@ -6625,14 +6702,347 @@
     document.getElementById('panelRL').classList.toggle('active', game === 'rl');
     document.getElementById('panelPK').classList.toggle('active', game === 'pk');
     document.getElementById('panelPR').classList.toggle('active', game === 'pr');
+    document.getElementById('panelLTF').classList.toggle('active', game === 'ltf');
     document.getElementById('tabBJ').classList.toggle('active', game === 'bj');
     document.getElementById('tabRL').classList.toggle('active', game === 'rl');
     document.getElementById('tabPK').classList.toggle('active', game === 'pk');
     document.getElementById('tabPR').classList.toggle('active', game === 'pr');
+    document.getElementById('tabLTF').classList.toggle('active', game === 'ltf');
     if (game === 'rl') { rlBuildGrid(); }
     if (game === 'pk') { pkInitCanvas(); }
+    if (game === 'ltf') { ltfInit(); }
     if (game !== 'pr') { prStop(); }
   };
+
+  // ══════════════════ LEARN TO FLY ══════════════════
+  let ltfState = null;
+  let ltfRun = null;
+  let ltfRAF = null;
+  let ltfKeysBound = false;
+
+  const LTF_UPGRADE_DATA = {
+    ramp:   { label: '🏔 Ramp', baseCost: 80, costScale: 1.45, desc: 'Launch acceleration and angle' },
+    boost:  { label: '🚀 Boost', baseCost: 90, costScale: 1.5, desc: 'Thrust power + fuel capacity' },
+    glider: { label: '🪂 Glider', baseCost: 110, costScale: 1.55, desc: 'Lift efficiency and drag reduction' },
+    body:   { label: '🐧 Body', baseCost: 95, costScale: 1.5, desc: 'Momentum + safer crashes' },
+  };
+
+  function ltfProgressKey(playerId) {
+    return `pw_ltf_progress_${playerId}`;
+  }
+
+  function ltfDefaultState() {
+    return {
+      moneyBank: 0,
+      bestDistance: 0,
+      bestHeight: 0,
+      upgrades: { ramp: 1, boost: 1, glider: 1, body: 1 },
+      stats: { runs: 0, totalFlight: 0 }
+    };
+  }
+
+  function ltfCost(type) {
+    const lvl = ltfState.upgrades[type] || 1;
+    const cfg = LTF_UPGRADE_DATA[type];
+    return Math.floor(cfg.baseCost * Math.pow(cfg.costScale, lvl - 1));
+  }
+
+  function ltfInit() {
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+    if (!ltfState) ltfLoadProgress(p.id);
+    ltfRenderUpgrades();
+    ltfRenderHud();
+    ltfDrawScene();
+    if (!ltfKeysBound) {
+      ltfKeysBound = true;
+      window.addEventListener('keydown', ltfHandleKey, { passive: true });
+      window.addEventListener('keyup', ltfHandleKey, { passive: true });
+    }
+  }
+
+  function ltfLoadProgress(playerId) {
+    const raw = localStorage.getItem(ltfProgressKey(playerId));
+    if (!raw) { ltfState = ltfDefaultState(); return; }
+    try {
+      const parsed = JSON.parse(raw);
+      ltfState = {
+        moneyBank: Math.max(0, parsed.moneyBank || 0),
+        bestDistance: Math.max(0, parsed.bestDistance || 0),
+        bestHeight: Math.max(0, parsed.bestHeight || 0),
+        upgrades: {
+          ramp: Math.max(1, parsed?.upgrades?.ramp || 1),
+          boost: Math.max(1, parsed?.upgrades?.boost || 1),
+          glider: Math.max(1, parsed?.upgrades?.glider || 1),
+          body: Math.max(1, parsed?.upgrades?.body || 1),
+        },
+        stats: {
+          runs: Math.max(0, parsed?.stats?.runs || 0),
+          totalFlight: Math.max(0, parsed?.stats?.totalFlight || 0),
+        }
+      };
+    } catch {
+      ltfState = ltfDefaultState();
+    }
+  }
+
+  function ltfSaveProgress(playerId) {
+    if (!playerId || !ltfState) return;
+    localStorage.setItem(ltfProgressKey(playerId), JSON.stringify(ltfState));
+  }
+
+  function ltfRenderHud(reward = 0) {
+    if (!ltfState) return;
+    const d = ltfRun ? ltfRun.distance : ltfState.bestDistance;
+    const h = ltfRun ? ltfRun.peakHeight : ltfState.bestHeight;
+    const s = ltfRun ? Math.hypot(ltfRun.vx, ltfRun.vy) : 0;
+    const fuelPct = ltfRun ? Math.max(0, (ltfRun.fuel / ltfRun.maxFuel) * 100) : 100;
+    document.getElementById('ltfDistance').textContent = `${Math.floor(d)}m`;
+    document.getElementById('ltfHeight').textContent = `${Math.floor(h)}m`;
+    document.getElementById('ltfSpeed').textContent = `${s.toFixed(1)}m/s`;
+    document.getElementById('ltfMoney').textContent = `+${Math.max(0, Math.floor(reward))}`;
+    document.getElementById('ltfFuel').textContent = `${Math.floor(fuelPct)}%`;
+  }
+
+  function ltfRenderUpgrades() {
+    if (!ltfState) return;
+    ['ramp','boost','glider','body'].forEach(type => {
+      const level = ltfState.upgrades[type];
+      const cost = ltfCost(type);
+      const btn = document.getElementById(`ltf${type[0].toUpperCase()}${type.slice(1)}Btn`);
+      btn.innerHTML = `<b>${LTF_UPGRADE_DATA[type].label} • Lv.${level}</b>${LTF_UPGRADE_DATA[type].desc}<small>Cost: ${cost} 🪙</small>`;
+    });
+  }
+
+  window.ltfBuyUpgrade = async function(type) {
+    const p = getCurrentCasinoPlayer();
+    if (!p || !ltfState || !LTF_UPGRADE_DATA[type]) return;
+    const cost = ltfCost(type);
+    const wallet = p.coins || 0;
+    if (wallet < cost) {
+      shakeWallet();
+      const b = document.getElementById('ltfResultBanner');
+      b.textContent = 'NOT ENOUGH COINS';
+      b.className = 'result-banner show lose';
+      setTimeout(() => b.classList.remove('show'), 1600);
+      return;
+    }
+    await setCasinoCoins(p.id, wallet - cost);
+    ltfState.upgrades[type] += 1;
+    ltfSaveProgress(p.id);
+    ltfRenderUpgrades();
+    refreshCasinoWallet();
+    const b = document.getElementById('ltfResultBanner');
+    b.textContent = `${LTF_UPGRADE_DATA[type].label.toUpperCase()} UPGRADED!`;
+    b.className = 'result-banner show win';
+    setTimeout(() => b.classList.remove('show'), 1800);
+  };
+
+  function ltfHandleKey(e) {
+    if (!ltfRun) return;
+    if (e.code === 'Space') ltfRun.boosting = e.type === 'keydown';
+    if (e.type !== 'keydown') return;
+    if (e.code === 'ArrowUp') ltfRun.angle = Math.min(0.75, ltfRun.angle + 0.06);
+    if (e.code === 'ArrowDown') ltfRun.angle = Math.max(-0.65, ltfRun.angle - 0.06);
+  }
+
+  function ltfMakeRun() {
+    const up = ltfState.upgrades;
+    const rampAccel = 21 + up.ramp * 4;
+    const rampAngle = 0.2 + up.ramp * 0.025;
+    const initSpeed = 18 + up.ramp * 3.4;
+    const bodyWeight = 1 + up.body * 0.09;
+    const thrust = 0.42 + up.boost * 0.075;
+    const maxFuel = 2.2 + up.boost * 0.45;
+    return {
+      x: 0,
+      y: 0,
+      vx: Math.cos(rampAngle) * (initSpeed + rampAccel * 0.25 * bodyWeight),
+      vy: Math.sin(rampAngle) * (initSpeed + rampAccel * 0.2),
+      angle: 0,
+      elapsed: 0,
+      distance: 0,
+      peakHeight: 0,
+      boosting: false,
+      done: false,
+      crashedAt: 0,
+      reward: 0,
+      thrust,
+      fuel: maxFuel,
+      maxFuel,
+      gravity: 15.5,
+      drag: Math.max(0.012, 0.029 - up.glider * 0.0024),
+      liftCoeff: 0.008 + up.glider * 0.0022,
+      bounce: Math.min(0.65, 0.3 + up.body * 0.035),
+      bodyWeight,
+    };
+  }
+
+  window.ltfLaunch = function() {
+    const p = getCurrentCasinoPlayer();
+    if (!p || !ltfState) return;
+    if (ltfRAF) cancelAnimationFrame(ltfRAF);
+    ltfRun = ltfMakeRun();
+    document.getElementById('ltfLaunchBtn').disabled = true;
+    const banner = document.getElementById('ltfResultBanner');
+    banner.className = 'result-banner';
+    let last = performance.now();
+
+    const loop = (now) => {
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
+      ltfStep(dt);
+      ltfDrawScene();
+      ltfRenderHud(ltfRun.reward);
+      if (!ltfRun.done) {
+        ltfRAF = requestAnimationFrame(loop);
+      } else {
+        ltfRAF = null;
+        ltfFinalizeRun();
+      }
+    };
+    ltfRAF = requestAnimationFrame(loop);
+  };
+
+  function ltfStep(dt) {
+    if (!ltfRun) return;
+    const r = ltfRun;
+    r.elapsed += dt;
+
+    const speed = Math.max(0, r.vx);
+    const angleLift = Math.cos(r.angle);
+    const angleDrag = Math.abs(Math.sin(r.angle));
+    const lift = speed * r.liftCoeff * Math.max(0, angleLift);
+    const dragX = r.drag * (1 + angleDrag * 0.8) * r.vx;
+
+    r.vy -= r.gravity * dt;
+    r.vy += lift * dt * 32;
+
+    if (r.boosting && r.fuel > 0 && r.vx > 4) {
+      r.vx += r.thrust * dt * 60;
+      r.fuel = Math.max(0, r.fuel - dt * 0.8);
+    }
+
+    r.vx -= dragX;
+    r.vx = Math.max(0, r.vx);
+
+    r.x += r.vx * dt;
+    r.y += r.vy * dt;
+    r.distance = Math.max(r.distance, r.x);
+    r.peakHeight = Math.max(r.peakHeight, r.y);
+
+    if (r.y <= 0 && r.elapsed > 0.35) {
+      const impactAngle = Math.atan2(Math.abs(r.vy), Math.max(0.1, r.vx));
+      if (impactAngle < 0.45) {
+        r.y = 0;
+        r.vx *= r.bounce;
+        r.vy = Math.abs(r.vy) * 0.22;
+      } else {
+        r.y = 0;
+        r.vx = 0;
+        r.vy = 0;
+      }
+    }
+
+    if (r.elapsed > 0.8 && r.y <= 0.01 && r.vx < 0.35) {
+      r.done = true;
+      r.crashedAt = r.distance;
+      const money = (r.distance * 0.9)
+        + (r.peakHeight * 0.55)
+        + (Math.max(0, speed - 8) * 2.1)
+        + (r.elapsed * 4.5);
+      r.reward = Math.floor(money);
+    }
+  }
+
+  async function ltfFinalizeRun() {
+    const p = getCurrentCasinoPlayer();
+    if (!p || !ltfRun || !ltfState) return;
+    ltfState.moneyBank += ltfRun.reward;
+    ltfState.bestDistance = Math.max(ltfState.bestDistance, ltfRun.distance);
+    ltfState.bestHeight = Math.max(ltfState.bestHeight, ltfRun.peakHeight);
+    ltfState.stats.runs += 1;
+    ltfState.stats.totalFlight += ltfRun.elapsed;
+    ltfSaveProgress(p.id);
+
+    const payout = (p.coins || 0) + ltfRun.reward;
+    await setCasinoCoins(p.id, payout);
+    refreshCasinoWallet();
+    ltfRenderUpgrades();
+    const banner = document.getElementById('ltfResultBanner');
+    banner.textContent = `FLIGHT COMPLETE • +${ltfRun.reward} 🪙 • ${Math.floor(ltfRun.distance)}M`;
+    banner.className = 'result-banner show win';
+    setTimeout(() => banner.classList.remove('show'), 2800);
+    document.getElementById('ltfLaunchBtn').disabled = false;
+  }
+
+  function ltfDrawScene() {
+    const canvas = document.getElementById('ltfCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const grd = ctx.createLinearGradient(0, 0, 0, h);
+    grd.addColorStop(0, '#0a2032');
+    grd.addColorStop(0.55, '#10324a');
+    grd.addColorStop(1, '#102b17');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, w, h);
+
+    const groundY = h - 34;
+    ctx.fillStyle = '#123f23';
+    ctx.fillRect(0, groundY, w, 34);
+    ctx.fillStyle = '#205a2d';
+    ctx.beginPath();
+    ctx.moveTo(0, groundY);
+    ctx.lineTo(84, groundY - 40);
+    ctx.lineTo(84, groundY);
+    ctx.fill();
+
+    if (!ltfRun) {
+      ctx.fillStyle = '#ffe082';
+      ctx.font = '18px Bebas Neue';
+      ctx.fillText('Build speed, burn boost, convert velocity into lift.', 16, 28);
+      return;
+    }
+
+    const camX = Math.max(0, ltfRun.x - 120);
+    const px = 84 + (ltfRun.x - camX) * 2.2;
+    const py = groundY - (ltfRun.y * 1.2) - 14;
+
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(-ltfRun.angle);
+    ctx.fillStyle = '#e2f1ff';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 12, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#1b2f44';
+    ctx.fillRect(-2, -2, 10, 4);
+    ctx.strokeStyle = '#7ed1ff';
+    ctx.beginPath();
+    ctx.moveTo(-5, -8);
+    ctx.lineTo(14, -11);
+    ctx.stroke();
+    if (ltfRun.boosting && ltfRun.fuel > 0) {
+      ctx.fillStyle = '#fb923c';
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(-20 - Math.random() * 9, -3);
+      ctx.lineTo(-20 - Math.random() * 9, 3);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    for (let i = 0; i < 5; i++) {
+      const x = ((i * 180) - (camX * 2.2 % 180));
+      ctx.fillRect(x, groundY + 6, 90, 2);
+    }
+  }
 
   // ══════════════════ ROULETTE ══════════════════
   // European roulette: 37 pockets (0–36)
