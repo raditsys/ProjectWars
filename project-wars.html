@@ -920,6 +920,39 @@
   }
   .clear-bet-btn:hover { border-color: var(--red); color: var(--red); }
 
+  .powerup-panel {
+    margin-top: 0.65rem;
+    border: 1px solid #3a2a00;
+    background: rgba(40, 25, 0, 0.35);
+    padding: 0.45rem 0.6rem;
+  }
+  .powerup-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6rem;
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #ffe082;
+    margin-bottom: 0.35rem;
+    font-family: 'DM Mono', monospace;
+  }
+  .powerup-btn {
+    width: 100%;
+    background: #1d1400;
+    border: 1px solid #6d5200;
+    color: #ffe082;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.35rem 0.45rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.6px;
+  }
+  .powerup-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+  .powerup-btn.armed { background: #3a2a00; border-color: var(--gold); color: var(--gold); }
+  .powerup-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
   /* Action buttons */
   .bj-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
 
@@ -4143,6 +4176,13 @@
     <span id="bjHeatLabel">Heat bonus: +0%</span>
   </div>
 </div>
+<div class="powerup-panel">
+  <div class="powerup-top">
+    <span>Win streak: <strong id="bjPowerStreak">0/3</strong></span>
+    <span>Owned: <strong id="bjPowerCount">0</strong></span>
+  </div>
+  <button class="powerup-btn" id="bjPowerBtn" onclick="toggleGamePowerup('bj')">Use Shield Card (refunds half on a loss)</button>
+</div>
 <!-- Split second hand (hidden until split) -->
 <div id="splitHand2Wrap" style="display:none;">
   <div class="table-section-label" style="margin-top:0.75rem;">Hand 2</div>
@@ -4205,6 +4245,13 @@
     <span id="rlHeatLabel">Streak boost: +0%</span>
   </div>
 </div>
+<div class="powerup-panel">
+  <div class="powerup-top">
+    <span>Win streak: <strong id="rlPowerStreak">0/3</strong></span>
+    <span>Owned: <strong id="rlPowerCount">0</strong></span>
+  </div>
+  <button class="powerup-btn" id="rlPowerBtn" onclick="toggleGamePowerup('rl')">Use Lucky Pocket (double winning spin profit)</button>
+</div>
 <div class="result-banner" id="rlResultBanner"></div>
 <button class="r-spin-btn" id="rlSpinBtn" onclick="rlSpin()">🎡 Spin</button>
 </div>
@@ -4240,6 +4287,13 @@
     <span id="pkXpLabel">0 / 10 xp</span>
     <span id="pkHeatLabel">Bounce bonus: +0%</span>
   </div>
+</div>
+<div class="powerup-panel">
+  <div class="powerup-top">
+    <span>Win streak: <strong id="pkPowerStreak">0/3</strong></span>
+    <span>Owned: <strong id="pkPowerCount">0</strong></span>
+  </div>
+  <button class="powerup-btn" id="pkPowerBtn" onclick="toggleGamePowerup('pk')">Use Cushion Drop (losses are cut in half)</button>
 </div>
 <div class="result-banner" id="pkResultBanner"></div>
 <button class="r-spin-btn" id="pkDropBtn" onclick="pkDrop()">🔵 Drop Ball</button>
@@ -4296,6 +4350,14 @@
       <span id="prXpLabel">0 / 8 xp</span>
       <span id="prHeatLabel">Pressure bonus: +0%</span>
     </div>
+  </div>
+
+  <div class="powerup-panel">
+    <div class="powerup-top">
+      <span>Win streak: <strong id="prPowerStreak">0/3</strong></span>
+      <span>Owned: <strong id="prPowerCount">0</strong></span>
+    </div>
+    <button class="powerup-btn" id="prPowerBtn" onclick="toggleGamePowerup('pr')">Use Steady Hand (first miss only loses half)</button>
   </div>
 
   <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
@@ -6270,6 +6332,138 @@
 
   let bjProgress = { level: 1, xp: 0, hands: 0, heat: 0 };
 
+  let gamePowerups = {
+    bj: { streak: 0, charges: 0, armed: false, active: false },
+    rl: { streak: 0, charges: 0, armed: false, active: false },
+    pk: { streak: 0, charges: 0, armed: false, active: false },
+    pr: { streak: 0, charges: 0, armed: false, active: false },
+  };
+
+  const POWERUP_TEXT = {
+    bj: 'Shield Card',
+    rl: 'Lucky Pocket',
+    pk: 'Cushion Drop',
+    pr: 'Steady Hand',
+  };
+
+  function powerupsKey(playerId) {
+    return `pw_casino_powerups_${playerId}`;
+  }
+
+  function loadGamePowerups(playerId) {
+    gamePowerups = {
+      bj: { streak: 0, charges: 0, armed: false, active: false },
+      rl: { streak: 0, charges: 0, armed: false, active: false },
+      pk: { streak: 0, charges: 0, armed: false, active: false },
+      pr: { streak: 0, charges: 0, armed: false, active: false },
+    };
+    if (!playerId) return;
+    const raw = localStorage.getItem(powerupsKey(playerId));
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      for (const game of ['bj', 'rl', 'pk', 'pr']) {
+        if (!parsed[game]) continue;
+        gamePowerups[game].streak = Math.max(0, parsed[game].streak || 0);
+        gamePowerups[game].charges = Math.max(0, parsed[game].charges || 0);
+      }
+    } catch {}
+  }
+
+  function saveGamePowerups(playerId) {
+    if (!playerId) return;
+    const payload = {};
+    for (const game of ['bj', 'rl', 'pk', 'pr']) {
+      payload[game] = {
+        streak: gamePowerups[game].streak,
+        charges: gamePowerups[game].charges,
+      };
+    }
+    localStorage.setItem(powerupsKey(playerId), JSON.stringify(payload));
+  }
+
+  function renderPowerupUI(game) {
+    const state = gamePowerups[game];
+    const streakEl = document.getElementById(`${game}PowerStreak`);
+    const countEl = document.getElementById(`${game}PowerCount`);
+    const btn = document.getElementById(`${game}PowerBtn`);
+    if (!state || !streakEl || !countEl || !btn) return;
+    streakEl.textContent = `${Math.min(state.streak, 3)}/3`;
+    countEl.textContent = state.charges;
+    const canArm = state.charges > 0;
+    btn.disabled = !canArm;
+    btn.classList.toggle('armed', state.armed);
+    const baseLabel = btn.textContent.replace(/^✅\s+|^⭐\s+/, '').replace(/\s+\(ARMED\)$/,'');
+    if (state.armed) btn.textContent = `✅ ${baseLabel} (ARMED)`;
+    else if (canArm) btn.textContent = `⭐ ${baseLabel}`;
+    else btn.textContent = baseLabel;
+  }
+
+  function renderAllPowerups() {
+    ['bj', 'rl', 'pk', 'pr'].forEach(renderPowerupUI);
+  }
+
+  function updatePowerupStreak(game, didWin) {
+    const p = getCurrentCasinoPlayer();
+    const state = gamePowerups[game];
+    if (!state) return;
+    state.streak = didWin ? state.streak + 1 : 0;
+    if (state.streak >= 3) {
+      state.streak = 0;
+      state.charges += 1;
+      const msg = `POWERUP EARNED: ${POWERUP_TEXT[game]}!`;
+      if (game === 'bj') showResult(`⭐ ${msg}`, 'win');
+      if (game === 'rl') {
+        const el = document.getElementById('rlResultBanner');
+        if (el) { el.textContent = `⭐ ${msg}`; el.className = 'result-banner show win'; setTimeout(() => el.classList.remove('show'), 2200); }
+      }
+      if (game === 'pk') {
+        const el = document.getElementById('pkResultBanner');
+        if (el) { el.textContent = `⭐ ${msg}`; el.className = 'result-banner show win'; setTimeout(() => el.classList.remove('show'), 2200); }
+      }
+      if (game === 'pr') {
+        const el = document.getElementById('prResult');
+        if (el && prPhase !== 'running') { el.textContent = `⭐ ${msg}`; el.className = 'pr-result win'; }
+      }
+    }
+    if (p) saveGamePowerups(p.id);
+    renderPowerupUI(game);
+  }
+
+  window.toggleGamePowerup = function(game) {
+    const state = gamePowerups[game];
+    if (!state || state.charges < 1) return;
+    state.armed = !state.armed;
+    const p = getCurrentCasinoPlayer();
+    if (p) saveGamePowerups(p.id);
+    renderPowerupUI(game);
+  };
+
+  function activatePowerup(game) {
+    const p = getCurrentCasinoPlayer();
+    const state = gamePowerups[game];
+    if (!state || !state.armed || state.charges < 1) return false;
+    state.armed = false;
+    state.active = true;
+    state.charges -= 1;
+    if (p) saveGamePowerups(p.id);
+    renderPowerupUI(game);
+    return true;
+  }
+
+  function consumeActivePowerup(game) {
+    const state = gamePowerups[game];
+    if (!state || !state.active) return false;
+    state.active = false;
+    return true;
+  }
+
+  function clearActivePowerup(game) {
+    const state = gamePowerups[game];
+    if (!state) return;
+    state.active = false;
+  }
+
   const BJ_TITLES = ['Card Shark', 'Pit Grinder', 'Table Ranger', 'High Roller', 'Velvet Legend'];
 
   function bjProgressKey(playerId) {
@@ -6426,6 +6620,7 @@
     document.getElementById('drawerOverlay').classList.add('open');
     document.getElementById('gambleTab').querySelector('.tab-arrow').textContent = '▶';
     document.getElementById('casinoPlayerDisplay').textContent = currentUser.name;
+    loadGamePowerups(currentUser.id);
     bjLoadProgress(currentUser.id);
     bjRenderProgress();
     updateBetDisplay();
@@ -6437,6 +6632,7 @@
     prLoadProgress(currentUser.id);
     prRenderProgress();
     prUpdateBetDisplay();
+    renderAllPowerups();
     refreshCasinoWallet();
   };
 
@@ -6512,6 +6708,7 @@
     if (bjBet < 1) { shakeWallet(); return; }
     if (bjBet > (p.coins || 0)) { shakeWallet(); return; }
 
+    activatePowerup('bj');
     bjDeck = shuffle(buildDeck());
     bjPlayer = [bjDeck.pop(), bjDeck.pop()];
     bjDealer = [bjDeck.pop(), bjDeck.pop()];
@@ -6891,6 +7088,7 @@
       return;
     }
     if (rlBet < 1) { shakeWallet(); return; }
+    activatePowerup('rl');
     const totalWager = rlBet * rlSelectedBets.size;
     if (totalWager > (p.coins || 0)) { shakeWallet(); return; }
 
@@ -6963,9 +7161,15 @@
       delta += bonus;
     }
 
+    let powerNote = '';
+    if (delta > 0 && consumeActivePowerup('rl')) {
+      delta *= 2;
+      powerNote = ' · POWERUP ×2';
+    }
+
     let resultText = '', resultType = '';
     if (delta > 0) {
-      resultText = `✅ ${num} — ${winHits} HIT${winHits > 1 ? 'S' : ''}! +${delta} 🪙${bonus ? ` (${bonus} streak)` : ''}`;
+      resultText = `✅ ${num} — ${winHits} HIT${winHits > 1 ? 'S' : ''}! +${delta} 🪙${bonus ? ` (${bonus} streak)` : ''}${powerNote}`;
       resultType = 'win';
       soundWin();
       setTimeout(() => launchParticles(delta >= totalWager ? 'bigwin' : 'win'), 80);
@@ -6973,10 +7177,12 @@
       recordBiggestWin(p.name, p.id, delta);
     } else if (delta === 0) {
       resultText = `➖ ${num} — BREAK EVEN`;
+      clearActivePowerup('rl');
       resultType = 'push';
       soundChip();
     } else {
       resultText = `❌ ${num} — -${Math.abs(delta)} 🪙`;
+      clearActivePowerup('rl');
       resultType = 'lose';
       soundLose();
       setTimeout(() => launchParticles('bust'), 100);
@@ -6989,6 +7195,8 @@
 
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
+    clearActivePowerup('rl');
+    updatePowerupStreak('rl', delta > 0);
     rlAwardProgress(p.id, delta);
 
     // Keep last roulette bet selected between spins
@@ -7295,9 +7503,17 @@
     payout += bounceBonus;
     profit += bounceBonus;
 
+    let powerNote = '';
+    if (profit < 0 && consumeActivePowerup('pk')) {
+      const saved = Math.floor(Math.abs(profit) / 2);
+      payout += saved;
+      profit += saved;
+      powerNote = ` (POWERUP saved ${saved})`;
+    }
+
     const resultEl = document.getElementById('plinkoResultNum');
     const bonusNote = bounceBonus > 0 ? ` (+${bounceBonus} bonus)` : '';
-    resultEl.textContent = mult + 'x  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙' + bonusNote;
+    resultEl.textContent = mult + 'x  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙' + bonusNote + powerNote;
     resultEl.className = 'roulette-result-num ' + (profit > 0 ? 'green' : profit === 0 ? '' : 'red');
 
     const banner = document.getElementById('pkResultBanner');
@@ -7312,7 +7528,7 @@
       banner.textContent = '🤝 Break even';
       banner.className = 'result-banner show push';
     } else {
-      banner.textContent = '❌ ' + profit + ' 🪙';
+      banner.textContent = '❌ ' + profit + ' 🪙' + powerNote;
       banner.className = 'result-banner show lose';
       soundLose();
     }
@@ -7324,6 +7540,8 @@
     await setCasinoCoins(p.id, currentCoins + payout);
 
     const outcome = profit > bet ? 'bigwin' : profit > 0 ? 'win' : profit === 0 ? 'push' : 'lose';
+    clearActivePowerup('pk');
+    updatePowerupStreak('pk', profit > 0);
     pkAwardProgress(p.id, outcome);
   }
 
@@ -7359,6 +7577,7 @@
     if (pkBet < 1) { shakeWallet(); return; }
     if (pkBet > (p.coins || 0)) { shakeWallet(); return; }
 
+    activatePowerup('pk');
     if (!pkCanvas) pkInitCanvas();
     if (!pkCanvas) return;
 
@@ -7696,10 +7915,16 @@
       flash.style.background = '#ff000044';
       flash.animate([{opacity:0.8},{opacity:0}], {duration:400,fill:'forwards'});
       arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
-      const lost = zone.loss === 'full' ? prBet : Math.floor(prBet / 2);
+      let lost = zone.loss === 'full' ? prBet : Math.floor(prBet / 2);
+      let powerNote = '';
+      if (consumeActivePowerup('pr')) {
+        const saved = Math.floor(lost / 2);
+        lost -= saved;
+        powerNote = ` · POWERUP saved ${saved}`;
+      }
       await setCasinoCoins(p.id, Math.max(0, (p.coins||0) - lost));
       spawnCoinFloat(`-${lost} 🪙`);
-      result.textContent = zone.mult === 0 ? `${zone.loss === 'full' ? '☠ SKULL' : 'MISS'} — lost ${lost} 🪙` : `0.5× — lost ${lost} 🪙`;
+      result.textContent = zone.mult === 0 ? `${zone.loss === 'full' ? '☠ SKULL' : 'MISS'} — lost ${lost} 🪙${powerNote}` : `0.5× — lost ${lost} 🪙${powerNote}`;
       result.className = 'pr-result miss';
       prStreak = 0;
       prRoundNum = 0;
@@ -7708,6 +7933,8 @@
       document.getElementById('prStreakDisplay').className = 'pr-streak-display';
       prUpdateCashoutDisplay();
       prUpdateArenaClass();
+      clearActivePowerup('pr');
+      updatePowerupStreak('pr', false);
       prAwardProgress(p.id, 'loss');
       // Auto-restart after brief pause
       prPhase = 'result';
@@ -7814,6 +8041,8 @@
     document.getElementById('prStreakDisplay').className = 'pr-streak-display';
     prUpdateCashoutDisplay();
     prUpdateArenaClass();
+    clearActivePowerup('pr');
+    updatePowerupStreak('pr', profit > 0);
     prAwardProgress(p.id, 'cashout');
     prPhase = 'idle';
     document.getElementById('prHint').innerHTML = 'Press <kbd>SPACE</kbd> or tap to lock in';
@@ -7833,6 +8062,7 @@
       prContinueBoost = prGetContinueBoost();
       prShowCashOut(false);
     } else {
+      activatePowerup('pr');
       prContinueBoost = 1.0;
       document.getElementById('prHint').innerHTML = 'Press <kbd>SPACE</kbd> or tap to lock in';
     }
@@ -7871,6 +8101,7 @@
     prSpeed = 0.048;
     prSafeHalf = 0.12;
     prRebuildZones();
+    clearActivePowerup('pr');
   };
 
   // Spacebar / tap to lock in
@@ -7930,12 +8161,20 @@
     const p = getCurrentCasinoPlayer();
     if (!p) return;
     const returned = Math.floor(bjBet / 2);
-    const lost = bjBet - returned;
-    showResult(`🏳 SURRENDER — lost ${lost} 🪙`, 'lose');
+    let lost = bjBet - returned;
+    let shieldNote = '';
+    if (consumeActivePowerup('bj')) {
+      const shield = Math.floor(lost / 2);
+      lost -= shield;
+      shieldNote = ` · SHIELD SAVED ${shield}`;
+    }
+    showResult(`🏳 SURRENDER — lost ${lost} 🪙${shieldNote}`, 'lose');
     playTone(220, 'sawtooth', 0.3, 0.12);
     setTimeout(() => playTone(180, 'sawtooth', 0.3, 0.15), 150);
     spawnCoinFloat(`-${lost} 🪙`);
     await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) - lost));
+    clearActivePowerup('bj');
+    updatePowerupStreak('bj', false);
     bjAwardProgress(p.id, 'surrender');
     // Keep last blackjack bet selected between hands (Precision-style remember bet)
     updateBetDisplay();
@@ -8064,10 +8303,16 @@
     results.forEach(r => totalDelta += r.delta);
     const heatBonus = totalDelta > 0 ? Math.floor(totalDelta * (bjHeatBonusPct() / 100)) : 0;
     totalDelta += heatBonus;
+    let shieldNote = '';
+    if (totalDelta < 0 && consumeActivePowerup('bj')) {
+      const shield = Math.floor(Math.abs(totalDelta) / 2);
+      totalDelta += shield;
+      shieldNote = ` · SHIELD SAVED ${shield}`;
+    }
     const summary = results.map((r, i) => `H${i+1}: ${r.text}`).join(' · ');
     const sign = totalDelta >= 0 ? '+' : '';
     const heatNote = heatBonus > 0 ? ` · HEAT +${heatBonus}` : '';
-    showResult(`${summary}${heatNote}  (${sign}${totalDelta} 🪙)`, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
+    showResult(`${summary}${heatNote}${shieldNote}  (${sign}${totalDelta} 🪙)`, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
     totalDelta > 0 ? soundWin() : totalDelta < 0 ? soundLose() : soundPush();
     if (totalDelta > 0) {
       setTimeout(() => launchParticles('win'), 80);
@@ -8078,6 +8323,8 @@
     }
 
     await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) + totalDelta));
+    clearActivePowerup('bj');
+    updatePowerupStreak('bj', totalDelta > 0);
     bjAwardProgress(p.id, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
 
     // Clean up split UI
@@ -8145,11 +8392,18 @@
       delta += heatBonus;
       resultText += ` · HEAT +${heatBonus} 🪙`;
     }
+    if (delta < 0 && consumeActivePowerup('bj')) {
+      const shield = Math.floor(Math.abs(delta) / 2);
+      delta += shield;
+      resultText += ` · SHIELD SAVED ${shield} 🪙`;
+    }
 
     showResult(resultText, resultType);
 
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
+    clearActivePowerup('bj');
+    updatePowerupStreak('bj', delta > 0);
     bjAwardProgress(p.id, resultType === 'win' || resultType === 'bj' ? resultType : resultType === 'lose' ? 'lose' : 'push');
 
     if (delta > 0) {
