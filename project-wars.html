@@ -851,6 +851,41 @@
   /* Bet section */
   .bet-section { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
 
+  .powerup-row {
+    display:flex;
+    gap:0.5rem;
+    align-items:center;
+    margin:0.45rem 0 0.65rem;
+    flex-wrap:wrap;
+  }
+  .powerup-row select {
+    background:#0d220d;
+    border:1px solid #2a5a2a;
+    color:var(--gold);
+    padding:0.35rem 0.45rem;
+    font-family:'DM Mono', monospace;
+    font-size:0.65rem;
+    letter-spacing:1px;
+  }
+  .powerup-use-btn {
+    background:#2a1d00;
+    border:1px solid #8a6a1a;
+    color:var(--gold);
+    padding:0.35rem 0.55rem;
+    cursor:pointer;
+    font-family:'DM Mono', monospace;
+    font-size:0.6rem;
+    letter-spacing:1px;
+  }
+  .powerup-use-btn:disabled { opacity:0.45; cursor:not-allowed; }
+  .powerup-status {
+    width:100%;
+    color:#9fd19f;
+    font-size:0.62rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+
   .chip {
     width: 48px;
     height: 48px;
@@ -4111,6 +4146,11 @@
 <!-- Bet chips -->
 <div>
 <div class="table-section-label" style="margin-bottom:0.5rem;">Place your bet</div>
+<div class="powerup-row">
+  <select id="bjPowerSelect"></select>
+  <button class="powerup-use-btn" id="bjPowerUseBtn" onclick="casinoUsePowerup('bj')">Use powerup</button>
+  <div class="powerup-status" id="bjPowerStatus">Win streak: 0/3 • no active powerup</div>
+</div>
 <div class="bet-section">
 <button class="chip chip-1" id="chip1" onclick="addBet(1)">1</button>
 <button class="chip chip-5" id="chip5" onclick="addBet(5)">5</button>
@@ -4182,6 +4222,11 @@
 <!-- Bet amount -->
 <div>
 <div class="table-section-label" style="margin-bottom:0.5rem;">Bet amount</div>
+<div class="powerup-row">
+  <select id="rlPowerSelect"></select>
+  <button class="powerup-use-btn" id="rlPowerUseBtn" onclick="casinoUsePowerup('rl')">Use powerup</button>
+  <div class="powerup-status" id="rlPowerStatus">Win streak: 0/3 • no active powerup</div>
+</div>
 <div class="bet-section">
 <button class="chip chip-1" onclick="rlAddBet(1)">1</button>
 <button class="chip chip-5" onclick="rlAddBet(5)">5</button>
@@ -4218,6 +4263,11 @@
 <!-- Bet amount -->
 <div>
 <div class="table-section-label" style="margin-bottom:0.5rem;">Bet amount</div>
+<div class="powerup-row">
+  <select id="pkPowerSelect"></select>
+  <button class="powerup-use-btn" id="pkPowerUseBtn" onclick="casinoUsePowerup('pk')">Use powerup</button>
+  <div class="powerup-status" id="pkPowerStatus">Win streak: 0/3 • no active powerup</div>
+</div>
 <div class="bet-section">
 <button class="chip chip-1" onclick="pkAddBet(1)">1</button>
 <button class="chip chip-5" onclick="pkAddBet(5)">5</button>
@@ -4272,6 +4322,11 @@
   <!-- Bet row -->
   <div>
     <div class="table-section-label" style="margin-bottom:0.25rem;">Bet amount</div>
+    <div class="powerup-row">
+      <select id="prPowerSelect"></select>
+      <button class="powerup-use-btn" id="prPowerUseBtn" onclick="casinoUsePowerup('pr')">Use powerup</button>
+      <div class="powerup-status" id="prPowerStatus">Win streak: 0/3 • no active powerup</div>
+    </div>
     <div style="font-size:0.6rem;color:#f87171;letter-spacing:2px;margin-bottom:0.5rem;">MIN BET: 10</div>
     <div class="bet-section">
       <button class="chip chip-1"   onclick="prAddBet(1)"   disabled style="opacity:0.25;cursor:not-allowed;">1</button>
@@ -6265,6 +6320,7 @@
 
   // BJ state
   let bjDeck = [], bjPlayer = [], bjDealer = [], bjBet = 0, bjPhase = 'bet'; // phases: bet, play, done
+  let bjRoundPower = null;
   let bjSplitHands = null; // null or [{cards,bet}, {cards,bet}] when split active
   let bjSplitIdx   = 0;    // which split hand is active
 
@@ -6434,6 +6490,7 @@
     pkUpdateBetDisplay();
     rlLoadProgress(currentUser.id);
     rlRenderProgress();
+    casinoLoadPowerups(currentUser.id);
     prLoadProgress(currentUser.id);
     prRenderProgress();
     prUpdateBetDisplay();
@@ -6470,6 +6527,136 @@
     await update(ref(db, `players/${playerId}`), { coins: newCoins });
   }
 
+
+
+  // ── Casino Powerups ──
+  const CASINO_POWERUPS = {
+    lucky: { label: '🍀 Lucky Chip (+25% on wins)' },
+    shield: { label: '🛡 Hedge Shield (refund 50% of a loss)' },
+  };
+  const GAME_LABELS = { bj: 'Blackjack', rl: 'Roulette', pk: 'Plinko', pr: 'Precision' };
+
+  let casinoPowers = {
+    bj: { inv: { lucky: 0, shield: 0 }, streak: 0, active: null },
+    rl: { inv: { lucky: 0, shield: 0 }, streak: 0, active: null },
+    pk: { inv: { lucky: 0, shield: 0 }, streak: 0, active: null },
+    pr: { inv: { lucky: 0, shield: 0 }, streak: 0, active: null },
+  };
+
+  function casinoPowerKey(playerId) { return `pw_casino_powerups_${playerId}`; }
+
+  function casinoLoadPowerups(playerId) {
+    if (!playerId) return;
+    const raw = localStorage.getItem(casinoPowerKey(playerId));
+    if (!raw) return casinoRenderPowerups();
+    try {
+      const parsed = JSON.parse(raw);
+      for (const g of ['bj','rl','pk','pr']) {
+        const src = parsed[g] || {};
+        casinoPowers[g].streak = Math.max(0, src.streak || 0);
+        casinoPowers[g].active = src.active || null;
+        casinoPowers[g].inv.lucky = Math.max(0, src?.inv?.lucky || 0);
+        casinoPowers[g].inv.shield = Math.max(0, src?.inv?.shield || 0);
+      }
+    } catch {}
+    casinoRenderPowerups();
+  }
+
+  function casinoSavePowerups(playerId) {
+    if (!playerId) return;
+    localStorage.setItem(casinoPowerKey(playerId), JSON.stringify(casinoPowers));
+  }
+
+  function casinoCanUsePower(game) {
+    if (game === 'bj') return bjPhase === 'bet' && bjBet === 0;
+    if (game === 'rl') return !rlSpinning && rlBet === 0;
+    if (game === 'pk') return !pkRunning && pkBet === 0;
+    if (game === 'pr') return prPhase === 'idle' && prStreak === 0 && prBet === 0;
+    return false;
+  }
+
+  function casinoRenderPowerupFor(game) {
+    const select = document.getElementById(game + 'PowerSelect');
+    const status = document.getElementById(game + 'PowerStatus');
+    const useBtn = document.getElementById(game + 'PowerUseBtn');
+    if (!select || !status || !useBtn) return;
+    const data = casinoPowers[game];
+    select.innerHTML = [
+      `<option value="">Choose powerup (${GAME_LABELS[game]})</option>`,
+      `<option value="lucky">🍀 Lucky Chip x${data.inv.lucky}</option>`,
+      `<option value="shield">🛡 Hedge Shield x${data.inv.shield}</option>`,
+    ].join('');
+    status.textContent = `Win streak: ${data.streak}/3 • active: ${data.active ? CASINO_POWERUPS[data.active].label : 'none'}`;
+    useBtn.disabled = !casinoCanUsePower(game);
+  }
+
+  function casinoRenderPowerups() {
+    ['bj','rl','pk','pr'].forEach(casinoRenderPowerupFor);
+  }
+
+  function casinoAnnouncePower(game, msg, win = true) {
+    if (game === 'pr') {
+      const el = document.getElementById('prResult');
+      if (!el || prPhase === 'running') return;
+      el.textContent = msg;
+      el.className = `pr-result ${win ? 'win' : 'miss'}`;
+      return;
+    }
+    const idMap = { bj: 'resultBanner', rl: 'rlResultBanner', pk: 'pkResultBanner' };
+    const b = document.getElementById(idMap[game]);
+    if (!b) return;
+    b.textContent = msg;
+    b.className = `result-banner show ${win ? 'win' : 'push'}`;
+    setTimeout(() => b.classList.remove('show'), 2600);
+  }
+
+  function casinoTrackOutcome(game, didWin, playerId) {
+    const data = casinoPowers[game];
+    data.streak = didWin ? data.streak + 1 : 0;
+    if (didWin && data.streak >= 3) {
+      data.streak -= 3;
+      const key = Math.random() < 0.5 ? 'lucky' : 'shield';
+      data.inv[key] += 1;
+      casinoAnnouncePower(game, `🔥 3-win streak! Earned ${CASINO_POWERUPS[key].label}`);
+    }
+    casinoSavePowerups(playerId);
+    casinoRenderPowerupFor(game);
+  }
+
+  function casinoApplyPowerup(game, net, baseLossWager, active) {
+    if (!active) return { net, note: '' };
+    if (active === 'lucky' && net > 0) {
+      const bonus = Math.floor(net * 0.25);
+      return { net: net + bonus, note: ` • 🍀 +${bonus}` };
+    }
+    if (active === 'shield' && net < 0) {
+      const refund = Math.floor(baseLossWager * 0.5);
+      return { net: net + refund, note: ` • 🛡 +${refund} refund` };
+    }
+    return { net, note: '' };
+  }
+
+  window.casinoUsePowerup = function(game) {
+    const p = getCurrentCasinoPlayer();
+    if (!p) return;
+    if (!casinoCanUsePower(game)) {
+      casinoAnnouncePower(game, 'Use powerup before placing your bet.', false);
+      return;
+    }
+    const select = document.getElementById(game + 'PowerSelect');
+    const key = select?.value;
+    if (!key) return;
+    if ((casinoPowers[game].inv[key] || 0) < 1) {
+      casinoAnnouncePower(game, 'You do not own that powerup yet.', false);
+      return;
+    }
+    casinoPowers[game].inv[key] -= 1;
+    casinoPowers[game].active = key;
+    casinoSavePowerups(p.id);
+    casinoRenderPowerupFor(game);
+    casinoAnnouncePower(game, `✅ Active: ${CASINO_POWERUPS[key].label}`);
+  };
+
   // Bet
   window.addBet = function(amount) {
     if (bjPhase !== 'bet') return;
@@ -6485,12 +6672,14 @@
     bjBet += amount;
     soundChip();
     updateBetDisplay();
+    casinoRenderPowerupFor('bj');
   };
 
   window.clearBet = function() {
     if (bjPhase !== 'bet') return;
     bjBet = 0;
     updateBetDisplay();
+    casinoRenderPowerupFor('bj');
   };
 
   function updateBetDisplay() {
@@ -6511,6 +6700,11 @@
     if (!p) { document.getElementById('resultBanner').textContent = 'Select a player first!'; document.getElementById('resultBanner').className = 'result-banner show lose'; return; }
     if (bjBet < 1) { shakeWallet(); return; }
     if (bjBet > (p.coins || 0)) { shakeWallet(); return; }
+
+    bjRoundPower = casinoPowers.bj.active;
+    casinoPowers.bj.active = null;
+    casinoSavePowerups(p.id);
+    casinoRenderPowerupFor('bj');
 
     bjDeck = shuffle(buildDeck());
     bjPlayer = [bjDeck.pop(), bjDeck.pop()];
@@ -6645,6 +6839,7 @@
   }
 
   let rlBet = 0;
+  let rlRoundPower = null;
   let rlSelectedBets = new Set();
   let rlSpinning = false;
   let rlProgress = { level: 1, xp: 0, spins: 0, heat: 0 };
@@ -6854,6 +7049,7 @@
     else rlSelectedBets.add(type);
     rlRefreshSelectionHighlights();
     rlUpdateBetDisplay();
+    casinoRenderPowerupFor('rl');
   };
 
   window.rlSelectBet = window.rlToggleBet;
@@ -6877,6 +7073,7 @@
     rlSelectedBets.clear();
     rlRefreshSelectionHighlights();
     rlUpdateBetDisplay();
+    casinoRenderPowerupFor('rl');
   };
 
   window.rlSpin = async function() {
@@ -6893,6 +7090,11 @@
     if (rlBet < 1) { shakeWallet(); return; }
     const totalWager = rlBet * rlSelectedBets.size;
     if (totalWager > (p.coins || 0)) { shakeWallet(); return; }
+
+    rlRoundPower = casinoPowers.rl.active;
+    casinoPowers.rl.active = null;
+    casinoSavePowerups(p.id);
+    casinoRenderPowerupFor('rl');
 
     rlSpinning = true;
     document.getElementById('rlSpinBtn').disabled = true;
@@ -6962,10 +7164,12 @@
       bonus = Math.floor(delta * (rlHeatBonusPct() / 100));
       delta += bonus;
     }
+    const pow = casinoApplyPowerup('rl', delta, totalWager, rlRoundPower);
+    delta = pow.net;
 
     let resultText = '', resultType = '';
     if (delta > 0) {
-      resultText = `✅ ${num} — ${winHits} HIT${winHits > 1 ? 'S' : ''}! +${delta} 🪙${bonus ? ` (${bonus} streak)` : ''}`;
+      resultText = `✅ ${num} — ${winHits} HIT${winHits > 1 ? 'S' : ''}! +${delta} 🪙${bonus ? ` (${bonus} streak)` : ''}${pow.note}`;
       resultType = 'win';
       soundWin();
       setTimeout(() => launchParticles(delta >= totalWager ? 'bigwin' : 'win'), 80);
@@ -6976,7 +7180,7 @@
       resultType = 'push';
       soundChip();
     } else {
-      resultText = `❌ ${num} — -${Math.abs(delta)} 🪙`;
+      resultText = `❌ ${num} — -${Math.abs(delta)} 🪙${pow.note}`;
       resultType = 'lose';
       soundLose();
       setTimeout(() => launchParticles('bust'), 100);
@@ -6990,6 +7194,8 @@
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
     rlAwardProgress(p.id, delta);
+    casinoTrackOutcome('rl', delta > 0, p.id);
+    rlRoundPower = null;
 
     // Keep last roulette bet selected between spins
     rlSpinning = false;
@@ -7006,6 +7212,7 @@
   const PK_COLORS      = ['#cd7f42','#4ade80','#f87171','#f87171','#f87171','#f87171','#f87171','#4ade80','#cd7f42'];
 
   let pkBet = 0;
+  let pkRoundPower = null;
   let pkRunning = false;
   let pkCanvas = null, pkCtx = null;
   let pkPegs = [];
@@ -7294,15 +7501,18 @@
     const bounceBonus = profit > 0 ? Math.floor(profit * (pkHeatBonusPct() / 100)) : 0;
     payout += bounceBonus;
     profit += bounceBonus;
+    const pow = casinoApplyPowerup('pk', profit, bet, pkRoundPower);
+    profit = pow.net;
+    payout = bet + profit;
 
     const resultEl = document.getElementById('plinkoResultNum');
     const bonusNote = bounceBonus > 0 ? ` (+${bounceBonus} bonus)` : '';
-    resultEl.textContent = mult + 'x  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙' + bonusNote;
+    resultEl.textContent = mult + 'x  →  ' + (profit >= 0 ? '+' : '') + profit + ' 🪙' + bonusNote + (pow.note || '');
     resultEl.className = 'roulette-result-num ' + (profit > 0 ? 'green' : profit === 0 ? '' : 'red');
 
     const banner = document.getElementById('pkResultBanner');
     if (profit > 0) {
-      banner.textContent = '✅ +' + profit + ' 🪙' + (bounceBonus > 0 ? `  (BONUS +${bounceBonus})` : '');
+      banner.textContent = '✅ +' + profit + ' 🪙' + (bounceBonus > 0 ? `  (BONUS +${bounceBonus})` : '') + (pow.note || '');
       banner.className = 'result-banner show win';
       soundWin();
       setTimeout(() => launchParticles('win'), 80);
@@ -7312,7 +7522,7 @@
       banner.textContent = '🤝 Break even';
       banner.className = 'result-banner show push';
     } else {
-      banner.textContent = '❌ ' + profit + ' 🪙';
+      banner.textContent = '❌ ' + profit + ' 🪙' + (pow.note || '');
       banner.className = 'result-banner show lose';
       soundLose();
     }
@@ -7325,6 +7535,8 @@
 
     const outcome = profit > bet ? 'bigwin' : profit > 0 ? 'win' : profit === 0 ? 'push' : 'lose';
     pkAwardProgress(p.id, outcome);
+    casinoTrackOutcome('pk', profit > 0, p.id);
+    pkRoundPower = null;
   }
 
   window.pkAddBet = function(amount) {
@@ -7344,12 +7556,14 @@
     pkBet += amount;
     soundChip();
     pkUpdateBetDisplay();
+    casinoRenderPowerupFor('pk');
   };
 
   window.pkClearBet = function() {
     if (pkRunning) return;
     pkBet = 0;
     pkUpdateBetDisplay();
+    casinoRenderPowerupFor('pk');
   };
 
   window.pkDrop = async function() {
@@ -7361,6 +7575,11 @@
 
     if (!pkCanvas) pkInitCanvas();
     if (!pkCanvas) return;
+
+    pkRoundPower = casinoPowers.pk.active;
+    casinoPowers.pk.active = null;
+    casinoSavePowerups(p.id);
+    casinoRenderPowerupFor('pk');
 
     pkRunning = true;
     document.getElementById('pkDropBtn').disabled = true;
@@ -7424,6 +7643,7 @@
   let prSpaceDown  = false;
   let prContinueBoost = 1.0;
   let prProgress   = { level: 1, xp: 0, rounds: 0, heat: 0 };
+  let prSessionPower = null;
 
   const PR_TITLES = ['Focus Rookie', 'Needle Scout', 'Precision Adept', 'Risk Oracle', 'Zen Sharpshooter'];
 
@@ -7697,9 +7917,11 @@
       flash.animate([{opacity:0.8},{opacity:0}], {duration:400,fill:'forwards'});
       arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
       const lost = zone.loss === 'full' ? prBet : Math.floor(prBet / 2);
-      await setCasinoCoins(p.id, Math.max(0, (p.coins||0) - lost));
-      spawnCoinFloat(`-${lost} 🪙`);
-      result.textContent = zone.mult === 0 ? `${zone.loss === 'full' ? '☠ SKULL' : 'MISS'} — lost ${lost} 🪙` : `0.5× — lost ${lost} 🪙`;
+      const powLoss = casinoApplyPowerup('pr', -lost, prBet, prSessionPower);
+      const finalLost = Math.max(0, -powLoss.net);
+      await setCasinoCoins(p.id, Math.max(0, (p.coins||0) - finalLost));
+      spawnCoinFloat(`-${finalLost} 🪙`);
+      result.textContent = (zone.mult === 0 ? `${zone.loss === 'full' ? '☠ SKULL' : 'MISS'} — lost ${finalLost} 🪙` : `0.5× — lost ${finalLost} 🪙`) + (powLoss.note || '');
       result.className = 'pr-result miss';
       prStreak = 0;
       prRoundNum = 0;
@@ -7709,6 +7931,8 @@
       prUpdateCashoutDisplay();
       prUpdateArenaClass();
       prAwardProgress(p.id, 'loss');
+      casinoTrackOutcome('pr', false, p.id);
+      prSessionPower = null;
       // Auto-restart after brief pause
       prPhase = 'result';
       prShowCashOut(false);
@@ -7796,6 +8020,8 @@
     let profit = payout - prBet;
     const bonus = profit > 0 ? Math.floor(profit * (prHeatBonusPct() / 100)) : 0;
     profit += bonus;
+    const pow = casinoApplyPowerup('pr', profit, prBet, prSessionPower);
+    profit = pow.net;
     await setCasinoCoins(p.id, (p.coins||0) + profit);
     if (profit > 0) {
       soundWin();
@@ -7804,7 +8030,7 @@
       recordBiggestWin(p.name, p.id, profit);
     }
     const result = document.getElementById('prResult');
-    result.textContent = `CASHED OUT +${profit} 🪙${bonus ? ` (BONUS +${bonus})` : ''}`;
+    result.textContent = `CASHED OUT +${profit} 🪙${bonus ? ` (BONUS +${bonus})` : ''}${pow.note || ''}`;
     result.className = 'pr-result win';
     prStreak = 0;
     prRoundNum = 0;
@@ -7815,6 +8041,8 @@
     prUpdateCashoutDisplay();
     prUpdateArenaClass();
     prAwardProgress(p.id, 'cashout');
+    casinoTrackOutcome('pr', profit > 0, p.id);
+    prSessionPower = null;
     prPhase = 'idle';
     document.getElementById('prHint').innerHTML = 'Press <kbd>SPACE</kbd> or tap to lock in';
   };
@@ -7829,6 +8057,13 @@
     if (prPhase === 'running') return;
 
     // Continue from streak result — next hit
+    if (prPhase === 'idle' && prStreak === 0) {
+      prSessionPower = casinoPowers.pr.active;
+      casinoPowers.pr.active = null;
+      casinoSavePowerups(p.id);
+      casinoRenderPowerupFor('pr');
+    }
+
     if (prPhase === 'result' && prStreak > 0) {
       prContinueBoost = prGetContinueBoost();
       prShowCashOut(false);
@@ -7908,12 +8143,14 @@
     prBet += amt;
     prUpdateBetDisplay();
     soundChip();
+    casinoRenderPowerupFor('pr');
   };
 
   window.prClearBet = function() {
     if (prPhase === 'running') return;
     prBet = 0;
     prUpdateBetDisplay();
+    casinoRenderPowerupFor('pr');
   };
 
   // Init on load
@@ -8064,10 +8301,13 @@
     results.forEach(r => totalDelta += r.delta);
     const heatBonus = totalDelta > 0 ? Math.floor(totalDelta * (bjHeatBonusPct() / 100)) : 0;
     totalDelta += heatBonus;
+    const powSplit = casinoApplyPowerup('bj', totalDelta, bjBet, bjRoundPower);
+    totalDelta = powSplit.net;
     const summary = results.map((r, i) => `H${i+1}: ${r.text}`).join(' · ');
     const sign = totalDelta >= 0 ? '+' : '';
     const heatNote = heatBonus > 0 ? ` · HEAT +${heatBonus}` : '';
-    showResult(`${summary}${heatNote}  (${sign}${totalDelta} 🪙)`, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
+    const powNote = powSplit.note || '';
+    showResult(`${summary}${heatNote}${powNote}  (${sign}${totalDelta} 🪙)`, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
     totalDelta > 0 ? soundWin() : totalDelta < 0 ? soundLose() : soundPush();
     if (totalDelta > 0) {
       setTimeout(() => launchParticles('win'), 80);
@@ -8079,6 +8319,8 @@
 
     await setCasinoCoins(p.id, Math.max(0, (p.coins || 0) + totalDelta));
     bjAwardProgress(p.id, totalDelta > 0 ? 'win' : totalDelta < 0 ? 'lose' : 'push');
+    casinoTrackOutcome('bj', totalDelta > 0, p.id);
+    bjRoundPower = null;
 
     // Clean up split UI
     bjSplitHands = null;
@@ -8146,11 +8388,17 @@
       resultText += ` · HEAT +${heatBonus} 🪙`;
     }
 
+    const pow = casinoApplyPowerup('bj', delta, bjBet, bjRoundPower);
+    delta = pow.net;
+    if (pow.note) resultText += pow.note;
+
     showResult(resultText, resultType);
 
     const newCoins = Math.max(0, (p.coins || 0) + delta);
     await setCasinoCoins(p.id, newCoins);
     bjAwardProgress(p.id, resultType === 'win' || resultType === 'bj' ? resultType : resultType === 'lose' ? 'lose' : 'push');
+    casinoTrackOutcome('bj', delta > 0, p.id);
+    bjRoundPower = null;
 
     if (delta > 0) {
       setTimeout(() => spawnCoinFloat(`+${delta} 🪙`), 400);
